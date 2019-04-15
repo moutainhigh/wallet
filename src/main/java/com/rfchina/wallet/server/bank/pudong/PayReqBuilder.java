@@ -2,6 +2,7 @@ package com.rfchina.wallet.server.bank.pudong;
 
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.server.bank.pudong.domain.common.RequestHeader;
+import com.rfchina.wallet.server.bank.pudong.domain.request.PayReq;
 import com.rfchina.wallet.server.bank.pudong.domain.request.PayReqBody;
 import com.rfchina.wallet.server.bank.pudong.domain.request.PayReqBody.Lists;
 import com.rfchina.wallet.server.bank.pudong.domain.response.PayRespBody;
@@ -22,7 +23,7 @@ public class PayReqBuilder extends PpdbReqTpl implements GatewayLancher<PayRespB
 	private String packetId;
 	private String authMasterId;
 	private String packageNo;
-	private List<PayReqBody.PayReq> payList;
+	private List<PayReq> payList;
 
 	@Override
 	PayReqBody buildReqBody() {

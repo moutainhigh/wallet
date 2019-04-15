@@ -1,15 +1,12 @@
 package com.rfchina.wallet.server.service;
 
 import com.rfchina.wallet.server.bank.pudong.PayReqBuilder;
-import com.rfchina.wallet.server.bank.pudong.domain.request.PayReqBody.PayReq;
+import com.rfchina.wallet.server.bank.pudong.domain.request.PayReq;
 import com.rfchina.wallet.server.bank.pudong.domain.response.PayRespBody;
-import java.util.Arrays;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient.Builder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 @Component

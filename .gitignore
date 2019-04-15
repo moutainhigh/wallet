@@ -1,0 +1,30 @@
+# Windows:
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+~$*
+
+# My configurations:
+php/data/*
+php/vendor/*
+php/composer.lock
+php/test.php
+php/app/tests
+java/.*
+java/bin
+/target/
+/.settings/
+/.classpath
+/.project
+/logs/
+*.iml
+.idea
+target/
+*.exe
+
+vendor/*
+data/logs
+/.gradle
+/out
+/build
+build
