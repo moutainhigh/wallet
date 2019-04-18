@@ -25,7 +25,7 @@ public abstract class PpdbReqTpl {
 	private final static String SIC_SUFFIX = "</sic>";
 	public static final String SIGN_FLAG = "1";
 	private static final String SUCC = "AAAAAAA";
-	public static final Charset CHARSET_GBK = Charset.forName("GBK");
+	public static final Charset SERVER_CHARSET = Charset.forName("GBK");
 	private static Boolean isServerGBK = true;
 
 	private String signServerUrl = "http://192.168.197.217:5666";
@@ -39,13 +39,12 @@ public abstract class PpdbReqTpl {
 	 * @param xmlData 需要签名的body
 	 */
 	public String sign(String xmlData) throws Exception {
-		xmlData = reqAdvise(xmlData);
 
 		Request request = new Request.Builder()
 			.url(signServerUrl)
 			.addHeader("Content-Type", "INFOSEC_SIGN/1.0")
 			.addHeader("Content-Length", String.valueOf(xmlData.length()))
-			.post(RequestBody.create(MediaType.parse("INFOSEC_SIGN/1.0"), xmlData))
+			.post(RequestBody.create(MediaType.parse("INFOSEC_SIGN/1.0"), reqAdvise(xmlData)))
 			.build();
 
 		Response resp = client.newCall(request).execute();
@@ -64,13 +63,13 @@ public abstract class PpdbReqTpl {
 	 * @param signData 网关返回的Signature
 	 */
 	public String unsign(String signData) throws Exception {
-		signData = reqAdvise(signData);
 
 		Request request = new Request.Builder()
 			.url(signServerUrl)
 			.addHeader("Content-Type", "INFOSEC_VERIFY_SIGN/1.0")
 			.addHeader("Content-Length", String.valueOf(signData.length()))
-			.post(RequestBody.create(MediaType.parse("INFOSEC_VERIFY_SIGN/1.0"), signData))
+			.post(RequestBody.create(MediaType.parse("INFOSEC_VERIFY_SIGN/1.0")
+				, reqAdvise(signData)))
 			.build();
 
 		Response resp = client.newCall(request).execute();
@@ -97,13 +96,12 @@ public abstract class PpdbReqTpl {
 
 	protected ResponsePacket doExec(RequestPacket requestPacket) throws Exception {
 		String xmlData = XmlUtil.wrap(XmlUtil.obj2Xml(requestPacket, RequestPacket.class));
-		xmlData = reqAdvise(xmlData);
 
 		Request request = new Request.Builder()
 			.url(gatewayUrl)
 			.addHeader("Content-Type", "text/plain")
 			.addHeader("Content-Length", String.valueOf(xmlData.length()))
-			.post(RequestBody.create(MediaType.parse("INFOSEC_SIGN/1.0"), xmlData))
+			.post(RequestBody.create(MediaType.parse("INFOSEC_SIGN/1.0"), reqAdvise(xmlData)))
 			.build();
 		Response resp = client.newCall(request).execute();
 
@@ -111,25 +109,18 @@ public abstract class PpdbReqTpl {
 		ResponsePacket responsePacket = XmlUtil
 			.xml2Obj(XmlUtil.unwrap(respData), ResponsePacket.class);
 		if (!SUCC.equals(responsePacket.getHead().getReturnCode())) {
-			log.error("银企直连接口错误, request = {} , response = {}", JSON.toJSONString(requestPacket),
-				JSON.toJSONString(responsePacket));
+			log.error("银企直连接口错误, request = {} , response = {}", xmlData,respData);
 			throw new RuntimeException();
 		}
 		return responsePacket;
 	}
 
-	private String reqAdvise(String xmlData) {
-		if (isServerGBK) {
-			xmlData = new String(xmlData.getBytes(CHARSET_GBK), CHARSET_GBK);
-		}
-		return xmlData;
+	private byte[] reqAdvise(String xmlData) {
+		return xmlData.getBytes(SERVER_CHARSET);
 	}
 
 	private String respAdvise(byte[] bytes) {
-		if (isServerGBK) {
-			return new String(bytes, Charset.forName("GBK"));
-		}
-		return new String(bytes);
+		return new String(bytes, SERVER_CHARSET);
 	}
 
 	protected String unsign(ResponsePacket responsePacket) throws Exception {

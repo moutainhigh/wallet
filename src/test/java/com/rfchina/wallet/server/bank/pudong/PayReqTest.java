@@ -4,8 +4,8 @@ import static com.rfchina.wallet.server.bank.pudong.TestingData.*;
 import static org.junit.Assert.*;
 
 import com.alibaba.fastjson.JSON;
-import com.rfchina.wallet.server.bank.pudong.domain.request.PayReq;
-import com.rfchina.wallet.server.bank.pudong.domain.response.PayRespBody;
+import com.rfchina.wallet.server.bank.pudong.domain.request.PubPayReq;
+import com.rfchina.wallet.server.bank.pudong.domain.response.PubPayRespBody;
 import com.rfchina.wallet.server.msic.EnumWallet.RemitLocation;
 import com.rfchina.wallet.server.msic.EnumWallet.SysFlag;
 import java.math.BigDecimal;
@@ -19,7 +19,7 @@ public class PayReqTest {
 
 	@Test
 	public void lanch() throws Exception {
-		PayReq payB = PayReq.builder()
+		PubPayReq payB = PubPayReq.builder()
 			.elecChequeNo(PACKET_ID)
 			.acctNo(CMP_ACCT_ID)
 			.acctName(CMP_ACCT_NAME)
@@ -34,15 +34,17 @@ public class PayReqTest {
 			.note("测试")
 			.build();
 
-		PayReqBuilder req = PayReqBuilder
+		PubPayReqBuilder req = PubPayReqBuilder
 			.builder()
 			.masterId(MASTER_ID)
 			.packetId(PACKET_ID)
 			.payList(Arrays.asList(payB))
 			.build();
-		PayRespBody resp = req.lanch(new Builder().build());
+		PubPayRespBody resp = req.lanch(new Builder().build());
 
 		log.info(JSON.toJSONString(resp));
 		assertTrue(resp != null);
+
+
 	}
 }

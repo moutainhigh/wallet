@@ -14,10 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * @author huangtiande@rfchina.com
- * @date 2016/12/27
- */
 @RestController
 @Slf4j
 public class EchoController {

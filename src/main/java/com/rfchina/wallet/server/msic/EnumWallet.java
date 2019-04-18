@@ -1,5 +1,6 @@
 package com.rfchina.wallet.server.msic;
 
+import com.rfchina.platform.common.utils.EnumUtil;
 import com.rfchina.platform.common.utils.Valuable;
 
 public class EnumWallet {
@@ -97,6 +98,66 @@ public class EnumWallet {
 		public String getValue() {
 			return value;
 		}
+
+		public String getDescription() {
+			return description;
+		}
+
+		public static TransStatus parse(String value) {
+			return EnumUtil.parse(TransStatus.class, value);
+		}
 	}
 
+	/**
+	 * 流水类型
+	 */
+	public enum WalletLogType implements Valuable<Byte> {
+		TRANSFER((byte) 1, "直接转帐"),
+		PAY_IN((byte) 2, "收入"),
+		PAY_OUT((byte) 3, "支出");
+
+		private Byte value;
+		private String valueName;
+
+		WalletLogType(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}
+	}
+
+	/**
+	 * 交易状态。1：银行受理中，2：交易成功，3：交易失败 4: 待发送银行网关
+	 */
+	public enum WalletLogStatus implements Valuable<Byte> {
+		PROCESSING((byte) 1, "银行受理中"),
+		SUCC((byte) 2, "交易成功"),
+		FAIL((byte) 3, "交易失败"),
+		SENDING((byte) 4, "待发送银行网关");
+
+		private Byte value;
+		private String valueName;
+
+		WalletLogStatus(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}
+
+		public String getValueName(){
+			return valueName;
+		}
+
+		public static WalletLogStatus parsePuDong8804(String tranStatus){
+			return null;
+		}
+	}
 }

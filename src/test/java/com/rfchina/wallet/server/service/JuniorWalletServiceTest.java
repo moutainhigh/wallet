@@ -1,0 +1,38 @@
+package com.rfchina.wallet.server.service;
+
+import static org.junit.Assert.*;
+
+import com.alibaba.fastjson.JSON;
+import com.rfchina.biztools.generate.IdGenerator;
+import com.rfchina.wallet.server.SpringBaseTest;
+import com.rfchina.wallet.server.bank.pudong.domain.response.PubPayRespBody;
+import com.rfchina.wallet.server.model.ext.PayInReq;
+import java.util.Arrays;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
+@Slf4j
+public class JuniorWalletServiceTest extends SpringBaseTest {
+
+	@Autowired
+	private JuniorWalletService juniorWalletService;
+
+	@Test
+	public void p0101payIn() {
+		PayInReq payInReq = PayInReq.builder()
+			.walletId(3L)
+			.amount(1L)
+			.elecChequeNo(IdGenerator.createBizId("Test", 15, (orderId) -> true))
+			.note("测试")
+			.payPurpose((byte) 1)
+			.build();
+
+		PubPayRespBody respBody = juniorWalletService.payIn(Arrays.asList(payInReq));
+		log.info("{}.response = {}", currMethod(), JSON.toJSONString(respBody));
+
+		assertNotNull(respBody);
+		assertNotNull(respBody.getSeqNo());
+		assertTrue(Integer.valueOf(respBody.getSuccessCount()) == 1);
+	}
+}

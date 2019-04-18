@@ -1,6 +1,8 @@
 buildscript {
     ext {
         springBootVersion = '2.0.3.RELEASE'
+        projectVersion = '1.0.0-SNAPSHOT'
+        lombokVersion = '1.16.10'
     }
     repositories {
         mavenLocal()
@@ -13,38 +15,44 @@ buildscript {
     }
 }
 
+allprojects {
+    repositories {
+        mavenLocal()
+        maven {
+            url "http://192.168.197.28:8081/repository/maven-public/"
+        }
+    }
+}
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
-group = 'com.rfchina.wallet.server'
-version = '1.0.0-SNAPSHOT'
+group = 'com.rfchina.wallet'
+version = "${projectVersion}"
 sourceCompatibility = 1.8
 
 jar {
     manifest {
-        attributes 'Main-Class': 'com.rfchina.wallet.server.WalletApplication'
+        attributes 'Main-Class': 'com.rfchina.wallet.server.WalletServerApplication'
     }
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
 }
 
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-web:2.0.3.RELEASE")
-//    compile('org.springframework.boot:spring-boot-starter-aop:2.0.3.RELEASE')
     compile('org.springframework.boot:spring-boot-starter-jetty:2.0.3.RELEASE')
     compile('org.springframework.boot:spring-boot-starter-data-rest:2.0.3.RELEASE')
-//    compile('org.springframework.boot:spring-boot-starter-data-redis:2.0.3.RELEASE')
     compile('org.mybatis.spring.boot:mybatis-spring-boot-starter:1.3.2')
     runtime('javax.servlet:javax.servlet-api:3.1.0')
     compile('mysql:mysql-connector-java:5.1.46')
     compile('io.github.hengyunabc.xdiamond:xdiamond-client:1.0.4')
     compile('org.slf4j:jcl-over-slf4j:1.7.21')
     compile('ch.qos.logback:logback-classic:1.1.7')
-//    compile 'org.slf4j:slf4j-api:1.7.0'
     compile 'org.slf4j:slf4j-log4j12:1.7.0'
     compile 'log4j:log4j:1.2.14'
-    compile('org.projectlombok:lombok:1.16.10')
+    compile("org.projectlombok:lombok:${lombokVersion}")
     compile('io.springfox:springfox-swagger2:2.9.2')
     compile('io.springfox:springfox-swagger-ui:2.9.2')
     compile('dom4j:dom4j:1.6.1')
@@ -52,14 +60,14 @@ dependencies {
 
     // 本地依赖
     compile('com.rfchina:rfchina-commons-utils:2.2.8')
-//    compile('com.rfchina:internal-sdk:3.0.6')
-//    compile('com.rfchina:platform-sdk:3.0.0')
-//    compile('com.rfchina:rfchina-platform-spring-intergration:2.0.3')
-//    compile('com.rfchina:rfchina-platform-passport-common:1.1.3')
     compile('com.rfchina:rfchina-commons-zipkin:1.1.4-SNAPSHOT')
+    compile('com.rfchina:rfwallet-domain:1.0.0-SNAPSHOT')
+    compile('com.rfchina.biztool:IdGenarator:1.0.1')
 
     // 测试依赖
     testCompile('org.springframework.boot:spring-boot-starter-test')
     testCompile('org.springframework.boot:spring-boot-test-autoconfigure')
     testCompile('org.mockito:mockito-core:2.21.0')
+
+    annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 }
