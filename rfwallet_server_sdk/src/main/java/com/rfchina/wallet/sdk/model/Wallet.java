@@ -1,0 +1,57 @@
+package com.rfchina.wallet.sdk.model;
+
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+import java.util.List;
+import java.util.Map;
+import java.util.Date;
+import java.util.ArrayList;
+
+    
+/**
+* Wallet
+*/
+@Data
+public class Wallet  {
+    @ApiModelProperty("审核方式，1：运营，3：银企直连，5：通联")
+    private Integer auditType ;
+
+    @ApiModelProperty("钱包余额最后更新日期")
+    private String balanceUpdTime ;
+
+    @ApiModelProperty("创建日期")
+    private String createTime ;
+
+    @ApiModelProperty("钱包ID")
+    private Long id ;
+
+    @ApiModelProperty("钱包信息最后更新日期")
+    private String lastUpdTime ;
+
+    @ApiModelProperty("累计支付金额")
+    private Long payAmount ;
+
+    @ApiModelProperty("累计支付次数")
+    private Integer payCount ;
+
+    @ApiModelProperty("累计充值金额")
+    private Long rechargeAmount ;
+
+    @ApiModelProperty("累计充值次数")
+    private Integer rechargeCount ;
+
+    @ApiModelProperty("钱包状态: 1:待审核，2：激活,3：禁用")
+    private Integer status ;
+
+    @ApiModelProperty("钱包标题，通常是姓名或公司名")
+    private String title ;
+
+    @ApiModelProperty("钱包类型， 1：企业钱包，2：个人钱包")
+    private Integer type ;
+
+    @ApiModelProperty("钱包余额")
+    private Long walletBalance ;
+
+
+}
+

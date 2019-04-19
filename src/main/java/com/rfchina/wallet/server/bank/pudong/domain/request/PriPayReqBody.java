@@ -55,6 +55,9 @@ public class PriPayReqBody {
 	@ApiModelProperty(value = "批次号", required = true)
 	private String batchNo;
 
+	@ApiModelProperty(value = "循环内容", required = true)
+	private Lists lists;
+
 	@Data
 	@Builder
 	@NoArgsConstructor

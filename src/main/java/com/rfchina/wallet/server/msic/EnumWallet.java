@@ -137,7 +137,8 @@ public class EnumWallet {
 		PROCESSING((byte) 1, "银行受理中"),
 		SUCC((byte) 2, "交易成功"),
 		FAIL((byte) 3, "交易失败"),
-		SENDING((byte) 4, "待发送银行网关");
+		SENDING((byte) 4, "待发送银行网关"),
+		REVOKE((byte) 5, "撤销");
 
 		private Byte value;
 		private String valueName;
@@ -152,12 +153,111 @@ public class EnumWallet {
 			return value;
 		}
 
-		public String getValueName(){
+		public String getValueName() {
 			return valueName;
 		}
 
-		public static WalletLogStatus parsePuDong8804(String tranStatus){
-			return null;
+		/**
+		 * 0-待补录：该笔支付需要柜员手工补录必要支付信息； 1-待记帐：该笔支付已经处在等待柜员处理记账； 2-待复核：该笔支付处于等待柜员处理复核阶段；
+		 * 3-待授权：该笔支付处于等待客户进行网银授权阶段； 4-完成：该笔支付处理成功，客户记账成功； 8-拒绝：该笔支付处理失败，被拒绝；如果对外支付时被人民银行退票则也会将该笔支付状态置为拒绝，同时冲回客户扣出的钱款；
+		 * 9-撤销：该笔支付已被撤销；客户和柜员都可以对待处理的支付进行撤销动作；
+		 */
+		public static WalletLogStatus parsePuDong8804(String tranStatus) {
+			switch (tranStatus) {
+				case "4":
+					return SUCC;
+				case "8":
+					return FAIL;
+				case "9":
+					return REVOKE;
+				default:
+					return PROCESSING;
+			}
+		}
+	}
+
+	/**
+	 * 钱包类型， 1：企业钱包，2：个人钱包
+	 */
+	public enum WalletType implements Valuable<Byte> {
+		COMPANY((byte) 1, "企业钱包"),
+		PERSON((byte) 2, "个人钱包");
+
+		private Byte value;
+		private String valueName;
+
+		WalletType(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}
+	}
+
+	/**
+	 * 交易类型.1:代收 2:代付
+	 */
+	public enum AQTransType implements Valuable<Byte>{
+		COLLECT((byte)1,"代收"),
+		TO_PAY((byte)2,"代付");
+
+		private Byte value;
+		private String valueName;
+
+		AQTransType(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}
+	}
+
+	/**
+	 * 收付款人对公对私标志 0:对公 1:对私
+	 */
+	public enum AQPayeeType implements Valuable<Byte>{
+		PUBLIC((byte)0,"对公"),
+		PRIVATE((byte)1,"对私");
+
+		private Byte value;
+		private String valueName;
+
+		AQPayeeType(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}
+	}
+
+
+	/**
+	 * 银行卡卡类型 0：对公帐号 1：卡 2：活期一本通 8：活期存折 9：内部帐/表外帐
+	 */
+	public enum AQCardType implements Valuable<Byte>{
+		PUBLIC((byte)0,"对公帐号"),
+		BANKCARD((byte)1,"卡");
+
+		private Byte value;
+		private String valueName;
+
+		AQCardType(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
 		}
 	}
 }

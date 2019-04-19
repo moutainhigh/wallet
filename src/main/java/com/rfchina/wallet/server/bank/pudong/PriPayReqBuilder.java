@@ -4,12 +4,18 @@ import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.server.bank.pudong.domain.common.RequestHeader;
 import com.rfchina.wallet.server.bank.pudong.domain.request.PriPayReq;
 import com.rfchina.wallet.server.bank.pudong.domain.request.PriPayReqBody;
+import com.rfchina.wallet.server.bank.pudong.domain.request.PriPayReqBody.Lists;
+import com.rfchina.wallet.server.bank.pudong.domain.request.PriPayReqBody.PriPayReqWrapper;
+import com.rfchina.wallet.server.bank.pudong.domain.response.PriPayRespBody;
 import io.swagger.annotations.ApiModelProperty;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+import lombok.Builder;
 import okhttp3.OkHttpClient;
 
+@Builder
 public class PriPayReqBuilder extends PpdbReqTpl implements GatewayLancher {
 
 	private final static String transCode = "AQ52";
@@ -60,8 +66,8 @@ public class PriPayReqBuilder extends PpdbReqTpl implements GatewayLancher {
 
 
 	@Override
-	public Object lanch(OkHttpClient client) throws Exception {
-		return null;
+	public PriPayRespBody lanch(OkHttpClient client) throws Exception {
+		return super.build(client,PriPayReqBody.class, PriPayRespBody.class);
 	}
 
 	@Override
@@ -69,6 +75,10 @@ public class PriPayReqBuilder extends PpdbReqTpl implements GatewayLancher {
 		BigDecimal amount = payReqList.stream()
 			.map(payReq -> new BigDecimal(payReq.getAmount()))
 			.reduce(BigDecimal::add).get();
+
+		List<PriPayReqWrapper> list = payReqList.stream()
+			.map(payReq -> PriPayReqWrapper.builder().detailedContent(payReq.toString()).build())
+			.collect(Collectors.toList());
 
 		return PriPayReqBody.builder()
 			.transMasterID(transMasterID)
@@ -80,6 +90,7 @@ public class PriPayReqBuilder extends PpdbReqTpl implements GatewayLancher {
 			.totalNumber(String.valueOf(payReqList.size()))
 			.totalAmount(amount.setScale(2, BigDecimal.ROUND_DOWN).toString())
 			.batchNo(batchNo)
+			.lists(Lists.builder().list(list).build())
 			.build();
 	}
 

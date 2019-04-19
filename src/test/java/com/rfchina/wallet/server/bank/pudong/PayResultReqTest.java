@@ -20,8 +20,8 @@ public class PayResultReqTest {
 			.acctNo(CMP_ACCT_ID)
 			.beginDate("20190415")
 			.endDate("20190415")
-			.beginNumber(1)
-			.queryNumber(30)
+			.beginNumber("1")
+			.queryNumber("30")
 			.build();
 		PubPayQueryRespBody respBody = req.lanch(new OkHttpClient());
 		log.info(JSON.toJSONString(respBody));

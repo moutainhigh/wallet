@@ -17,6 +17,15 @@ buildscript {
     }
 }
 
+allprojects {
+    repositories {
+        maven {
+            url "http://192.168.197.28:8081/repository/maven-public/"
+        }
+    }
+}
+
+
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: "sdk-builder"
@@ -25,9 +34,9 @@ group = "${projectGroup}"
 version = "${projectVersion}"
 sourceCompatibility = 1.8
 
-jar {
-    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-}
+//jar {
+//    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+//}
 
 dependencies {
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
@@ -50,4 +59,7 @@ uploadArchives {
             pom.version = "${projectVersion}"
         }
     }
+//    artifacts {
+//        archives jar
+//    }
 }
