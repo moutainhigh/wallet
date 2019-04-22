@@ -1,6 +1,6 @@
 package com.rfchina.wallet.server.web;
 
-import com.rfchina.wallet.server.bank.pudong.domain.util.UrlConstant;
+import com.rfchina.wallet.server.msic.UrlConstant;
 import com.rfchina.wallet.server.service.JuniorWalletService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

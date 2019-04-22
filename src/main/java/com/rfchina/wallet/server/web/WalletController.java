@@ -2,8 +2,7 @@ package com.rfchina.wallet.server.web;
 
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.ResponseValue;
-import com.rfchina.wallet.server.bank.pudong.domain.util.UrlConstant;
-import com.rfchina.wallet.server.model.ext.WalletCardInfoResp;
+import com.rfchina.wallet.server.msic.UrlConstant;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import com.rfchina.wallet.server.service.WalletService;
 import io.swagger.annotations.Api;

@@ -3,6 +3,7 @@ package com.rfchina.wallet.server.bank.pudong;
 import static org.junit.Assert.*;
 
 import com.alibaba.fastjson.JSON;
+import com.rfchina.wallet.server.bank.pudong.Builder.PubPayQueryBuilder;
 import com.rfchina.wallet.server.bank.pudong.domain.response.PubPayQueryRespBody;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;

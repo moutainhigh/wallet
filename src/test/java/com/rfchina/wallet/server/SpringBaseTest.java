@@ -14,7 +14,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 public class SpringBaseTest {
 
 	protected String currMethod() {
-		return Thread.currentThread().getStackTrace()[1].getMethodName();
+		return Thread.currentThread().getStackTrace()[2].getMethodName();
 	}
 
 }

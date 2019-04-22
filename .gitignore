@@ -21,6 +21,9 @@ java/bin
 .idea
 target/
 *.exe
+.gradle
+build
+out
 
 vendor/*
 data/logs

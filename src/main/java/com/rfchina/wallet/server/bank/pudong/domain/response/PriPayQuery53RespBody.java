@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+@Data
 public class PriPayQuery53RespBody {
 	@ApiModelProperty(value = "交易日期", required = true)
 	private String transDate;
@@ -26,6 +27,10 @@ public class PriPayQuery53RespBody {
 	@ApiModelProperty(value = "循环内容", required = true)
 	private Lists lists;
 
+	@Data
+	@Builder
+	@NoArgsConstructor
+	@AllArgsConstructor
 	public static class Lists {
 		private List<PriPayQuery53RespWrapper> list;
 	}
@@ -38,8 +43,8 @@ public class PriPayQuery53RespBody {
 		@ApiModelProperty(value = "费项编码", required = true)
 		private String costItemCode;
 
-		@ApiModelProperty(value = "交易类型.1:代收 2:代付", required = true)
-		private String transType;
+		@ApiModelProperty(value = "交易类型编码.1:代收 2:代付", required = true)
+		private String transTypeCode;
 
 		@ApiModelProperty(value = "电子凭证号", required = true)
 		private String elecChequeNo;

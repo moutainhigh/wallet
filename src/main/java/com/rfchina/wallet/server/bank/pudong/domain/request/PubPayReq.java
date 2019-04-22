@@ -1,6 +1,7 @@
 package com.rfchina.wallet.server.bank.pudong.domain.request;
 
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,68 +14,51 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PubPayReq {
 
-	/**
-	 * 电子凭证号
-	 */
+	@ApiModelProperty(value = "电子凭证号")
 	private String elecChequeNo;
-	/**
-	 * 付款账号
-	 */
+
+	@ApiModelProperty(value = "付款账号", required = true)
 	private String acctNo;
-	/**
-	 * 付款人账户名称
-	 */
+
+	@ApiModelProperty(value = "付款人账户名称", required = true)
 	private String acctName;
-	/**
-	 * 预约日期  格式：20041008
-	 */
+
+	@ApiModelProperty(value = "预约日期  格式：20041008")
 	private String bespeakDate;
-	/**
-	 * 收款人账号
-	 */
+
+	@ApiModelProperty(value = "收款人账号", required = true)
 	private String payeeAcctNo;
-	/**
-	 * 收款人名称
-	 */
+
+	@ApiModelProperty(value = "收款人名称", required = true)
 	private String payeeName;
-	/**
-	 * 收款人账户类型 0-对公账号 1-卡
-	 */
-//		private String payeeType;
-	/**
-	 * 收款行名称
-	 */
+
+	@ApiModelProperty(value = "收款人账户类型 0-对公账号 1-卡")
+	private String payeeType;
+
+	@ApiModelProperty(value = "收款行名称")
 	private String payeeBankName;
-	/**
-	 * 收款人地址
-	 */
+
+	@ApiModelProperty(value = "收款人地址")
 	private String payeeAddress;
-	/**
-	 * 支付金额
-	 */
+
+	@ApiModelProperty(value = "支付金额", required = true)
 	private String amount;
-	/**
-	 * 本行/他行标志 0：表示本行 1：表示他行
-	 */
+
+	@ApiModelProperty(value = "本行/他行标志 0：表示本行 1：表示他行", required = true)
 	private String sysFlag;
-	/**
-	 * 同城异地标志 0：同城 1：异地
-	 */
+
+	@ApiModelProperty(value = "同城异地标志 0：同城 1：异地", required = true)
 	private String remitLocation;
-	/**
-	 * 附言
-	 */
+
+	@ApiModelProperty(value = "附言")
 	private String note;
-	/**
-	 * 收款行速选标志
-	 */
+
+	@ApiModelProperty(value = "收款行速选标志")
 	private String payeeBankSelectFlag;
-	/**
-	 * 支付号
-	 */
+
+	@ApiModelProperty(value = "支付号")
 	private String payeeBankNo;
-	/**
-	 * 支付用途 收款人为个人客户时必须输入
-	 */
+
+	@ApiModelProperty(value = "支付用途 收款人为个人客户时必须输入")
 	private String payPurpose;
 }

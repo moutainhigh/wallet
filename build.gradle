@@ -49,7 +49,7 @@ dependencies {
     compile('mysql:mysql-connector-java:5.1.46')
     compile('io.github.hengyunabc.xdiamond:xdiamond-client:1.0.4')
     compile('org.slf4j:jcl-over-slf4j:1.7.21')
-    compile('ch.qos.logback:logback-classic:1.1.7')
+    compile('ch.qos.logback:logback-classic:1.2.3')
     compile 'org.slf4j:slf4j-log4j12:1.7.0'
     compile 'log4j:log4j:1.2.14'
     compile("org.projectlombok:lombok:${lombokVersion}")
@@ -57,6 +57,9 @@ dependencies {
     compile('io.springfox:springfox-swagger-ui:2.9.2')
     compile('dom4j:dom4j:1.6.1')
     compile('com.alibaba:fastjson:1.1.41')
+    compile 'org.aspectj:aspectjrt:1.8.9'
+    compile 'org.aspectj:aspectjweaver:1.8.9'
+    compile 'org.springframework:spring-aspects:4.3.1.RELEASE'
 
     // 本地依赖
     compile('com.rfchina:rfchina-commons-utils:2.2.28')
@@ -64,7 +67,7 @@ dependencies {
     compile('com.rfchina:rfwallet-domain:1.0.0-SNAPSHOT')
     compile('com.rfchina.biztool:IdGenarator:1.0.1')
     compile 'org.tas:post-core:1.0.0'
-//    compile 'com.rfchina:rfchina-platform-scheduler-spring:1.1.1'
+//    compile 'com.rfchina:rfchina-platform-scheduler-spring:1.1.2'
 
     // 测试依赖
     testCompile('org.springframework.boot:spring-boot-starter-test')

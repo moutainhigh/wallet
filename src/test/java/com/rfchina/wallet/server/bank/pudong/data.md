@@ -51,3 +51,71 @@ MIIJKgYJKoZIhvcNAQcCoIIJGzCCCRcCA......G7VeztcPnTEDA==
 ```resp
 {"acceptNo":"PT19YQ0000018904","failCount":"0","seqNo":"020189583321","successCount":"1"}
 ```
+
+### 8800网银
+```
+masterid: 2000040752  auditMasterId: 2623669269  packageId: 随机  packageNo: 随机
+acctno:	990B8950900000818 acctname:	浦发2478952744  
+<returnCode>B2E0005</returnCode><returnMsg>网银授权设置不匹配</returnMsg>
+```
+
+
+``` 8800非网银授权
+
+{
+    "key": "wlpay.pudong.acctAreaCode",
+    "value": "2900",
+    "description": null
+  },
+  {
+    "key": "wlpay.pudong.acctname",
+    "value": "浦发2000040752",
+    "description": null
+  },
+  {
+    "key": "wlpay.pudong.acctno",
+    "value": "95200078801300000003",
+    "description": null
+  },
+  {
+    "key": "wlpay.pudong.auditMasterId",
+    "value": "2623669269",
+    "description": null
+  },
+  {
+    "key": "wlpay.pudong.masterid",
+    "value": "2000040752",
+    "description": "机构号"
+  }
+
+```
+
+``` 8800网银授权
+
+{
+    "key": "wlpay.pudong.acctAreaCode",
+    "value": "2900",
+    "description": null
+  },
+  {
+    "key": "wlpay.pudong.acctname",
+    "value": "浦发2478952744",
+    "description": null
+  },
+  {
+    "key": "wlpay.pudong.acctno",
+    "value": "990B8950900000818",
+    "description": null
+  },
+  {
+    "key": "wlpay.pudong.auditMasterId",
+    "value": "2478952744",
+    "description": null
+  },
+  {
+    "key": "wlpay.pudong.masterid",
+    "value": "2623669269",
+    "description": "机构号"
+  }
+
+```

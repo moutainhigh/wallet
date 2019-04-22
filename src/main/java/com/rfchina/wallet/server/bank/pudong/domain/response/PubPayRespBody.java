@@ -41,4 +41,5 @@ public class PubPayRespBody {
 
 	@ApiModelProperty(value = "失败笔数")
 	private String failCount;
+
 }

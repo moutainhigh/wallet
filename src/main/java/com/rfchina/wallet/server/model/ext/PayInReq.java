@@ -18,7 +18,7 @@ public class PayInReq {
 	@ApiModelProperty(value = "支付金额(单位分)", required = true, example = "1")
 	private Long amount;
 
-	@ApiModelProperty(value = "电子凭证号(业务方定义唯一)", required = true, example = "123")
+	@ApiModelProperty(value = "电子凭证号(业务方定义唯一,最长16字节)", required = true, example = "123")
 	private String elecChequeNo;
 
 	@ApiModelProperty(value = "附言", required = false, example = "收入")

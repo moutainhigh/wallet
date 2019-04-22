@@ -4,12 +4,10 @@ import com.rfchina.wallet.server.bank.pudong.domain.request.PriPayReq;
 import com.rfchina.wallet.server.bank.pudong.domain.util.StringIndex;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class PriPayResp extends PriPayReq {
