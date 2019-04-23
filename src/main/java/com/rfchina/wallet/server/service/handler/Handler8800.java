@@ -7,8 +7,8 @@ import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.model.BankCode;
 import com.rfchina.wallet.domain.model.WalletCard;
-import com.rfchina.wallet.server.bank.pudong.Builder.PubPayQueryBuilder;
-import com.rfchina.wallet.server.bank.pudong.Builder.PubPayReqBuilder;
+import com.rfchina.wallet.server.bank.pudong.builder.PubPayQueryBuilder;
+import com.rfchina.wallet.server.bank.pudong.builder.PubPayReqBuilder;
 import com.rfchina.wallet.server.bank.pudong.domain.request.PubPayReq;
 import com.rfchina.wallet.server.bank.pudong.domain.response.PubPayQueryRespBody;
 import com.rfchina.wallet.server.bank.pudong.domain.response.PubPayQueryRespBody.PayResult;
@@ -23,7 +23,6 @@ import com.rfchina.wallet.server.msic.EnumWallet.RemitLocation;
 import com.rfchina.wallet.server.msic.EnumWallet.SysFlag;
 import com.rfchina.wallet.server.msic.EnumWallet.TransStatus8800;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletLogStatus;
-import com.rfchina.wallet.server.msic.EnumWallet.WalletType;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -72,7 +71,8 @@ public class Handler8800 implements PuDongHandler {
 
 	@Override
 	public boolean isSupportWalletType(Byte walletType) {
-		return WalletType.COMPANY.getValue().byteValue() == walletType;
+//		return WalletType.COMPANY.getValue().byteValue() == walletType;
+		return true;
 	}
 
 	@Override
@@ -152,7 +152,7 @@ public class Handler8800 implements PuDongHandler {
 	}
 
 	@Override
-	public void updatePayStatus(String acceptNo, Date createTime) {
+	public int updatePayStatus(String acceptNo, Date createTime) {
 		Date endDate = DateUtil.addDate2(createTime, 7);
 
 		PubPayQueryBuilder req = PubPayQueryBuilder.builder()
@@ -178,15 +178,20 @@ public class Handler8800 implements PuDongHandler {
 			List<PayResult> results = respBody.getLists().getList();
 
 			// 更新银行回单到流水表
-			results.forEach(rs -> {
+			int count = 0;
+			for (PayResult rs : results) {
 				WalletLogStatus status = WalletLogStatus.parsePuDong8804(rs.getTransStatus());
 				TransStatus8800 transStatus = TransStatus8800.parse(rs.getTransStatus());
 
-				walletLogDao.updateStatusAndErrMsg(rs.getAcceptNo(), rs.getElecChequeNo(),
+				int c = walletLogDao.updateStatusAndErrMsg(rs.getAcceptNo(), rs.getElecChequeNo(),
 					status.getValue(), transStatus != null ? transStatus.getDescription()
 						: ("未知状态" + rs.getTransStatus()));
-			});
+				count += c;
+			}
+			return count;
 		}
+
+		return 0;
 	}
 
 	private WalletCard getWalletCard(Long walletId) {

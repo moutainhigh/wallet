@@ -1,6 +1,5 @@
-package com.rfchina.wallet.server.bank.pudong.Builder;
+package com.rfchina.wallet.server.bank.pudong.builder;
 
-import com.alibaba.fastjson.JSON;
 import com.rfchina.wallet.server.bank.pudong.domain.common.RequestHeader;
 import com.rfchina.wallet.server.bank.pudong.domain.common.RequestPacket;
 import com.rfchina.wallet.server.bank.pudong.domain.common.ResponsePacket;

@@ -37,7 +37,7 @@ public class PayInRequest extends  AbstractApiRequest {
 
   @Override
   public Class<?> getResponseModelClass() {
-    return PubPayRespBody.class;
+    return PayInResp.class;
   }
 
   @Override

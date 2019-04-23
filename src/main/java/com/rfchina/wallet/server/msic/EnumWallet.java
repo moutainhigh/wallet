@@ -6,6 +6,28 @@ import com.rfchina.platform.common.utils.Valuable;
 public class EnumWallet {
 
 	/**
+	 * 钱包状态: 1:待审核，2：激活,3：禁用
+	 */
+	public enum WalletStatus implements Valuable<Byte> {
+		WAIT_AUDIT((byte) 1, "待审核"),
+		ACTIVE((byte) 2, "激活"),
+		UNVALID((byte) 3, "禁用");
+
+		private Byte value;
+		private String valueName;
+
+		WalletStatus(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}
+	}
+
+	/**
 	 * 收款人账户类型
 	 */
 	public enum PayeeType implements Valuable<String> {
@@ -84,7 +106,7 @@ public class EnumWallet {
 		FINISH("4", "完成", "该笔支付处理成功，客户记账成功"),
 		REJECT("8", "拒绝", "该笔支付处理失败，被拒绝"),
 		REVOKE("9", "撤销", "该笔支付已被撤销"),
-		UNKNOWN("A","未知状态","接口文档未记录的状态");
+		UNKNOWN("A", "未知状态", "接口文档未记录的状态");
 
 		private String value;
 		private String valueName;
@@ -205,6 +227,28 @@ public class EnumWallet {
 		private String valueName;
 
 		WalletType(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}
+	}
+
+	/**
+	 * 钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 个人用户
+	 */
+	public enum WalletSource implements Valuable<Byte> {
+		FHT_CORP((byte) 1, "富慧通-企业商家"),
+		FHT_PERSON((byte) 2, "富慧通-个人商家"),
+		USER((byte) 3, "个人用户");
+
+		private Byte value;
+		private String valueName;
+
+		WalletSource(Byte value, String valueName) {
 			this.value = value;
 			this.valueName = valueName;
 		}

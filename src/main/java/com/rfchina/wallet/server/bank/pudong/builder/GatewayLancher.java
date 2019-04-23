@@ -1,4 +1,4 @@
-package com.rfchina.wallet.server.bank.pudong.Builder;
+package com.rfchina.wallet.server.bank.pudong.builder;
 
 import okhttp3.OkHttpClient;
 

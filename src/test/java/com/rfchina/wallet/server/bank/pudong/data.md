@@ -114,7 +114,7 @@ acctno:	990B8950900000818 acctname:	浦发2478952744
   },
   {
     "key": "wlpay.pudong.masterid",
-    "value": "2623669269",
+    "value": "200004075",
     "description": "机构号"
   }
 

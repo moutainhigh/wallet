@@ -14,4 +14,9 @@ public class UrlConstant {
 
 	public static final String WALLET_QUERY_INFO = VERSION + "/wallet/query_wallet_info";
 
+	/**
+	 * 开通未审核的钱包
+	 */
+	public static final String CREATE_WALLET = VERSION + "/wallet/create_wallet";
+
 }
