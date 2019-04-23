@@ -14,7 +14,7 @@ public class BatchPayInRequest extends  AbstractApiRequest {
   @ApiModelProperty("access_token")
   private String accessToken ;
 
-  @ApiModelProperty("json数组，参考思力出钱单笔接口，拼装成数组即可")
+  @ApiModelProperty("json数组，参考思力出钱单笔接口，拼装成数组即可( 钱包类型必须统一为企业或个人 )")
   private String jsonArry ;
 
 
@@ -25,7 +25,7 @@ public class BatchPayInRequest extends  AbstractApiRequest {
 
   @Override
   public Class<?> getResponseModelClass() {
-    return PubPayRespBody.class;
+    return PayInResp.class;
   }
 
   @Override

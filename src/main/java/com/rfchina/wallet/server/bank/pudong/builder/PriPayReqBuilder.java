@@ -1,4 +1,4 @@
-package com.rfchina.wallet.server.bank.pudong.Builder;
+package com.rfchina.wallet.server.bank.pudong.builder;
 
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.server.bank.pudong.domain.common.RequestHeader;

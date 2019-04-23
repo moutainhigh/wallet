@@ -13,7 +13,9 @@ import com.rfchina.wallet.domain.model.WalletUser;
 import com.rfchina.wallet.server.mapper.ext.WalletUserExtDao;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp.WalletInfoRespBuilder;
+import com.rfchina.wallet.server.msic.EnumWallet.WalletStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletType;
+import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +38,7 @@ public class WalletService {
 		WalletInfoRespBuilder builder = WalletInfoResp.builder();
 
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
-		if(wallet == null){
+		if (wallet == null) {
 			throw new RfchinaResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST);
 		}
 
@@ -50,7 +52,28 @@ public class WalletService {
 			builder.personInfo(walletPerson);
 		}
 
-
 		return builder.wallet(wallet).userInfo(walletUser).build();
+	}
+
+	/**
+	 * 开通未审核的钱包
+	 */
+	public Wallet createWallet(Byte type, String title, Byte source) {
+
+		Wallet wallet = Wallet.builder()
+			.type(type)
+			.title(title)
+			.walletBalance(0L)
+			.rechargeAmount(0L)
+			.rechargeCount(0)
+			.payAmount(0L)
+			.payCount(0)
+			.source(source)
+			.status(WalletStatus.WAIT_AUDIT.getValue())
+			.createTime(new Date())
+			.build();
+		walletDao.insert(wallet);
+
+		return wallet;
 	}
 }

@@ -17,7 +17,7 @@ public interface PuDongHandler {
 
 	Tuple<GatewayMethod, PayInResp> pay(List<PayInReq> payInReqs) throws Exception;
 
-	void updatePayStatus(String acceptNo, Date createTime);
+	int updatePayStatus(String acceptNo, Date createTime);
 
 	PuDongHandler getNext();
 

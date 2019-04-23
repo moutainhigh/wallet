@@ -165,12 +165,15 @@ public class JuniorWalletService {
 		log.info("scheduler: 开始更新支付状态[银企直连]");
 
 		List<AcceptNo> acceptNos = walletLogDao.selectUnFinish();
-		acceptNos.forEach(item -> {
 
+		int count = 0;
+		for (AcceptNo item : acceptNos) {
 			PuDongHandler handler = handlerHelper.selectByMethod(item.getRefMethod());
-			handler.updatePayStatus(item.getAcceptNo(), item.getCreateTime());
-		});
+			int c = handler.updatePayStatus(item.getAcceptNo(), item.getCreateTime());
+			count += c;
+		}
 
+		log.info("更新批次状态，批次数量= {}，更新笔数= {}", acceptNos.size(), count);
 		log.info("scheduler: 结束更新支付状态[银企直连]");
 	}
 

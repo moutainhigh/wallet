@@ -28,6 +28,9 @@ public class Wallet  {
     @ApiModelProperty("钱包信息最后更新日期")
     private String lastUpdTime ;
 
+    @ApiModelProperty("钱包等级，1： 初级钱包，2： 高级钱包")
+    private Integer level ;
+
     @ApiModelProperty("累计支付金额")
     private Long payAmount ;
 
@@ -39,6 +42,9 @@ public class Wallet  {
 
     @ApiModelProperty("累计充值次数")
     private Integer rechargeCount ;
+
+    @ApiModelProperty("钱包等级，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户")
+    private Integer source ;
 
     @ApiModelProperty("钱包状态: 1:待审核，2：激活,3：禁用")
     private Integer status ;

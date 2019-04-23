@@ -4,7 +4,7 @@ import static com.rfchina.wallet.server.bank.pudong.TestingData.*;
 import static org.junit.Assert.*;
 
 import com.alibaba.fastjson.JSON;
-import com.rfchina.wallet.server.bank.pudong.Builder.PubPayReqBuilder;
+import com.rfchina.wallet.server.bank.pudong.builder.PubPayReqBuilder;
 import com.rfchina.wallet.server.bank.pudong.domain.request.PubPayReq;
 import com.rfchina.wallet.server.bank.pudong.domain.response.PubPayRespBody;
 import com.rfchina.wallet.server.msic.EnumWallet.RemitLocation;

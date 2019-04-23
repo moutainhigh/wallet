@@ -2,6 +2,8 @@ package com.rfchina.wallet.server.web;
 
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.ResponseValue;
+import com.rfchina.wallet.domain.model.Wallet;
+import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import com.rfchina.wallet.server.service.WalletService;
@@ -27,9 +29,21 @@ public class WalletController {
 		@ApiParam(value = "钱包ID", required = true, example = "2") @RequestParam("wallet_id") Long walletId
 	) {
 
-		WalletInfoResp resp = walletService.queryWalletInfo(accessToken,walletId);
+		WalletInfoResp resp = walletService.queryWalletInfo(accessToken, walletId);
 
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,resp);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, resp);
+	}
+
+	@ApiOperation("开通未审核的钱包")
+	@PostMapping(UrlConstant.CREATE_WALLET)
+	public ResponseValue<Wallet> createWallet(
+		@ApiParam(value = "钱包类型， 1：企业钱包，2：个人钱包", required = true, example = "2") @RequestParam("type") Byte type,
+		@ApiParam(value = "钱包标题，通常是姓名或公司名", required = true, example = "测试个人钱包") @RequestParam("title") String title,
+		@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2") @RequestParam("source") Byte source
+	) {
+		Wallet wallet = walletService.createWallet(type,title,source);
+
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, wallet);
 	}
 
 }

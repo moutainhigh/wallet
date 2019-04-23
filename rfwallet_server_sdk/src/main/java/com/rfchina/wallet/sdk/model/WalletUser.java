@@ -16,23 +16,20 @@ public class WalletUser  {
     @ApiModelProperty("创建日期")
     private String createTime ;
 
-    @ApiModelProperty("帐号ID")
-    private Long id ;
-
     @ApiModelProperty("钱包信息最后更新日期")
     private String lastUpdTime ;
 
     @ApiModelProperty("登录手机号")
     private String mobile ;
 
-    @ApiModelProperty("注册进度, 1:已通过身份验证, 2:已开通钱包")
+    @ApiModelProperty("注册进度, 1:已通过身份验证, 2:已绑定银行卡")
     private Integer registerProgress ;
 
     @ApiModelProperty("帐号状态: 1:正常，2：禁用")
     private Integer status ;
 
     @ApiModelProperty("用户ID")
-    private Long uid ;
+    private Long userId ;
 
     @ApiModelProperty("关联的钱包ID")
     private Long walletId ;

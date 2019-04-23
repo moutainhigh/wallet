@@ -6,9 +6,9 @@ import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.model.BankCode;
 import com.rfchina.wallet.domain.model.WalletCard;
-import com.rfchina.wallet.server.bank.pudong.Builder.PriPayQuery53Builder;
-import com.rfchina.wallet.server.bank.pudong.Builder.PriPayQuery54Builder;
-import com.rfchina.wallet.server.bank.pudong.Builder.PriPayReqBuilder;
+import com.rfchina.wallet.server.bank.pudong.builder.PriPayQuery53Builder;
+import com.rfchina.wallet.server.bank.pudong.builder.PriPayQuery54Builder;
+import com.rfchina.wallet.server.bank.pudong.builder.PriPayReqBuilder;
 import com.rfchina.wallet.server.bank.pudong.domain.request.PriPayReq;
 import com.rfchina.wallet.server.bank.pudong.domain.response.PriPayQuery53RespBody;
 import com.rfchina.wallet.server.bank.pudong.domain.response.PriPayQuery53RespBody.PriPayQuery53RespWrapper;
@@ -28,7 +28,6 @@ import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.SysFlag;
 import com.rfchina.wallet.server.msic.EnumWallet.TransStatusAQ53;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletLogStatus;
-import com.rfchina.wallet.server.msic.EnumWallet.WalletType;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
@@ -72,7 +71,8 @@ public class HandlerAQ52 implements PuDongHandler {
 	private PuDongHandler next;
 
 	public boolean isSupportWalletType(Byte walletType) {
-		return WalletType.PERSON.getValue().byteValue() == walletType;
+//		return WalletType.PERSON.getValue().byteValue() == walletType;
+		return false;
 	}
 
 	public boolean isSupportMethod(Byte method) {
@@ -152,7 +152,7 @@ public class HandlerAQ52 implements PuDongHandler {
 	}
 
 
-	public void updatePayStatus(String acceptNo, Date createTime) {
+	public int updatePayStatus(String acceptNo, Date createTime) {
 		Date endDate = DateUtil.addDate2(createTime, 7);
 
 		PriPayQuery53Builder req53 = PriPayQuery53Builder.builder()
@@ -179,7 +179,7 @@ public class HandlerAQ52 implements PuDongHandler {
 				}
 				if (!TransStatusAQ53.SUCC.getValue().toString()
 					.equals(wrapper.getBatchHandleStatus())) {
-					return;
+					return 0;
 				}
 			}
 		} catch (Exception e) {
@@ -207,12 +207,16 @@ public class HandlerAQ52 implements PuDongHandler {
 								PriPayResp.class, "|");
 					}).collect(Collectors.toList());
 
-				priPayResps.forEach(rs -> {
+				int count = 0;
+				for (PriPayResp rs : priPayResps) {
 					WalletLogStatus status = WalletLogStatus.parsePuDongAQ54(rs.getStatus());
 
-					walletLogDao.updateStatusAndErrMsg(respBody.getHandleSeqNo(), rs.getBizLog(),
-						status.getValue(), rs.getErrMsg());
-				});
+					int c = walletLogDao.updateStatusAndErrMsg(respBody.getHandleSeqNo(),
+						rs.getBizLog(), status.getValue(), rs.getErrMsg());
+					count += c;
+				}
+
+				return count;
 			}
 
 		} catch (Exception e) {
@@ -220,6 +224,7 @@ public class HandlerAQ52 implements PuDongHandler {
 			throw new RuntimeException(e);
 		}
 
+		return 0;
 	}
 
 

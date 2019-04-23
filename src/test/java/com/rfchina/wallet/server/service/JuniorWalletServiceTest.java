@@ -35,7 +35,6 @@ public class JuniorWalletServiceTest extends SpringBaseTest {
 
 		assertNotNull(respBody);
 		assertNotNull(respBody.getSeqNo());
-		assertTrue(Integer.valueOf(respBody.getSuccessCount()) == 1);
 	}
 
 	@Test
@@ -54,7 +53,6 @@ public class JuniorWalletServiceTest extends SpringBaseTest {
 
 		assertNotNull(respBody);
 		assertNotNull(respBody.getSeqNo());
-		assertTrue(Integer.valueOf(respBody.getSuccessCount()) == 1);
 	}
 
 	@Test
