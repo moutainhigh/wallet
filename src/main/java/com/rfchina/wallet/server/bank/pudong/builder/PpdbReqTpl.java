@@ -81,6 +81,9 @@ public abstract class PpdbReqTpl {
 
 	protected String parseAndSign(Object reqBody, Class clz) throws Exception {
 		String xmlBody = XmlUtil.obj2Xml(reqBody, clz);
+		if(log.isDebugEnabled()) {
+			log.debug(xmlBody);
+		}
 		return sign(xmlBody);
 	}
 
@@ -105,6 +108,9 @@ public abstract class PpdbReqTpl {
 		Response resp = client.newCall(request).execute();
 
 		String respData = respAdvise(resp.body().bytes());
+		if(log.isDebugEnabled()){
+			log.debug(respData);
+		}
 		ResponsePacket responsePacket = XmlUtil
 			.xml2Obj(XmlUtil.unwrap(respData), ResponsePacket.class);
 		if (!SUCC.equals(responsePacket.getHead().getReturnCode())) {
