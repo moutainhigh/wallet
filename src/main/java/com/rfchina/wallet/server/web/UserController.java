@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class UserController {
 
-    @ApiOperation("查询钱包信息（企业or个人）")
+    @ApiOperation("查询用户信息")
     @PostMapping(UrlConstant.WALLET_USER_LIST)
     public ResponseValue userList(){
         return null;

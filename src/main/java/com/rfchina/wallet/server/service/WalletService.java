@@ -1,7 +1,9 @@
 package com.rfchina.wallet.server.service;
 
+import com.rfchina.platform.common.annotation.ParamValid;
 import com.rfchina.platform.common.exception.RfchinaResponseException;
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
+import com.rfchina.platform.common.misc.SymbolConstant;
 import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.domain.mapper.ext.*;
@@ -12,6 +14,7 @@ import com.rfchina.wallet.server.model.ext.WalletInfoResp.WalletInfoRespBuilder;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletType;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +37,9 @@ public class WalletService {
 
 	@Autowired
 	private WalletLogDao walletLogDao;
+
+	@Autowired
+	private WalletCardDao walletCardDao;
 
 	public WalletInfoResp queryWalletInfo(String accessToken, Long walletId) {
 		WalletInfoRespBuilder builder = WalletInfoResp.builder();
@@ -88,11 +94,20 @@ public class WalletService {
 	 * @param stat
 	 * @return
 	 */
-	public Pagination<WalletLog> walletLogList(Long walletId,  Date startTime, Date endTime, int limit, long offset, Boolean stat){
+	public Pagination<WalletLog> walletLogList(@ParamValid(nullable = false) Long walletId, Date startTime, Date endTime, @ParamValid(min = 1, max = SymbolConstant.QUERY_LIMIT) int limit, @ParamValid(min = 0) long offset, Boolean stat){
 		Date queryStartTime = DateUtil.getDate2(startTime);
 		Date queryEndTime = DateUtil.getDate(endTime);
 		return new Pagination.PaginationBuilder<WalletLog>().offset(offset).pageLimit(limit)
 				.data(walletLogDao.selectList(walletId, queryStartTime, queryEndTime, limit, offset))
 				.total(Optional.ofNullable(stat).orElse(false) ? walletLogDao.selectCount(walletId, queryStartTime, queryEndTime) : 0L).build();
+	}
+
+	/**
+	 * 查询绑定的银行卡列表
+	 * @param walletId		钱包ID
+	 * @return
+	 */
+	public List<WalletCard> bankCardList(@ParamValid(nullable = false) Long walletId){
+		return walletCardDao.selectByWalletId(walletId);
 	}
 }
