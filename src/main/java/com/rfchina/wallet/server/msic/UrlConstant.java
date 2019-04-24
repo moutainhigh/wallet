@@ -19,8 +19,16 @@ public class UrlConstant {
 	 */
 	public static final String CREATE_WALLET = VERSION + "/wallet/create_wallet";
 
+	/**
+	 * 查询用户信息
+	 */
 	public static final String WALLET_USER_LIST = VERSION + "/wallet/user/list";
 
+	/**
+	 * 查询交易流水
+	 */
 	public static final String WALLET_LOG_LIST = VERSION + "/wallet/log/list";
+
+	public static final String WALLET_BANK_CARD_LIST = VERSION + "/wallet/log/list";
 
 }
