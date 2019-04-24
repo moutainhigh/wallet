@@ -1,6 +1,6 @@
 ###  开通未审核的钱包
 
-请求地址: /v1/wallet/create_wallet
+请求地址: /wallet-server/v1/wallet/create_wallet
 
 请求类型: POST
 
@@ -98,7 +98,7 @@
 >>>>>>> d42b400bb2a92ce945b84958fdd0b29aca1c8b45
 ###  查询钱包信息（企业or个人）
 
-请求地址: /v1/wallet/query_wallet_info
+请求地址: /wallet-server/v1/wallet/query_wallet_info
 
 请求类型: POST
 

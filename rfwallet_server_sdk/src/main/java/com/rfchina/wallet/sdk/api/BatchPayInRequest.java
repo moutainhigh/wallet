@@ -20,7 +20,7 @@ public class BatchPayInRequest extends  AbstractApiRequest {
 
   @Override
   public String getApiUrl() {
-    return "/v1/junior/sl_batch_pay_in";
+    return "/wallet-server/v1/junior/sl_batch_pay_in";
   }
 
   @Override

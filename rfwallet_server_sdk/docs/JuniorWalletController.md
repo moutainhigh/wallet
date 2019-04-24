@@ -1,6 +1,6 @@
 ###  初级钱包-思力批量出钱（最多20笔）
 
-请求地址: /v1/junior/sl_batch_pay_in
+请求地址: /wallet-server/v1/junior/sl_batch_pay_in
 
 请求类型: POST
 
@@ -29,7 +29,7 @@
 
 ###  初级钱包-思力出钱
 
-请求地址: /v1/junior/sl_pay_in
+请求地址: /wallet-server/v1/junior/sl_pay_in
 
 请求类型: POST
 
@@ -62,7 +62,7 @@
 
 ###  初级钱包-查询支付状态
 
-请求地址: /v1/junior/sl_query
+请求地址: /wallet-server/v1/junior/sl_query
 
 请求类型: POST
 
