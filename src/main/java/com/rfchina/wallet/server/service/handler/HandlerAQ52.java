@@ -21,23 +21,18 @@ import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletLogExtDao;
 import com.rfchina.wallet.server.model.ext.PayInReq;
 import com.rfchina.wallet.server.model.ext.PayInResp;
-import com.rfchina.wallet.server.msic.EnumWallet.AQCardType;
-import com.rfchina.wallet.server.msic.EnumWallet.AQPayeeType;
-import com.rfchina.wallet.server.msic.EnumWallet.AQTransType;
-import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
-import com.rfchina.wallet.server.msic.EnumWallet.SysFlag;
-import com.rfchina.wallet.server.msic.EnumWallet.TransStatusAQ53;
-import com.rfchina.wallet.server.msic.EnumWallet.WalletLogStatus;
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
+import com.rfchina.wallet.server.msic.EnumWallet.*;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient.Builder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Data

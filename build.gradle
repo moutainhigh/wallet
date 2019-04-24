@@ -12,6 +12,7 @@ buildscript {
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath "com.rfchina.tools:sdk-gradle-builder:1.0.0-SNAPSHOT"
     }
 }
 
@@ -28,6 +29,7 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: "sdk-builder"
 
 group = 'com.rfchina.wallet'
 version = "${projectVersion}"
