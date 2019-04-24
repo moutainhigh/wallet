@@ -2,20 +2,18 @@ package com.rfchina.wallet.server.service;
 
 import com.rfchina.platform.common.exception.RfchinaResponseException;
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
-import com.rfchina.wallet.domain.mapper.ext.WalletCompanyDao;
-import com.rfchina.wallet.domain.mapper.ext.WalletDao;
-import com.rfchina.wallet.domain.mapper.ext.WalletPersonDao;
-import com.rfchina.wallet.domain.mapper.ext.WalletUserDao;
-import com.rfchina.wallet.domain.model.Wallet;
-import com.rfchina.wallet.domain.model.WalletCompany;
-import com.rfchina.wallet.domain.model.WalletPerson;
-import com.rfchina.wallet.domain.model.WalletUser;
+import com.rfchina.platform.common.page.Pagination;
+import com.rfchina.platform.common.utils.DateUtil;
+import com.rfchina.wallet.domain.mapper.ext.*;
+import com.rfchina.wallet.domain.model.*;
 import com.rfchina.wallet.server.mapper.ext.WalletUserExtDao;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp.WalletInfoRespBuilder;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletType;
 import java.util.Date;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +31,9 @@ public class WalletService {
 
 	@Autowired
 	private WalletUserExtDao walletUserDao;
+
+	@Autowired
+	private WalletLogDao walletLogDao;
 
 	public WalletInfoResp queryWalletInfo(String accessToken, Long walletId) {
 		WalletInfoRespBuilder builder = WalletInfoResp.builder();
@@ -75,5 +76,23 @@ public class WalletService {
 		walletDao.insert(wallet);
 
 		return wallet;
+	}
+
+	/**
+	 * 查詢钱包流水
+	 * @param walletId		钱包ID
+	 * @param startTime		开始时间
+	 * @param endTime		结束时间
+	 * @param limit
+	 * @param offset
+	 * @param stat
+	 * @return
+	 */
+	public Pagination<WalletLog> walletLogList(Long walletId,  Date startTime, Date endTime, int limit, long offset, Boolean stat){
+		Date queryStartTime = DateUtil.getDate2(startTime);
+		Date queryEndTime = DateUtil.getDate(endTime);
+		return new Pagination.PaginationBuilder<WalletLog>().offset(offset).pageLimit(limit)
+				.data(walletLogDao.selectList(walletId, queryStartTime, queryEndTime, limit, offset))
+				.total(Optional.ofNullable(stat).orElse(false) ? walletLogDao.selectCount(walletId, queryStartTime, queryEndTime) : 0L).build();
 	}
 }

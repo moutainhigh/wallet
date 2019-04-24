@@ -1,0 +1,13 @@
+{
+  "inputSpec": "http://localhost:8080/wallet-server/v2/api-docs",
+  "outputDir": "/home/xiejueheng/me/git/wallet_server/rfwallet_server_sdk",
+  "modelPackage": "com.rfchina.wallet.sdk.model",
+  "apiPackage": "com.rfchina.wallet.sdk.api",
+  "lang": "java",
+  "packageName": "",
+  "modelPropertyNaming":"snake_case",
+  "additionalProperties": {
+    "apiVersion": "v1.0.0",
+    "author": "nzm"
+  }
+}

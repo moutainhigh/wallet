@@ -21,4 +21,8 @@ public class UrlConstant {
 	 */
 	public static final String CREATE_WALLET = VERSION + "/wallet/create_wallet";
 
+	public static final String WALLET_USER_LIST = VERSION + "/wallet/user/list";
+
+	public static final String WALLET_LOG_LIST = VERSION + "/wallet/log/list";
+
 }
