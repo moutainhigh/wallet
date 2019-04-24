@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
+import java.util.List;
 
 @RestController
 @Api
@@ -62,4 +63,9 @@ public class WalletController {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, walletService.walletLogList(walletId, startTime, endTime, limit, offset, stat));
 	}
 
+	@ApiOperation("钱包绑定的银行卡列表")
+	@PostMapping(UrlConstant.WALLET_BANK_CARD_LIST)
+	public ResponseValue<List<WalletCard>> bindingBankCardList(@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId){
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, walletService.bankCardList(walletId));
+	}
 }
