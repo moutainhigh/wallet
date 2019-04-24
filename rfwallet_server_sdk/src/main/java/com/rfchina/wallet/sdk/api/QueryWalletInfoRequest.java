@@ -20,7 +20,7 @@ public class QueryWalletInfoRequest extends  AbstractApiRequest {
 
   @Override
   public String getApiUrl() {
-    return "/v1/wallet/query_wallet_info";
+    return "/wallet-server/v1/wallet/query_wallet_info";
   }
 
   @Override
