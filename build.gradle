@@ -70,6 +70,7 @@ dependencies {
     compile('com.rfchina.biztool:IdGenarator:1.0.1')
     compile 'org.tas:post-core:1.0.0'
 //    compile 'com.rfchina:rfchina-platform-scheduler-spring:1.1.2'
+    compile 'com.rfchina:rfchina-platform-spring-intergration:2.0.9'
 
     // 测试依赖
     testCompile('org.springframework.boot:spring-boot-starter-test')

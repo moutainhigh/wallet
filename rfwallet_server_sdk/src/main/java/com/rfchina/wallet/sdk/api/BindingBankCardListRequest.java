@@ -17,7 +17,7 @@ public class BindingBankCardListRequest extends  AbstractApiRequest {
 
   @Override
   public String getApiUrl() {
-    return "/wallet-server/v1/wallet/bank_card/list";
+    return "/wallet_server/v1/wallet/bank_card/list";
   }
 
   @Override

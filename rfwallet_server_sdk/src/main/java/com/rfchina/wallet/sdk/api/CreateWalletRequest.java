@@ -23,7 +23,7 @@ public class CreateWalletRequest extends  AbstractApiRequest {
 
   @Override
   public String getApiUrl() {
-    return "/wallet-server/v1/wallet/create_wallet";
+    return "/wallet_server/v1/wallet/create_wallet";
   }
 
   @Override
