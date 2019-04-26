@@ -77,7 +77,7 @@
 
 ###  查询钱包信息（企业or个人）
 
-请求地址: /wallet-server/v1/wallet/query_wallet_info
+请求地址: /wallet_server/v1/wallet/query_wallet_info
 
 请求类型: POST
 

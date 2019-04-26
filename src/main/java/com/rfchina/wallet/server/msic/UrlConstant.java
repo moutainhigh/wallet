@@ -2,7 +2,7 @@ package com.rfchina.wallet.server.msic;
 
 public class UrlConstant {
 
-	private final static String PREFIX = "/wallet-server/";
+	private final static String PREFIX = "/wallet_server/";
 
 	private static final String VERSION = PREFIX + "v1";
 
