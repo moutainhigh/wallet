@@ -1,6 +1,6 @@
 ###  查询用户信息
 
-请求地址: /wallet-server/v1/wallet/user/list
+请求地址: /wallet_server/v1/wallet/user/list
 
 请求类型: POST
 
