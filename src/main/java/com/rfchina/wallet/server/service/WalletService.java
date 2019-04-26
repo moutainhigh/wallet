@@ -41,7 +41,10 @@ public class WalletService {
 	@Autowired
 	private WalletCardDao walletCardDao;
 
-	public WalletInfoResp queryWalletInfo(String accessToken, Long walletId) {
+	/**
+	 * 查询钱包明细
+	 */
+	public WalletInfoResp queryWalletInfo(Long walletId) {
 		WalletInfoRespBuilder builder = WalletInfoResp.builder();
 
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
@@ -86,28 +89,29 @@ public class WalletService {
 
 	/**
 	 * 查詢钱包流水
-	 * @param walletId		钱包ID
-	 * @param startTime		开始时间
-	 * @param endTime		结束时间
-	 * @param limit
-	 * @param offset
-	 * @param stat
-	 * @return
+	 *
+	 * @param walletId 钱包ID
+	 * @param startTime 开始时间
+	 * @param endTime 结束时间
 	 */
-	public Pagination<WalletLog> walletLogList(@ParamValid(nullable = false) Long walletId, Date startTime, Date endTime, @ParamValid(min = 1, max = SymbolConstant.QUERY_LIMIT) int limit, @ParamValid(min = 0) long offset, Boolean stat){
+	public Pagination<WalletLog> walletLogList(@ParamValid(nullable = false) Long walletId,
+		Date startTime, Date endTime,
+		@ParamValid(min = 1, max = SymbolConstant.QUERY_LIMIT) int limit,
+		@ParamValid(min = 0) long offset, Boolean stat) {
 		Date queryStartTime = DateUtil.getDate2(startTime);
 		Date queryEndTime = DateUtil.getDate(endTime);
 		return new Pagination.PaginationBuilder<WalletLog>().offset(offset).pageLimit(limit)
-				.data(walletLogDao.selectList(walletId, queryStartTime, queryEndTime, limit, offset))
-				.total(Optional.ofNullable(stat).orElse(false) ? walletLogDao.selectCount(walletId, queryStartTime, queryEndTime) : 0L).build();
+			.data(walletLogDao.selectList(walletId, queryStartTime, queryEndTime, limit, offset))
+			.total(Optional.ofNullable(stat).orElse(false) ? walletLogDao
+				.selectCount(walletId, queryStartTime, queryEndTime) : 0L).build();
 	}
 
 	/**
 	 * 查询绑定的银行卡列表
-	 * @param walletId		钱包ID
-	 * @return
+	 *
+	 * @param walletId 钱包ID
 	 */
-	public List<WalletCard> bankCardList(@ParamValid(nullable = false) Long walletId){
+	public List<WalletCard> bankCardList(@ParamValid(nullable = false) Long walletId) {
 		return walletCardDao.selectByWalletId(walletId);
 	}
 }

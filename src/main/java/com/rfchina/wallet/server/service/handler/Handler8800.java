@@ -51,6 +51,9 @@ public class Handler8800 implements PuDongHandler {
 	@Value("${wlpay.pudong.acctAreaCode}")
 	private String cmpAcctAreaCode;
 
+	@Value("${wlpay.pudong.acctBankCode}")
+	private String cmpAcctBankCode;
+
 	@Value("${wlpay.pudong.auditMasterId}")
 	private String auditMasterId;
 
@@ -107,7 +110,7 @@ public class Handler8800 implements PuDongHandler {
 
 			BankCode bankCode = bankCodeExtDao.selectByCode(walletCard.getBankCode());
 
-			String sysFlag = bankCode.getClassCode().equals("310") ?
+			String sysFlag = bankCode.getClassCode().equals(cmpAcctBankCode) ?
 				SysFlag.SELF.getValue() : SysFlag.OTHER.getValue();
 
 			String remitLocation = bankCode.getAreaCode().equals(cmpAcctAreaCode) ?

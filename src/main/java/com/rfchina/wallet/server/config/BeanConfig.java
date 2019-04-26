@@ -1,7 +1,7 @@
 package com.rfchina.wallet.server.config;
 
-import static java.util.concurrent.Executors.newFixedThreadPool;
-
+import com.rfchina.passport.misc.SessionThreadLocal;
+import com.rfchina.platform.spring.SpringContext;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
@@ -13,9 +13,19 @@ public class BeanConfig {
 
 
 	@Bean("mqExecutor")
-	public ExecutorService mqExecutor(){
+	public ExecutorService mqExecutor() {
 		return Executors.newFixedThreadPool(2,
 			new BasicThreadFactory.Builder().namingPattern("MqExec_%d").build());
+	}
+
+	@Bean
+	public SpringContext springContext() {
+		return new SpringContext();
+	}
+
+	@Bean
+	public SessionThreadLocal sessionThreadLocal() {
+		return new SessionThreadLocal();
 	}
 
 }
