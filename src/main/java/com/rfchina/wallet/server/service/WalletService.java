@@ -165,11 +165,8 @@ public class WalletService {
 			throw new WalletResponseException(WalletResponseCode.EnumWalletResponseCode.WALLET_NOT_EXIST);
 		}
 
-		List<WalletCard> existWalletCardList = walletCardDao.selectByWalletId(walletId);
-		if(!existWalletCardList.isEmpty()){
-			throw new WalletResponseException(WalletResponseCode.EnumWalletResponseCode.JUNIOR_WALLET_LIMIT_BIND_ONE_CARD);
-		}
-
+		//更新已绑定的银行卡状态为已解绑
+		walletCardDao.updateWalletCard(walletId, EnumDef.EnumCardBindStatus.UNBIND.getValue(), EnumDef.EnumCardBindStatus.BIND.getValue(), null, EnumDef.EnumDefBankCard.NO.getValue());
 
 		BankCode bankCodeResult = bankCodeExtDao.selectByCode(bankCode);
 
@@ -183,7 +180,7 @@ public class WalletService {
 				.telephone(telephone)
 				.build();
 
-		int effectRows = walletCardDao.insertSelective(walletCard);
+		int effectRows = walletCardDao.replace(walletCard);
 		if (effectRows != 1) {
 			log.error("绑定银行卡失败, wallet: {}, effectRows: {}", JsonUtil.toJSON(wallet), effectRows);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
