@@ -1,3 +1,39 @@
+###  钱包绑定的银行卡列表
+
+请求地址: /wallet-server/v1/wallet/bank_card/list
+
+请求类型: POST
+
+请求参数:
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|wallet_id|是|钱包id|
+
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": "", //消息
+"data": [{
+              bank_account: "" , //银行账号
+        bank_code: "" , //银行代码
+        create_time: "" , //创建日期
+        deposit_bank: "" , //开户行
+        deposit_name: "" , //开户名
+        is_def: "" , //是否默认银行卡: 1:是，2：否
+        is_public: "" , //是否对公账户: 1:是，2：否
+        last_upd_time: "" , //钱包信息最后更新日期
+        status: "" , //绑定状态: 1:已绑定，2：已解绑
+        telephone: "" , //预留手机号
+        wallet_id: ""  //钱包ID
+
+      
+  }]
+}
+```
+
 ###  开通未审核的钱包
 
 请求地址: /wallet-server/v1/wallet/create_wallet
@@ -29,11 +65,7 @@
         pay_count: "" , //累计支付次数
         recharge_amount: "" , //累计充值金额
         recharge_count: "" , //累计充值次数
-<<<<<<< HEAD
         source: "" , //钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户
-=======
-        source: "" , //钱包等级，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户
->>>>>>> d42b400bb2a92ce945b84958fdd0b29aca1c8b45
         status: "" , //钱包状态: 1:待审核，2：激活,3：禁用
         title: "" , //钱包标题，通常是姓名或公司名
         type: "" , //钱包类型， 1：企业钱包，2：个人钱包
@@ -43,59 +75,6 @@
 }
 ```
 
-<<<<<<< HEAD
-###  钱包流水
-
-请求地址: /v1/wallet/log/list
-
-请求类型: POST
-
-请求参数:
-
-| 参数名 | 是否必须 | 描述 |
-|:-- |:-- |:--   |
-|limit|是|需要查询的数量（数量最大50）|
-|offset|是|查询列表的起始偏移量，从0开始，即offset: 5是指从列表里的第六个开始读取|
-|wallet_id|是|钱包id|
-|end_time|否|结束时间|
-|start_time|否|开始时间|
-|stat|否|非必填, false:否, true:是, 是否返回数据总量, 默认false|
-
-
-返回数据
-```
-{
-  "code": 1001,//状态码
-  "msg": "", //消息
-"data": {
-              list: [{
-                        accept_no: "" , //受理编号
-        amount: "" , //流水金额
-        create_time: "" , //创建日期
-        elec_cheque_no: "" , //电子凭证号
-        err_msg: "" , //错误信息
-        id: "" , //ID
-        payee_account: "" , //收款方帐号
-        payee_type: "" , //收款账户类型，1：对公账户，2：个人账户
-        payer_account: "" , //付款方帐号
-        ref_method: "" , //关联接口方法，1：银企直连AQ52，2：银企直连8800
-        remark: "" , //备注
-        status: "" , //交易状态。 1: 待发送银行网关，2：银行受理中，3：交易成功，4：交易失败，5：撤销
-        type: "" , //流水类型，1：直接转帐，2：收入，3：支出
-        wallet_id: ""  //钱包ID
-
-            },]
-        page_limit: "" , //
-        page_num: "" , //
-        total: "" , //
-        total_page: ""  //
-
-  }
-}
-```
-
-=======
->>>>>>> d42b400bb2a92ce945b84958fdd0b29aca1c8b45
 ###  查询钱包信息（企业or个人）
 
 请求地址: /wallet-server/v1/wallet/query_wallet_info
@@ -159,17 +138,63 @@
         pay_count: "" , //累计支付次数
         recharge_amount: "" , //累计充值金额
         recharge_count: "" , //累计充值次数
-<<<<<<< HEAD
         source: "" , //钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户
-=======
-        source: "" , //钱包等级，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户
->>>>>>> d42b400bb2a92ce945b84958fdd0b29aca1c8b45
         status: "" , //钱包状态: 1:待审核，2：激活,3：禁用
         title: "" , //钱包标题，通常是姓名或公司名
         type: "" , //钱包类型， 1：企业钱包，2：个人钱包
         wallet_balance: ""  //钱包余额
 
             }
+
+  }
+}
+```
+
+###  钱包流水
+
+请求地址: /wallet-server/v1/wallet/log/list
+
+请求类型: POST
+
+请求参数:
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|limit|是|需要查询的数量（数量最大50）|
+|offset|是|查询列表的起始偏移量，从0开始，即offset: 5是指从列表里的第六个开始读取|
+|wallet_id|是|钱包id|
+|end_time|否|结束时间|
+|start_time|否|开始时间|
+|stat|否|非必填, false:否, true:是, 是否返回数据总量, 默认false|
+
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": "", //消息
+"data": {
+              list: [{
+                        accept_no: "" , //受理编号
+        amount: "" , //流水金额
+        create_time: "" , //创建日期
+        elec_cheque_no: "" , //电子凭证号
+        err_msg: "" , //错误信息
+        id: "" , //ID
+        payee_account: "" , //收款方帐号
+        payee_type: "" , //收款账户类型，1：对公账户，2：个人账户
+        payer_account: "" , //付款方帐号
+        ref_method: "" , //关联接口方法，1：银企直连AQ52，2：银企直连8800
+        remark: "" , //备注
+        status: "" , //交易状态。 1: 待发送银行网关，2：银行受理中，3：交易成功，4：交易失败，5：撤销
+        type: "" , //流水类型，1：直接转帐，2：收入，3：支出
+        wallet_id: ""  //钱包ID
+
+            },]
+        page_limit: "" , //
+        page_num: "" , //
+        total: "" , //
+        total_page: ""  //
 
   }
 }

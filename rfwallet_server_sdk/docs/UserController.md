@@ -1,6 +1,6 @@
-###  查询钱包信息（企业or个人）
+###  查询用户信息
 
-请求地址: /v1/wallet/user/list
+请求地址: /wallet-server/v1/wallet/user/list
 
 请求类型: POST
 

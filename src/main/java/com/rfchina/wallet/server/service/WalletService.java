@@ -1,13 +1,22 @@
 package com.rfchina.wallet.server.service;
 
+import com.rfchina.platform.common.annotation.EnumParamValid;
 import com.rfchina.platform.common.annotation.ParamValid;
 import com.rfchina.platform.common.exception.RfchinaResponseException;
+import com.rfchina.platform.common.misc.ResponseCode;
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.SymbolConstant;
 import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.platform.common.utils.DateUtil;
+import com.rfchina.platform.common.utils.JsonUtil;
+import com.rfchina.platform.common.utils.RegexUtil;
+import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.*;
+import com.rfchina.wallet.domain.misc.EnumDef;
+import com.rfchina.wallet.domain.misc.WalletResponseCode;
 import com.rfchina.wallet.domain.model.*;
+import com.rfchina.wallet.server.adapter.UserAdapter;
+import com.rfchina.wallet.server.mapper.ext.BankCodeExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletUserExtDao;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp.WalletInfoRespBuilder;
@@ -17,9 +26,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import com.rfchina.wallet.server.web.AppService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class WalletService {
 
@@ -40,6 +52,15 @@ public class WalletService {
 
 	@Autowired
 	private WalletCardDao walletCardDao;
+
+	@Autowired
+	private UserAdapter userAdapter;
+
+	@Autowired
+	private AppService appService;
+
+	@Autowired
+	private BankCodeExtDao bankCodeExtDao;
 
 	public WalletInfoResp queryWalletInfo(String accessToken, Long walletId) {
 		WalletInfoRespBuilder builder = WalletInfoResp.builder();
@@ -95,8 +116,18 @@ public class WalletService {
 	 * @return
 	 */
 	public Pagination<WalletLog> walletLogList(@ParamValid(nullable = false) Long walletId, Date startTime, Date endTime, @ParamValid(min = 1, max = SymbolConstant.QUERY_LIMIT) int limit, @ParamValid(min = 0) long offset, Boolean stat){
-		Date queryStartTime = DateUtil.getDate2(startTime);
-		Date queryEndTime = DateUtil.getDate(endTime);
+		Date queryStartTime = null;
+
+		if(null != startTime) {
+			queryStartTime = DateUtil.getDate2(startTime);
+		}
+
+		Date queryEndTime = null;
+
+		if(null != startTime) {
+			queryEndTime = DateUtil.getDate(endTime);
+		}
+
 		return new Pagination.PaginationBuilder<WalletLog>().offset(offset).pageLimit(limit)
 				.data(walletLogDao.selectList(walletId, queryStartTime, queryEndTime, limit, offset))
 				.total(Optional.ofNullable(stat).orElse(false) ? walletLogDao.selectCount(walletId, queryStartTime, queryEndTime) : 0L).build();
@@ -109,5 +140,55 @@ public class WalletService {
 	 */
 	public List<WalletCard> bankCardList(@ParamValid(nullable = false) Long walletId){
 		return walletCardDao.selectByWalletId(walletId);
+	}
+
+	/**
+	 * 绑定对工银行卡
+	 * @param walletId		钱包id
+	 * @param bankCode		银行代码
+	 * @param bankAccount	银行帐号
+	 * @param depositBank	开户支行
+	 * @param depositName	开户名
+	 * @param isDef			是否默认银行卡: 1:是，2：否
+	 * @param telephone		预留手机号
+	 * @return
+	 */
+	public WalletCard bindBankCard(@ParamValid(nullable = false)Long walletId,
+								   @ParamValid(nullable = false, min = 12, max = 12)String bankCode,
+								   @ParamValid(nullable = false, min = 20, max = 32) String bankAccount,
+								   @ParamValid(nullable = false, min = 1, max = 256) String depositBank,
+								   @ParamValid(nullable = false, min = 1, max = 256) String depositName,
+								   @EnumParamValid(valuableEnumClass = EnumDef.EnumDefBankCard.class)Integer isDef,
+								   @ParamValid(pattern = RegexUtil.REGEX_MOBILE)String telephone){
+		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
+		if (null == wallet){
+			throw new WalletResponseException(WalletResponseCode.EnumWalletResponseCode.WALLET_NOT_EXIST);
+		}
+
+		List<WalletCard> existWalletCardList = walletCardDao.selectByWalletId(walletId);
+		if(!existWalletCardList.isEmpty()){
+			throw new WalletResponseException(WalletResponseCode.EnumWalletResponseCode.JUNIOR_WALLET_LIMIT_BIND_ONE_CARD);
+		}
+
+
+		BankCode bankCodeResult = bankCodeExtDao.selectByCode(bankCode);
+
+		WalletCard walletCard = WalletCard.builder().walletId(walletId).bankAccount(bankAccount)
+				.bankCode(bankCode)
+				.bankName(bankCodeResult.getClassName())
+				.depositName(depositName)
+				.depositBank(depositBank)
+				.isDef(isDef.byteValue())
+				.isPublic(EnumDef.EnumPublicAccount.YES.getValue().byteValue())
+				.telephone(telephone)
+				.build();
+
+		int effectRows = walletCardDao.insertSelective(walletCard);
+		if (effectRows != 1) {
+			log.error("绑定银行卡失败, wallet: {}, effectRows: {}", JsonUtil.toJSON(wallet), effectRows);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+		}
+
+		return walletCard;
 	}
 }
