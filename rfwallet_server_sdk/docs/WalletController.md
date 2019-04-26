@@ -10,8 +10,7 @@
 |:-- |:-- |:--   |
 |access_token|是|access_token|
 |bank_account|是|银行帐号|
-|bank_code|是|银行代码|
-|deposit_bank|是|开户支行|
+|bank_code|是|开户支行|
 |deposit_name|是|开户名|
 |wallet_id|是|钱包id|
 |is_def|否|是否默认银行卡: 1:是，2：否|

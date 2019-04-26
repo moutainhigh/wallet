@@ -81,15 +81,13 @@ public class WalletController {
 	public ResponseValue<WalletCard> bindBankCard(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
-		@ApiParam(value = "银行代码", required = true) @RequestParam("bank_code") String bankCode,
 		@ApiParam(value = "银行帐号", required = true) @RequestParam("bank_account") String bankAccount,
-		@ApiParam(value = "开户支行", required = true) @RequestParam("deposit_bank") String depositBank,
+		@ApiParam(value = "开户支行", required = true) @RequestParam("bank_code") String bankCode,
 		@ApiParam(value = "开户名", required = true) @RequestParam("deposit_name") String depositName,
 		@ApiParam(value = "是否默认银行卡: 1:是，2：否") @RequestParam(value = "is_def", required = false, defaultValue = "1") Integer isDef,
 		@ApiParam(value = "预留手机号") @RequestParam(value = "telephone", required = false) String telephone) {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, walletApi
-			.bindBankCard(accessToken,walletId, bankCode, bankAccount, depositBank, depositName, isDef,
-				telephone));
+			.bindBankCard(accessToken,walletId, bankCode, bankAccount, depositName, isDef, telephone));
 	}
 
 }

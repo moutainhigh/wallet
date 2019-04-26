@@ -153,7 +153,6 @@ public class WalletService {
 	 * @param walletId 钱包id
 	 * @param bankCode 银行代码
 	 * @param bankAccount 银行帐号
-	 * @param depositBank 开户支行
 	 * @param depositName 开户名
 	 * @param isDef 是否默认银行卡: 1:是，2：否
 	 * @param telephone 预留手机号
@@ -161,7 +160,6 @@ public class WalletService {
 	public WalletCard bindBankCard(@ParamValid(nullable = false) Long walletId,
 		@ParamValid(nullable = false, min = 12, max = 12) String bankCode,
 		@ParamValid(nullable = false, min = 20, max = 32) String bankAccount,
-		@ParamValid(nullable = false, min = 1, max = 256) String depositBank,
 		@ParamValid(nullable = false, min = 1, max = 256) String depositName,
 		@EnumParamValid(valuableEnumClass = EnumDef.EnumDefBankCard.class) Integer isDef,
 		@ParamValid(pattern = RegexUtil.REGEX_MOBILE) String telephone) {
@@ -175,19 +173,21 @@ public class WalletService {
 		walletCardDao.updateWalletCard(walletId, EnumDef.EnumCardBindStatus.UNBIND.getValue(), EnumDef.EnumCardBindStatus.BIND.getValue(), null, EnumDef.EnumDefBankCard.NO.getValue());
 
 		BankCode bankCodeResult = bankCodeExtDao.selectByCode(bankCode);
+		Date now = new Date();
 
 		WalletCard walletCard = WalletCard.builder().walletId(walletId).bankAccount(bankAccount)
 			.bankCode(bankCode)
 			.bankName(bankCodeResult.getClassName())
 			.depositName(depositName)
-			.depositBank(depositBank)
+			.depositBank(bankCodeResult.getBankName())
 			.isDef(isDef.byteValue())
 			.isPublic(EnumDef.EnumPublicAccount.YES.getValue().byteValue())
 			.telephone(telephone)
+			.lastUpdTime(now)
 			.build();
 
 		int effectRows = walletCardDao.replace(walletCard);
-		if (effectRows != 1) {
+		if (effectRows < 1) {
 			log.error("绑定银行卡失败, wallet: {}, effectRows: {}", JsonUtil.toJSON(wallet), effectRows);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 		}

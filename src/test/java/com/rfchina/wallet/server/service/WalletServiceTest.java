@@ -18,7 +18,7 @@ public class WalletServiceTest extends SpringBaseTest {
 	@Test
 	public void queryWalletInfo() {
 		Long walletId = 2L;
-		WalletInfoResp resp = walletService.queryWalletInfo(null, walletId);
+		WalletInfoResp resp = walletService.queryWalletInfo(walletId);
 
 		log.info(JSON.toJSONString(resp));
 		assertNotNull(resp);

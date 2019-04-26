@@ -41,5 +41,5 @@ public interface WalletApi {
 	 * 绑定银行卡
 	 */
 	WalletCard bindBankCard(String accessToken, Long walletId, String bankCode, String bankAccount,
-		String depositBank, String depositName, Integer isDef, String telephone);
+							String depositName, Integer isDef, String telephone);
 }

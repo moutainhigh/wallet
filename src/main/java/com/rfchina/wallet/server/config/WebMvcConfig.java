@@ -1,26 +1,20 @@
 package com.rfchina.wallet.server.config;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
-import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.spring.exception.RfchinaExceptionResolver;
-import java.text.SimpleDateFormat;
-import java.util.List;
+import com.rfchina.wallet.server.interceptor.AllInterceptor;
+import com.rfchina.wallet.server.interceptor.BasicInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.util.List;
 
 @Configuration
 @EnableWebMvc
@@ -32,6 +26,16 @@ public class WebMvcConfig implements WebMvcConfigurer {
 	@Autowired
 	private MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter;
 
+	@Autowired
+	private AllInterceptor allInterceptor;
+	@Autowired
+	private BasicInterceptor basicInterceptor;
+
+	@Override
+	public void addInterceptors(InterceptorRegistry registry) {
+		registry.addInterceptor(allInterceptor).addPathPatterns("/**");
+		registry.addInterceptor(basicInterceptor).addPathPatterns("/**");
+	}
 
 	@Bean
 	public StringHttpMessageConverter stringHttpMessageConverter() {

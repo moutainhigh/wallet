@@ -33,4 +33,7 @@ public class ConfigService {
 
 	@Value(value = "${wallet.verify.limit}")
 	private Integer verifyLimitCount;
+
+	@Value(value = "${sign.enable}")
+	private boolean signEnable;
 }

@@ -17,11 +17,8 @@ public class BindBankCardRequest extends  AbstractApiRequest {
   @ApiModelProperty("银行帐号")
   private String bankAccount ;
 
-  @ApiModelProperty("银行代码")
-  private String bankCode ;
-
   @ApiModelProperty("开户支行")
-  private String depositBank ;
+  private String bankCode ;
 
   @ApiModelProperty("开户名")
   private String depositName ;
@@ -57,9 +54,6 @@ public class BindBankCardRequest extends  AbstractApiRequest {
       }
       if(bankCode != null){
         parameters.put("bank_code", bankCode.toString());
-      }
-      if(depositBank != null){
-        parameters.put("deposit_bank", depositBank.toString());
       }
       if(depositName != null){
         parameters.put("deposit_name", depositName.toString());

@@ -61,9 +61,9 @@ public class WalletApiImpl implements WalletApi {
 	@SignVerify
 	@Override
 	public WalletCard bindBankCard(String accessToken, Long walletId, String bankCode,
-		String bankAccount, String depositBank, String depositName, Integer isDef,
+		String bankAccount, String depositName, Integer isDef,
 		String telephone) {
-		return walletService.bindBankCard(walletId, bankCode, bankAccount, depositBank, depositName,
+		return walletService.bindBankCard(walletId, bankCode, bankAccount, depositName,
 			isDef, telephone);
 	}
 }
