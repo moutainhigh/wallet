@@ -8,13 +8,9 @@ import com.rfchina.passport.misc.SessionThreadLocal;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.StringHttpMessageConverter;
 
 @Configuration
 public class BeanConfig {
-
-
-
 
 	@Bean("mqExecutor")
 	public ExecutorService mqExecutor() {

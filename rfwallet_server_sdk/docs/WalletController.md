@@ -150,6 +150,21 @@
         wallet_id: ""  //关联的钱包ID
 
             },
+        def_wallet_card: {
+                        bank_account: "" , //银行账号
+        bank_code: "" , //银行代码
+        bank_name: "" , //银行名称
+        create_time: "" , //创建日期
+        deposit_bank: "" , //开户支行
+        deposit_name: "" , //开户名
+        is_def: "" , //是否默认银行卡: 1:是，2：否
+        is_public: "" , //是否对公账户: 1:是，2：否
+        last_upd_time: "" , //钱包信息最后更新日期
+        status: "" , //绑定状态: 1:已绑定，2：已解绑
+        telephone: "" , //预留手机号
+        wallet_id: ""  //钱包ID
+
+            },
         person_info: {
                         create_time: "" , //创建日期
         email: "" , //邮箱
@@ -159,16 +174,6 @@
         last_upd_time: "" , //钱包信息最后更新日期
         name: "" , //姓名
         tel: "" , //电话
-        wallet_id: ""  //关联的钱包ID
-
-            },
-        user_info: {
-                        create_time: "" , //创建日期
-        last_upd_time: "" , //钱包信息最后更新日期
-        mobile: "" , //登录手机号
-        register_progress: "" , //注册进度, 1:已通过身份验证, 2:已绑定银行卡
-        status: "" , //帐号状态: 1:正常，2：禁用
-        user_id: "" , //用户ID
         wallet_id: ""  //关联的钱包ID
 
             },

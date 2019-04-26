@@ -74,8 +74,6 @@ public class WalletService {
 			throw new RfchinaResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST);
 		}
 
-		WalletUser walletUser = walletUserDao.selectByWalletId(walletId);
-
 		if (WalletType.COMPANY.getValue().byteValue() == wallet.getType()) {
 			WalletCompany walletCompany = walletCompanyDao.selectByWalletId(walletId);
 			builder.companyInfo(walletCompany);
@@ -84,7 +82,9 @@ public class WalletService {
 			builder.personInfo(walletPerson);
 		}
 
-		return builder.wallet(wallet).userInfo(walletUser).build();
+		WalletCard walletCard = walletCardDao.selectByDef(walletId);
+
+		return builder.wallet(wallet).defWalletCard(walletCard).build();
 	}
 
 	/**
