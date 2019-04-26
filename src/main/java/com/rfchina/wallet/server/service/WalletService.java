@@ -169,10 +169,14 @@ public class WalletService {
 				WalletResponseCode.EnumWalletResponseCode.WALLET_NOT_EXIST);
 		}
 
+		BankCode bankCodeResult = bankCodeExtDao.selectByCode(bankCode);
+		if(null == bankCodeResult){
+			throw new RfchinaResponseException(EnumResponseCode.COMMON_INVALID_PARAMS, "bank_code");
+		}
+
 		//更新已绑定的银行卡状态为已解绑
 		walletCardDao.updateWalletCard(walletId, EnumDef.EnumCardBindStatus.UNBIND.getValue(), EnumDef.EnumCardBindStatus.BIND.getValue(), null, EnumDef.EnumDefBankCard.NO.getValue());
 
-		BankCode bankCodeResult = bankCodeExtDao.selectByCode(bankCode);
 		Date now = new Date();
 
 		WalletCard walletCard = WalletCard.builder().walletId(walletId).bankAccount(bankAccount)
