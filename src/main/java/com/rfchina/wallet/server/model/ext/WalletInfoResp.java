@@ -1,6 +1,7 @@
 package com.rfchina.wallet.server.model.ext;
 
 import com.rfchina.wallet.domain.model.Wallet;
+import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletCompany;
 import com.rfchina.wallet.domain.model.WalletPerson;
 import com.rfchina.wallet.domain.model.WalletUser;
@@ -27,7 +28,7 @@ public class WalletInfoResp {
 	@ApiModelProperty("钱包个人信息")
 	private WalletPerson personInfo;
 
-	@ApiModelProperty("钱包用户信息")
-	private WalletUser userInfo;
+	@ApiModelProperty("钱包默认卡")
+	private WalletCard defWalletCard;
 
 }

@@ -16,11 +16,11 @@ public class WalletInfoResp  {
     @ApiModelProperty("钱包公司信息")
     private WalletCompany companyInfo ;
 
+    @ApiModelProperty("钱包默认卡")
+    private WalletCard defWalletCard ;
+
     @ApiModelProperty("钱包个人信息")
     private WalletPerson personInfo ;
-
-    @ApiModelProperty("钱包用户信息")
-    private WalletUser userInfo ;
 
     @ApiModelProperty("钱包主要信息")
     private Wallet wallet ;
