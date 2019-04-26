@@ -11,6 +11,9 @@ import io.swagger.annotations.ApiModelProperty;
 @Builder
 public class BindBankCardRequest extends  AbstractApiRequest {
 
+  @ApiModelProperty("access_token")
+  private String accessToken ;
+
   @ApiModelProperty("银行帐号")
   private String bankAccount ;
 
@@ -46,6 +49,9 @@ public class BindBankCardRequest extends  AbstractApiRequest {
   @Override
   public Map<String, String> getTextParmas() {
     Map<String, String> parameters = new HashMap<>(2);
+      if(accessToken != null){
+        parameters.put("access_token", accessToken.toString());
+      }
       if(bankAccount != null){
         parameters.put("bank_account", bankAccount.toString());
       }

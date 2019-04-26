@@ -11,13 +11,16 @@ import io.swagger.annotations.ApiModelProperty;
 @Builder
 public class BindingBankCardListRequest extends  AbstractApiRequest {
 
+  @ApiModelProperty("access_token")
+  private String accessToken ;
+
   @ApiModelProperty("钱包id")
   private Long walletId ;
 
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/wallet/bank_card/list";
+    return "/wallet_server/v1/m/wallet/bank_card/list";
   }
 
   @Override
@@ -28,6 +31,9 @@ public class BindingBankCardListRequest extends  AbstractApiRequest {
   @Override
   public Map<String, String> getTextParmas() {
     Map<String, String> parameters = new HashMap<>(2);
+      if(accessToken != null){
+        parameters.put("access_token", accessToken.toString());
+      }
       if(walletId != null){
         parameters.put("wallet_id", walletId.toString());
       }

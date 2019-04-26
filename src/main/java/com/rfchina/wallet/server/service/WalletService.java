@@ -53,6 +53,7 @@ public class WalletService {
 	@Autowired
 	private WalletCardDao walletCardDao;
 
+
 	@Autowired
 	private UserAdapter userAdapter;
 
@@ -62,7 +63,10 @@ public class WalletService {
 	@Autowired
 	private BankCodeExtDao bankCodeExtDao;
 
-	public WalletInfoResp queryWalletInfo(String accessToken, Long walletId) {
+	/**
+	 * 查询钱包明细
+	 */
+	public WalletInfoResp queryWalletInfo(Long walletId) {
 		WalletInfoRespBuilder builder = WalletInfoResp.builder();
 
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
@@ -107,62 +111,64 @@ public class WalletService {
 
 	/**
 	 * 查詢钱包流水
-	 * @param walletId		钱包ID
-	 * @param startTime		开始时间
-	 * @param endTime		结束时间
-	 * @param limit
-	 * @param offset
-	 * @param stat
-	 * @return
+	 *
+	 * @param walletId 钱包ID
+	 * @param startTime 开始时间
+	 * @param endTime 结束时间
 	 */
-	public Pagination<WalletLog> walletLogList(@ParamValid(nullable = false) Long walletId, Date startTime, Date endTime, @ParamValid(min = 1, max = SymbolConstant.QUERY_LIMIT) int limit, @ParamValid(min = 0) long offset, Boolean stat){
+	public Pagination<WalletLog> walletLogList(@ParamValid(nullable = false) Long walletId,
+		Date startTime, Date endTime,
+		@ParamValid(min = 1, max = SymbolConstant.QUERY_LIMIT) int limit,
+		@ParamValid(min = 0) long offset, Boolean stat) {
 		Date queryStartTime = null;
 
-		if(null != startTime) {
+		if (null != startTime) {
 			queryStartTime = DateUtil.getDate2(startTime);
 		}
 
 		Date queryEndTime = null;
 
-		if(null != startTime) {
+		if (null != startTime) {
 			queryEndTime = DateUtil.getDate(endTime);
 		}
 
 		return new Pagination.PaginationBuilder<WalletLog>().offset(offset).pageLimit(limit)
-				.data(walletLogDao.selectList(walletId, queryStartTime, queryEndTime, limit, offset))
-				.total(Optional.ofNullable(stat).orElse(false) ? walletLogDao.selectCount(walletId, queryStartTime, queryEndTime) : 0L).build();
+			.data(walletLogDao.selectList(walletId, queryStartTime, queryEndTime, limit, offset))
+			.total(Optional.ofNullable(stat).orElse(false) ? walletLogDao
+				.selectCount(walletId, queryStartTime, queryEndTime) : 0L).build();
 	}
 
 	/**
 	 * 查询绑定的银行卡列表
-	 * @param walletId		钱包ID
-	 * @return
+	 *
+	 * @param walletId 钱包ID
 	 */
-	public List<WalletCard> bankCardList(@ParamValid(nullable = false) Long walletId){
+	public List<WalletCard> bankCardList(@ParamValid(nullable = false) Long walletId) {
 		return walletCardDao.selectByWalletId(walletId);
 	}
 
 	/**
 	 * 绑定对工银行卡
-	 * @param walletId		钱包id
-	 * @param bankCode		银行代码
-	 * @param bankAccount	银行帐号
-	 * @param depositBank	开户支行
-	 * @param depositName	开户名
-	 * @param isDef			是否默认银行卡: 1:是，2：否
-	 * @param telephone		预留手机号
-	 * @return
+	 *
+	 * @param walletId 钱包id
+	 * @param bankCode 银行代码
+	 * @param bankAccount 银行帐号
+	 * @param depositBank 开户支行
+	 * @param depositName 开户名
+	 * @param isDef 是否默认银行卡: 1:是，2：否
+	 * @param telephone 预留手机号
 	 */
-	public WalletCard bindBankCard(@ParamValid(nullable = false)Long walletId,
-								   @ParamValid(nullable = false, min = 12, max = 12)String bankCode,
-								   @ParamValid(nullable = false, min = 20, max = 32) String bankAccount,
-								   @ParamValid(nullable = false, min = 1, max = 256) String depositBank,
-								   @ParamValid(nullable = false, min = 1, max = 256) String depositName,
-								   @EnumParamValid(valuableEnumClass = EnumDef.EnumDefBankCard.class)Integer isDef,
-								   @ParamValid(pattern = RegexUtil.REGEX_MOBILE)String telephone){
+	public WalletCard bindBankCard(@ParamValid(nullable = false) Long walletId,
+		@ParamValid(nullable = false, min = 12, max = 12) String bankCode,
+		@ParamValid(nullable = false, min = 20, max = 32) String bankAccount,
+		@ParamValid(nullable = false, min = 1, max = 256) String depositBank,
+		@ParamValid(nullable = false, min = 1, max = 256) String depositName,
+		@EnumParamValid(valuableEnumClass = EnumDef.EnumDefBankCard.class) Integer isDef,
+		@ParamValid(pattern = RegexUtil.REGEX_MOBILE) String telephone) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
-		if (null == wallet){
-			throw new WalletResponseException(WalletResponseCode.EnumWalletResponseCode.WALLET_NOT_EXIST);
+		if (null == wallet) {
+			throw new WalletResponseException(
+				WalletResponseCode.EnumWalletResponseCode.WALLET_NOT_EXIST);
 		}
 
 		//更新已绑定的银行卡状态为已解绑
@@ -171,14 +177,14 @@ public class WalletService {
 		BankCode bankCodeResult = bankCodeExtDao.selectByCode(bankCode);
 
 		WalletCard walletCard = WalletCard.builder().walletId(walletId).bankAccount(bankAccount)
-				.bankCode(bankCode)
-				.bankName(bankCodeResult.getClassName())
-				.depositName(depositName)
-				.depositBank(depositBank)
-				.isDef(isDef.byteValue())
-				.isPublic(EnumDef.EnumPublicAccount.YES.getValue().byteValue())
-				.telephone(telephone)
-				.build();
+			.bankCode(bankCode)
+			.bankName(bankCodeResult.getClassName())
+			.depositName(depositName)
+			.depositBank(depositBank)
+			.isDef(isDef.byteValue())
+			.isPublic(EnumDef.EnumPublicAccount.YES.getValue().byteValue())
+			.telephone(telephone)
+			.build();
 
 		int effectRows = walletCardDao.replace(walletCard);
 		if (effectRows != 1) {

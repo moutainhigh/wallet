@@ -3,12 +3,11 @@ package com.rfchina.wallet.server.web;
 import com.alibaba.fastjson.JSON;
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.ResponseValue;
-import com.rfchina.wallet.server.bank.pudong.domain.response.PubPayRespBody;
+import com.rfchina.wallet.server.api.JuniorWalletApi;
 import com.rfchina.wallet.server.model.ext.PayInResp;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import com.rfchina.wallet.server.model.ext.PayInReq;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
-import com.rfchina.wallet.server.service.JuniorWalletService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -24,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class JuniorWalletController {
 
 	@Autowired
-	private JuniorWalletService juniorWalletService;
+	private JuniorWalletApi juniorWalletApi;
 
 	@ApiOperation("初级钱包-思力出钱")
 	@PostMapping(UrlConstant.JUNIOR_WALLET_PAY_IN)
@@ -46,7 +45,7 @@ public class JuniorWalletController {
 			.payPurpose(payPurpose)
 			.build();
 
-		PayInResp respBody = juniorWalletService.payIn(Arrays.asList(payInReq));
+		PayInResp respBody = juniorWalletApi.payIn(accessToken, Arrays.asList(payInReq));
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, respBody);
 	}
 
@@ -58,7 +57,7 @@ public class JuniorWalletController {
 	) {
 		List<PayInReq> payReqs = JSON.parseArray(jsonArry, PayInReq.class);
 
-		PayInResp respBody = juniorWalletService.payIn(payReqs);
+		PayInResp respBody = juniorWalletApi.payIn(accessToken, payReqs);
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, respBody);
 	}
@@ -70,7 +69,7 @@ public class JuniorWalletController {
 		@ApiParam(value = "电子凭证号(业务方定义唯一)", required = false, example = "123") @RequestParam("elec_cheque_no") String elecChequeNo,
 		@ApiParam(value = "受理编号", required = false) @RequestParam("accept_no") String acceptNo
 	) {
-		List<PayStatusResp> resp = juniorWalletService.query(elecChequeNo, acceptNo);
+		List<PayStatusResp> resp = juniorWalletApi.query(accessToken, elecChequeNo, acceptNo);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, resp);
 	}
 

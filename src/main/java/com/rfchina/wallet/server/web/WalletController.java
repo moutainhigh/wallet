@@ -6,9 +6,9 @@ import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletLog;
+import com.rfchina.wallet.server.api.WalletApi;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
-import com.rfchina.wallet.server.service.WalletService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -26,7 +26,7 @@ import java.util.List;
 public class WalletController {
 
 	@Autowired
-	private WalletService walletService;
+	private WalletApi walletApi;
 
 	@ApiOperation("查询钱包信息（企业or个人）")
 	@PostMapping(UrlConstant.WALLET_QUERY_INFO)
@@ -35,7 +35,7 @@ public class WalletController {
 		@ApiParam(value = "钱包ID", required = true, example = "2") @RequestParam("wallet_id") Long walletId
 	) {
 
-		WalletInfoResp resp = walletService.queryWalletInfo(accessToken, walletId);
+		WalletInfoResp resp = walletApi.queryWalletInfo(accessToken, walletId);
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, resp);
 	}
@@ -43,42 +43,53 @@ public class WalletController {
 	@ApiOperation("开通未审核的钱包")
 	@PostMapping(UrlConstant.CREATE_WALLET)
 	public ResponseValue<Wallet> createWallet(
+		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包类型， 1：企业钱包，2：个人钱包", required = true, example = "2") @RequestParam("type") Byte type,
 		@ApiParam(value = "钱包标题，通常是姓名或公司名", required = true, example = "测试个人钱包") @RequestParam("title") String title,
 		@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2") @RequestParam("source") Byte source
 	) {
-		Wallet wallet = walletService.createWallet(type,title,source);
+		Wallet wallet = walletApi.createWallet(accessToken, type, title, source);
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, wallet);
 	}
 
 	@ApiOperation("钱包流水")
 	@PostMapping(UrlConstant.WALLET_LOG_LIST)
-	public ResponseValue<Pagination<WalletLog>> walletLogList(@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
-														@ApiParam(value = "开始时间") @RequestParam(value = "start_time", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date startTime,
-														@ApiParam(value = "结束时间") @RequestParam(value = "end_time", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endTime,
-														@ApiParam(value = "需要查询的数量（数量最大50）", required = true) @RequestParam(value = "limit") int limit,
-														@ApiParam(value = "查询列表的起始偏移量，从0开始，即offset: 5是指从列表里的第六个开始读取", required = true) @RequestParam(value = "offset") long offset,
-														@ApiParam(value = "非必填, false:否, true:是, 是否返回数据总量, 默认false") @RequestParam(value = "stat", required = false) Boolean stat){
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, walletService.walletLogList(walletId, startTime, endTime, limit, offset, stat));
+	public ResponseValue<Pagination<WalletLog>> walletLogList(
+		@RequestParam("access_token") String accessToken,
+		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+		@ApiParam(value = "开始时间") @RequestParam(value = "start_time", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date startTime,
+		@ApiParam(value = "结束时间") @RequestParam(value = "end_time", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endTime,
+		@ApiParam(value = "需要查询的数量（数量最大50）", required = true) @RequestParam(value = "limit") int limit,
+		@ApiParam(value = "查询列表的起始偏移量，从0开始，即offset: 5是指从列表里的第六个开始读取", required = true) @RequestParam(value = "offset") long offset,
+		@ApiParam(value = "非必填, false:否, true:是, 是否返回数据总量, 默认false") @RequestParam(value = "stat", required = false) Boolean stat) {
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, walletApi
+			.walletLogList(accessToken, walletId, startTime, endTime, limit, offset, stat));
 	}
 
 	@ApiOperation("钱包绑定的银行卡列表")
 	@PostMapping(UrlConstant.WALLET_BANK_CARD_LIST)
-	public ResponseValue<List<WalletCard>> bindingBankCardList(@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId){
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, walletService.bankCardList(walletId));
+	public ResponseValue<List<WalletCard>> bindingBankCardList(
+		@RequestParam("access_token") String accessToken,
+		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId) {
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
+			walletApi.bankCardList(accessToken, walletId));
 	}
 
 	@ApiOperation("绑定银行卡(对工)")
 	@PostMapping(UrlConstant.WALLET_BANK_CARD_BIND)
-	public ResponseValue<WalletCard> bindBankCard(@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
-												  @ApiParam(value = "银行代码", required = true) @RequestParam("bank_code") String bankCode,
-												  @ApiParam(value = "银行帐号", required = true) @RequestParam("bank_account") String bankAccount,
-												  @ApiParam(value = "开户支行", required = true) @RequestParam("deposit_bank") String depositBank,
-												  @ApiParam(value = "开户名", required = true) @RequestParam("deposit_name") String depositName,
-												  @ApiParam(value = "是否默认银行卡: 1:是，2：否") @RequestParam(value = "is_def", required = false, defaultValue = "1") Integer isDef,
-												  @ApiParam(value = "预留手机号") @RequestParam(value = "telephone", required = false) String telephone){
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, walletService.bindBankCard(walletId, bankCode, bankAccount, depositBank, depositName, isDef, telephone));
+	public ResponseValue<WalletCard> bindBankCard(
+		@RequestParam("access_token") String accessToken,
+		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+		@ApiParam(value = "银行代码", required = true) @RequestParam("bank_code") String bankCode,
+		@ApiParam(value = "银行帐号", required = true) @RequestParam("bank_account") String bankAccount,
+		@ApiParam(value = "开户支行", required = true) @RequestParam("deposit_bank") String depositBank,
+		@ApiParam(value = "开户名", required = true) @RequestParam("deposit_name") String depositName,
+		@ApiParam(value = "是否默认银行卡: 1:是，2：否") @RequestParam(value = "is_def", required = false, defaultValue = "1") Integer isDef,
+		@ApiParam(value = "预留手机号") @RequestParam(value = "telephone", required = false) String telephone) {
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, walletApi
+			.bindBankCard(accessToken,walletId, bankCode, bankAccount, depositBank, depositName, isDef,
+				telephone));
 	}
 
 }

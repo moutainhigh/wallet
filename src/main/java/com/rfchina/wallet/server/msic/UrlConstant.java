@@ -6,20 +6,32 @@ public class UrlConstant {
 
 	private static final String VERSION = PREFIX + "v1";
 
-	public static final String JUNIOR_WALLET_PAY_IN = VERSION + "/junior/sl_pay_in";
+	/**
+	 * 初级钱包-思力出钱
+	 */
+	public static final String JUNIOR_WALLET_PAY_IN = VERSION + "/m/junior/sl_pay_in";
 
-	public static final String JUNIOR_WALLET_BATCH_PAY_IN = VERSION + "/junior/sl_batch_pay_in";
+	/**
+	 * 初级钱包-思力批量出钱（最多20笔）
+	 */
+	public static final String JUNIOR_WALLET_BATCH_PAY_IN = VERSION + "/m/junior/sl_batch_pay_in";
 
-	public static final String JUNIOR_WALLET_QUERY = VERSION + "/junior/sl_query";
+	/**
+	 * 初级钱包-查询支付状态
+	 */
+	public static final String JUNIOR_WALLET_QUERY = VERSION + "/m/junior/sl_query";
 
 	public static final String WALLET_UPDATE_PAY_STATUS = VERSION + "/wallet/quartz_update_pay_status";
 
-	public static final String WALLET_QUERY_INFO = VERSION + "/wallet/query_wallet_info";
+	/**
+	 * 查询钱包信息（企业or个人）
+	 */
+	public static final String WALLET_QUERY_INFO = VERSION + "/m/wallet/query_wallet_info";
 
 	/**
 	 * 开通未审核的钱包
 	 */
-	public static final String CREATE_WALLET = VERSION + "/wallet/create_wallet";
+	public static final String CREATE_WALLET = VERSION + "/m/wallet/create_wallet";
 
 	/**
 	 * 查询用户信息
@@ -29,12 +41,12 @@ public class UrlConstant {
 	/**
 	 * 查询交易流水
 	 */
-	public static final String WALLET_LOG_LIST = VERSION + "/wallet/log/list";
+	public static final String WALLET_LOG_LIST = VERSION + "/m/wallet/log/list";
 
 	/**
 	 * 查询钱包绑定的银行卡
 	 */
-	public static final String WALLET_BANK_CARD_LIST = VERSION + "/wallet/bank_card/list";
+	public static final String WALLET_BANK_CARD_LIST = VERSION + "/m/wallet/bank_card/list";
 
 	/**
 	 * 钱包绑定银行卡
