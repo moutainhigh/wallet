@@ -7,7 +7,7 @@ import com.rfchina.platform.sdk2.request.AbstractApiRequest;
 import lombok.Builder;
 import io.swagger.annotations.ApiModelProperty;
 
-/** 绑定银行卡(对工) */
+/** 绑定银行卡(对公) */
 @Builder
 public class BindBankCardRequest extends  AbstractApiRequest {
 

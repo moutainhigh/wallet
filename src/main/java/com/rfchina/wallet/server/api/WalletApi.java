@@ -4,7 +4,11 @@ import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletLog;
+import com.rfchina.wallet.domain.model.ext.Bank;
+import com.rfchina.wallet.domain.model.ext.BankArea;
+import com.rfchina.wallet.domain.model.ext.BankClass;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
+
 import java.util.Date;
 import java.util.List;
 
@@ -42,4 +46,25 @@ public interface WalletApi {
 	 */
 	WalletCard bindBankCard(String accessToken, Long walletId, String bankCode, String bankAccount,
 							String depositName, Integer isDef, String telephone);
+
+	/**
+	 * 银行类别列表
+	 * @return
+	 */
+	List<BankClass> bankClassList();
+
+	/**
+	 * 银行地区列表
+	 * @param classCode		必填，银行类型编码
+	 * @return
+	 */
+	List<BankArea> bankAreaList(String classCode);
+
+	/**
+	 * 银行支行列表
+	 * @param classCode		必填，银行类别编码
+	 * @param areaCode		必填，地区编码
+	 * @return
+	 */
+	List<Bank> bankList(String classCode, String areaCode);
 }

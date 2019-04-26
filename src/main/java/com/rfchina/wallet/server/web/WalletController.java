@@ -6,9 +6,12 @@ import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletLog;
+import com.rfchina.wallet.domain.model.ext.Bank;
+import com.rfchina.wallet.domain.model.ext.BankArea;
+import com.rfchina.wallet.domain.model.ext.BankClass;
 import com.rfchina.wallet.server.api.WalletApi;
-import com.rfchina.wallet.server.msic.UrlConstant;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
+import com.rfchina.wallet.server.msic.UrlConstant;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -76,7 +79,7 @@ public class WalletController {
 			walletApi.bankCardList(accessToken, walletId));
 	}
 
-	@ApiOperation("绑定银行卡(对工)")
+	@ApiOperation("绑定银行卡(对公)")
 	@PostMapping(UrlConstant.WALLET_BANK_CARD_BIND)
 	public ResponseValue<WalletCard> bindBankCard(
 		@RequestParam("access_token") String accessToken,
@@ -88,6 +91,28 @@ public class WalletController {
 		@ApiParam(value = "预留手机号") @RequestParam(value = "telephone", required = false) String telephone) {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, walletApi
 			.bindBankCard(accessToken,walletId, bankCode, bankAccount, depositName, isDef, telephone));
+	}
+
+	@ApiOperation("银行类别列表")
+	@PostMapping(UrlConstant.WALLET_BANK_CLASS_LIST)
+	public ResponseValue<List<BankClass>> bankClassList(){
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, walletApi
+				.bankClassList());
+	}
+
+	@ApiOperation("银行地区列表")
+	@PostMapping(UrlConstant.WALLET_BANK_AREA_LIST)
+	public ResponseValue<List<BankArea>> bankAreaList(@ApiParam(value = "银行类型编码", required = true) @RequestParam("class_code") String classCode){
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, walletApi
+				.bankAreaList(classCode));
+	}
+
+	@ApiOperation("银行支行列表")
+	@PostMapping(UrlConstant.WALLET_BANK_LIST)
+	public ResponseValue<List<Bank>> bankList(@ApiParam(value = "银行类型编码", required = true) @RequestParam("class_code") String classCode,
+											  @ApiParam(value = "地区编码", required = true) @RequestParam("area＿code") String areaCode){
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, walletApi
+				.bankList(classCode, areaCode));
 	}
 
 }

@@ -95,4 +95,32 @@ public abstract class WalletBaseTest extends BaseTest {
 
         return postAndValidateSuccessCode(BASE_URL, UrlConstant.WALLET_BANK_CARD_BIND, params);
     }
+
+    protected Map<String, Object> bankClassList(){
+        Map<String, String> params = new HashMap<>();
+        params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+        String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+        params.put("sign", sign);
+        return postAndValidateSuccessCode(BASE_URL, UrlConstant.WALLET_BANK_CLASS_LIST, params);
+    }
+
+    protected Map<String, Object> bankAreaList(String classCode){
+        Map<String, String> params = new HashMap<>();
+        params.put("class_code", classCode);
+        params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+        String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+        params.put("sign", sign);
+        return postAndValidateSuccessCode(BASE_URL, UrlConstant.WALLET_BANK_AREA_LIST, params);
+    }
+
+    protected Map<String, Object> bankList(String classCode, String areaCode){
+        Map<String, String> params = new HashMap<>();
+        params.put("class_code", classCode);
+        params.put("area_code", areaCode);
+        params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+        String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+        params.put("sign", sign);
+        return postAndValidateSuccessCode(BASE_URL, UrlConstant.WALLET_BANK_LIST, params);
+    }
+
 }

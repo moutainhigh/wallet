@@ -15,6 +15,9 @@ import com.rfchina.wallet.domain.mapper.ext.*;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.WalletResponseCode;
 import com.rfchina.wallet.domain.model.*;
+import com.rfchina.wallet.domain.model.ext.Bank;
+import com.rfchina.wallet.domain.model.ext.BankArea;
+import com.rfchina.wallet.domain.model.ext.BankClass;
 import com.rfchina.wallet.server.adapter.UserAdapter;
 import com.rfchina.wallet.server.mapper.ext.BankCodeExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletUserExtDao;
@@ -61,7 +64,7 @@ public class WalletService {
 	private AppService appService;
 
 	@Autowired
-	private BankCodeExtDao bankCodeExtDao;
+	private BankCodeDao bankCodeDao;
 
 	/**
 	 * 查询钱包明细
@@ -169,7 +172,7 @@ public class WalletService {
 				WalletResponseCode.EnumWalletResponseCode.WALLET_NOT_EXIST);
 		}
 
-		BankCode bankCodeResult = bankCodeExtDao.selectByCode(bankCode);
+		BankCode bankCodeResult = bankCodeDao.selectByBankCode(bankCode);
 		if(null == bankCodeResult){
 			throw new RfchinaResponseException(EnumResponseCode.COMMON_INVALID_PARAMS, "bank_code");
 		}
@@ -197,5 +200,32 @@ public class WalletService {
 		}
 
 		return walletCard;
+	}
+
+	/**
+	 * 查询银行类别列表
+	 * @return
+	 */
+	public List<BankClass> bankClassList(){
+		return bankCodeDao.selectBankClassList();
+	}
+
+	/**
+	 * 查询银行地区列表
+	 * @param classCode		类别编码
+	 * @return
+	 */
+	public List<BankArea> bankAreaList(String classCode){
+		return bankCodeDao.selectBankAreaList(classCode);
+	}
+
+	/**
+	 * 查询银行支行列表
+	 * @param classCode		类别编码
+	 * @param areaCode		地区编码
+	 * @return
+	 */
+	public List<Bank> bankList(String classCode, String areaCode){
+		return bankCodeDao.selectBankList(classCode, areaCode);
 	}
 }

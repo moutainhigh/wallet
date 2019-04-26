@@ -3,18 +3,23 @@ package com.rfchina.wallet.server.api.impl;
 import com.rfchina.passport.token.EnumTokenType;
 import com.rfchina.passport.token.TokenVerify;
 import com.rfchina.platform.common.annotation.Log;
+import com.rfchina.platform.common.annotation.ParamValid;
 import com.rfchina.platform.common.annotation.SignVerify;
 import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletLog;
+import com.rfchina.wallet.domain.model.ext.Bank;
+import com.rfchina.wallet.domain.model.ext.BankArea;
+import com.rfchina.wallet.domain.model.ext.BankClass;
 import com.rfchina.wallet.server.api.WalletApi;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import com.rfchina.wallet.server.service.WalletService;
-import java.util.Date;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Date;
+import java.util.List;
 
 @Component
 public class WalletApiImpl implements WalletApi {
@@ -65,5 +70,20 @@ public class WalletApiImpl implements WalletApi {
 		String telephone) {
 		return walletService.bindBankCard(walletId, bankCode, bankAccount, depositName,
 			isDef, telephone);
+	}
+
+	@Override
+	public List<BankClass> bankClassList() {
+		return walletService.bankClassList();
+	}
+
+	@Override
+	public List<BankArea> bankAreaList(@ParamValid(nullable = false)String classCode) {
+		return walletService.bankAreaList(classCode);
+	}
+
+	@Override
+	public List<Bank> bankList(@ParamValid(nullable = false)String classCode, @ParamValid(nullable = false)String areaCode) {
+		return walletService.bankList(classCode, areaCode);
 	}
 }

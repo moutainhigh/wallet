@@ -43,4 +43,18 @@ public class WalletTest extends WalletBaseTest{
         bindBankCard(1L, "402336100092", "12345678901234567890", "哈哈", 1, "");
     }
 
+    @Test
+    public void testBankClassList(){
+        bankClassList();
+    }
+
+    @Test
+    public void testBankAreaList(){
+        bankAreaList("001");
+    }
+
+    @Test
+    public void testBankList(){
+        bankList("001", "4910");
+    }
 }

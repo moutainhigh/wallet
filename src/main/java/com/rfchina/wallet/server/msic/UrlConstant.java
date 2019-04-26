@@ -53,4 +53,18 @@ public class UrlConstant {
 	 */
 	public static final String WALLET_BANK_CARD_BIND = VERSION + "/wallet/bank_card/bind";
 
+	/**
+	 * 银行类别列表
+	 */
+	public static final String WALLET_BANK_CLASS_LIST = "/wallet/bank/class_list";
+
+	/**
+	 * 银行地区列表
+	 */
+	public static final String WALLET_BANK_AREA_LIST = "/wallet/bank/area_list";
+
+	/**
+	 * 银行支行列表
+	 */
+	public static final String WALLET_BANK_LIST = "/wallet/bank/bank_list";
 }
