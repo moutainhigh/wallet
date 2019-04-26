@@ -64,7 +64,7 @@ public class WalletController {
 		@ApiParam(value = "查询列表的起始偏移量，从0开始，即offset: 5是指从列表里的第六个开始读取", required = true) @RequestParam(value = "offset") long offset,
 		@ApiParam(value = "非必填, false:否, true:是, 是否返回数据总量, 默认false") @RequestParam(value = "stat", required = false) Boolean stat) {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, walletApi
-			.walletLogList(accessToken,walletId, startTime, endTime, limit, offset, stat));
+			.walletLogList(accessToken, walletId, startTime, endTime, limit, offset, stat));
 	}
 
 	@ApiOperation("钱包绑定的银行卡列表")
@@ -73,6 +73,23 @@ public class WalletController {
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId) {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
-			walletApi.bankCardList(accessToken,walletId));
+			walletApi.bankCardList(accessToken, walletId));
 	}
+
+	@ApiOperation("绑定银行卡(对工)")
+	@PostMapping(UrlConstant.WALLET_BANK_CARD_BIND)
+	public ResponseValue<WalletCard> bindBankCard(
+		@RequestParam("access_token") String accessToken,
+		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+		@ApiParam(value = "银行代码", required = true) @RequestParam("bank_code") String bankCode,
+		@ApiParam(value = "银行帐号", required = true) @RequestParam("bank_account") String bankAccount,
+		@ApiParam(value = "开户支行", required = true) @RequestParam("deposit_bank") String depositBank,
+		@ApiParam(value = "开户名", required = true) @RequestParam("deposit_name") String depositName,
+		@ApiParam(value = "是否默认银行卡: 1:是，2：否") @RequestParam(value = "is_def", required = false, defaultValue = "1") Integer isDef,
+		@ApiParam(value = "预留手机号") @RequestParam(value = "telephone", required = false) String telephone) {
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, walletApi
+			.bindBankCard(accessToken,walletId, bankCode, bankAccount, depositBank, depositName, isDef,
+				telephone));
+	}
+
 }

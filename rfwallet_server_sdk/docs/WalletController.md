@@ -1,3 +1,45 @@
+###  绑定银行卡(对工)
+
+请求地址: /wallet_server/v1/wallet/bank_card/bind
+
+请求类型: POST
+
+请求参数:
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|bank_account|是|银行帐号|
+|bank_code|是|银行代码|
+|deposit_bank|是|开户支行|
+|deposit_name|是|开户名|
+|wallet_id|是|钱包id|
+|is_def|否|是否默认银行卡: 1:是，2：否|
+|telephone|否|预留手机号|
+
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": "", //消息
+"data": {
+              bank_account: "" , //银行账号
+        bank_code: "" , //银行代码
+        bank_name: "" , //银行名称
+        create_time: "" , //创建日期
+        deposit_bank: "" , //开户支行
+        deposit_name: "" , //开户名
+        is_def: "" , //是否默认银行卡: 1:是，2：否
+        is_public: "" , //是否对公账户: 1:是，2：否
+        last_upd_time: "" , //钱包信息最后更新日期
+        status: "" , //绑定状态: 1:已绑定，2：已解绑
+        telephone: "" , //预留手机号
+        wallet_id: ""  //钱包ID
+
+  }
+}
+```
+
 ###  钱包绑定的银行卡列表
 
 请求地址: /wallet_server/v1/wallet/bank_card/list
@@ -19,8 +61,9 @@
 "data": [{
               bank_account: "" , //银行账号
         bank_code: "" , //银行代码
+        bank_name: "" , //银行名称
         create_time: "" , //创建日期
-        deposit_bank: "" , //开户行
+        deposit_bank: "" , //开户支行
         deposit_name: "" , //开户名
         is_def: "" , //是否默认银行卡: 1:是，2：否
         is_public: "" , //是否对公账户: 1:是，2：否

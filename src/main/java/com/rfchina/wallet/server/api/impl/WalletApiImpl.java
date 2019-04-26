@@ -42,8 +42,8 @@ public class WalletApiImpl implements WalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public Pagination<WalletLog> walletLogList(String accessToken,Long walletId, Date startTime,
-		Date endTime,int limit, long offset, Boolean stat) {
+	public Pagination<WalletLog> walletLogList(String accessToken, Long walletId, Date startTime,
+		Date endTime, int limit, long offset, Boolean stat) {
 		return walletService.walletLogList(walletId, startTime, endTime,
 			limit, offset, stat);
 	}
@@ -52,7 +52,18 @@ public class WalletApiImpl implements WalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public List<WalletCard> bankCardList(String accessToken,Long walletId) {
+	public List<WalletCard> bankCardList(String accessToken, Long walletId) {
 		return walletService.bankCardList(walletId);
+	}
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
+	@Override
+	public WalletCard bindBankCard(String accessToken, Long walletId, String bankCode,
+		String bankAccount, String depositBank, String depositName, Integer isDef,
+		String telephone) {
+		return walletService.bindBankCard(walletId, bankCode, bankAccount, depositBank, depositName,
+			isDef, telephone);
 	}
 }

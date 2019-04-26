@@ -19,10 +19,13 @@ public class WalletCard  {
     @ApiModelProperty("银行代码")
     private String bankCode ;
 
+    @ApiModelProperty("银行名称")
+    private String bankName ;
+
     @ApiModelProperty("创建日期")
     private String createTime ;
 
-    @ApiModelProperty("开户行")
+    @ApiModelProperty("开户支行")
     private String depositBank ;
 
     @ApiModelProperty("开户名")

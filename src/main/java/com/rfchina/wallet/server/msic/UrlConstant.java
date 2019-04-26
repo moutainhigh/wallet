@@ -48,4 +48,9 @@ public class UrlConstant {
 	 */
 	public static final String WALLET_BANK_CARD_LIST = VERSION + "/m/wallet/bank_card/list";
 
+	/**
+	 * 钱包绑定银行卡
+	 */
+	public static final String WALLET_BANK_CARD_BIND = VERSION + "/wallet/bank_card/bind";
+
 }

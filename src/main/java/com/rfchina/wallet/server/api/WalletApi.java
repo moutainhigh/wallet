@@ -28,12 +28,18 @@ public interface WalletApi {
 	 * @param endTime 结束时间
 	 */
 	Pagination<WalletLog> walletLogList(String accessToekn, Long walletId, Date startTime,
-		Date endTime,int limit, long offset, Boolean stat);
+		Date endTime, int limit, long offset, Boolean stat);
 
 	/**
 	 * 查询绑定的银行卡列表
 	 *
 	 * @param walletId 钱包ID
 	 */
-	List<WalletCard> bankCardList(String accessToken,Long walletId);
+	List<WalletCard> bankCardList(String accessToken, Long walletId);
+
+	/**
+	 * 绑定银行卡
+	 */
+	WalletCard bindBankCard(String accessToken, Long walletId, String bankCode, String bankAccount,
+		String depositBank, String depositName, Integer isDef, String telephone);
 }
