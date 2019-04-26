@@ -8,6 +8,7 @@
 
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
+|access_token|是|access_token|
 |bank_account|是|银行帐号|
 |bank_code|是|银行代码|
 |deposit_bank|是|开户支行|
@@ -42,7 +43,7 @@
 
 ###  钱包绑定的银行卡列表
 
-请求地址: /wallet_server/v1/wallet/bank_card/list
+请求地址: /wallet_server/v1/m/wallet/bank_card/list
 
 请求类型: POST
 
@@ -50,6 +51,7 @@
 
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
+|access_token|是|access_token|
 |wallet_id|是|钱包id|
 
 
@@ -79,7 +81,7 @@
 
 ###  开通未审核的钱包
 
-请求地址: /wallet_server/v1/wallet/create_wallet
+请求地址: /wallet_server/v1/m/wallet/create_wallet
 
 请求类型: POST
 
@@ -87,6 +89,7 @@
 
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
+|access_token|是|access_token|
 |source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
 |title|是|钱包标题，通常是姓名或公司名|
 |type|是|钱包类型， 1：企业钱包，2：个人钱包|
@@ -120,7 +123,7 @@
 
 ###  查询钱包信息（企业or个人）
 
-请求地址: /wallet_server/v1/wallet/query_wallet_info
+请求地址: /wallet_server/v1/m/wallet/query_wallet_info
 
 请求类型: POST
 
@@ -195,7 +198,7 @@
 
 ###  钱包流水
 
-请求地址: /wallet_server/v1/wallet/log/list
+请求地址: /wallet_server/v1/m/wallet/log/list
 
 请求类型: POST
 
@@ -203,6 +206,7 @@
 
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
+|access_token|是|access_token|
 |limit|是|需要查询的数量（数量最大50）|
 |offset|是|查询列表的起始偏移量，从0开始，即offset: 5是指从列表里的第六个开始读取|
 |wallet_id|是|钱包id|

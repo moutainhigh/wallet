@@ -11,6 +11,9 @@ import io.swagger.annotations.ApiModelProperty;
 @Builder
 public class WalletLogListRequest extends  AbstractApiRequest {
 
+  @ApiModelProperty("access_token")
+  private String accessToken ;
+
   @ApiModelProperty("需要查询的数量（数量最大50）")
   private Integer limit ;
 
@@ -32,7 +35,7 @@ public class WalletLogListRequest extends  AbstractApiRequest {
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/wallet/log/list";
+    return "/wallet_server/v1/m/wallet/log/list";
   }
 
   @Override
@@ -43,6 +46,9 @@ public class WalletLogListRequest extends  AbstractApiRequest {
   @Override
   public Map<String, String> getTextParmas() {
     Map<String, String> parameters = new HashMap<>(2);
+      if(accessToken != null){
+        parameters.put("access_token", accessToken.toString());
+      }
       if(limit != null){
         parameters.put("limit", limit.toString());
       }

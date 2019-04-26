@@ -23,7 +23,7 @@ public class QueryRequest extends  AbstractApiRequest {
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/junior/sl_query";
+    return "/wallet_server/v1/m/junior/sl_query";
   }
 
   @Override
