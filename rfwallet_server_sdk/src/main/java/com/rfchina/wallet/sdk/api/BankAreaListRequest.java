@@ -17,7 +17,7 @@ public class BankAreaListRequest extends  AbstractApiRequest {
 
   @Override
   public String getApiUrl() {
-    return "/wallet/bank/area_list";
+    return "/wallet_server/v1/wallet/bank/area_list";
   }
 
   @Override

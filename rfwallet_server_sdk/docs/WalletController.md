@@ -1,6 +1,6 @@
 ###  银行地区列表
 
-请求地址: /wallet/bank/area_list
+请求地址: /wallet_server/v1/wallet/bank/area_list
 
 请求类型: POST
 
@@ -28,7 +28,7 @@
 
 ###  银行类别列表
 
-请求地址: /wallet/bank/class_list
+请求地址: /wallet_server/v1/wallet/bank/class_list
 
 请求类型: POST
 
@@ -54,7 +54,7 @@
 
 ###  银行支行列表
 
-请求地址: /wallet/bank/bank_list
+请求地址: /wallet_server/v1/wallet/bank/bank_list
 
 请求类型: POST
 
