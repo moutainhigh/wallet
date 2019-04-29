@@ -29,6 +29,11 @@ public class UrlConstant {
 	public static final String WALLET_QUERY_INFO = VERSION + "/m/wallet/query_wallet_info";
 
 	/**
+	 * 查询钱包信息（企业or个人）
+	 */
+	public static final String WALLET_QUERY_INFO_BY_UID = VERSION + "/m/wallet/query_wallet_info_by_uid";
+
+	/**
 	 * 开通未审核的钱包
 	 */
 	public static final String CREATE_WALLET = VERSION + "/m/wallet/create_wallet";

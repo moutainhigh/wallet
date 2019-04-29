@@ -24,4 +24,14 @@ public class WalletServiceTest extends SpringBaseTest {
 		assertNotNull(resp);
 
 	}
+
+	@Test
+	public void queryWalletInfoByUid() {
+		Long userId = 33443L;
+		WalletInfoResp resp = walletService.queryWalletInfoByUserId(userId);
+
+		log.info(JSON.toJSONString(resp));
+		assertNotNull(resp);
+
+	}
 }

@@ -43,6 +43,18 @@ public class WalletController {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, resp);
 	}
 
+	@ApiOperation("通过UID查询钱包信息（企业or个人）")
+	@PostMapping(UrlConstant.WALLET_QUERY_INFO_BY_UID)
+	public ResponseValue<WalletInfoResp> queryWalletInfoByUid(
+			@RequestParam("access_token") String accessToken,
+			@ApiParam(value = "用户ID", required = true, example = "2") @RequestParam("user_id") Long userId
+	) {
+
+		WalletInfoResp resp = walletApi.queryWalletInfoByUserId(accessToken, userId);
+
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, resp);
+	}
+
 	@ApiOperation("开通未审核的钱包")
 	@PostMapping(UrlConstant.CREATE_WALLET)
 	public ResponseValue<Wallet> createWallet(

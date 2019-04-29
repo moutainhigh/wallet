@@ -20,6 +20,11 @@ public interface WalletApi {
 	WalletInfoResp queryWalletInfo(String accessToken, Long walletId);
 
 	/**
+	 * 查询钱包明细
+	 */
+	WalletInfoResp queryWalletInfoByUserId(String accessToken, Long userId);
+
+	/**
 	 * 开通未审核的钱包
 	 */
 	Wallet createWallet(String accessToken, Byte type, String title, Byte source);

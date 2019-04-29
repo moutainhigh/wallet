@@ -1,6 +1,6 @@
 {
   "inputSpec": "http://localhost:8080/v2/api-docs",
-  "outputDir": "/data/git/rfchina/platform/rfwallet_server/rfwallet_server_sdk",
+  "outputDir": "./rfwallet_server_sdk",
   "modelPackage": "com.rfchina.wallet.sdk.model",
   "apiPackage": "com.rfchina.wallet.sdk.api",
   "lang": "java",

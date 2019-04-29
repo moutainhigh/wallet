@@ -90,6 +90,16 @@ public class WalletService {
 		return builder.wallet(wallet).defWalletCard(walletCard).build();
 	}
 
+	public WalletInfoResp queryWalletInfoByUserId(Long userId){
+		WalletUser walletUser = walletUserDao.selectByPrimaryKey(userId);
+
+		if (walletUser == null) {
+			throw new RfchinaResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST, "user_id");
+		}
+
+		return queryWalletInfo(walletUser.getWalletId());
+	}
+
 	/**
 	 * 开通未审核的钱包
 	 */

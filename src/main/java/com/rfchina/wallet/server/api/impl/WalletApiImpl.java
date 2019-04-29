@@ -39,6 +39,14 @@ public class WalletApiImpl implements WalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
+	public WalletInfoResp queryWalletInfoByUserId(String accessToken, Long userId) {
+		return walletService.queryWalletInfoByUserId(userId);
+	}
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
+	@Override
 	public Wallet createWallet(String accessToken, Byte type, String title, Byte source) {
 		return walletService.createWallet(type, title, source);
 	}

@@ -55,6 +55,9 @@ public class WalletLog  {
     @ApiModelProperty("备注")
     private String remark ;
 
+    @ApiModelProperty("交易流水号")
+    private String seqNo ;
+
     @ApiModelProperty("交易状态。 1: 待发送银行网关，2：银行受理中，3：交易成功，4：交易失败，5：撤销")
     private Integer status ;
 
