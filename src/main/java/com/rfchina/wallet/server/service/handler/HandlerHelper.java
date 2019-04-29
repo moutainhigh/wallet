@@ -1,5 +1,7 @@
 package com.rfchina.wallet.server.service.handler;
 
+import com.rfchina.wallet.domain.exception.WalletResponseException;
+import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -31,7 +33,7 @@ public class HandlerHelper {
 			currHandler = currHandler.getNext();
 		}
 
-		throw new RuntimeException();
+		throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_HANDLER_NOT_FOUND,"type = "+ walletType);
 	}
 
 	public PuDongHandler selectByMethod(Byte refMethod) {
@@ -44,6 +46,6 @@ public class HandlerHelper {
 			currHandler = currHandler.getNext();
 		}
 
-		throw new RuntimeException();
+		throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_METHOD_NOT_FOUND);
 	}
 }

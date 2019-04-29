@@ -22,6 +22,9 @@ public class WalletLog  {
     @ApiModelProperty("创建日期")
     private String createTime ;
 
+    @ApiModelProperty("当前尝试次数")
+    private Integer currTryTimes ;
+
     @ApiModelProperty("电子凭证号")
     private String elecChequeNo ;
 
@@ -31,6 +34,9 @@ public class WalletLog  {
     @ApiModelProperty("ID")
     private Long id ;
 
+    @ApiModelProperty("最大尝试次数")
+    private Integer nextTryTimes ;
+
     @ApiModelProperty("收款方帐号")
     private String payeeAccount ;
 
@@ -39,6 +45,9 @@ public class WalletLog  {
 
     @ApiModelProperty("付款方帐号")
     private String payerAccount ;
+
+    @ApiModelProperty("计划查询时间")
+    private String queryTime ;
 
     @ApiModelProperty("关联接口方法，1：银企直连AQ52，2：银企直连8800")
     private Integer refMethod ;

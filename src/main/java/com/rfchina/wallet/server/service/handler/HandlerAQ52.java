@@ -217,7 +217,7 @@ public class HandlerAQ52 implements PuDongHandler {
 					WalletLogStatus status = WalletLogStatus.parsePuDongAQ54(rs.getStatus());
 
 					int c = walletLogDao.updateStatusAndErrMsg(respBody.getHandleSeqNo(),
-						rs.getBizLog(), status.getValue(), rs.getErrMsg());
+						rs.getBizLog(), "", status.getValue(), rs.getErrMsg());
 					count += c;
 				}
 

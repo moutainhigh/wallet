@@ -4,7 +4,9 @@ import com.rfchina.platform.common.exception.RfchinaResponseException;
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.DateUtil;
+import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
+import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletLog;
 import com.rfchina.wallet.domain.model.WalletLogCriteria;
@@ -70,7 +72,7 @@ public class JuniorWalletService {
 			.collect(Collectors.toList());
 		List<Byte> walletTypes = walletDao.selectWalletType(walletIds);
 		if (walletTypes.size() != 1) {
-			throw new RuntimeException();
+			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_WALLET_TYPE_LIMIT);
 		}
 		Byte walletType = walletTypes.get(0);
 
@@ -79,7 +81,7 @@ public class JuniorWalletService {
 
 			WalletCard walletCard = getWalletCard(payInReq.getWalletId());
 			if (walletCard == null) {
-				throw new RuntimeException();
+				throw new WalletResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST);
 			}
 
 			WalletLog walletLog = WalletLog.builder()
@@ -103,16 +105,18 @@ public class JuniorWalletService {
 			PuDongHandler puDongHandler = handlerHelper.selectByWalletType(walletType);
 			Tuple<GatewayMethod, PayInResp> rs = puDongHandler.pay(payInReqs);
 
+			GatewayMethod method = rs.left;
+			PayInResp payInResp = rs.right;
 			for (WalletLog walletLog : walletLogs) {
 				walletLogDao.updateStatusAndAcceptNo(walletLog.getId(),
-					WalletLogStatus.PROCESSING.getValue(), rs.right.getAcceptNo(),
-					rs.left.getValue());
+					WalletLogStatus.PROCESSING.getValue(), payInResp.getAcceptNo(),
+					method.getValue());
 			}
 
 			return rs.right;
 		} catch (Exception e) {
-			log.error("支付错误", e);
-			throw new RuntimeException(e);
+			log.error("银行网关支付错误", e);
+			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_GATEWAY_PAY_ERROR);
 		}
 
 
@@ -135,13 +139,6 @@ public class JuniorWalletService {
 		List<WalletLog> walletLogs = walletLogDao.selectByExample(example);
 		if (walletLogs.isEmpty()) {
 			throw new RfchinaResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST);
-		}
-
-		boolean wantToQuery = walletLogs.stream().map(walletLog -> walletLog.getStatus())
-			.anyMatch(status -> status.byteValue() != WalletLogStatus.SUCC.getValue());
-
-		if (!wantToQuery) {
-			// notify query
 		}
 
 		return walletLogs.stream().map(walletLog -> {

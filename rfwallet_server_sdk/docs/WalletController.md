@@ -311,12 +311,15 @@
                         accept_no: "" , //受理编号
         amount: "" , //流水金额
         create_time: "" , //创建日期
+        curr_try_times: "" , //当前尝试次数
         elec_cheque_no: "" , //电子凭证号
         err_msg: "" , //错误信息
         id: "" , //ID
+        next_try_times: "" , //最大尝试次数
         payee_account: "" , //收款方帐号
         payee_type: "" , //收款账户类型，1：对公账户，2：个人账户
         payer_account: "" , //付款方帐号
+        query_time: "" , //计划查询时间
         ref_method: "" , //关联接口方法，1：银企直连AQ52，2：银企直连8800
         remark: "" , //备注
         status: "" , //交易状态。 1: 待发送银行网关，2：银行受理中，3：交易成功，4：交易失败，5：撤销

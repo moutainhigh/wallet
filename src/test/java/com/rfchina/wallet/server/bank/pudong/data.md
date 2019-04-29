@@ -62,9 +62,14 @@ acctno:	990B8950900000818 acctname:	浦发2478952744
 
 ``` 8800非网银授权
 
-{
+  {
     "key": "wlpay.pudong.acctAreaCode",
     "value": "2900",
+    "description": null
+  },
+  {
+    "key": "wlpay.pudong.acctBankCode",
+    "value": "310",
     "description": null
   },
   {
@@ -79,7 +84,7 @@ acctno:	990B8950900000818 acctname:	浦发2478952744
   },
   {
     "key": "wlpay.pudong.auditMasterId",
-    "value": "2623669269",
+    "value": "",
     "description": null
   },
   {
@@ -92,11 +97,6 @@ acctno:	990B8950900000818 acctname:	浦发2478952744
 
 ``` 8800网银授权
 
-{
-    "key": "wlpay.pudong.acctAreaCode",
-    "value": "2900",
-    "description": null
-  },
   {
     "key": "wlpay.pudong.acctname",
     "value": "浦发2478952744",
@@ -111,11 +111,6 @@ acctno:	990B8950900000818 acctname:	浦发2478952744
     "key": "wlpay.pudong.auditMasterId",
     "value": "2478952744",
     "description": null
-  },
-  {
-    "key": "wlpay.pudong.masterid",
-    "value": "200004075",
-    "description": "机构号"
   }
 
 ```

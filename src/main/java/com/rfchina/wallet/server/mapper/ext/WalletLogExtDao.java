@@ -19,17 +19,19 @@ public interface WalletLogExtDao extends WalletLogMapper {
 		@Param("acceptNo") String acceptNo, @Param("refMethod") Byte refMethod);
 
 	@Update({"update rf_wallet_log"
-		, "set err_msg = #{errMsg} , status = #{status}"
+		, "set err_msg = #{errMsg} , status = #{status}, seq_no = #{seqNo}"
 		, "where accept_no = #{acceptNo} and elec_cheque_no = #{elecChequeNo} and status = 2"
 	})
 	int updateStatusAndErrMsg(@Param("acceptNo") String acceptNo,
 		@Param("elecChequeNo") String elecChequeNo,
-		@Param("status") Byte status, @Param("errMsg") String errMsg);
+		@Param("seqNo") String seqNo,
+		@Param("status") Byte status,
+		@Param("errMsg") String errMsg);
 
 	@Select({
-		"select accept_no as acceptNo,ref_method as refMethod, create_time as createTime",
+		"select distinct accept_no as acceptNo,ref_method as refMethod, create_time as createTime",
 		"from rf_wallet_log",
-		"where status = 2"
+		"where status = 2 and query_time < CURRENT_TIMESTAMP and curr_try_times < next_try_times"
 	})
 	List<AcceptNo> selectUnFinish();
 
@@ -40,4 +42,11 @@ public interface WalletLogExtDao extends WalletLogMapper {
 	})
 	int updateStatusByAcceptNo(@Param("acceptNo") String handleSeqNo, @Param("status") Byte value,
 		@Param("errMsg") String errMsg);
+
+	@Update({"update rf_wallet_log"
+		, "set curr_try_times = curr_try_times + 1 "
+		, ", query_time = date_add(CURRENT_TIMESTAMP, interval power(2 , curr_try_times + 1) minute) "
+		, "where accept_no = #{acceptNo}"
+	})
+	void updateTryTimes(String acceptNo);
 }

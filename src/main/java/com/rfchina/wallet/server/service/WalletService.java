@@ -135,10 +135,14 @@ public class WalletService {
 			queryEndTime = DateUtil.getDate(endTime);
 		}
 
+		List<WalletLog> data = walletLogDao.selectList(walletId, queryStartTime, queryEndTime,
+			limit, offset);
+		long total = Optional.ofNullable(stat).orElse(false) ? walletLogDao.selectCount(
+			walletId, queryStartTime, queryEndTime) : 0L;
+
 		return new Pagination.PaginationBuilder<WalletLog>().offset(offset).pageLimit(limit)
-			.data(walletLogDao.selectList(walletId, queryStartTime, queryEndTime, limit, offset))
-			.total(Optional.ofNullable(stat).orElse(false) ? walletLogDao
-				.selectCount(walletId, queryStartTime, queryEndTime) : 0L).build();
+			.data(data)
+			.total(total).build();
 	}
 
 	/**
@@ -178,7 +182,9 @@ public class WalletService {
 		}
 
 		//更新已绑定的银行卡状态为已解绑
-		walletCardDao.updateWalletCard(walletId, EnumDef.EnumCardBindStatus.UNBIND.getValue(), EnumDef.EnumCardBindStatus.BIND.getValue(), null, EnumDef.EnumDefBankCard.NO.getValue());
+		walletCardDao.updateWalletCard(walletId, EnumDef.EnumCardBindStatus.UNBIND.getValue(),
+			EnumDef.EnumCardBindStatus.BIND.getValue(), null,
+			EnumDef.EnumDefBankCard.NO.getValue());
 
 		Date now = new Date();
 

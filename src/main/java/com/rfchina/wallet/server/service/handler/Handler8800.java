@@ -1,10 +1,13 @@
 package com.rfchina.wallet.server.service.handler;
 
 import com.rfchina.biztools.generate.IdGenerator;
+import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.platform.common.utils.DateUtil;
+import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
+import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.BankCode;
 import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.server.bank.pudong.builder.PubPayQueryBuilder;
@@ -92,15 +95,16 @@ public class Handler8800 implements PuDongHandler {
 	@Override
 	public Tuple<GatewayMethod, PayInResp> pay(List<PayInReq> payInReqs) throws Exception {
 		// 出佣请求不能为空, 数量不能大于20
-		if (payInReqs.size() > 20) {
-			throw new RuntimeException();
+		int limit = 20;
+		if (payInReqs.size() > limit) {
+			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_BATCH_LIMIT);
 		}
 
 		List<PubPayReq> payReqs = payInReqs.stream().map(payInReq -> {
 
 			WalletCard walletCard = getWalletCard(payInReq.getWalletId());
 			if (walletCard == null) {
-				throw new RuntimeException();
+				throw new WalletResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST);
 			}
 
 			// 必须注意，分转换为0.00元
@@ -172,9 +176,11 @@ public class Handler8800 implements PuDongHandler {
 		try {
 			respBody = req.lanch(new Builder().build());
 		} catch (Exception e) {
-			log.error("查询错误", e);
-			throw new RuntimeException(e);
+			log.error("银行网关支付状态查询错误", e);
+			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_STATUS_QUERY_ERROR);
 		}
+
+		walletLogDao.updateTryTimes(acceptNo);
 
 		if (respBody.getLists() != null && respBody.getLists().getList() != null) {
 
@@ -186,9 +192,14 @@ public class Handler8800 implements PuDongHandler {
 				WalletLogStatus status = WalletLogStatus.parsePuDong8804(rs.getTransStatus());
 				TransStatus8800 transStatus = TransStatus8800.parse(rs.getTransStatus());
 
-				int c = walletLogDao.updateStatusAndErrMsg(rs.getAcceptNo(), rs.getElecChequeNo(),
-					status.getValue(), transStatus != null ? transStatus.getDescription()
-						: ("未知状态" + rs.getTransStatus()));
+				int c = walletLogDao.updateStatusAndErrMsg(
+					rs.getAcceptNo(),
+					rs.getElecChequeNo(),
+					rs.getSeqNo(),
+					status.getValue(),
+					transStatus != null ? transStatus.getDescription()
+						: ("未知状态" + rs.getTransStatus())
+				);
 				count += c;
 			}
 			return count;

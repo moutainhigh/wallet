@@ -1,5 +1,7 @@
 package com.rfchina.wallet.server.bank.pudong.builder;
 
+import com.rfchina.wallet.domain.exception.WalletResponseException;
+import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.server.bank.pudong.domain.common.RequestHeader;
 import com.rfchina.wallet.server.bank.pudong.domain.common.RequestPacket;
 import com.rfchina.wallet.server.bank.pudong.domain.common.ResponsePacket;
@@ -47,10 +49,11 @@ public abstract class PpdbReqTpl {
 			.build();
 
 		Response resp = client.newCall(request).execute();
+		checkRespCode(resp);
 
 		String body = respAdvise(resp.body().bytes());
 		if (StringUtils.isEmpty(body) || !body.contains(SIGN_PREFIX)) {
-			throw new RuntimeException();
+			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_SINGED_ERROR);
 		}
 
 		return XmlUtil.extract(body, SIGN_PREFIX, SIGN_SUFFIX);
@@ -72,16 +75,18 @@ public abstract class PpdbReqTpl {
 			.build();
 
 		Response resp = client.newCall(request).execute();
+		checkRespCode(resp);
 
 		String body = respAdvise(resp.body().bytes());
 		return XmlUtil.extract(body, SIC_PREFIX, SIC_SUFFIX);
 	}
 
+
 	abstract <T> T buildReqBody();
 
 	protected String parseAndSign(Object reqBody, Class clz) throws Exception {
 		String xmlBody = XmlUtil.obj2Xml(reqBody, clz);
-		if(log.isDebugEnabled()) {
+		if (log.isDebugEnabled()) {
 			log.debug(xmlBody);
 		}
 		return sign(xmlBody);
@@ -108,14 +113,14 @@ public abstract class PpdbReqTpl {
 		Response resp = client.newCall(request).execute();
 
 		String respData = respAdvise(resp.body().bytes());
-		if(log.isDebugEnabled()){
+		if (log.isDebugEnabled()) {
 			log.debug(respData);
 		}
 		ResponsePacket responsePacket = XmlUtil
 			.xml2Obj(XmlUtil.unwrap(respData), ResponsePacket.class);
 		if (!SUCC.equals(responsePacket.getHead().getReturnCode())) {
-			log.error("银企直连接口错误, request = {} , response = {}", xmlData,respData);
-			throw new RuntimeException();
+			log.error("银企直连接口错误, request = {} , response = {}", xmlData, respData);
+			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_GATEWAY_RESPONSE_ERROR);
 		}
 		return responsePacket;
 	}
@@ -155,5 +160,9 @@ public abstract class PpdbReqTpl {
 		return extractRespObj(unsign, respBodyClz);
 	}
 
-
+	private void checkRespCode(Response resp) {
+		if (resp.code() != 200) {
+			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_GATEWAY_REQUEST_ERROR);
+		}
+	}
 }

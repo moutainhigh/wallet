@@ -6,8 +6,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication(scanBasePackages="com.rfchina.wallet.server")
 @EnableAutoConfiguration
-//@EnableFuScheduleTask
-//@ImportResource("classpath:schedule-task.xml")
 public class WalletServerApplication {
 
 	public static void main(String[] args) {
