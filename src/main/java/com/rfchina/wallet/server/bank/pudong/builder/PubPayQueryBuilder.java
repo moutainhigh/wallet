@@ -1,14 +1,17 @@
 package com.rfchina.wallet.server.bank.pudong.builder;
 
-import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.server.bank.pudong.domain.common.RequestHeader;
 import com.rfchina.wallet.server.bank.pudong.domain.request.PubPayQueryReqBody;
 import com.rfchina.wallet.server.bank.pudong.domain.response.PubPayQueryRespBody;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.validation.constraints.NotNull;
 import lombok.Builder;
 import okhttp3.OkHttpClient;
 
+/**
+ * @author nzm
+ */
 @Builder
 public class PubPayQueryBuilder extends PpdbReqTpl implements GatewayLancher {
 
@@ -44,12 +47,13 @@ public class PubPayQueryBuilder extends PpdbReqTpl implements GatewayLancher {
 
 	@Override
 	RequestHeader buildReqestHeader() {
+		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		return RequestHeader.builder()
 			.transCode(transCode)
 			.signFlag(SIGN_FLAG)
 			.packetID(String.valueOf(System.currentTimeMillis()))
 			.masterID(masterId)
-			.timeStamp(DateUtil.formatDate(new Date()))
+			.timeStamp(format.format(new Date()))
 			.build();
 	}
 

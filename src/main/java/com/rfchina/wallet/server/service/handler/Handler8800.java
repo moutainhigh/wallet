@@ -1,6 +1,7 @@
 package com.rfchina.wallet.server.service.handler;
 
 import com.rfchina.biztools.generate.IdGenerator;
+import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.BeanUtil;
@@ -10,6 +11,7 @@ import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.BankCode;
 import com.rfchina.wallet.domain.model.WalletCard;
+import com.rfchina.wallet.domain.model.WalletLog;
 import com.rfchina.wallet.server.bank.pudong.builder.PubPayQueryBuilder;
 import com.rfchina.wallet.server.bank.pudong.builder.PubPayReqBuilder;
 import com.rfchina.wallet.server.bank.pudong.domain.request.PubPayReq;
@@ -26,7 +28,9 @@ import com.rfchina.wallet.server.msic.EnumWallet.RemitLocation;
 import com.rfchina.wallet.server.msic.EnumWallet.SysFlag;
 import com.rfchina.wallet.server.msic.EnumWallet.TransStatus8800;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletLogStatus;
+import com.rfchina.wallet.server.msic.MqConstant;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,6 +41,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+
+/**
+ * 8800处理器
+ *
+ * @author nzm
+ */
 @Component
 @Slf4j
 @Data
@@ -104,7 +114,8 @@ public class Handler8800 implements PuDongHandler {
 
 			WalletCard walletCard = getWalletCard(payInReq.getWalletId());
 			if (walletCard == null) {
-				throw new WalletResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST);
+				throw new WalletResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST
+					, String.valueOf(payInReq.getWalletId()));
 			}
 
 			// 必须注意，分转换为0.00元
@@ -159,7 +170,7 @@ public class Handler8800 implements PuDongHandler {
 	}
 
 	@Override
-	public int updatePayStatus(String acceptNo, Date createTime) {
+	public List<WalletLog> updatePayStatus(String acceptNo, Date createTime) {
 		Date endDate = DateUtil.addDate2(createTime, 7);
 
 		PubPayQueryBuilder req = PubPayQueryBuilder.builder()
@@ -187,25 +198,25 @@ public class Handler8800 implements PuDongHandler {
 			List<PayResult> results = respBody.getLists().getList();
 
 			// 更新银行回单到流水表
-			int count = 0;
-			for (PayResult rs : results) {
+			return results.stream().map(rs -> {
 				WalletLogStatus status = WalletLogStatus.parsePuDong8804(rs.getTransStatus());
 				TransStatus8800 transStatus = TransStatus8800.parse(rs.getTransStatus());
 
-				int c = walletLogDao.updateStatusAndErrMsg(
-					rs.getAcceptNo(),
-					rs.getElecChequeNo(),
-					rs.getSeqNo(),
-					status.getValue(),
-					transStatus != null ? transStatus.getDescription()
-						: ("未知状态" + rs.getTransStatus())
-				);
-				count += c;
-			}
-			return count;
+				WalletLog walletLog = walletLogDao.selectByAcctAndElecNo(rs.getAcceptNo()
+					, rs.getElecChequeNo(), WalletLogStatus.PROCESSING.getValue());
+				if (walletLog != null) {
+					walletLog.setSeqNo(rs.getSeqNo());
+					walletLog.setStatus(status.getValue());
+					walletLog.setErrMsg(transStatus != null ? transStatus.getDescription()
+						: ("未知状态" + rs.getTransStatus()));
+					walletLog.setEndTime(new Date());
+					walletLogDao.updateByPrimaryKeySelective(walletLog);
+				}
+				return walletLog;
+			}).filter(rs -> rs != null).collect(Collectors.toList());
 		}
 
-		return 0;
+		return new ArrayList<>();
 	}
 
 	private WalletCard getWalletCard(Long walletId) {

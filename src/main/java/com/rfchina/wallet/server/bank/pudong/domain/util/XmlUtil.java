@@ -7,6 +7,9 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
+/**
+ * @author nzm
+ */
 public class XmlUtil {
 
 	public static String extract(String xmlData, String prefix, String suffix) {

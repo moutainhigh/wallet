@@ -5,7 +5,6 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 /**
@@ -18,6 +17,8 @@ import lombok.Data;
  * freezeBalance> < cortrolBalance>999.00</ cortrolBalance> < canUseBalance>123.23</ canUseBalance>
  * < overdraftBalance>44</ overdraftBalance>
  * </list>
+ *
+ * @author nzm
  */
 @XmlRootElement(name = "body")
 @XmlAccessorType(XmlAccessType.FIELD)

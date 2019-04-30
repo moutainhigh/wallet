@@ -9,13 +9,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * @author nzm
+ */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @XmlRootElement(name = "body")
 @XmlAccessorType(XmlAccessType.FIELD)
-
 public class PubPayReqBody {
 
 	/**
@@ -47,10 +49,5 @@ public class PubPayReqBody {
 
 		private List<PubPayReq> list;
 	}
-
-
-
-
-
 
 }

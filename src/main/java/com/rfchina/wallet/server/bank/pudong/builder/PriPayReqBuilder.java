@@ -15,6 +15,9 @@ import java.util.stream.Collectors;
 import lombok.Builder;
 import okhttp3.OkHttpClient;
 
+/**
+ * @author nzm
+ */
 @Builder
 public class PriPayReqBuilder extends PpdbReqTpl implements GatewayLancher {
 
@@ -67,7 +70,7 @@ public class PriPayReqBuilder extends PpdbReqTpl implements GatewayLancher {
 
 	@Override
 	public PriPayRespBody lanch(OkHttpClient client) throws Exception {
-		return super.build(client,PriPayReqBody.class, PriPayRespBody.class);
+		return super.build(client, PriPayReqBody.class, PriPayRespBody.class);
 	}
 
 	@Override

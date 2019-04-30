@@ -18,7 +18,6 @@ import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
 @Configuration
 @MapperScan(basePackages = {"com.rfchina.wallet.domain.mapper","com.rfchina.wallet.server.mapper"}, sqlSessionTemplateRef = "sqlSessionTemplate")
-
 @Slf4j
 public class DataSourceConfig {
 

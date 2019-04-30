@@ -9,6 +9,9 @@ import java.util.Date;
 import lombok.Builder;
 import okhttp3.OkHttpClient;
 
+/**
+ * @author nzm
+ */
 @Builder
 public class PriPayQuery53Builder extends PpdbReqTpl implements GatewayLancher {
 

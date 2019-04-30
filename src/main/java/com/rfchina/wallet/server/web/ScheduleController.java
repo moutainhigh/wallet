@@ -1,5 +1,6 @@
 package com.rfchina.wallet.server.web;
 
+import com.rfchina.scheduler.annotation.FuScheduleTaskReporter;
 import com.rfchina.wallet.server.api.JuniorWalletApi;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +18,7 @@ public class ScheduleController {
 
 
 	@RequestMapping(value = UrlConstant.WALLET_UPDATE_PAY_STATUS, method = RequestMethod.POST)
-//	@FuScheduleTaskReporter
+	@FuScheduleTaskReporter
 	public String quartzUpdatePayStatus() {
 
 		log.info("scheduler: 开始执行任务[{}]", "quartzUpdatePayStatus");

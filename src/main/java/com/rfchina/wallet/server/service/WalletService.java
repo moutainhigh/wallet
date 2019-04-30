@@ -74,7 +74,8 @@ public class WalletService {
 
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		if (wallet == null) {
-			throw new RfchinaResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST);
+			throw new RfchinaResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST
+				, String.valueOf(walletId));
 		}
 
 		if (WalletType.COMPANY.getValue().byteValue() == wallet.getType()) {
@@ -187,7 +188,7 @@ public class WalletService {
 		}
 
 		BankCode bankCodeResult = bankCodeDao.selectByBankCode(bankCode);
-		if(null == bankCodeResult){
+		if (null == bankCodeResult) {
 			throw new RfchinaResponseException(EnumResponseCode.COMMON_INVALID_PARAMS, "bank_code");
 		}
 
@@ -220,28 +221,27 @@ public class WalletService {
 
 	/**
 	 * 查询银行类别列表
-	 * @return
 	 */
-	public List<BankClass> bankClassList(){
+	public List<BankClass> bankClassList() {
 		return bankCodeDao.selectBankClassList();
 	}
 
 	/**
 	 * 查询银行地区列表
-	 * @param classCode		类别编码
-	 * @return
+	 *
+	 * @param classCode 类别编码
 	 */
-	public List<BankArea> bankAreaList(String classCode){
+	public List<BankArea> bankAreaList(String classCode) {
 		return bankCodeDao.selectBankAreaList(classCode);
 	}
 
 	/**
 	 * 查询银行支行列表
-	 * @param classCode		类别编码
-	 * @param areaCode		地区编码
-	 * @return
+	 *
+	 * @param classCode 类别编码
+	 * @param areaCode 地区编码
 	 */
-	public List<Bank> bankList(String classCode, String areaCode){
+	public List<Bank> bankList(String classCode, String areaCode) {
 		return bankCodeDao.selectBankList(classCode, areaCode);
 	}
 }

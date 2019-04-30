@@ -1,6 +1,6 @@
-package com.rfchina.wallet.server.bank.pudong;
+package com.rfchina.wallet.bank.pudong;
 
-import static com.rfchina.wallet.server.bank.pudong.TestingData.*;
+import static com.rfchina.wallet.bank.pudong.TestingData.*;
 import static org.junit.Assert.*;
 
 import com.alibaba.fastjson.JSON;

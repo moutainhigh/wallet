@@ -5,6 +5,7 @@ import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 
@@ -29,11 +30,9 @@ public class XDiamondConfig {
 
 
 	@Bean
-	public static PropertyPlaceholderConfigurer propertyPlaceholderConfigurer(
-		XDiamondConfigFactoryBean bean)
-		throws Exception {
-		PropertyPlaceholderConfigurer config = new PropertyPlaceholderConfigurer();
-		config.setProperties(bean.getObject().getProperties());
-		return config;
+	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer(XDiamondConfigFactoryBean xDiamondConfig) throws Exception {
+		PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer = new PropertySourcesPlaceholderConfigurer();
+		propertySourcesPlaceholderConfigurer.setProperties(xDiamondConfig.getObject().getProperties());
+		return propertySourcesPlaceholderConfigurer;
 	}
 }

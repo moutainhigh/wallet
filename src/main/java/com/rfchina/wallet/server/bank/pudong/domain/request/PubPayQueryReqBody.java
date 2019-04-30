@@ -9,6 +9,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 
+/**
+ * @author nzm
+ */
 @ApiModel
 @Builder
 @NoArgsConstructor

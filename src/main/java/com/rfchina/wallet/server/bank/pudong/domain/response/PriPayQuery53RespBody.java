@@ -7,6 +7,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * @author nzm
+ */
 @Data
 public class PriPayQuery53RespBody {
 	@ApiModelProperty(value = "交易日期", required = true)

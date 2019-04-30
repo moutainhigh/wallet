@@ -12,6 +12,9 @@ import java.util.Optional;
 import lombok.Builder;
 import okhttp3.OkHttpClient;
 
+/**
+ * @author nzm
+ */
 @Builder
 public class BalanceReqBuilder extends PpdbReqTpl implements GatewayLancher<Balance> {
 

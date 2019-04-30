@@ -12,12 +12,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class BeanConfig {
 
-	@Bean("mqExecutor")
-	public ExecutorService mqExecutor() {
-		return Executors.newFixedThreadPool(2,
-			new BasicThreadFactory.Builder().namingPattern("MqExec_%d").build());
-	}
-
 	@Bean
 	public SpringContext springContext() {
 		return new SpringContext();

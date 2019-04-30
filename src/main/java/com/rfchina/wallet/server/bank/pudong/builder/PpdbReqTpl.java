@@ -1,12 +1,12 @@
 package com.rfchina.wallet.server.bank.pudong.builder;
 
-import com.rfchina.wallet.domain.exception.WalletResponseException;
-import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.server.bank.pudong.domain.common.RequestHeader;
 import com.rfchina.wallet.server.bank.pudong.domain.common.RequestPacket;
 import com.rfchina.wallet.server.bank.pudong.domain.common.ResponsePacket;
 import com.rfchina.wallet.server.bank.pudong.domain.common.SignedBody;
 import com.rfchina.wallet.server.bank.pudong.domain.util.XmlUtil;
+import com.rfchina.wallet.domain.exception.WalletResponseException;
+import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import java.nio.charset.Charset;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.MediaType;
@@ -14,8 +14,13 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
+/**
+ * 浦发网关请求模板类
+ *
+ * @author nzm
+ */
 @Slf4j
 public abstract class PpdbReqTpl {
 

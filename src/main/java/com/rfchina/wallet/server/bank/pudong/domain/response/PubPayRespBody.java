@@ -2,7 +2,6 @@ package com.rfchina.wallet.server.bank.pudong.domain.response;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -20,6 +19,8 @@ import lombok.NoArgsConstructor;
  * <successCount >1</ successCount >
  * <failCount>0</ failCount>
  * </body>
+ *
+ * @author nzm
  */
 @Data
 @Builder

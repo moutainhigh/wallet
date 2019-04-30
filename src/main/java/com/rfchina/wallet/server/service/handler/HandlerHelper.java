@@ -6,8 +6,14 @@ import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * 处理器助手
+ *
+ * @author nzm
+ */
 @Component
 public class HandlerHelper {
+
 	@Autowired
 	private HandlerAQ52 handlerAQ52;
 
@@ -23,7 +29,7 @@ public class HandlerHelper {
 		handlerAQ52.setNext(handler8800);
 	}
 
-	public PuDongHandler selectByWalletType(Byte walletType){
+	public PuDongHandler selectByWalletType(Byte walletType) {
 		PuDongHandler currHandler = rootHandler;
 
 		while (currHandler != null) {
@@ -33,7 +39,8 @@ public class HandlerHelper {
 			currHandler = currHandler.getNext();
 		}
 
-		throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_HANDLER_NOT_FOUND,"type = "+ walletType);
+		throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_HANDLER_NOT_FOUND,
+			"type = " + walletType);
 	}
 
 	public PuDongHandler selectByMethod(Byte refMethod) {

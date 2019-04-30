@@ -14,6 +14,9 @@ import java.util.Optional;
 import lombok.Builder;
 import okhttp3.OkHttpClient;
 
+/**
+ * @author nzm
+ */
 @Builder
 public class PubPayReqBuilder extends PpdbReqTpl implements GatewayLancher<PubPayRespBody> {
 

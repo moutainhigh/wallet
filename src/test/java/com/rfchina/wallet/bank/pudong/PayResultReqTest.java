@@ -1,4 +1,4 @@
-package com.rfchina.wallet.server.bank.pudong;
+package com.rfchina.wallet.bank.pudong;
 
 import static org.junit.Assert.*;
 
@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import org.junit.Test;
 
-import static com.rfchina.wallet.server.bank.pudong.TestingData.*;
+import static com.rfchina.wallet.bank.pudong.TestingData.*;
 
 @Slf4j
 public class PayResultReqTest {

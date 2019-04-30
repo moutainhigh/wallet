@@ -1,6 +1,7 @@
 package com.rfchina.wallet.server.mapper.ext;
 
 import com.rfchina.wallet.domain.mapper.WalletLogMapper;
+import com.rfchina.wallet.domain.model.WalletLog;
 import com.rfchina.wallet.server.model.ext.AcceptNo;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
@@ -31,7 +32,7 @@ public interface WalletLogExtDao extends WalletLogMapper {
 	@Select({
 		"select distinct accept_no as acceptNo,ref_method as refMethod, create_time as createTime",
 		"from rf_wallet_log",
-		"where status = 2 and query_time < CURRENT_TIMESTAMP and curr_try_times < next_try_times"
+		"where status = 2 and query_time < CURRENT_TIMESTAMP and curr_try_times < max_try_times"
 	})
 	List<AcceptNo> selectUnFinish();
 
@@ -44,9 +45,19 @@ public interface WalletLogExtDao extends WalletLogMapper {
 		@Param("errMsg") String errMsg);
 
 	@Update({"update rf_wallet_log"
-		, "set curr_try_times = curr_try_times + 1 "
-		, ", query_time = date_add(CURRENT_TIMESTAMP, interval power(2 , curr_try_times + 1) minute) "
+		, "set curr_try_times = curr_try_times + 1 ,"
+		, "query_time = date_add(CURRENT_TIMESTAMP, interval power(2 , curr_try_times + 1) minute) "
 		, "where accept_no = #{acceptNo}"
 	})
-	void updateTryTimes(String acceptNo);
+	void updateTryTimes(@Param("acceptNo") String acceptNo);
+
+	@Select({
+		"select * from rf_wallet_log"
+		, "where accept_no = #{acceptNo} and elec_cheque_no = #{elecChequeNo} "
+		, " and status = #{status}"
+		, "limit 1"
+	})
+	@ResultMap("com.rfchina.wallet.domain.mapper.WalletLogMapper.BaseResultMap")
+	WalletLog selectByAcctAndElecNo(@Param("acceptNo") String acceptNo,
+		@Param("elecChequeNo") String elecChequeNo, @Param("status") Byte status);
 }

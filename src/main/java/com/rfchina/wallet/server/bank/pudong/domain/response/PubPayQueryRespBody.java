@@ -7,6 +7,9 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import lombok.Data;
 
+/**
+ * @author nzm
+ */
 @Data
 @XmlRootElement(name = "body")
 @XmlAccessorType(XmlAccessType.FIELD)
