@@ -27,6 +27,11 @@ public interface WalletApi {
 	void quartzUpdate();
 
 	/**
+	 * 定时支付
+	 */
+	void quartzPay();
+
+	/**
 	 * 查询钱包明细
 	 */
 	WalletInfoResp queryWalletInfo(String accessToken, Long walletId);
@@ -84,4 +89,6 @@ public interface WalletApi {
 	 * @return
 	 */
 	List<Bank> bankList(String classCode, String areaCode);
+
+
 }

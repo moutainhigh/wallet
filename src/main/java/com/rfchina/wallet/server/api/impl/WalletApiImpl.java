@@ -15,6 +15,7 @@ import com.rfchina.wallet.domain.model.ext.BankClass;
 import com.rfchina.wallet.server.api.WalletApi;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
+import com.rfchina.wallet.server.service.JuniorWalletService;
 import com.rfchina.wallet.server.service.WalletService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,6 +28,9 @@ public class WalletApiImpl implements WalletApi {
 
 	@Autowired
 	private WalletService walletService;
+
+	@Autowired
+	private JuniorWalletService juniorWalletService;
 
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
@@ -41,6 +45,14 @@ public class WalletApiImpl implements WalletApi {
 	public void quartzUpdate() {
 		walletService.quartzUpdate();
 	}
+
+	@Log
+	@Override
+	public void quartzPay() {
+		walletService.quartzPay();
+	}
+
+
 
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})

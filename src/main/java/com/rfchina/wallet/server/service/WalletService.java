@@ -7,6 +7,7 @@ import com.rfchina.platform.common.exception.RfchinaResponseException;
 import com.rfchina.platform.common.misc.ResponseCode;
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.SymbolConstant;
+import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.JsonUtil;
@@ -15,19 +16,22 @@ import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.*;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.WalletResponseCode;
+import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.*;
 import com.rfchina.wallet.domain.model.WalletLogCriteria.Criteria;
 import com.rfchina.wallet.domain.model.ext.Bank;
 import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
 import com.rfchina.wallet.server.adapter.UserAdapter;
-import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletLogExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletUserExtDao;
 import com.rfchina.wallet.server.model.ext.AcceptNo;
+import com.rfchina.wallet.server.model.ext.PayInResp;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp.WalletInfoRespBuilder;
+import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
+import com.rfchina.wallet.server.msic.EnumWallet.WalletLogStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletType;
 import com.rfchina.wallet.server.msic.MqConstant;
@@ -115,6 +119,35 @@ public class WalletService {
 
 	}
 
+
+	/**
+	 * 定时支付
+	 */
+	public void quartzPay() {
+		List<String> acceptNos = walletLogExtDao.selectUnSendBatchNo();
+		acceptNos.forEach(batchNo -> {
+			List<WalletLog> walletLogs = walletLogExtDao.selectByBatchNo(batchNo);
+			if(StringUtils.isEmpty(batchNo) || walletLogs.size() == 0){
+				return;
+			}
+			// 请求网关
+			try {
+				PuDongHandler puDongHandler = handlerHelper.selectByWalletType(null);
+				Tuple<GatewayMethod, PayInResp> rs = puDongHandler.pay(walletLogs);
+
+				GatewayMethod method = rs.left;
+				PayInResp payInResp = rs.right;
+				for (WalletLog walletLog : walletLogs) {
+					walletLogExtDao.updateStatusAndAcceptNo(walletLog.getId(),
+						WalletLogStatus.PROCESSING.getValue(), payInResp.getAcceptNo(),
+						method.getValue());
+				}
+			} catch (Exception e) {
+				log.error("银行网关支付错误", e);
+			}
+		});
+
+	}
 
 	/**
 	 * 定时更新支付状态
@@ -334,4 +367,6 @@ public class WalletService {
 	public List<Bank> bankList(String classCode, String areaCode) {
 		return bankCodeDao.selectBankList(classCode, areaCode);
 	}
+
+
 }

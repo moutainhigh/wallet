@@ -93,7 +93,7 @@ public class HandlerAQ52 implements PuDongHandler {
 	/**
 	 * 对私转帐
 	 */
-	public Tuple<GatewayMethod, PayInResp> pay(List<PayInReq> payInReqs) throws Exception {
+	public Tuple<GatewayMethod, PayInResp> pay(List<WalletLog> payInReqs) throws Exception {
 		int seq = 1;
 
 		List<PriPayReq> payReqs = payInReqs.stream().map(payInReq -> {
