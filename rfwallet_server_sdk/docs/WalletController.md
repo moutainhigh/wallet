@@ -82,7 +82,7 @@
 
 ###  绑定银行卡(对公)
 
-请求地址: /wallet_server/v1/wallet/bank_card/bind
+请求地址: /wallet_server/v1/m/wallet/bank_card/bind
 
 请求类型: POST
 
@@ -390,12 +390,15 @@
               list: [{
                         accept_no: "" , //受理编号
         amount: "" , //流水金额
+        batch_no: "" , //钱包批次号
+        biz_no: "" , //业务凭证号
         create_time: "" , //创建日期
         curr_try_times: "" , //当前尝试次数
         elec_cheque_no: "" , //电子凭证号
+        end_time: "" , //交易结束时间（浦发只有时分秒，查询成功定为交易结束时间）
         err_msg: "" , //错误信息
         id: "" , //ID
-        next_try_times: "" , //最大尝试次数
+        max_try_times: "" , //最大尝试次数
         payee_account: "" , //收款方帐号
         payee_type: "" , //收款账户类型，1：对公账户，2：个人账户
         payer_account: "" , //付款方帐号

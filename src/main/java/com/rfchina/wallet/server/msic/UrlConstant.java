@@ -41,10 +41,6 @@ public class UrlConstant {
 	 */
 	public static final String CREATE_WALLET = VERSION + "/m/wallet/create_wallet";
 
-	/**
-	 * 查询用户信息
-	 */
-	public static final String WALLET_USER_LIST = VERSION + "/wallet/user/list";
 
 	/**
 	 * 查询交易流水
@@ -59,7 +55,7 @@ public class UrlConstant {
 	/**
 	 * 钱包绑定银行卡
 	 */
-	public static final String WALLET_BANK_CARD_BIND = VERSION + "/wallet/bank_card/bind";
+	public static final String WALLET_BANK_CARD_BIND = VERSION + "/m/wallet/bank_card/bind";
 
 	/**
 	 * 银行类别列表

@@ -19,6 +19,12 @@ public class WalletLog  {
     @ApiModelProperty("流水金额")
     private Long amount ;
 
+    @ApiModelProperty("钱包批次号")
+    private String batchNo ;
+
+    @ApiModelProperty("业务凭证号")
+    private String bizNo ;
+
     @ApiModelProperty("创建日期")
     private String createTime ;
 
@@ -28,6 +34,9 @@ public class WalletLog  {
     @ApiModelProperty("电子凭证号")
     private String elecChequeNo ;
 
+    @ApiModelProperty("交易结束时间（浦发只有时分秒，查询成功定为交易结束时间）")
+    private String endTime ;
+
     @ApiModelProperty("错误信息")
     private String errMsg ;
 
@@ -35,7 +44,7 @@ public class WalletLog  {
     private Long id ;
 
     @ApiModelProperty("最大尝试次数")
-    private Integer nextTryTimes ;
+    private Integer maxTryTimes ;
 
     @ApiModelProperty("收款方帐号")
     private String payeeAccount ;
