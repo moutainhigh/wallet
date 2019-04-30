@@ -28,6 +28,14 @@ public class XDiamondConfig {
 		return bean;
 	}
 
+	@Bean
+	public static PropertyPlaceholderConfigurer propertyPlaceholderConfigurer(
+		XDiamondConfigFactoryBean bean)
+		throws Exception {
+		PropertyPlaceholderConfigurer config = new PropertyPlaceholderConfigurer();
+		config.setProperties(bean.getObject().getProperties());
+		return config;
+	}
 
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer(XDiamondConfigFactoryBean xDiamondConfig) throws Exception {
