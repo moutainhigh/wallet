@@ -24,21 +24,21 @@ public class Handler8800Test extends SpringBaseTest {
 
 	@Test
 	public void p0101Pay() throws Exception {
-		PayInReq req1 = PayInReq.builder()
+		WalletLog req1 = WalletLog.builder()
 			.walletId(3L)
 			.amount(1L)
 			.elecChequeNo(
 				IdGenerator.createBizId("Eno", 16, (orderId) -> true))
 			.note("测试")
-			.payPurpose((byte) 1)
+			.payPurpose("1")
 			.build();
-		PayInReq req2 = PayInReq.builder()
+		WalletLog req2 = WalletLog.builder()
 			.walletId(2L)
 			.amount(1L)
 			.elecChequeNo(
 				IdGenerator.createBizId("Test", 16, (orderId) -> true))
 			.note("测试")
-			.payPurpose((byte) 1)
+			.payPurpose("1")
 			.build();
 
 		Tuple<GatewayMethod, PayInResp> tuple = handler8800.pay(Arrays.asList(req1, req2));

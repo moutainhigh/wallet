@@ -21,8 +21,8 @@ public class ScheduleController {
 
 	@RequestMapping(value = UrlConstant.WALLET_UPDATE_PAY_STATUS, method = RequestMethod.POST)
 	@FuScheduleTaskReporter
-	public String quartzUpdatePayStatus(@
-		RequestParam("schedule_id") String scheduleId,
+	public String quartzUpdatePayStatus(
+		@RequestParam("schedule_id") String scheduleId,
 		@RequestParam("timestamp") String timestamp,
 		@RequestParam("sign") String sign) {
 
@@ -31,6 +31,22 @@ public class ScheduleController {
 		walletApi.quartzUpdate();
 
 		log.info("scheduler: 完成任务[{}]", "quartzUpdatePayStatus");
+		return "success";
+	}
+
+	@RequestMapping(value = UrlConstant.WALLET_PAY, method = RequestMethod.POST)
+	@FuScheduleTaskReporter
+	public String quartzPay(
+		@RequestParam("schedule_id") String scheduleId,
+		@RequestParam("timestamp") String timestamp,
+		@RequestParam("sign") String sign) {
+
+		log.info("scheduler: 开始执行任务[{}]", "quartzUpdatePayStatus");
+
+		walletApi.quartzPay();
+
+		log.info("scheduler: 完成任务[{}]", "quartzUpdatePayStatus");
+
 		return "success";
 	}
 }

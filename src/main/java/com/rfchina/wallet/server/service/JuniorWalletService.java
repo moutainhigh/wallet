@@ -69,15 +69,9 @@ public class JuniorWalletService {
 			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_BATCH_LIMIT);
 		}
 
-		// 钱包类型唯一
-		List<Long> walletIds = payInReqs.stream()
-			.map(payInReq -> payInReq.getWalletId())
-			.distinct()
-			.collect(Collectors.toList());
-
 		// 记录钱包流水
 		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> true);
-		List<WalletLog> walletLogs = payInReqs.stream().map(payInReq -> {
+		payInReqs.forEach(payInReq -> {
 
 			WalletCard walletCard = getWalletCard(payInReq.getWalletId());
 			if (walletCard == null) {
@@ -98,39 +92,26 @@ public class JuniorWalletService {
 				.batchNo(payInReq.getBatchNo())
 				.bizNo(payInReq.getBizNo())
 				.elecChequeNo(payInReq.getElecChequeNo())
+				.payPurpose(payInReq.getPayPurpose() != null ?
+					String.valueOf(payInReq.getPayPurpose()) : null)
+				.note(payInReq.getNote())
 				.status(WalletLogStatus.SENDING.getValue())
+				.queryTime(DateUtil.addSecs(new Date(), 30))
 				.createTime(new Date())
 				.build();
 
 			walletLogDao.insertSelective(walletLog);
-			return walletLog;
-		}).collect(Collectors.toList());
+		});
 
-		// 请求网关
-		try {
-			PuDongHandler puDongHandler = handlerHelper.selectByWalletType(null);
-			Tuple<GatewayMethod, PayInResp> rs = puDongHandler.pay(payInReqs);
-
-			GatewayMethod method = rs.left;
-			PayInResp payInResp = rs.right;
-			for (WalletLog walletLog : walletLogs) {
-				walletLogDao.updateStatusAndAcceptNo(walletLog.getId(),
-					WalletLogStatus.PROCESSING.getValue(), payInResp.getAcceptNo(),
-					method.getValue());
-			}
-
-			payInResp.setBatchNo(batchNo);
-			return payInResp;
-		} catch (Exception e) {
-			log.error("银行网关支付错误", e);
-			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_GATEWAY_PAY_ERROR);
-		}
-
-
+		return PayInResp.builder()
+			.batchNo(batchNo)
+			.build();
 	}
 
 
 	private WalletCard getWalletCard(Long walletId) {
 		return walletCardDao.selectByDef(walletId);
 	}
+
+
 }

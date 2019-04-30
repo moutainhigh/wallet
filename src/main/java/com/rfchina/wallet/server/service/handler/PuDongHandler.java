@@ -22,7 +22,7 @@ public interface PuDongHandler {
 
 	GatewayMethod getGatewayMethod();
 
-	Tuple<GatewayMethod, PayInResp> pay(List<PayInReq> payInReqs) throws Exception;
+	Tuple<GatewayMethod, PayInResp> pay(List<WalletLog> payInReqs) throws Exception;
 
 	List<WalletLog> updatePayStatus(String acceptNo, Date createTime);
 

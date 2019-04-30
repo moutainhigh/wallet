@@ -36,6 +36,20 @@ public interface WalletLogExtDao extends WalletLogMapper {
 	})
 	List<AcceptNo> selectUnFinish();
 
+	@Select({
+		"select distinct batch_no",
+		"from rf_wallet_log",
+		"where status = 1",
+		"limit 10"
+	})
+	List<String> selectUnSendBatchNo();
+
+	@Select({
+		"select * from rf_wallet_log",
+		"where batch_no = #{batchNo} and status = 1"
+	})
+	@ResultMap("com.rfchina.wallet.domain.mapper.WalletLogMapper.BaseResultMap")
+	List<WalletLog> selectByBatchNo(@Param("batchNo") String batchNo);
 
 	@Update({"update rf_wallet_log"
 		, "set err_msg = #{errMsg} , status = #{status}"
@@ -46,7 +60,7 @@ public interface WalletLogExtDao extends WalletLogMapper {
 
 	@Update({"update rf_wallet_log"
 		, "set curr_try_times = curr_try_times + 1 ,"
-		, "query_time = date_add(CURRENT_TIMESTAMP, interval power(2 , curr_try_times + 1) minute) "
+		, "query_time = date_add(CURRENT_TIMESTAMP, interval power(2 , curr_try_times) minute) "
 		, "where accept_no = #{acceptNo}"
 	})
 	void updateTryTimes(@Param("acceptNo") String acceptNo);
@@ -60,4 +74,6 @@ public interface WalletLogExtDao extends WalletLogMapper {
 	@ResultMap("com.rfchina.wallet.domain.mapper.WalletLogMapper.BaseResultMap")
 	WalletLog selectByAcctAndElecNo(@Param("acceptNo") String acceptNo,
 		@Param("elecChequeNo") String elecChequeNo, @Param("status") Byte status);
+
+
 }

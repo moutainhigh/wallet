@@ -103,23 +103,22 @@ public class Handler8800 implements PuDongHandler {
 
 
 	@Override
-	public Tuple<GatewayMethod, PayInResp> pay(List<PayInReq> payInReqs) throws Exception {
-		// 出佣请求不能为空, 数量不能大于20
+	public Tuple<GatewayMethod, PayInResp> pay(List<WalletLog> payInReqs) throws Exception {
 		int limit = 20;
 		if (payInReqs.size() > limit) {
 			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_BATCH_LIMIT);
 		}
 
-		List<PubPayReq> payReqs = payInReqs.stream().map(payInReq -> {
+		List<PubPayReq> payReqs = payInReqs.stream().map(walletLog -> {
 
-			WalletCard walletCard = getWalletCard(payInReq.getWalletId());
+			WalletCard walletCard = getWalletCard(walletLog.getWalletId());
 			if (walletCard == null) {
 				throw new WalletResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST
-					, String.valueOf(payInReq.getWalletId()));
+					, String.valueOf(walletLog.getWalletId()));
 			}
 
 			// 必须注意，分转换为0.00元
-			BigDecimal bigAmount = new BigDecimal(payInReq.getAmount())
+			BigDecimal bigAmount = new BigDecimal(walletLog.getAmount())
 				.divide(new BigDecimal("100"))
 				.setScale(2, BigDecimal.ROUND_DOWN);
 
@@ -138,7 +137,7 @@ public class Handler8800 implements PuDongHandler {
 				&& RemitLocation.OTHER.getValue().equals(remitLocation);
 
 			return PubPayReq.builder()
-				.elecChequeNo(payInReq.getElecChequeNo())
+				.elecChequeNo(walletLog.getElecChequeNo())
 				.acctNo(cmpAcctNo)
 				.acctName(cmpAcctName)
 				.payeeAcctNo(walletCard.getBankAccount())
@@ -146,11 +145,11 @@ public class Handler8800 implements PuDongHandler {
 				.amount(bigAmount.toString())
 				.sysFlag(sysFlag)
 				.remitLocation(remitLocation)
-				.note(payInReq.getNote())
+				.note(walletLog.getNote())
 				.payeeBankSelectFlag(isOtherRemit ? "1" : null)
 				.payeeBankNo(isOtherRemit ? walletCard.getBankCode() : null)
 				.payPurpose(
-					payInReq.getPayPurpose() != null ? payInReq.getPayPurpose().toString() : null)
+					walletLog.getPayPurpose() != null ? walletLog.getPayPurpose().toString() : null)
 				.build();
 
 		}).collect(Collectors.toList());
