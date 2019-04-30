@@ -11,11 +11,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PayStatusResp {
-	@ApiModelProperty(value = "电子凭证号")
-	private String elecChequeNo;
+	@ApiModelProperty(value = "业务凭证号")
+	private String bizNo;
 
-	@ApiModelProperty(value = "受理编号")
-	private String acceptNo;
+	@ApiModelProperty(value = "钱包批次号")
+	private String batchNo;
 
 	@ApiModelProperty(value = "交易日期")
 	private String transDate;
@@ -23,7 +23,7 @@ public class PayStatusResp {
 	@ApiModelProperty(value = "支付金额")
 	private Long amount;
 
-	@ApiModelProperty(value = "支付状态。1：受理中，2：交易成功。3：交易失败")
+	@ApiModelProperty(value = "交易状态。 1: 待发送银行网关，2：银行受理中，3：交易成功，4：交易失败，5：撤销")
 	private Byte status;
 
 	@ApiModelProperty(value = "失败原因")

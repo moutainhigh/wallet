@@ -10,6 +10,7 @@ import com.rfchina.wallet.domain.model.ext.Bank;
 import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
 import com.rfchina.wallet.server.api.WalletApi;
+import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import io.swagger.annotations.Api;
@@ -30,6 +31,17 @@ public class WalletController {
 
 	@Autowired
 	private WalletApi walletApi;
+
+	@ApiOperation("初级钱包-查询支付状态")
+	@PostMapping(UrlConstant.JUNIOR_WALLET_QUERY)
+	public ResponseValue<List<PayStatusResp>> query(
+		@RequestParam("access_token") String accessToken,
+		@ApiParam(value = "业务凭证号(业务方定义唯一)", required = false, example = "123") @RequestParam("biz_no") String bizNo,
+		@ApiParam(value = "钱包批次号", required = false) @RequestParam("batch_no") String batchNo
+	) {
+		List<PayStatusResp> resp = walletApi.query(accessToken, bizNo, batchNo);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, resp);
+	}
 
 	@ApiOperation("查询钱包信息（企业or个人）")
 	@PostMapping(UrlConstant.WALLET_QUERY_INFO)

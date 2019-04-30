@@ -12,15 +12,10 @@ import lombok.NoArgsConstructor;
 @Data
 public class PayInResp {
 
-	@ApiModelProperty(value = "受理编号")
+	@ApiModelProperty(value = "钱包批次号")
+	private String batchNo;
+
+	@ApiModelProperty(value = "受理编号", hidden = true)
 	private String acceptNo;
 
-	@ApiModelProperty(value = "柜员流水号")
-	private String seqNo;
-
-	@ApiModelProperty(value = "成功笔数")
-	private String successCount;
-
-	@ApiModelProperty(value = "失败笔数")
-	private String failCount;
 }

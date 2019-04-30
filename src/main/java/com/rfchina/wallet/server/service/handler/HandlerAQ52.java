@@ -151,8 +151,6 @@ public class HandlerAQ52 implements PuDongHandler {
 
 		PayInResp payInResp = PayInResp.builder()
 			.acceptNo(resp.getHandleSeqNo())
-			.successCount(String.valueOf(payInReqs.size()))
-			.failCount("0")
 			.build();
 
 		return new Tuple<>(getGatewayMethod(), payInResp);

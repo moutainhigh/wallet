@@ -27,17 +27,5 @@ public class JuniorWalletApiImpl implements JuniorWalletApi {
 		return juniorWalletService.payIn(payInReqs);
 	}
 
-	@Log
-	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
-	@SignVerify
-	@Override
-	public List<PayStatusResp> query(String accessToken, String elecChequeNo, String acceptNo) {
-		return juniorWalletService.query(elecChequeNo, acceptNo);
-	}
 
-	@Log
-	@Override
-	public void quartzUpdate() {
-		juniorWalletService.quartzUpdate();
-	}
 }

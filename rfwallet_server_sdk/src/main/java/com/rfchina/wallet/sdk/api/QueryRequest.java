@@ -14,11 +14,11 @@ public class QueryRequest extends  AbstractApiRequest {
   @ApiModelProperty("access_token")
   private String accessToken ;
 
-  @ApiModelProperty("受理编号")
-  private String acceptNo ;
+  @ApiModelProperty("钱包批次号")
+  private String batchNo ;
 
-  @ApiModelProperty("电子凭证号(业务方定义唯一)")
-  private String elecChequeNo ;
+  @ApiModelProperty("业务凭证号(业务方定义唯一)")
+  private String bizNo ;
 
 
   @Override
@@ -37,11 +37,11 @@ public class QueryRequest extends  AbstractApiRequest {
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
       }
-      if(acceptNo != null){
-        parameters.put("accept_no", acceptNo.toString());
+      if(batchNo != null){
+        parameters.put("batch_no", batchNo.toString());
       }
-      if(elecChequeNo != null){
-        parameters.put("elec_cheque_no", elecChequeNo.toString());
+      if(bizNo != null){
+        parameters.put("biz_no", bizNo.toString());
       }
     return parameters;
   }

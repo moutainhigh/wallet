@@ -23,8 +23,7 @@ public class JuniorWalletServiceTest extends SpringBaseTest {
 		PayInReq req1 = PayInReq.builder()
 			.walletId(3L)
 			.amount(1L)
-			.elecChequeNo(
-				IdGenerator.createBizId("Eno", 16, (orderId) -> true))
+			.bizNo(IdGenerator.createBizId("Eno", 16, (orderId) -> true))
 			.note("测试")
 			.payPurpose((byte) 1)
 			.build();
@@ -32,8 +31,7 @@ public class JuniorWalletServiceTest extends SpringBaseTest {
 		PayInReq req2 = PayInReq.builder()
 			.walletId(2L)
 			.amount(1L)
-			.elecChequeNo(
-				IdGenerator.createBizId("Test", 16, (orderId) -> true))
+			.bizNo(IdGenerator.createBizId("Test", 16, (orderId) -> true))
 			.note("测试")
 			.payPurpose((byte) 1)
 			.build();
@@ -42,7 +40,6 @@ public class JuniorWalletServiceTest extends SpringBaseTest {
 		log.info("{}.response = {}", currMethod(), JSON.toJSONString(respBody));
 
 		assertNotNull(respBody);
-		assertNotNull(respBody.getSeqNo());
 	}
 
 	@Test
@@ -50,8 +47,7 @@ public class JuniorWalletServiceTest extends SpringBaseTest {
 		PayInReq req1 = PayInReq.builder()
 			.walletId(2L)
 			.amount(1L)
-			.elecChequeNo(
-				IdGenerator.createBizId("Test", 16, (orderId) -> true))
+			.bizNo(IdGenerator.createBizId("Test", 16, (orderId) -> true))
 			.note("测试")
 			.payPurpose((byte) 1)
 			.build();
@@ -59,8 +55,7 @@ public class JuniorWalletServiceTest extends SpringBaseTest {
 		PayInReq req2 = PayInReq.builder()
 			.walletId(15L)
 			.amount(1L)
-			.elecChequeNo(
-				IdGenerator.createBizId("Eno", 16, (orderId) -> true))
+			.bizNo(IdGenerator.createBizId("Eno", 16, (orderId) -> true))
 			.note("测试")
 			.payPurpose((byte) 1)
 			.build();
@@ -69,11 +64,6 @@ public class JuniorWalletServiceTest extends SpringBaseTest {
 		log.info("{}.response = {}", currMethod(), JSON.toJSONString(respBody));
 
 		assertNotNull(respBody);
-		assertNotNull(respBody.getSeqNo());
 	}
 
-	@Test
-	public void quartzUpdate() {
-		juniorWalletService.quartzUpdate();
-	}
 }

@@ -7,12 +7,24 @@ import com.rfchina.wallet.domain.model.WalletLog;
 import com.rfchina.wallet.domain.model.ext.Bank;
 import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
+import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 
 import java.util.Date;
 import java.util.List;
 
 public interface WalletApi {
+
+
+	/**
+	 * 查询出佣结果
+	 */
+	List<PayStatusResp> query(String accessToken, String bizNo, String batchNo);
+
+	/**
+	 * 定时更新支付状态
+	 */
+	void quartzUpdate();
 
 	/**
 	 * 查询钱包明细

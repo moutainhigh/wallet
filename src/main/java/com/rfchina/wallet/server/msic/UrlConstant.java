@@ -19,12 +19,12 @@ public class UrlConstant {
 	/**
 	 * 初级钱包-查询支付状态
 	 */
-	public static final String JUNIOR_WALLET_QUERY = VERSION + "/m/junior/sl_query";
+	public static final String JUNIOR_WALLET_QUERY = VERSION + "/m/wallet/sl_query";
 
 	/**
 	 * 定时更新支付状态
 	 */
-	public static final String WALLET_UPDATE_PAY_STATUS = VERSION + "/wallet/quartz_update_pay_status";
+	public static final String WALLET_UPDATE_PAY_STATUS = VERSION + "/schedule/quartz_update_pay_status";
 
 	/**
 	 * 查询钱包信息（企业or个人）

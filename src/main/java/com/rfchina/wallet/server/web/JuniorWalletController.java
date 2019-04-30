@@ -31,7 +31,7 @@ public class JuniorWalletController {
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包ID", required = true, example = "1") @RequestParam("wallet_id") Long walletId,
 		@ApiParam(value = "支付金额(单位分)", required = true, example = "1") @RequestParam("amount") Long amount,
-		@ApiParam(value = "电子凭证号(业务方定义唯一)", required = true, example = "123") @RequestParam("elec_cheque_no") String elecChequeNo,
+		@ApiParam(value = "业务凭证号(业务方定义唯一，最长32字)", required = true, example = "123") @RequestParam("biz_no") String bizNo,
 		@ApiParam(value = "附言", required = false) @RequestParam(value = "note", required = false) String note,
 		@ApiParam(value = "支付用途 收款人为个人客户时必须输入 1-工资、奖金收入 2-稿费、演出费等劳务费用 3-债券、期货、信托等投资的本金和收益 4-个人债权或产权转让收益 5-个人贷款转存 6-证券交易结算资金和期货交易保证金 7-集成、赠予款项 8-保险理赔、保费退换等款项 9-纳税退还 A-农、副、矿产品销售收入", required = false)
 		@RequestParam(value = "pay_purpose", required = false) Byte payPurpose
@@ -40,7 +40,7 @@ public class JuniorWalletController {
 		PayInReq payInReq = PayInReq.builder()
 			.walletId(walletId)
 			.amount(amount)
-			.elecChequeNo(elecChequeNo)
+			.bizNo(bizNo)
 			.note(note)
 			.payPurpose(payPurpose)
 			.build();
@@ -62,15 +62,6 @@ public class JuniorWalletController {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, respBody);
 	}
 
-	@ApiOperation("初级钱包-查询支付状态")
-	@PostMapping(UrlConstant.JUNIOR_WALLET_QUERY)
-	public ResponseValue<List<PayStatusResp>> query(
-		@RequestParam("access_token") String accessToken,
-		@ApiParam(value = "电子凭证号(业务方定义唯一)", required = false, example = "123") @RequestParam("elec_cheque_no") String elecChequeNo,
-		@ApiParam(value = "受理编号", required = false) @RequestParam("accept_no") String acceptNo
-	) {
-		List<PayStatusResp> resp = juniorWalletApi.query(accessToken, elecChequeNo, acceptNo);
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, resp);
-	}
+
 
 }

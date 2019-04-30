@@ -34,4 +34,10 @@ public class WalletServiceTest extends SpringBaseTest {
 		assertNotNull(resp);
 
 	}
+
+
+	@Test
+	public void quartzUpdate() {
+		walletService.quartzUpdate();
+	}
 }

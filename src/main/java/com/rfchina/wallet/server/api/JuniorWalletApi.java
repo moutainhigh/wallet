@@ -12,13 +12,5 @@ public interface JuniorWalletApi {
 	 */
 	PayInResp payIn(String accessToken, List<PayInReq> payInReqs);
 
-	/**
-	 * 查询出佣结果
-	 */
-	List<PayStatusResp> query(String accessToken, String elecChequeNo, String acceptNo);
 
-	/**
-	 * 定时更新支付状态
-	 */
-	void quartzUpdate();
 }

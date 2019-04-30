@@ -1,5 +1,6 @@
 package com.rfchina.wallet.server.service;
 
+import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.platform.common.annotation.EnumParamValid;
 import com.rfchina.platform.common.annotation.ParamValid;
 import com.rfchina.platform.common.exception.RfchinaResponseException;
@@ -15,22 +16,33 @@ import com.rfchina.wallet.domain.mapper.ext.*;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.WalletResponseCode;
 import com.rfchina.wallet.domain.model.*;
+import com.rfchina.wallet.domain.model.WalletLogCriteria.Criteria;
 import com.rfchina.wallet.domain.model.ext.Bank;
 import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
 import com.rfchina.wallet.server.adapter.UserAdapter;
+import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletLogExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletUserExtDao;
+import com.rfchina.wallet.server.model.ext.AcceptNo;
+import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp.WalletInfoRespBuilder;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletType;
+import com.rfchina.wallet.server.msic.MqConstant;
+import com.rfchina.wallet.server.service.handler.HandlerHelper;
+import com.rfchina.wallet.server.service.handler.PuDongHandler;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @Service
@@ -63,6 +75,86 @@ public class WalletService {
 
 	@Autowired
 	private BankCodeDao bankCodeDao;
+
+	@Autowired
+	private HandlerHelper handlerHelper;
+
+	@Autowired
+	private WalletLogExtDao walletLogExtDao;
+
+	/**
+	 * 查询出佣结果
+	 */
+	public List<PayStatusResp> query(String bizNo, String batchNo) {
+
+		WalletLogCriteria example = new WalletLogCriteria();
+		Criteria criteria = example.createCriteria();
+		if (!StringUtils.isEmpty(bizNo)) {
+			criteria.andBizNoEqualTo(bizNo);
+		}
+		if (!StringUtils.isEmpty(batchNo)) {
+			criteria.andBatchNoEqualTo(batchNo);
+		}
+
+		List<WalletLog> walletLogs = walletLogDao.selectByExample(example);
+		if (walletLogs.isEmpty()) {
+			throw new RfchinaResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST
+				, batchNo + "_" + bizNo);
+		}
+
+		return walletLogs.stream().map(walletLog -> {
+			return PayStatusResp.builder()
+				.bizNo(walletLog.getBizNo())
+				.batchNo(walletLog.getBatchNo())
+				.amount(walletLog.getAmount())
+				.transDate(DateUtil.formatDate(walletLog.getCreateTime()))
+				.status(walletLog.getStatus())
+				.errMsg(walletLog.getErrMsg())
+				.build();
+		}).collect(Collectors.toList());
+
+	}
+
+
+	/**
+	 * 定时更新支付状态
+	 */
+	@PostMq(routingKey = MqConstant.WALLET_PAY_RESULT)
+	public List<PayStatusResp> quartzUpdate() {
+
+		log.info("scheduler: 开始更新支付状态[银企直连]");
+
+		List<AcceptNo> acceptNos = walletLogExtDao.selectUnFinish();
+
+		List<WalletLog> result = acceptNos.stream().map(item -> {
+			PuDongHandler handler = handlerHelper.selectByMethod(item.getRefMethod());
+			List<WalletLog> walletLogs = handler.updatePayStatus(item.getAcceptNo()
+				, item.getCreateTime());
+			return walletLogs;
+		}).reduce((rs, item) -> {
+			rs.addAll(item);
+			return rs;
+		}).orElse(new ArrayList<>());
+
+		String elecs = result.stream().map(rs -> rs.getElecChequeNo())
+			.collect(Collectors.joining("|"));
+		log.info("更新批次状态，批次数量= {}，更新笔数= {}，业务凭证号= {}", acceptNos.size(), result.size(), elecs);
+		log.info("scheduler: 结束更新支付状态[银企直连]");
+
+		if (result == null || result.size() == 0) {
+			return new ArrayList<>();
+		}
+		return result.stream()
+			.map(rs -> PayStatusResp.builder()
+				.batchNo(rs.getBatchNo())
+				.bizNo(rs.getBizNo())
+				.transDate(DateUtil.formatDate(rs.getCreateTime()))
+				.amount(rs.getAmount())
+				.status(rs.getStatus())
+				.errMsg(rs.getErrMsg())
+				.build())
+			.collect(Collectors.toList());
+	}
 
 	/**
 	 * 查询钱包明细

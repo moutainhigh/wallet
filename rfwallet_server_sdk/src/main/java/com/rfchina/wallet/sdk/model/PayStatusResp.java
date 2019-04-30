@@ -13,19 +13,19 @@ import java.util.ArrayList;
 */
 @Data
 public class PayStatusResp  {
-    @ApiModelProperty("受理编号")
-    private String acceptNo ;
-
     @ApiModelProperty("支付金额")
     private Long amount ;
 
-    @ApiModelProperty("电子凭证号")
-    private String elecChequeNo ;
+    @ApiModelProperty("钱包批次号")
+    private String batchNo ;
+
+    @ApiModelProperty("业务凭证号")
+    private String bizNo ;
 
     @ApiModelProperty("失败原因")
     private String errMsg ;
 
-    @ApiModelProperty("支付状态。1：受理中，2：交易成功。3：交易失败")
+    @ApiModelProperty("交易状态。 1: 待发送银行网关，2：银行受理中，3：交易成功，4：交易失败，5：撤销")
     private Integer status ;
 
     @ApiModelProperty("交易日期")

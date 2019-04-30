@@ -124,6 +124,9 @@ public class Handler8800 implements PuDongHandler {
 				.setScale(2, BigDecimal.ROUND_DOWN);
 
 			BankCode bankCode = bankCodeExtDao.selectByCode(walletCard.getBankCode());
+			if(bankCode == null){
+				throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_BATCH_LIMIT);
+			}
 
 			String sysFlag = bankCode.getClassCode().equals(cmpAcctBankCode) ?
 				SysFlag.SELF.getValue() : SysFlag.OTHER.getValue();

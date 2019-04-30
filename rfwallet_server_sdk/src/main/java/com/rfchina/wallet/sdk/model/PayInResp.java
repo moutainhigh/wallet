@@ -13,17 +13,8 @@ import java.util.ArrayList;
 */
 @Data
 public class PayInResp  {
-    @ApiModelProperty("受理编号")
-    private String acceptNo ;
-
-    @ApiModelProperty("失败笔数")
-    private String failCount ;
-
-    @ApiModelProperty("柜员流水号")
-    private String seqNo ;
-
-    @ApiModelProperty("成功笔数")
-    private String successCount ;
+    @ApiModelProperty("钱包批次号")
+    private String batchNo ;
 
 
 }

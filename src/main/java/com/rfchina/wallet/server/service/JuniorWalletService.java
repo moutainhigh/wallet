@@ -1,5 +1,6 @@
 package com.rfchina.wallet.server.service;
 
+import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.platform.common.exception.RfchinaResponseException;
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
@@ -75,6 +76,7 @@ public class JuniorWalletService {
 			.collect(Collectors.toList());
 
 		// 记录钱包流水
+		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> true);
 		List<WalletLog> walletLogs = payInReqs.stream().map(payInReq -> {
 
 			WalletCard walletCard = getWalletCard(payInReq.getWalletId());
@@ -83,6 +85,9 @@ public class JuniorWalletService {
 					, String.valueOf(payInReq.getWalletId()));
 			}
 
+			payInReq.setElecChequeNo(IdGenerator.createBizId("", 16, id -> true));
+			payInReq.setBatchNo(batchNo);
+
 			WalletLog walletLog = WalletLog.builder()
 				.walletId(payInReq.getWalletId())
 				.type(WalletLogType.TRANSFER.getValue())
@@ -90,6 +95,8 @@ public class JuniorWalletService {
 				.payerAccount(cmpAcctNo)
 				.payeeType(walletCard.getIsPublic())
 				.payeeAccount(walletCard.getBankAccount())
+				.batchNo(payInReq.getBatchNo())
+				.bizNo(payInReq.getBizNo())
 				.elecChequeNo(payInReq.getElecChequeNo())
 				.status(WalletLogStatus.SENDING.getValue())
 				.createTime(new Date())
@@ -112,87 +119,14 @@ public class JuniorWalletService {
 					method.getValue());
 			}
 
-			return rs.right;
+			payInResp.setBatchNo(batchNo);
+			return payInResp;
 		} catch (Exception e) {
 			log.error("银行网关支付错误", e);
 			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_GATEWAY_PAY_ERROR);
 		}
 
 
-	}
-
-	/**
-	 * 查询出佣结果
-	 */
-	public List<PayStatusResp> query(String elecChequeNo, String acceptNo) {
-
-		WalletLogCriteria example = new WalletLogCriteria();
-		Criteria criteria = example.createCriteria();
-		if (!StringUtils.isEmpty(elecChequeNo)) {
-			criteria.andElecChequeNoEqualTo(elecChequeNo);
-		}
-		if (!StringUtils.isEmpty(acceptNo)) {
-			criteria.andAcceptNoEqualTo(acceptNo);
-		}
-
-		List<WalletLog> walletLogs = walletLogDao.selectByExample(example);
-		if (walletLogs.isEmpty()) {
-			throw new RfchinaResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST
-				, acceptNo + "_" + elecChequeNo);
-		}
-
-		return walletLogs.stream().map(walletLog -> {
-			return PayStatusResp.builder()
-				.acceptNo(walletLog.getAcceptNo())
-				.elecChequeNo(walletLog.getElecChequeNo())
-				.transDate(DateUtil.formatDate(walletLog.getCreateTime()))
-				.status(walletLog.getStatus())
-				.errMsg(walletLog.getErrMsg())
-				.build();
-		}).collect(Collectors.toList());
-
-	}
-
-
-	/**
-	 * 定时更新支付状态
-	 */
-	@PostMq(routingKey = MqConstant.WALLET_PAY_RESULT)
-	public List<PayStatusResp> quartzUpdate() {
-
-		log.info("scheduler: 开始更新支付状态[银企直连]");
-
-		List<AcceptNo> acceptNos = walletLogDao.selectUnFinish();
-
-		List<WalletLog> result = acceptNos.stream().map(item -> {
-			PuDongHandler handler = handlerHelper.selectByMethod(item.getRefMethod());
-			List<WalletLog> walletLogs = handler.updatePayStatus(item.getAcceptNo()
-				, item.getCreateTime());
-			return walletLogs;
-		}).reduce((rs, item) -> {
-			rs.addAll(item);
-			return rs;
-		}).orElse(new ArrayList<>());
-
-
-
-		String elecs = result.stream().map(rs -> rs.getElecChequeNo())
-			.collect(Collectors.joining("|"));
-		log.info("更新批次状态，批次数量= {}，更新笔数= {}，业务凭证号= {}", acceptNos.size(), result.size(), elecs);
-		log.info("scheduler: 结束更新支付状态[银企直连]");
-
-		if (result == null || result.size() == 0) {
-			return new ArrayList<>();
-		}
-		return result.stream()
-			.map(rs -> PayStatusResp.builder()
-				.acceptNo(rs.getAcceptNo())
-				.elecChequeNo(rs.getElecChequeNo())
-				.transDate(DateUtil.formatDate(rs.getCreateTime()))
-				.status(rs.getStatus())
-				.errMsg(rs.getErrMsg())
-				.build())
-			.collect(Collectors.toList());
 	}
 
 

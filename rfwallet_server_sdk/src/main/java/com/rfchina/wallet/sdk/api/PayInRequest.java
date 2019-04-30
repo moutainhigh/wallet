@@ -17,8 +17,8 @@ public class PayInRequest extends  AbstractApiRequest {
   @ApiModelProperty("支付金额(单位分)")
   private Long amount ;
 
-  @ApiModelProperty("电子凭证号(业务方定义唯一)")
-  private String elecChequeNo ;
+  @ApiModelProperty("业务凭证号(业务方定义唯一，最长32字)")
+  private String bizNo ;
 
   @ApiModelProperty("钱包ID")
   private Long walletId ;
@@ -49,8 +49,8 @@ public class PayInRequest extends  AbstractApiRequest {
       if(amount != null){
         parameters.put("amount", amount.toString());
       }
-      if(elecChequeNo != null){
-        parameters.put("elec_cheque_no", elecChequeNo.toString());
+      if(bizNo != null){
+        parameters.put("biz_no", bizNo.toString());
       }
       if(walletId != null){
         parameters.put("wallet_id", walletId.toString());
