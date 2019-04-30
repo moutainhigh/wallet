@@ -1,4 +1,4 @@
-package com.rfchina.wallet.server.web;
+package com.rfchina.wallet.server.service;
 
 import com.rfchina.internal.api.request.app.GetAccessTokenRequest;
 import com.rfchina.internal.api.request.app.RefreshAppTokenRequest;

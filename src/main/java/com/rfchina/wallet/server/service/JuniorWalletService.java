@@ -65,7 +65,7 @@ public class JuniorWalletService {
 	public PayInResp payIn(List<PayInReq> payInReqs) {
 		// 出佣请求不能为空, 数量不能大于20
 		if (payInReqs.isEmpty() || payInReqs.size() > 20) {
-			throw new RuntimeException();
+			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_BATCH_LIMIT);
 		}
 
 		// 钱包类型唯一

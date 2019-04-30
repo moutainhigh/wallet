@@ -8,6 +8,7 @@ import com.rfchina.platform.spring.exception.RfchinaExceptionResolver;
 import com.rfchina.wallet.server.interceptor.AllInterceptor;
 import com.rfchina.wallet.server.interceptor.BasicInterceptor;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,8 +40,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
-		registry.addInterceptor(allInterceptor).addPathPatterns("/**");
-		registry.addInterceptor(basicInterceptor).addPathPatterns("/**");
+		registry.addInterceptor(allInterceptor)
+			.addPathPatterns("/**");
+		registry.addInterceptor(basicInterceptor)
+			.addPathPatterns("/**");
 	}
 
 	@Bean

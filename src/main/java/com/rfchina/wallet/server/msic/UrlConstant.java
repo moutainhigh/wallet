@@ -21,6 +21,9 @@ public class UrlConstant {
 	 */
 	public static final String JUNIOR_WALLET_QUERY = VERSION + "/m/junior/sl_query";
 
+	/**
+	 * 定时更新支付状态
+	 */
 	public static final String WALLET_UPDATE_PAY_STATUS = VERSION + "/wallet/quartz_update_pay_status";
 
 	/**

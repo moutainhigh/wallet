@@ -78,7 +78,7 @@ public class ApiAdvice {
 	/**
 	 * 打印日志
 	 */
-	@Around(value = "execution(public * com.rfchina.wallet.api..*.*(..)) && @annotation(log)")
+	@Around(value = "execution(public * com.rfchina.wallet.server.api..*.*(..)) && @annotation(log)")
 	public Object logAroundApiInvoke(ProceedingJoinPoint jp, Log log) throws Throwable {
 		//写日志
 		return log.log() ? AopLogUtil.logWithAround(sessionThreadLocal.getRequestPath(), jp)
