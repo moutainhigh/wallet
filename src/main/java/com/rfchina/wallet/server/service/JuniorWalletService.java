@@ -96,6 +96,7 @@ public class JuniorWalletService {
 					String.valueOf(payInReq.getPayPurpose()) : null)
 				.note(payInReq.getNote())
 				.status(WalletLogStatus.SENDING.getValue())
+				.queryTime(DateUtil.addSecs(new Date(), 30))
 				.createTime(new Date())
 				.build();
 
