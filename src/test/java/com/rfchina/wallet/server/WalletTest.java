@@ -1,11 +1,5 @@
 package com.rfchina.wallet.server;
 
-import com.alibaba.fastjson.JSON;
-import com.rfchina.internal.api.request.app.GetAccessTokenRequest;
-import com.rfchina.internal.api.response.ResponseData;
-import com.rfchina.internal.api.response.model.app.GetAccessTokenReponseModel;
-import com.rfchina.internal.api.response.model.app.base.AccessTokenModel;
-import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.server.service.ConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.FixMethodOrder;
@@ -19,9 +13,6 @@ public class WalletTest extends WalletBaseTest{
 
     @Autowired
     private com.rfchina.internal.api.ApiClient internalApiClient;
-
-    @Autowired
-    private ConfigService configService;
 
     @Test
     public void testCreateWallet(){
@@ -56,5 +47,10 @@ public class WalletTest extends WalletBaseTest{
     @Test
     public void testBankList(){
         bankList("001", "4910");
+    }
+
+    @Test
+    public void testQueryWalletByUserId(){
+        queryWalletByUserId(30799L);
     }
 }

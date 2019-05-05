@@ -123,4 +123,14 @@ public abstract class WalletBaseTest extends BaseTest {
         return postAndValidateSuccessCode(BASE_URL, UrlConstant.WALLET_BANK_LIST, params);
     }
 
+    protected Map<String, Object> queryWalletByUserId(Long userId){
+        Map<String, String> params = new HashMap<>();
+        params.put("access_token", getAccessToken(appId, appSecret));
+        params.put("user_id", userId.toString());
+        params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+        String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+        params.put("sign", sign);
+        return postAndValidateSuccessCode(BASE_URL, UrlConstant.WALLET_QUERY_INFO_BY_UID, params);
+    }
+
 }
