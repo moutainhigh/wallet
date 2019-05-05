@@ -45,7 +45,7 @@ public class SwaggerConfig implements WebMvcConfigurer {
 
 	private ApiInfo apiInfo() {
 		return new ApiInfoBuilder()
-			.title("MCH_SERVER")
+			.title("wallet-server")
 			.version("1.0")
 			.build();
 	}
