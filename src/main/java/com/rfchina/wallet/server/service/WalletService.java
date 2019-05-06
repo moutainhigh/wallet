@@ -89,7 +89,7 @@ public class WalletService {
 	/**
 	 * 查询出佣结果
 	 */
-	public List<PayStatusResp> query(String bizNo, String batchNo) {
+	public List<PayStatusResp> queryWalletLog(String bizNo, String batchNo) {
 
 		WalletLogCriteria example = new WalletLogCriteria();
 		Criteria criteria = example.createCriteria();

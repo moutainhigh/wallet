@@ -39,7 +39,7 @@ public class WalletController {
 		@ApiParam(value = "业务凭证号(业务方定义唯一)", required = false, example = "123") @RequestParam("biz_no") String bizNo,
 		@ApiParam(value = "钱包批次号", required = false) @RequestParam("batch_no") String batchNo
 	) {
-		List<PayStatusResp> resp = walletApi.query(accessToken, bizNo, batchNo);
+		List<PayStatusResp> resp = walletApi.queryWalletLog(accessToken, bizNo, batchNo);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, resp);
 	}
 

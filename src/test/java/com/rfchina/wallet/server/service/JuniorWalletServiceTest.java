@@ -37,7 +37,7 @@ public class JuniorWalletServiceTest extends SpringBaseTest {
 			.build();
 
 		PayInResp respBody = juniorWalletService.payIn(Arrays.asList(req1, req2));
-		log.info("{}.response = {}", currMethod(), JSON.toJSONString(respBody));
+		logStack(respBody);
 
 		assertNotNull(respBody);
 	}
@@ -61,7 +61,7 @@ public class JuniorWalletServiceTest extends SpringBaseTest {
 			.build();
 
 		PayInResp respBody = juniorWalletService.payIn(Arrays.asList(req1, req2));
-		log.info("{}.response = {}", currMethod(), JSON.toJSONString(respBody));
+		logStack(respBody);
 
 		assertNotNull(respBody);
 	}

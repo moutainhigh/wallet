@@ -17,7 +17,7 @@ public class UrlConstant {
 	public static final String JUNIOR_WALLET_BATCH_PAY_IN = VERSION + "/m/junior/sl_batch_pay_in";
 
 	/**
-	 * 初级钱包-查询支付状态
+	 * 查询支付状态
 	 */
 	public static final String JUNIOR_WALLET_QUERY = VERSION + "/m/wallet/sl_query";
 

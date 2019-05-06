@@ -19,7 +19,7 @@ public interface WalletApi {
 	/**
 	 * 查询出佣结果
 	 */
-	List<PayStatusResp> query(String accessToken, String bizNo, String batchNo);
+	List<PayStatusResp> queryWalletLog(String accessToken, String bizNo, String batchNo);
 
 	/**
 	 * 定时更新支付状态

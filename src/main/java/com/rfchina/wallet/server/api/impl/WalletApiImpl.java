@@ -36,8 +36,8 @@ public class WalletApiImpl implements WalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public List<PayStatusResp> query(String accessToken, String bizNo, String batchNo) {
-		return walletService.query(bizNo, batchNo);
+	public List<PayStatusResp> queryWalletLog(String accessToken, String bizNo, String batchNo) {
+		return walletService.queryWalletLog(bizNo, batchNo);
 	}
 
 	@Log
