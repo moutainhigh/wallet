@@ -19,7 +19,7 @@ public class UrlConstant {
 	/**
 	 * 查询支付状态
 	 */
-	public static final String JUNIOR_WALLET_QUERY = VERSION + "/m/wallet/sl_query";
+	public static final String JUNIOR_WALLET_QUERY = VERSION + "/m/wallet/query_pay_status";
 
 	/**
 	 * 定时支付

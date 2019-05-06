@@ -204,7 +204,7 @@
 
 ###  初级钱包-查询支付状态
 
-请求地址: /wallet_server/v1/m/wallet/sl_query
+请求地址: /wallet_server/v1/m/wallet/query_pay_status
 
 请求类型: POST
 

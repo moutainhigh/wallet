@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 /** 初级钱包-查询支付状态 */
 @Builder
-public class QueryRequest extends  AbstractApiRequest {
+public class QueryPayStatusRequest extends  AbstractApiRequest {
 
   @ApiModelProperty("access_token")
   private String accessToken ;
@@ -23,7 +23,7 @@ public class QueryRequest extends  AbstractApiRequest {
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/wallet/sl_query";
+    return "/wallet_server/v1/m/wallet/query_pay_status";
   }
 
   @Override

@@ -34,10 +34,10 @@ public class WalletController {
 
 	@ApiOperation("初级钱包-查询支付状态")
 	@PostMapping(UrlConstant.JUNIOR_WALLET_QUERY)
-	public ResponseValue<List<PayStatusResp>> query(
+	public ResponseValue<List<PayStatusResp>> queryPayStatus(
 		@RequestParam("access_token") String accessToken,
-		@ApiParam(value = "业务凭证号(业务方定义唯一)", required = false, example = "123") @RequestParam("biz_no") String bizNo,
-		@ApiParam(value = "钱包批次号", required = false) @RequestParam("batch_no") String batchNo
+		@ApiParam(value = "业务凭证号(业务方定义唯一)", required = false, example = "123") @RequestParam(value = "biz_no", required = false) String bizNo,
+		@ApiParam(value = "钱包批次号", required = false) @RequestParam(value = "batch_no", required = false) String batchNo
 	) {
 		List<PayStatusResp> resp = walletApi.queryWalletLog(accessToken, bizNo, batchNo);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, resp);
@@ -58,8 +58,8 @@ public class WalletController {
 	@ApiOperation("通过UID查询钱包信息（企业or个人）")
 	@PostMapping(UrlConstant.WALLET_QUERY_INFO_BY_UID)
 	public ResponseValue<WalletInfoResp> queryWalletInfoByUid(
-			@RequestParam("access_token") String accessToken,
-			@ApiParam(value = "用户ID", required = true, example = "2") @RequestParam("user_id") Long userId
+		@RequestParam("access_token") String accessToken,
+		@ApiParam(value = "用户ID", required = true, example = "2") @RequestParam("user_id") Long userId
 	) {
 
 		WalletInfoResp resp = walletApi.queryWalletInfoByUserId(accessToken, userId);
@@ -114,29 +114,32 @@ public class WalletController {
 		@ApiParam(value = "是否默认银行卡: 1:是，2：否") @RequestParam(value = "is_def", required = false, defaultValue = "1") Integer isDef,
 		@ApiParam(value = "预留手机号") @RequestParam(value = "telephone", required = false) String telephone) {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, walletApi
-			.bindBankCard(accessToken,walletId, bankCode, bankAccount, depositName, isDef, telephone));
+			.bindBankCard(accessToken, walletId, bankCode, bankAccount, depositName, isDef,
+				telephone));
 	}
 
 	@ApiOperation("银行类别列表")
 	@PostMapping(UrlConstant.WALLET_BANK_CLASS_LIST)
-	public ResponseValue<List<BankClass>> bankClassList(){
+	public ResponseValue<List<BankClass>> bankClassList() {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, walletApi
-				.bankClassList());
+			.bankClassList());
 	}
 
 	@ApiOperation("银行地区列表")
 	@PostMapping(UrlConstant.WALLET_BANK_AREA_LIST)
-	public ResponseValue<List<BankArea>> bankAreaList(@ApiParam(value = "银行类型编码", required = true) @RequestParam("class_code") String classCode){
+	public ResponseValue<List<BankArea>> bankAreaList(
+		@ApiParam(value = "银行类型编码", required = true) @RequestParam("class_code") String classCode) {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, walletApi
-				.bankAreaList(classCode));
+			.bankAreaList(classCode));
 	}
 
 	@ApiOperation("银行支行列表")
 	@PostMapping(UrlConstant.WALLET_BANK_LIST)
-	public ResponseValue<List<Bank>> bankList(@ApiParam(value = "银行类型编码", required = true) @RequestParam("class_code") String classCode,
-											  @ApiParam(value = "地区编码", required = true) @RequestParam("area＿code") String areaCode){
+	public ResponseValue<List<Bank>> bankList(
+		@ApiParam(value = "银行类型编码", required = true) @RequestParam("class_code") String classCode,
+		@ApiParam(value = "地区编码", required = true) @RequestParam("area＿code") String areaCode) {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, walletApi
-				.bankList(classCode, areaCode));
+			.bankList(classCode, areaCode));
 	}
 
 }

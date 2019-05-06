@@ -36,7 +36,9 @@ public class WalletApiImpl implements WalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public List<PayStatusResp> queryWalletLog(String accessToken, String bizNo, String batchNo) {
+	public List<PayStatusResp> queryWalletLog(String accessToken,
+		@ParamValid(nullable = true) String bizNo,
+		@ParamValid(nullable = true) String batchNo) {
 		return walletService.queryWalletLog(bizNo, batchNo);
 	}
 
@@ -51,7 +53,6 @@ public class WalletApiImpl implements WalletApi {
 	public void quartzPay() {
 		walletService.quartzPay();
 	}
-
 
 
 	@Log
@@ -113,12 +114,13 @@ public class WalletApiImpl implements WalletApi {
 	}
 
 	@Override
-	public List<BankArea> bankAreaList(@ParamValid(nullable = false)String classCode) {
+	public List<BankArea> bankAreaList(@ParamValid(nullable = false) String classCode) {
 		return walletService.bankAreaList(classCode);
 	}
 
 	@Override
-	public List<Bank> bankList(@ParamValid(nullable = false)String classCode, @ParamValid(nullable = false)String areaCode) {
+	public List<Bank> bankList(@ParamValid(nullable = false) String classCode,
+		@ParamValid(nullable = false) String areaCode) {
 		return walletService.bankList(classCode, areaCode);
 	}
 }
