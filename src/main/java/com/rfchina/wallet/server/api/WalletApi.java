@@ -67,28 +67,37 @@ public interface WalletApi {
 	 * 绑定银行卡
 	 */
 	WalletCard bindBankCard(String accessToken, Long walletId, String bankCode, String bankAccount,
-							String depositName, Integer isDef, String telephone);
+		String depositName, Integer isDef, String telephone);
 
 	/**
 	 * 银行类别列表
-	 * @return
 	 */
 	List<BankClass> bankClassList();
 
 	/**
 	 * 银行地区列表
-	 * @param classCode		必填，银行类型编码
-	 * @return
+	 *
+	 * @param classCode 必填，银行类型编码
 	 */
 	List<BankArea> bankAreaList(String classCode);
 
 	/**
 	 * 银行支行列表
-	 * @param classCode		必填，银行类别编码
-	 * @param areaCode		必填，地区编码
-	 * @return
+	 *
+	 * @param classCode 必填，银行类别编码
+	 * @param areaCode 必填，地区编码
 	 */
 	List<Bank> bankList(String classCode, String areaCode);
 
 
+	/**
+	 * 富慧通审核个人商家钱包
+	 */
+	void auditWalletPerson(Long walletId, String name, Byte idType, String idNo, Byte status,
+		Long auditType);
+
+	/**
+	 * 富慧通审核企业商家钱包
+	 */
+	void auditWalletCompany(Long walletId, String companyName, Byte status, Long auditType);
 }

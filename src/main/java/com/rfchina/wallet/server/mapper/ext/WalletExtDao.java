@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 public interface WalletExtDao extends WalletMapper {
 
@@ -17,4 +18,12 @@ public interface WalletExtDao extends WalletMapper {
 		"</script>"
 	})
 	List<Byte> selectWalletType(@Param("walletIds") List<Long> walletIds);
+
+	@Update({"update rf_wallet"
+		, "set status = #{status} , audit_type = #{auditType}"
+		, "where id = #{walletId}"
+	})
+	void updateStatus(@Param("walletId") Long walletId, @Param("status") Byte status,
+		@Param("auditType") Long auditType);
+
 }

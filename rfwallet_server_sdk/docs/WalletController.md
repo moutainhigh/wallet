@@ -1,3 +1,59 @@
+###  富慧通审核企业商家钱包
+
+请求地址: /wallet_server/v1/m/wallet/audit_wallet_company
+
+请求类型: POST
+
+请求参数:
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|audit_type|是|审核方式，1：运营，3：银企直连，5：通联|
+|company_name|是|公司名称|
+|status|是|钱包状态: 1:待审核，2：激活,3：禁用|
+|wallet_id|是|钱包ID|
+
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": "", //消息
+"data": {
+  }
+}
+```
+
+###  富慧通审核个人商家钱包
+
+请求地址: /wallet_server/v1/m/wallet/audit_wallet_person
+
+请求类型: POST
+
+请求参数:
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|audit_type|是|审核方式，1：运营，3：银企直连，5：通联|
+|id_no|是|证件号|
+|id_type|是|证件类型，1:身份证|
+|name|是|姓名|
+|status|是|钱包状态: 1:待审核，2：激活,3：禁用|
+|wallet_id|是|钱包ID|
+
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": "", //消息
+"data": {
+  }
+}
+```
+
 ###  银行地区列表
 
 请求地址: /wallet_server/v1/wallet/bank/area_list

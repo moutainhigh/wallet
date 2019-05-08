@@ -46,7 +46,15 @@ public class UrlConstant {
 	 */
 	public static final String CREATE_WALLET = VERSION + "/m/wallet/create_wallet";
 
+	/**
+	 * 富慧通审核企业商家钱包
+	 */
+	public static final String AUDIT_WALLET_COMPANY = VERSION + "/m/wallet/audit_wallet_company";
 
+	/**
+	 * 富慧通审核个人商家钱包
+	 */
+	public static final String AUDIT_WALLET_PERSON = VERSION + "/m/wallet/audit_wallet_person";
 	/**
 	 * 查询交易流水
 	 */

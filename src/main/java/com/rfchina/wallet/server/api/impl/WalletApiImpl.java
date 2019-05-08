@@ -59,7 +59,8 @@ public class WalletApiImpl implements WalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public WalletInfoResp queryWalletInfo(String accessToken, Long walletId) {
+	public WalletInfoResp queryWalletInfo(String accessToken,
+		@ParamValid(nullable = false) Long walletId) {
 		return walletService.queryWalletInfo(walletId);
 	}
 
@@ -75,7 +76,10 @@ public class WalletApiImpl implements WalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public Wallet createWallet(String accessToken, Byte type, String title, Byte source) {
+	public Wallet createWallet(String accessToken,
+		@ParamValid(nullable = false) Byte type,
+		@ParamValid(nullable = false) String title,
+		@ParamValid(nullable = false) Byte source) {
 		return walletService.createWallet(type, title, source);
 	}
 
@@ -122,5 +126,22 @@ public class WalletApiImpl implements WalletApi {
 	public List<Bank> bankList(@ParamValid(nullable = false) String classCode,
 		@ParamValid(nullable = false) String areaCode) {
 		return walletService.bankList(classCode, areaCode);
+	}
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
+	@Override
+	public void auditWalletPerson(Long walletId, String name, Byte idType, String idNo,
+		Byte status, Long auditType) {
+		walletService.auditWalletPerson(walletId, name, idType, idNo, status, auditType);
+	}
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
+	@Override
+	public void auditWalletCompany(Long walletId, String companyName, Byte status, Long auditType) {
+		walletService.auditWalletCompany(walletId, companyName, status, auditType);
 	}
 }
