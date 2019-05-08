@@ -137,7 +137,7 @@ public class WalletController {
 	@PostMapping(UrlConstant.WALLET_BANK_LIST)
 	public ResponseValue<List<Bank>> bankList(
 		@ApiParam(value = "银行类型编码", required = true) @RequestParam("class_code") String classCode,
-		@ApiParam(value = "地区编码", required = true) @RequestParam("area＿code") String areaCode) {
+		@ApiParam(value = "地区编码", required = true) @RequestParam("area_code") String areaCode) {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, walletApi
 			.bankList(classCode, areaCode));
 	}

@@ -1,0 +1,13 @@
+{
+  "inputSpec": " ",
+  "outputDir": "./rfwallet_server_sdk",
+  "modelPackage": "com.rfchina.wallet.sdk.model",
+  "apiPackage": "com.rfchina.wallet.sdk.api",
+  "lang": "java",
+  "packageName": "",
+  "modelPropertyNaming":"snake_case",
+  "additionalProperties": {
+    "apiVersion": "v1.0.0",
+    "author": "nzm"
+  }
+}
