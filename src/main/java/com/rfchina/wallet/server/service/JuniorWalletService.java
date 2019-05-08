@@ -37,6 +37,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 
@@ -63,6 +65,7 @@ public class JuniorWalletService {
 	/**
 	 * 出佣到个人钱包
 	 */
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 	public PayInResp payIn(List<PayInReq> payInReqs) {
 		// 出佣请求不能为空, 数量不能大于20
 		if (payInReqs.isEmpty() || payInReqs.size() > 20) {

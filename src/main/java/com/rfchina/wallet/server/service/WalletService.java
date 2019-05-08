@@ -23,7 +23,10 @@ import com.rfchina.wallet.domain.model.ext.Bank;
 import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
 import com.rfchina.wallet.server.adapter.UserAdapter;
+import com.rfchina.wallet.server.mapper.ext.WalletCompanyExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletLogExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletUserExtDao;
 import com.rfchina.wallet.server.model.ext.AcceptNo;
 import com.rfchina.wallet.server.model.ext.PayInResp;
@@ -53,13 +56,13 @@ import org.springframework.util.StringUtils;
 public class WalletService {
 
 	@Autowired
-	private WalletDao walletDao;
+	private WalletExtDao walletDao;
 
 	@Autowired
-	private WalletCompanyDao walletCompanyDao;
+	private WalletCompanyExtDao walletCompanyDao;
 
 	@Autowired
-	private WalletPersonDao walletPersonDao;
+	private WalletPersonExtDao walletPersonDao;
 
 	@Autowired
 	private WalletUserExtDao walletUserDao;
@@ -127,7 +130,7 @@ public class WalletService {
 		List<String> acceptNos = walletLogExtDao.selectUnSendBatchNo();
 		acceptNos.forEach(batchNo -> {
 			List<WalletLog> walletLogs = walletLogExtDao.selectByBatchNo(batchNo);
-			if(StringUtils.isEmpty(batchNo) || walletLogs.size() == 0){
+			if (StringUtils.isEmpty(batchNo) || walletLogs.size() == 0) {
 				return;
 			}
 			// 请求网关
@@ -214,11 +217,12 @@ public class WalletService {
 		return builder.wallet(wallet).defWalletCard(walletCard).build();
 	}
 
-	public WalletInfoResp queryWalletInfoByUserId(Long userId){
+	public WalletInfoResp queryWalletInfoByUserId(Long userId) {
 		WalletUser walletUser = walletUserDao.selectByPrimaryKey(userId);
 
 		if (walletUser == null) {
-			throw new RfchinaResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST, "user_id");
+			throw new RfchinaResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST,
+				"user_id");
 		}
 
 		return queryWalletInfo(walletUser.getWalletId());
@@ -241,7 +245,7 @@ public class WalletService {
 			.status(WalletStatus.WAIT_AUDIT.getValue())
 			.createTime(new Date())
 			.build();
-		walletDao.insert(wallet);
+		walletDao.insertSelective(wallet);
 
 		return wallet;
 	}
@@ -368,5 +372,48 @@ public class WalletService {
 		return bankCodeDao.selectBankList(classCode, areaCode);
 	}
 
+	/**
+	 * 富慧通审核通过个人商家钱包
+	 */
+	public void auditWalletPerson(Long walletId, String name, Byte idType, String idNo,
+		Byte status, Long auditType) {
 
+		WalletPerson walletPerson = walletPersonDao.selectByWalletId(walletId);
+
+		boolean isUpdate = walletPerson != null;
+		walletPerson = isUpdate ? walletPerson : new WalletPerson();
+		walletPerson.setWalletId(walletId);
+		walletPerson.setName(name);
+		walletPerson.setIdType(idType);
+		walletPerson.setIdNo(idNo);
+
+		if (isUpdate) {
+			walletPersonDao.updateByPrimaryKeySelective(walletPerson);
+		} else {
+			walletPersonDao.insertSelective(walletPerson);
+		}
+
+		walletDao.updateStatus(walletId, status, auditType);
+	}
+
+	/**
+	 * 富慧通审核通过企业商家钱包
+	 */
+	public void auditWalletCompany(Long walletId, String companyName, Byte status, Long auditType) {
+
+		WalletCompany walletCompany = walletCompanyDao.selectByWalletId(walletId);
+
+		boolean isUpdate = walletCompany != null;
+		walletCompany = isUpdate ? walletCompany : new WalletCompany();
+		walletCompany.setWalletId(walletId);
+		walletCompany.setCompanyName(companyName);
+
+		if (isUpdate) {
+			walletCompanyDao.updateByPrimaryKeySelective(walletCompany);
+		} else {
+			walletCompanyDao.insertSelective(walletCompany);
+		}
+
+		walletDao.updateStatus(walletId, status, auditType);
+	}
 }
