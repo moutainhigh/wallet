@@ -41,11 +41,11 @@ public class ScheduleController {
 		@RequestParam("timestamp") String timestamp,
 		@RequestParam("sign") String sign) {
 
-		log.info("scheduler: 开始执行任务[{}]", "quartzUpdatePayStatus");
+		log.info("scheduler: 开始执行任务[{}]", "quartzPay");
 
 		walletApi.quartzPay();
 
-		log.info("scheduler: 完成任务[{}]", "quartzUpdatePayStatus");
+		log.info("scheduler: 完成任务[{}]", "quartzPay");
 
 		return "success";
 	}

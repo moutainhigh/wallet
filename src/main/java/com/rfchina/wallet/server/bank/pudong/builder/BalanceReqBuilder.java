@@ -47,8 +47,9 @@ public class BalanceReqBuilder extends PpdbReqTpl implements GatewayLancher<Bala
 	}
 
 	@Override
-	public Balance lanch(OkHttpClient client) throws Exception {
-		BalanceRespBody respBody = super.build(client, BalanceReqBody.class, BalanceRespBody.class);
+	public Balance lanch(String hostUrl, String signUrl, OkHttpClient client) throws Exception {
+		BalanceRespBody respBody = super
+			.build(hostUrl, signUrl, client, BalanceReqBody.class, BalanceRespBody.class);
 
 		Optional<Balance> first = respBody.getLists().getList().stream()
 			.filter(o -> acctNo.equals(o.getAcctNo()))

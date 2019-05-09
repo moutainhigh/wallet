@@ -22,7 +22,7 @@ public class PubPayReqBuilder extends PpdbReqTpl implements GatewayLancher<PubPa
 
 	private final static String transCode = "8800";
 	private String masterId;
-	private String 	packetId;
+	private String packetId;
 
 	private String authMasterId;
 	private String packageNo;
@@ -54,7 +54,8 @@ public class PubPayReqBuilder extends PpdbReqTpl implements GatewayLancher<PubPa
 	}
 
 	@Override
-	public PubPayRespBody lanch(OkHttpClient client) throws Exception {
-		return super.build(client, PubPayReqBody.class, PubPayRespBody.class);
+	public PubPayRespBody lanch(String hostUrl, String signUrl, OkHttpClient client)
+		throws Exception {
+		return super.build(hostUrl, signUrl, client, PubPayReqBody.class, PubPayRespBody.class);
 	}
 }

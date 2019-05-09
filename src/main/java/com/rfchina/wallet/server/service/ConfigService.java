@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 @Getter
 @Service
 public class ConfigService {
+
 	@Value(value = "${zipkin.service.enable}")
 	private Boolean zipKinEnable;
 
@@ -36,4 +37,35 @@ public class ConfigService {
 
 	@Value(value = "${sign.enable}")
 	private boolean signEnable;
+
+	// 银企直连
+
+	@Value("${wlpay.pudong.signUrl}")
+	private String signUrl;
+
+	@Value("${wlpay.pudong.hostUrl}")
+	private String hostUrl;
+
+	@Value("${wlpay.pudong.masterid}")
+	private String masterId;
+
+	@Value("${wlpay.pudong.acctno}")
+	private String acctNo;
+
+	@Value("${wlpay.pudong.acctname}")
+	private String acctName;
+
+	@Value("${wlpay.pudong.acctAreaCode}")
+	private String acctAreaCode;
+
+	@Value("${wlpay.pudong.acctBankCode}")
+	private String acctBankCode;
+
+	@Value("${wlpay.pudong.auditMasterId}")
+	private String auditMasterId;
+
+	@Value("${wallet.paystatus.nextRoundSec}")
+	private Integer nextRoundSec;
+
+	// 银企直连 END
 }

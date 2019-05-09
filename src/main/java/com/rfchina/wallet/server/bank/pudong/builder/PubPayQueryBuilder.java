@@ -13,7 +13,7 @@ import okhttp3.OkHttpClient;
  * @author nzm
  */
 @Builder
-public class PubPayQueryBuilder extends PpdbReqTpl implements GatewayLancher {
+public class PubPayQueryBuilder extends PpdbReqTpl implements GatewayLancher<PubPayQueryRespBody> {
 
 	private final static String transCode = "8804";
 	@NotNull
@@ -24,10 +24,6 @@ public class PubPayQueryBuilder extends PpdbReqTpl implements GatewayLancher {
 	private String beginDate;
 	@NotNull
 	private String endDate;
-	@NotNull
-	private String queryNumber;
-	@NotNull
-	private String beginNumber;
 	private String acceptNo;
 	private String elecChequeNo;
 
@@ -37,8 +33,8 @@ public class PubPayQueryBuilder extends PpdbReqTpl implements GatewayLancher {
 			.acctNo(acctNo)
 			.beginDate(beginDate)
 			.endDate(endDate)
-			.beginNumber(beginNumber)
-			.queryNumber(queryNumber)
+			.beginNumber("1")
+			.queryNumber("30")
 			.singleOrBatchFlag("1")
 			.acceptNo(acceptNo)
 			.elecChequeNo(elecChequeNo)
@@ -58,8 +54,8 @@ public class PubPayQueryBuilder extends PpdbReqTpl implements GatewayLancher {
 	}
 
 	@Override
-	public PubPayQueryRespBody lanch(OkHttpClient client) throws Exception {
-		return super.build(client, PubPayQueryReqBody.class, PubPayQueryRespBody.class);
+	public PubPayQueryRespBody lanch(String hostUrl, String signUrl,OkHttpClient client) throws Exception {
+		return super.build(hostUrl, signUrl,client, PubPayQueryReqBody.class, PubPayQueryRespBody.class);
 	}
 
 }

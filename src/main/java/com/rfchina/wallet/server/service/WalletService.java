@@ -1,5 +1,6 @@
 package com.rfchina.wallet.server.service;
 
+import com.rfchina.biztools.lock.SimpleExclusiveLock;
 import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.platform.common.annotation.EnumParamValid;
 import com.rfchina.platform.common.annotation.ParamValid;
@@ -88,6 +89,7 @@ public class WalletService {
 	@Autowired
 	private WalletLogExtDao walletLogExtDao;
 
+
 	/**
 	 * 查询出佣结果
 	 */
@@ -126,23 +128,29 @@ public class WalletService {
 	 * 定时支付
 	 */
 	public void quartzPay() {
+
 		List<String> acceptNos = walletLogExtDao.selectUnSendBatchNo();
 		acceptNos.forEach(batchNo -> {
-			List<WalletLog> walletLogs = walletLogExtDao.selectByBatchNo(batchNo);
+
+			List<WalletLog> walletLogs = walletLogExtDao.selectUnDealByBatchNo(batchNo);
 			if (StringUtils.isEmpty(batchNo) || walletLogs.size() == 0) {
 				return;
 			}
 			// 请求网关
 			try {
+
 				PuDongHandler puDongHandler = handlerHelper.selectByWalletType(null);
 				Tuple<GatewayMethod, PayInResp> rs = puDongHandler.pay(walletLogs);
 
+				// 记录结果
 				GatewayMethod method = rs.left;
 				PayInResp payInResp = rs.right;
 				for (WalletLog walletLog : walletLogs) {
-					walletLogExtDao.updateStatusAndAcceptNo(walletLog.getId(),
-						WalletLogStatus.PROCESSING.getValue(), payInResp.getAcceptNo(),
-						method.getValue());
+
+					walletLog.setStatus(WalletLogStatus.PROCESSING.getValue());
+					walletLog.setRefMethod(method.getValue());
+					walletLog.setAcceptNo(payInResp.getAcceptNo());
+					walletLogExtDao.updateByPrimaryKeySelective(walletLog);
 				}
 			} catch (Exception e) {
 				log.error("银行网关支付错误", e);

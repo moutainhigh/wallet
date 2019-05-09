@@ -1,6 +1,6 @@
 package com.rfchina.wallet.server.api.impl;
 
-import com.rfchina.api.response.model.user.UserLoginTokenResponseModel;
+import com.rfchina.biztools.lock.SimpleExclusiveLock;
 import com.rfchina.passport.token.EnumTokenType;
 import com.rfchina.passport.token.TokenVerify;
 import com.rfchina.platform.common.annotation.EnumParamValid;
@@ -15,6 +15,7 @@ import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletUserDao;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.WalletResponseCode;
+import com.rfchina.wallet.domain.mapper.ext.WalletUserDao;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletLog;
@@ -46,6 +47,9 @@ public class WalletApiImpl implements WalletApi {
 	private JuniorWalletService juniorWalletService;
 
 	@Autowired
+	private SimpleExclusiveLock lock;
+
+	@Autowired
 	private WalletUserDao walletUserDao;
 
 	@Autowired
@@ -64,13 +68,25 @@ public class WalletApiImpl implements WalletApi {
 	@Log
 	@Override
 	public void quartzUpdate() {
-		walletService.quartzUpdate();
+
+//		String lockName = SimpleExclusiveLock.PRE_EXEC_LOCK + "quartzUpdate";
+//		boolean succ = lock.acquireLock(lockName, 3600, 0, 1);
+//		if (succ) {
+			walletService.quartzUpdate();
+//			lock.unLock(lockName);
+//		}
 	}
 
 	@Log
 	@Override
 	public void quartzPay() {
-		walletService.quartzPay();
+
+//		String lockName = SimpleExclusiveLock.PRE_EXEC_LOCK + "quartzPay";
+//		boolean succ =	lock.acquireLock(lockName, 3600, 0, 1);
+//		if(succ){
+			walletService.quartzPay();
+//			lock.unLock(lockName);
+//		}
 	}
 
 

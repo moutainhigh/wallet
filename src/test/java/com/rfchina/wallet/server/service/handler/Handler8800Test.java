@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.platform.common.misc.Tuple;
+import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.domain.model.WalletLog;
 import com.rfchina.wallet.server.SpringBaseTest;
 import com.rfchina.wallet.server.model.ext.PayInReq;
@@ -12,7 +13,6 @@ import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import org.assertj.core.util.DateUtil;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -50,8 +50,9 @@ public class Handler8800Test extends SpringBaseTest {
 
 	@Test
 	public void p0102UpdatePayStatus() {
-		String acceptNo = "PT19YQ0000025178";
-		List<WalletLog> walletLogs = handler8800.updatePayStatus(acceptNo, new Date());
+		String acceptNo = "5248528489";
+		List<WalletLog> walletLogs = handler8800.updatePayStatus(acceptNo,
+			DateUtil.parse("2019-05-08", DateUtil.STANDARD_DTAE_PATTERN));
 		assertTrue(walletLogs.size() > 0);
 	}
 }

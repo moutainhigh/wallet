@@ -69,8 +69,9 @@ public class PriPayReqBuilder extends PpdbReqTpl implements GatewayLancher {
 
 
 	@Override
-	public PriPayRespBody lanch(OkHttpClient client) throws Exception {
-		return super.build(client, PriPayReqBody.class, PriPayRespBody.class);
+	public PriPayRespBody lanch(String hostUrl, String signUrl, OkHttpClient client)
+		throws Exception {
+		return super.build(hostUrl, signUrl, client, PriPayReqBody.class, PriPayRespBody.class);
 	}
 
 	@Override

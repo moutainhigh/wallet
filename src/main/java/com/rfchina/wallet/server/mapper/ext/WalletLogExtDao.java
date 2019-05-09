@@ -3,6 +3,7 @@ package com.rfchina.wallet.server.mapper.ext;
 import com.rfchina.wallet.domain.mapper.WalletLogMapper;
 import com.rfchina.wallet.domain.model.WalletLog;
 import com.rfchina.wallet.server.model.ext.AcceptNo;
+import java.util.Date;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.ResultMap;
@@ -49,7 +50,7 @@ public interface WalletLogExtDao extends WalletLogMapper {
 		"where batch_no = #{batchNo} and status = 1"
 	})
 	@ResultMap("com.rfchina.wallet.domain.mapper.WalletLogMapper.BaseResultMap")
-	List<WalletLog> selectByBatchNo(@Param("batchNo") String batchNo);
+	List<WalletLog> selectUnDealByBatchNo(@Param("batchNo") String batchNo);
 
 	@Update({"update rf_wallet_log"
 		, "set err_msg = #{errMsg} , status = #{status}"
@@ -59,21 +60,33 @@ public interface WalletLogExtDao extends WalletLogMapper {
 		@Param("errMsg") String errMsg);
 
 	@Update({"update rf_wallet_log"
-		, "set curr_try_times = curr_try_times + 1 ,"
-		, "query_time = date_add(CURRENT_TIMESTAMP, interval power(2 , curr_try_times) minute) "
+		, "set curr_try_times = curr_try_times + 1 ,query_time = #{queryTime} "
 		, "where accept_no = #{acceptNo}"
 	})
-	void updateTryTimes(@Param("acceptNo") String acceptNo);
+	void incTryTimes(@Param("acceptNo") String acceptNo, @Param("queryTime") Date queryTime);
 
 	@Select({
 		"select * from rf_wallet_log"
-		, "where accept_no = #{acceptNo} and elec_cheque_no = #{elecChequeNo} "
+		, "where host_accept_no = #{acceptNo} and elec_cheque_no = #{elecChequeNo} "
 		, " and status = #{status}"
 		, "limit 1"
 	})
 	@ResultMap("com.rfchina.wallet.domain.mapper.WalletLogMapper.BaseResultMap")
-	WalletLog selectByAcctAndElecNo(@Param("acceptNo") String acceptNo,
+	WalletLog selectByHostAcctAndElecNo(@Param("acceptNo") String acceptNo,
 		@Param("elecChequeNo") String elecChequeNo, @Param("status") Byte status);
 
 
+	@Update({"update rf_wallet_log"
+		, "set host_accept_no = #{hostAcceptNo} , audit_time = #{auditTime}"
+		, "where accept_no = #{acceptNo} and status = 2"
+	})
+	void updateHostAcctNo(@Param("acceptNo") String acceptNo,
+		@Param("hostAcceptNo") String hostJnlSeqNo, @Param("auditTime") Date auditTime);
+
+	@Update({"update rf_wallet_log"
+		, "set status = 4 , err_code = #{errCode}, err_msg = #{errMsg}"
+		, "where accept_no = #{acceptNo} and status = 2"
+	})
+	void updateAcceptNoError(@Param("acceptNo") String acceptNo, @Param("errCode") String errCode,
+		@Param("errMsg") String errMsg);
 }
