@@ -133,4 +133,30 @@ public abstract class WalletBaseTest extends BaseTest {
         return postAndValidateSuccessCode(BASE_URL, UrlConstant.WALLET_QUERY_INFO_BY_UID, params);
     }
 
+    protected Map<String, Object> sendVerifyCode(String mobile, Integer type, String ip){
+        Map<String, String> params = new HashMap<>();
+        params.put("access_token", getAccessToken(appId, appSecret));
+        params.put("mobile", mobile);
+        params.put("type", String.valueOf(type));
+        params.put("ip", ip);
+        params.put("verify_token", "123");
+        params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+        String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+        params.put("sign", sign);
+        return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SEND_VERIFY_CODE, params, 2033);
+    }
+
+    protected Map<String, Object> loginWithVerify(String mobile, String verifyCode, Integer type, String ip){
+        Map<String, String> params = new HashMap<>();
+        params.put("access_token", getAccessToken(appId, appSecret));
+        params.put("mobile", mobile);
+        params.put("verify_code", verifyCode);
+        params.put("ip", ip);
+        params.put("type", String.valueOf(type));
+        params.put("verify_token", "123");
+        params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+        String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+        params.put("sign", sign);
+        return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_LOGIN_WITH_VERIFY_CODE, params, 2033);
+    }
 }

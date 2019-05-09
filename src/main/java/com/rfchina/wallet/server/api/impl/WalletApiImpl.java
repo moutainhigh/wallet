@@ -1,14 +1,24 @@
 package com.rfchina.wallet.server.api.impl;
 
+import com.rfchina.api.response.model.user.UserLoginTokenResponseModel;
 import com.rfchina.passport.token.EnumTokenType;
 import com.rfchina.passport.token.TokenVerify;
+import com.rfchina.platform.common.annotation.EnumParamValid;
 import com.rfchina.platform.common.annotation.Log;
 import com.rfchina.platform.common.annotation.ParamValid;
 import com.rfchina.platform.common.annotation.SignVerify;
+import com.rfchina.platform.common.misc.ResponseValue;
 import com.rfchina.platform.common.page.Pagination;
+import com.rfchina.platform.common.utils.EnumUtil;
+import com.rfchina.platform.common.utils.RegexUtil;
+import com.rfchina.wallet.domain.exception.WalletResponseException;
+import com.rfchina.wallet.domain.mapper.ext.WalletUserDao;
+import com.rfchina.wallet.domain.misc.EnumDef;
+import com.rfchina.wallet.domain.misc.WalletResponseCode;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletLog;
+import com.rfchina.wallet.domain.model.WalletUser;
 import com.rfchina.wallet.domain.model.ext.Bank;
 import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
@@ -16,12 +26,15 @@ import com.rfchina.wallet.server.api.WalletApi;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import com.rfchina.wallet.server.service.JuniorWalletService;
+import com.rfchina.wallet.server.service.UserService;
 import com.rfchina.wallet.server.service.WalletService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 public class WalletApiImpl implements WalletApi {
@@ -31,6 +44,12 @@ public class WalletApiImpl implements WalletApi {
 
 	@Autowired
 	private JuniorWalletService juniorWalletService;
+
+	@Autowired
+	private WalletUserDao walletUserDao;
+
+	@Autowired
+	private UserService userService;
 
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
@@ -143,5 +162,48 @@ public class WalletApiImpl implements WalletApi {
 	@Override
 	public void auditWalletCompany(Long walletId, String companyName, Byte status, Long auditType) {
 		walletService.auditWalletCompany(walletId, companyName, status, auditType);
+	}
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
+	@Override
+	public ResponseValue sendVerifyCode(String accessToken,
+			Long userId, @ParamValid(pattern = RegexUtil.REGEX_MOBILE) String mobile,
+			@EnumParamValid(valuableEnumClass = com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType.class) Integer type,
+			@ParamValid(nullable = false) String verifyToken, String redirectUrl, String ip) {
+
+		com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType enumSendSmsType = EnumUtil.parse(com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType.class, type);
+
+		if (enumSendSmsType == com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType.VERIFY_BINDING_ACCOUNT){
+			//检查已绑定钱包的手机号
+			WalletUser walletUser = Optional.ofNullable(walletUserDao.selectByMobile(mobile)).orElseThrow(() -> new WalletResponseException(
+					WalletResponseCode.EnumWalletResponseCode.WALLET_NOT_BINDING));
+
+			if(walletUser.getStatus() == com.rfchina.wallet.domain.misc.EnumDef.EnumWalletStatus.DISABLE.getValue().byteValue()){
+				throw new WalletResponseException(WalletResponseCode.EnumWalletResponseCode.WALLET_DISABLE);
+			}
+		}
+		//直接发送短信
+		return userService.sendSmsVerifyCode(com.rfchina.wallet.domain.misc.EnumDef.EnumVerifyCodeType.LOGIN, mobile, verifyToken, redirectUrl, enumSendSmsType.msg(), ip);
+	}
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
+	@Override
+	public WalletUser loginWithVerifyCode(String accessToken, @ParamValid(pattern = RegexUtil.REGEX_MOBILE) String mobile,
+										  @ParamValid(nullable = false, min = 1, max = 6) String verifyCode,
+										  @EnumParamValid(valuableEnumClass = EnumDef.EnumVerifyType.class) Integer type, String ip) {
+		//通过短信验证码登录
+		userService.userLoginWithVerifyCode(mobile, verifyCode, ip);
+
+		//检查帐号是否已开通钱包
+		WalletUser walletUser = walletUserDao.selectByMobile(mobile);
+		if(null == walletUser){
+			throw new WalletResponseException(WalletResponseCode.EnumWalletResponseCode.WALLET_NOT_EXIST);
+		}
+
+		return walletUser;
 	}
 }

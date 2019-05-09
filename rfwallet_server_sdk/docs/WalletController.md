@@ -118,7 +118,7 @@
 
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
-|area＿code|是|地区编码|
+|area_code|是|地区编码|
 |class_code|是|银行类型编码|
 
 
@@ -258,6 +258,41 @@
 }
 ```
 
+###  通过短信验证码登录
+
+请求地址: /wallet_server/v1/m/wallet/login_with_verify_code
+
+请求类型: POST
+
+请求参数:
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|ip|是|来源IP|
+|mobile|是|手机号码|
+|type|是|短信类型, 1:登录当前钱包, 2:登录已开通钱包|
+|verify_code|是|验证码|
+
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": "", //消息
+"data": {
+              create_time: "" , //创建日期
+        last_upd_time: "" , //钱包信息最后更新日期
+        mobile: "" , //登录手机号
+        register_progress: "" , //注册进度, 1:已通过身份验证, 2:已绑定银行卡
+        status: "" , //帐号状态: 1:正常，2：禁用
+        user_id: "" , //用户ID
+        wallet_id: ""  //关联的钱包ID
+
+  }
+}
+```
+
 ###  初级钱包-查询支付状态
 
 请求地址: /wallet_server/v1/m/wallet/query_pay_status
@@ -311,7 +346,8 @@
   "code": 1001,//状态码
   "msg": "", //消息
 "data": {
-              company_info: {
+              bank_card_count: "" , //银行卡数量
+        company_info: {
                         company_name: "" , //公司名称
         create_time: "" , //创建日期
         email: "" , //公司邮箱
@@ -391,7 +427,8 @@
   "code": 1001,//状态码
   "msg": "", //消息
 "data": {
-              company_info: {
+              bank_card_count: "" , //银行卡数量
+        company_info: {
                         company_name: "" , //公司名称
         create_time: "" , //创建日期
         email: "" , //公司邮箱
@@ -447,6 +484,34 @@
 
             }
 
+  }
+}
+```
+
+###  发送短信验证码
+
+请求地址: /wallet_server/v1/m/wallet/send_verify_code
+
+请求类型: POST
+
+请求参数:
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|ip|是|来源IP|
+|mobile|是|手机号码|
+|type|是|验证码类型, 1:登录, 2:验证已开通钱包帐号|
+|verify_token|是|反作弊结果查询token|
+|redirect_url|否|触发图形验证码并验证成功后重定向地址|
+
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": "", //消息
+"data": {
   }
 }
 ```

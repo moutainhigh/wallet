@@ -13,6 +13,9 @@ import java.util.ArrayList;
 */
 @Data
 public class WalletInfoResp  {
+    @ApiModelProperty("银行卡数量")
+    private Integer bankCardCount ;
+
     @ApiModelProperty("钱包公司信息")
     private WalletCompany companyInfo ;
 

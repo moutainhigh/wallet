@@ -84,4 +84,14 @@ public class UrlConstant {
 	 * 银行支行列表
 	 */
 	public static final String WALLET_BANK_LIST = VERSION + "/wallet/bank/bank_list";
+
+	/**
+	 * 发送短信验证码
+	 */
+	public static final String WALLET_SEND_VERIFY_CODE = VERSION + "/m/wallet/send_verify_code";
+
+	/**
+	 * 短信验证码登录
+	 */
+	public static final String WALLET_LOGIN_WITH_VERIFY_CODE = VERSION + "/m/wallet/login_with_verify_code";
 }

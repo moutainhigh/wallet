@@ -12,7 +12,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class BankListRequest extends  AbstractApiRequest {
 
   @ApiModelProperty("地区编码")
-  private String areacode ;
+  private String areaCode ;
 
   @ApiModelProperty("银行类型编码")
   private String classCode ;
@@ -31,8 +31,8 @@ public class BankListRequest extends  AbstractApiRequest {
   @Override
   public Map<String, String> getTextParmas() {
     Map<String, String> parameters = new HashMap<>(2);
-      if(areacode != null){
-        parameters.put("area＿code", areacode.toString());
+      if(areaCode != null){
+        parameters.put("area_code", areaCode.toString());
       }
       if(classCode != null){
         parameters.put("class_code", classCode.toString());

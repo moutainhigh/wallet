@@ -73,7 +73,6 @@ public class WalletService {
 	@Autowired
 	private WalletCardDao walletCardDao;
 
-
 	@Autowired
 	private UserAdapter userAdapter;
 
@@ -214,7 +213,7 @@ public class WalletService {
 
 		WalletCard walletCard = walletCardDao.selectByDef(walletId);
 
-		return builder.wallet(wallet).defWalletCard(walletCard).build();
+		return builder.wallet(wallet).defWalletCard(walletCard).bankCardCount(walletCardDao.count(walletId)).build();
 	}
 
 	public WalletInfoResp queryWalletInfoByUserId(Long userId) {

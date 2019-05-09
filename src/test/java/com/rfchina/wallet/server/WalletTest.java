@@ -53,4 +53,14 @@ public class WalletTest extends WalletBaseTest{
     public void testQueryWalletByUserId(){
         queryWalletByUserId(30799L);
     }
+
+    @Test
+    public void testSendVerifyCode(){
+        sendVerifyCode("13560166318", 1,"127.0.0.1");
+    }
+
+    @Test
+    public void testLoginWithVerify(){
+        loginWithVerify("13560166318", "12345",1, "127.0.0.1");
+    }
 }

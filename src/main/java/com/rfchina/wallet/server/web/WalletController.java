@@ -6,6 +6,7 @@ import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletLog;
+import com.rfchina.wallet.domain.model.WalletUser;
 import com.rfchina.wallet.domain.model.ext.Bank;
 import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @Api
@@ -170,4 +172,26 @@ public class WalletController {
 			.bankList(classCode, areaCode));
 	}
 
+	@ApiOperation("发送短信验证码")
+	@PostMapping(UrlConstant.WALLET_SEND_VERIFY_CODE)
+	public ResponseValue<Map<String, Object>> sendVerifyCode(
+			@RequestParam("access_token") String accessToken,
+			@ApiParam(value = "手机号码", required = true) @RequestParam(value = "mobile") String mobile,
+			@ApiParam(value = "验证码类型, 1:登录, 2:验证已开通钱包帐号", required = true) @RequestParam("type") Integer type,
+			@ApiParam(value = "反作弊结果查询token", required = true) @RequestParam("verify_token") String verifyToken,
+			@ApiParam(value = "触发图形验证码并验证成功后重定向地址") @RequestParam(value = "redirect_url", required = false) String redirectUrl,
+			@ApiParam(value = "来源IP", required = true) @RequestParam(value = "ip") String ip){
+		return walletApi.sendVerifyCode(accessToken,null, mobile,type,verifyToken,redirectUrl, ip);
+	}
+
+	@ApiOperation("通过短信验证码登录")
+	@PostMapping(UrlConstant.WALLET_LOGIN_WITH_VERIFY_CODE)
+	public ResponseValue<WalletUser> loginWithVerifyCode(
+			@RequestParam("access_token") String accessToken,
+			@ApiParam(value = "手机号码", required = true) @RequestParam("mobile") String mobile,
+			@ApiParam(value = "验证码", required = true) @RequestParam("verify_code") String verifyCode,
+			@ApiParam(value = "短信类型, 1:登录当前钱包, 2:登录已开通钱包", required = true) @RequestParam("type") Integer type,
+			@ApiParam(value = "来源IP", required = true) @RequestParam(value = "ip") String ip){
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, walletApi.loginWithVerifyCode(accessToken, mobile, verifyCode, type, ip));
+	}
 }

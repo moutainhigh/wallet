@@ -31,4 +31,7 @@ public class WalletInfoResp {
 	@ApiModelProperty("钱包默认卡")
 	private WalletCard defWalletCard;
 
+	@ApiModelProperty(name="bank_card_count", value = "银行卡数量")
+	private Integer bankCardCount;
+
 }

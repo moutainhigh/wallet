@@ -1,9 +1,19 @@
 package com.rfchina.wallet.server.api;
 
+import com.rfchina.passport.token.EnumTokenType;
+import com.rfchina.passport.token.TokenVerify;
+import com.rfchina.platform.common.annotation.EnumParamValid;
+import com.rfchina.platform.common.annotation.Log;
+import com.rfchina.platform.common.annotation.ParamValid;
+import com.rfchina.platform.common.annotation.SignVerify;
+import com.rfchina.platform.common.misc.ResponseValue;
 import com.rfchina.platform.common.page.Pagination;
+import com.rfchina.platform.common.utils.RegexUtil;
+import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletLog;
+import com.rfchina.wallet.domain.model.WalletUser;
 import com.rfchina.wallet.domain.model.ext.Bank;
 import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
@@ -100,4 +110,25 @@ public interface WalletApi {
 	 * 富慧通审核企业商家钱包
 	 */
 	void auditWalletCompany(Long walletId, String companyName, Byte status, Long auditType);
+
+	/**
+	 * 发送手机验证码
+	 *
+	 * @param mobile		非必填，手机号码
+	 * @param type			必填，验证码类型, 1:登录, 2:身份验证
+	 * @param verifyToken	必填，反作弊结果查询token
+	 * @param redirectUrl 	非必填，触发图形验证码并验证成功后重定向地址
+	 * @return
+	 */
+	ResponseValue sendVerifyCode(String accessToken, Long userId, String mobile, Integer type, String verifyToken, String redirectUrl, String ip);
+
+	/**
+	 * 通过手机验证码登录
+	 *
+	 * @param mobile		必填, 手机号码
+	 * @param verifyCode	必填, 验证码
+	 * @param type			必填, 短信类型, 1:登录当前钱包, 2:登录已开通钱包
+	 * @return
+	 */
+	WalletUser loginWithVerifyCode(String accessToken, String mobile,String verifyCode,Integer type, String ip);
 }
