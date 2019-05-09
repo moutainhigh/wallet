@@ -1,6 +1,6 @@
 ###  富慧通审核企业商家钱包
 
-请求地址: /wallet_server/v1/m/wallet/audit_wallet_company
+请求地址: /wallet_server/v1/m/wallet/active_wallet_company
 
 请求类型: POST
 
@@ -27,7 +27,7 @@
 
 ###  富慧通审核个人商家钱包
 
-请求地址: /wallet_server/v1/m/wallet/audit_wallet_person
+请求地址: /wallet_server/v1/m/wallet/active_wallet_person
 
 请求类型: POST
 
@@ -544,13 +544,16 @@
               list: [{
                         accept_no: "" , //受理编号
         amount: "" , //流水金额
+        audit_time: "" , //网银授权日期
         batch_no: "" , //钱包批次号
         biz_no: "" , //业务凭证号
         create_time: "" , //创建日期
         curr_try_times: "" , //当前尝试次数
         elec_cheque_no: "" , //电子凭证号
         end_time: "" , //交易结束时间（浦发只有时分秒，查询成功定为交易结束时间）
+        err_code: "" , //银行错误码
         err_msg: "" , //错误信息
+        host_accept_no: "" , //核心受理编号
         id: "" , //ID
         max_try_times: "" , //最大尝试次数
         note: "" , //附言(不超过100)

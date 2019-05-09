@@ -15,7 +15,6 @@ import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletUserDao;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.WalletResponseCode;
-import com.rfchina.wallet.domain.mapper.ext.WalletUserDao;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletLog;
@@ -29,7 +28,6 @@ import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import com.rfchina.wallet.server.service.JuniorWalletService;
 import com.rfchina.wallet.server.service.UserService;
 import com.rfchina.wallet.server.service.WalletService;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -167,17 +165,17 @@ public class WalletApiImpl implements WalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public void auditWalletPerson(Long walletId, String name, Byte idType, String idNo,
-		Byte status, Long auditType) {
-		walletService.auditWalletPerson(walletId, name, idType, idNo, status, auditType);
+	public void activeWalletPerson(Long walletId, String name, Byte idType, String idNo,
+		Long auditType) {
+		walletService.activeWalletPerson(walletId, name, idType, idNo, auditType);
 	}
 
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public void auditWalletCompany(Long walletId, String companyName, Byte status, Long auditType) {
-		walletService.auditWalletCompany(walletId, companyName, status, auditType);
+	public void activeWalletCompany(Long walletId, String companyName, Long auditType) {
+		walletService.activeWalletCompany(walletId, companyName, auditType);
 	}
 
 	@Log

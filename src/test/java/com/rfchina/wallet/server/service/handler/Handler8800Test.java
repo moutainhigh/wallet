@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.DateUtil;
+import com.rfchina.wallet.domain.mapper.ext.WalletLogDao;
 import com.rfchina.wallet.domain.model.WalletLog;
 import com.rfchina.wallet.server.SpringBaseTest;
 import com.rfchina.wallet.server.model.ext.PayInReq;
@@ -21,27 +22,15 @@ public class Handler8800Test extends SpringBaseTest {
 	@Autowired
 	private Handler8800 handler8800;
 
+	@Autowired
+	private WalletLogDao walletLogDao;
+
 
 	@Test
 	public void p0101Pay() throws Exception {
-		WalletLog req1 = WalletLog.builder()
-			.walletId(3L)
-			.amount(1L)
-			.elecChequeNo(
-				IdGenerator.createBizId("Eno", 16, (orderId) -> true))
-			.note("测试")
-			.payPurpose("1")
-			.build();
-		WalletLog req2 = WalletLog.builder()
-			.walletId(2L)
-			.amount(1L)
-			.elecChequeNo(
-				IdGenerator.createBizId("Test", 16, (orderId) -> true))
-			.note("测试")
-			.payPurpose("1")
-			.build();
+		WalletLog walletLog = walletLogDao.selectByPrimaryKey(110L);
 
-		Tuple<GatewayMethod, PayInResp> tuple = handler8800.pay(Arrays.asList(req1, req2));
+		Tuple<GatewayMethod, PayInResp> tuple = handler8800.pay(Arrays.asList(walletLog));
 		assertNotNull(tuple);
 		assertNotNull(tuple.right);
 		assertNotNull(tuple.right.getAcceptNo());

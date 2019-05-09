@@ -221,7 +221,8 @@ public class WalletService {
 
 		WalletCard walletCard = walletCardDao.selectByDef(walletId);
 
-		return builder.wallet(wallet).defWalletCard(walletCard).bankCardCount(walletCardDao.count(walletId)).build();
+		return builder.wallet(wallet).defWalletCard(walletCard)
+			.bankCardCount(walletCardDao.count(walletId)).build();
 	}
 
 	public WalletInfoResp queryWalletInfoByUserId(Long userId) {
@@ -382,8 +383,8 @@ public class WalletService {
 	/**
 	 * 富慧通审核通过个人商家钱包
 	 */
-	public void auditWalletPerson(Long walletId, String name, Byte idType, String idNo,
-		Byte status, Long auditType) {
+	public void activeWalletPerson(Long walletId, String name, Byte idType, String idNo,
+		Long auditType) {
 
 		WalletPerson walletPerson = walletPersonDao.selectByWalletId(walletId);
 
@@ -400,13 +401,13 @@ public class WalletService {
 			walletPersonDao.insertSelective(walletPerson);
 		}
 
-		walletDao.updateStatus(walletId, status, auditType);
+		walletDao.updateActiveStatus(walletId, auditType);
 	}
 
 	/**
 	 * 富慧通审核通过企业商家钱包
 	 */
-	public void auditWalletCompany(Long walletId, String companyName, Byte status, Long auditType) {
+	public void activeWalletCompany(Long walletId, String companyName, Long auditType) {
 
 		WalletCompany walletCompany = walletCompanyDao.selectByWalletId(walletId);
 
@@ -421,6 +422,6 @@ public class WalletService {
 			walletCompanyDao.insertSelective(walletCompany);
 		}
 
-		walletDao.updateStatus(walletId, status, auditType);
+		walletDao.updateActiveStatus(walletId, auditType);
 	}
 }

@@ -133,6 +133,7 @@ public class Handler8800 implements PuDongHandler {
 				.sysFlag(sysFlag)
 				.remitLocation(remitLocation)
 				.note(walletLog.getNote())
+				.payeeType(walletCard.getIsPublic().equals("1") ? "0" : "1")
 				.payeeBankSelectFlag(isOtherRemit ? "1" : null)
 				.payeeBankNo(isOtherRemit ? walletCard.getBankCode() : null)
 				.payPurpose(

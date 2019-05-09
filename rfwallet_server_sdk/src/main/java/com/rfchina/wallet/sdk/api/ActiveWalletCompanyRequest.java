@@ -7,9 +7,9 @@ import com.rfchina.platform.sdk2.request.AbstractApiRequest;
 import lombok.Builder;
 import io.swagger.annotations.ApiModelProperty;
 
-/** 富慧通审核个人商家钱包 */
+/** 富慧通审核企业商家钱包 */
 @Builder
-public class AuditWalletPersonRequest extends  AbstractApiRequest {
+public class ActiveWalletCompanyRequest extends  AbstractApiRequest {
 
   @ApiModelProperty("access_token")
   private String accessToken ;
@@ -17,14 +17,8 @@ public class AuditWalletPersonRequest extends  AbstractApiRequest {
   @ApiModelProperty("审核方式，1：运营，3：银企直连，5：通联")
   private Long auditType ;
 
-  @ApiModelProperty("证件号")
-  private String idNo ;
-
-  @ApiModelProperty("证件类型，1:身份证")
-  private Integer idType ;
-
-  @ApiModelProperty("姓名")
-  private String name ;
+  @ApiModelProperty("公司名称")
+  private String companyName ;
 
   @ApiModelProperty("钱包状态: 1:待审核，2：激活,3：禁用")
   private Integer status ;
@@ -35,7 +29,7 @@ public class AuditWalletPersonRequest extends  AbstractApiRequest {
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/wallet/audit_wallet_person";
+    return "/wallet_server/v1/m/wallet/active_wallet_company";
   }
 
   @Override
@@ -52,14 +46,8 @@ public class AuditWalletPersonRequest extends  AbstractApiRequest {
       if(auditType != null){
         parameters.put("audit_type", auditType.toString());
       }
-      if(idNo != null){
-        parameters.put("id_no", idNo.toString());
-      }
-      if(idType != null){
-        parameters.put("id_type", idType.toString());
-      }
-      if(name != null){
-        parameters.put("name", name.toString());
+      if(companyName != null){
+        parameters.put("company_name", companyName.toString());
       }
       if(status != null){
         parameters.put("status", status.toString());
