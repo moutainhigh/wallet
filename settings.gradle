@@ -1,2 +1,3 @@
 rootProject.name = 'rfwallet_server'
 include 'rfwallet-domain'
+include 'rfwallet_server_sdk'

@@ -105,7 +105,8 @@ public abstract class PpdbReqTpl {
 			.build();
 	}
 
-	protected ResponsePacket doExec(String hostUrl, RequestPacket requestPacket) throws Exception {
+	protected ResponsePacket doExec(String hostUrl, String signUrl, RequestPacket requestPacket)
+		throws Exception {
 		String xmlData = XmlUtil.wrap(XmlUtil.obj2Xml(requestPacket, RequestPacket.class));
 
 		Request request = new Request.Builder()
@@ -117,13 +118,13 @@ public abstract class PpdbReqTpl {
 		Response resp = client.newCall(request).execute();
 
 		String respData = respAdvise(resp.body().bytes());
-		if (log.isDebugEnabled()) {
-			log.debug(respData);
-		}
 		ResponsePacket responsePacket = XmlUtil
 			.xml2Obj(XmlUtil.unwrap(respData), ResponsePacket.class);
 		if (!SUCC.equals(responsePacket.getHead().getReturnCode())) {
-			log.error("银企直连接口错误, request = {} , response = {}", xmlData, respData);
+			// 解析到签名服务接口
+			String unsign = unsign(signUrl, responsePacket);
+			log.error("银企直连接口错误, request = {} , response = {}, body = {}", xmlData, respData,
+				unsign);
 			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_GATEWAY_RESPONSE_ERROR);
 		}
 		return responsePacket;
@@ -158,7 +159,7 @@ public abstract class PpdbReqTpl {
 		RequestPacket requestPacket = buildRequestPacket(requestHeader, signature);
 		// 发送请求
 		log.info("银企直连-请求接口： request = " + JSON.toJSONString(reqBody));
-		ResponsePacket responsePacket = doExec(hostUrl, requestPacket);
+		ResponsePacket responsePacket = doExec(hostUrl, signUrl, requestPacket);
 		// 解析到签名服务接口
 		String unsign = unsign(signUrl, responsePacket);
 		log.info("银企直连-接口响应： response = " + unsign);

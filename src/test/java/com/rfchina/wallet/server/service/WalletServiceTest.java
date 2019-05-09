@@ -24,7 +24,7 @@ public class WalletServiceTest extends SpringBaseTest {
 	}
 
 	@Test
-	public void quartzPay(){
+	public void quartzPay() {
 		walletService.quartzPay();
 	}
 
@@ -49,18 +49,16 @@ public class WalletServiceTest extends SpringBaseTest {
 	}
 
 
-
-
 	@Test
 	public void auditWalletPerson() {
 		Long walletId = 2L;
 		walletService.activeWalletPerson(walletId, "张三", (byte) 1, "430224197009285684",
-			WalletStatus.ACTIVE.getValue(), 1L);
+			1L);
 	}
 
 	@Test
 	public void auditWalletCompany() {
 		Long walletId = 3L;
-		walletService.activeWalletCompany(walletId, "公司", WalletStatus.ACTIVE.getValue(), 1L);
+		walletService.activeWalletCompany(walletId, "公司", 1L);
 	}
 }
