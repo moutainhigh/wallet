@@ -64,8 +64,14 @@ public class ConfigService {
 	@Value("${wlpay.pudong.auditMasterId}")
 	private String auditMasterId;
 
-	@Value("${wallet.paystatus.nextRoundSec}")
+	@Value("${wlpay.paystatus.nextRoundSec}")
 	private Integer nextRoundSec;
+
+	@Value("${wlpay.quartz.updateSize}")
+	private Integer batchUpdateSize;
+
+	@Value("${wlpay.quartz.paySize}")
+	private Integer batchPaySize;
 
 	// 银企直连 END
 }

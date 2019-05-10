@@ -1,6 +1,5 @@
 package com.rfchina.wallet.server.service;
 
-import com.rfchina.biztools.lock.SimpleExclusiveLock;
 import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.platform.common.annotation.EnumParamValid;
 import com.rfchina.platform.common.annotation.ParamValid;
@@ -17,7 +16,6 @@ import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.*;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.WalletResponseCode;
-import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.*;
 import com.rfchina.wallet.domain.model.WalletLogCriteria.Criteria;
 import com.rfchina.wallet.domain.model.ext.Bank;
@@ -30,11 +28,13 @@ import com.rfchina.wallet.server.mapper.ext.WalletLogExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletUserExtDao;
 import com.rfchina.wallet.server.model.ext.AcceptNo;
+import com.rfchina.wallet.server.model.ext.BatchNo;
 import com.rfchina.wallet.server.model.ext.PayInResp;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp.WalletInfoRespBuilder;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
+import com.rfchina.wallet.server.msic.EnumWallet.LOCKSTATUS;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletLogStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletType;
@@ -127,33 +127,42 @@ public class WalletService {
 	/**
 	 * 定时支付
 	 */
-	public void quartzPay() {
+	public void quartzPay(Integer batchSize) {
 
-		List<String> acceptNos = walletLogExtDao.selectUnSendBatchNo();
-		acceptNos.forEach(batchNo -> {
+		List<String> batchNos = walletLogExtDao.selectUnSendBatchNo(batchSize);
+		batchNos.forEach(batchNo -> {
 
-			List<WalletLog> walletLogs = walletLogExtDao.selectUnDealByBatchNo(batchNo);
-			if (StringUtils.isEmpty(batchNo) || walletLogs.size() == 0) {
-				return;
-			}
-			// 请求网关
-			try {
+			int c = walletLogExtDao.updateLock(batchNo, LOCKSTATUS.UNLOCK.getValue(),
+				LOCKSTATUS.LOCKED.getValue());
+			if (c > 0) {
+				try {
+					List<WalletLog> walletLogs = walletLogExtDao.selectUnDealByBatchNo(batchNo);
+					if (StringUtils.isEmpty(batchNo) || walletLogs.size() == 0) {
+						return;
+					}
+					// 请求网关
+					try {
 
-				PuDongHandler puDongHandler = handlerHelper.selectByWalletType(null);
-				Tuple<GatewayMethod, PayInResp> rs = puDongHandler.pay(walletLogs);
+						PuDongHandler puDongHandler = handlerHelper.selectByWalletType(null);
+						Tuple<GatewayMethod, PayInResp> rs = puDongHandler.pay(walletLogs);
 
-				// 记录结果
-				GatewayMethod method = rs.left;
-				PayInResp payInResp = rs.right;
-				for (WalletLog walletLog : walletLogs) {
+						// 记录结果
+						GatewayMethod method = rs.left;
+						PayInResp payInResp = rs.right;
+						for (WalletLog walletLog : walletLogs) {
 
-					walletLog.setStatus(WalletLogStatus.PROCESSING.getValue());
-					walletLog.setRefMethod(method.getValue());
-					walletLog.setAcceptNo(payInResp.getAcceptNo());
-					walletLogExtDao.updateByPrimaryKeySelective(walletLog);
+							walletLog.setStatus(WalletLogStatus.PROCESSING.getValue());
+							walletLog.setRefMethod(method.getValue());
+							walletLog.setAcceptNo(payInResp.getAcceptNo());
+							walletLogExtDao.updateByPrimaryKeySelective(walletLog);
+						}
+					} catch (Exception e) {
+						log.error("银行网关支付错误", e);
+					}
+				} finally {
+					walletLogExtDao.updateLock(batchNo, LOCKSTATUS.LOCKED.getValue(),
+						LOCKSTATUS.UNLOCK.getValue());
 				}
-			} catch (Exception e) {
-				log.error("银行网关支付错误", e);
 			}
 		});
 
@@ -163,11 +172,11 @@ public class WalletService {
 	 * 定时更新支付状态
 	 */
 	@PostMq(routingKey = MqConstant.WALLET_PAY_RESULT)
-	public List<PayStatusResp> quartzUpdate() {
+	public List<PayStatusResp> quartzUpdate(Integer batchSize) {
 
 		log.info("scheduler: 开始更新支付状态[银企直连]");
 
-		List<AcceptNo> acceptNos = walletLogExtDao.selectUnFinish();
+		List<AcceptNo> acceptNos = walletLogExtDao.selectUnFinish(batchSize);
 
 		List<WalletLog> result = acceptNos.stream().map(item -> {
 			PuDongHandler handler = handlerHelper.selectByMethod(item.getRefMethod());

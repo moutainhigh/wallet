@@ -62,10 +62,20 @@ acctno:	990B8950900000818 acctname:	浦发2478952744
 
 ``` 8800非网银授权
   {
-    "key": "wallet.paystatus.nextRoundSec",
+    "key": "wlpay.paystatus.nextRoundSec",
     "value": "60",
     "description": null
   }, 
+  {
+    "key": "wlpay.quartz.paySize",
+    "value": "100",
+    "description": null
+  }, 
+   {
+    "key": "wlpay.quartz.updateSize",
+    "value": "100",
+    "description": null
+  },  
   {
     "key": "wlpay.pudong.signUrl",
     "value": "http://192.168.197.217:5666",

@@ -3,6 +3,7 @@ package com.rfchina.wallet.server.mapper.ext;
 import com.rfchina.wallet.domain.mapper.WalletLogMapper;
 import com.rfchina.wallet.domain.model.WalletLog;
 import com.rfchina.wallet.server.model.ext.AcceptNo;
+import com.rfchina.wallet.server.model.ext.BatchNo;
 import java.util.Date;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
@@ -13,37 +14,21 @@ import org.apache.ibatis.annotations.Update;
 
 public interface WalletLogExtDao extends WalletLogMapper {
 
-	@Update({"update rf_wallet_log"
-		, "set accept_no = #{acceptNo} , status = #{status} , ref_method = #{refMethod}"
-		, "where id = #{logId} and status = 1"
+	@Select({
+		"select distinct batch_no ",
+		"from rf_wallet_log",
+		"where status = 1",
+		"limit #{batchSize}"
 	})
-	void updateStatusAndAcceptNo(@Param("logId") Long logId, @Param("status") Byte status,
-		@Param("acceptNo") String acceptNo, @Param("refMethod") Byte refMethod);
-
-	@Update({"update rf_wallet_log"
-		, "set err_msg = #{errMsg} , status = #{status}, seq_no = #{seqNo}"
-		, "where accept_no = #{acceptNo} and elec_cheque_no = #{elecChequeNo} and status = 2"
-	})
-	int updateStatusAndErrMsg(@Param("acceptNo") String acceptNo,
-		@Param("elecChequeNo") String elecChequeNo,
-		@Param("seqNo") String seqNo,
-		@Param("status") Byte status,
-		@Param("errMsg") String errMsg);
+	List<String> selectUnSendBatchNo(@Param("batchSize") Integer batchSize);
 
 	@Select({
 		"select distinct accept_no as acceptNo,ref_method as refMethod, create_time as createTime",
 		"from rf_wallet_log",
-		"where status = 2 and query_time < CURRENT_TIMESTAMP and curr_try_times < max_try_times"
+		"where status = 2 and query_time < CURRENT_TIMESTAMP and curr_try_times < max_try_times",
+		"limit #{batchSize}"
 	})
-	List<AcceptNo> selectUnFinish();
-
-	@Select({
-		"select distinct batch_no",
-		"from rf_wallet_log",
-		"where status = 1",
-		"limit 10"
-	})
-	List<String> selectUnSendBatchNo();
+	List<AcceptNo> selectUnFinish(@Param("batchSize") Integer batchSize);
 
 	@Select({
 		"select * from rf_wallet_log",
@@ -89,4 +74,11 @@ public interface WalletLogExtDao extends WalletLogMapper {
 	})
 	void updateAcceptNoError(@Param("acceptNo") String acceptNo, @Param("errCode") String errCode,
 		@Param("errMsg") String errMsg);
+
+	@Update({"update rf_wallet_log"
+		, "set locked = #{destLocked}"
+		, "where batch_no = #{batchNo} and locked = #{orgLocked}"
+	})
+	int updateLock(@Param("batchNo") String batchNo, @Param("orgLocked") Byte orgLocked,
+		@Param("destLocked") Byte destLocked);
 }

@@ -25,9 +25,11 @@ import com.rfchina.wallet.domain.model.ext.BankClass;
 import com.rfchina.wallet.server.api.WalletApi;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
+import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.JuniorWalletService;
 import com.rfchina.wallet.server.service.UserService;
 import com.rfchina.wallet.server.service.WalletService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -35,6 +37,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Component
 public class WalletApiImpl implements WalletApi {
 
@@ -53,6 +56,9 @@ public class WalletApiImpl implements WalletApi {
 	@Autowired
 	private UserService userService;
 
+	@Autowired
+	private ConfigService configService;
+
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
@@ -67,24 +73,28 @@ public class WalletApiImpl implements WalletApi {
 	@Override
 	public void quartzUpdate() {
 
-//		String lockName = SimpleExclusiveLock.PRE_EXEC_LOCK + "quartzUpdate";
-//		boolean succ = lock.acquireLock(lockName, 3600, 0, 1);
-//		if (succ) {
-			walletService.quartzUpdate();
-//			lock.unLock(lockName);
-//		}
+		String lockName = SimpleExclusiveLock.PRE_EXEC_LOCK + "quartzUpdate";
+		boolean succ = lock.acquireLock(lockName, 3600, 0, 1);
+		if (succ) {
+			walletService.quartzUpdate(configService.getBatchUpdateSize());
+			lock.unLock(lockName);
+		}else{
+			log.warn("获取分布式锁失败， 跳过执行的任务");
+		}
 	}
 
 	@Log
 	@Override
 	public void quartzPay() {
 
-//		String lockName = SimpleExclusiveLock.PRE_EXEC_LOCK + "quartzPay";
-//		boolean succ =	lock.acquireLock(lockName, 3600, 0, 1);
-//		if(succ){
-			walletService.quartzPay();
-//			lock.unLock(lockName);
-//		}
+		String lockName = SimpleExclusiveLock.PRE_EXEC_LOCK + "quartzPay";
+		boolean succ = lock.acquireLock(lockName, 3600, 0, 1);
+		if(succ){
+			walletService.quartzPay(configService.getBatchPaySize());
+			lock.unLock(lockName);
+		}else{
+			log.warn("获取分布式锁失败， 跳过执行的任务");
+		}
 	}
 
 

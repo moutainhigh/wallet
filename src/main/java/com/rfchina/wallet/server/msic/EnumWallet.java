@@ -433,5 +433,21 @@ public class EnumWallet {
 		}
 	}
 
+	public enum LOCKSTATUS implements Valuable<Byte> {
+		UNLOCK((byte) 1, "未锁"),
+		LOCKED((byte) 2, "锁定");
 
+		private Byte value;
+		private String valueName;
+
+		LOCKSTATUS(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}
+	}
 }

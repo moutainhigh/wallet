@@ -34,13 +34,13 @@ public class WalletApiImplTest extends SpringBaseTest {
 	}
 
 	@Test
-	public void quartzUpdate() {
-		walletApi.quartzUpdate();
+	public void quartzPay() {
+		walletApi.quartzPay();
 	}
 
 	@Test
-	public void quartzPay() {
-		walletApi.quartzPay();
+	public void quartzUpdate() {
+		walletApi.quartzUpdate();
 	}
 
 	@Test

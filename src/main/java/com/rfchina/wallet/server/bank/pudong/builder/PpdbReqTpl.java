@@ -158,11 +158,12 @@ public abstract class PpdbReqTpl {
 		// 完整请求
 		RequestPacket requestPacket = buildRequestPacket(requestHeader, signature);
 		// 发送请求
-		log.info("银企直连-请求接口： request = " + JSON.toJSONString(reqBody));
+		log.info("银企直连-请求接口： header = {}, request = {}", JSON.toJSONString(requestHeader),
+			JSON.toJSONString(reqBody));
 		ResponsePacket responsePacket = doExec(hostUrl, signUrl, requestPacket);
 		// 解析到签名服务接口
 		String unsign = unsign(signUrl, responsePacket);
-		log.info("银企直连-接口响应： response = " + unsign);
+		log.info("银企直连-接口响应： response = {}", unsign);
 		// 提取响应结果
 		return extractRespObj(unsign, respBodyClz);
 	}
