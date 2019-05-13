@@ -15,6 +15,11 @@ public class WalletTest extends WalletBaseTest{
     private com.rfchina.internal.api.ApiClient internalApiClient;
 
     @Test
+    public void testWalletInfo(){
+        walletInfo(36L);
+    }
+
+    @Test
     public void testCreateWallet(){
         createWallet((byte)2, "个人钱包1", (byte)3);
     }

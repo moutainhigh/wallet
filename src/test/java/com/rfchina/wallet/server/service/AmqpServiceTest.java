@@ -1,5 +1,6 @@
 package com.rfchina.wallet.server.service;
 
+import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.server.SpringBaseTest;
 import org.junit.Test;
 import org.springframework.amqp.core.AmqpTemplate;

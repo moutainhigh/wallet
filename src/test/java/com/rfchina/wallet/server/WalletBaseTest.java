@@ -33,6 +33,18 @@ public abstract class WalletBaseTest extends BaseTest {
     @Autowired
     protected MockHttpSession session;
 
+    protected Map<String, Object> walletInfo(Long walletId){
+        Map<String, String> params = new HashMap<>();
+
+        params.put("access_token", getAccessToken(appId, appSecret));
+        params.put("wallet_id", String.valueOf(walletId));
+
+        params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+        String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+        params.put("sign", sign);
+        return postAndValidateSuccessCode(BASE_URL, UrlConstant.WALLET_QUERY_INFO, params);
+    }
+
     protected Map<String, Object> createWallet(Byte type, String title, Byte source){
         Map<String, String> params = new HashMap<>();
 
