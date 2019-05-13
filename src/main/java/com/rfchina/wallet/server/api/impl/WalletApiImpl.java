@@ -1,6 +1,7 @@
 package com.rfchina.wallet.server.api.impl;
 
 import com.rfchina.biztools.mq.PostMq;
+import com.rfchina.biztools.lock.SimpleExclusiveLock;
 import com.rfchina.passport.token.EnumTokenType;
 import com.rfchina.passport.token.TokenVerify;
 import com.rfchina.platform.common.annotation.EnumParamValid;
@@ -27,9 +28,11 @@ import com.rfchina.wallet.domain.model.ext.WalletCardExt;
 import com.rfchina.wallet.server.api.WalletApi;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
+import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.JuniorWalletService;
 import com.rfchina.wallet.server.service.UserService;
 import com.rfchina.wallet.server.service.WalletService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -37,6 +40,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Component
 public class WalletApiImpl implements WalletApi {
 
@@ -47,10 +51,16 @@ public class WalletApiImpl implements WalletApi {
 	private JuniorWalletService juniorWalletService;
 
 	@Autowired
+	private SimpleExclusiveLock lock;
+
+	@Autowired
 	private WalletUserDao walletUserDao;
 
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private ConfigService configService;
 
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
@@ -65,13 +75,29 @@ public class WalletApiImpl implements WalletApi {
 	@Log
 	@Override
 	public void quartzUpdate() {
-		walletService.quartzUpdate();
+
+		String lockName = SimpleExclusiveLock.PRE_EXEC_LOCK + "quartzUpdate";
+		boolean succ = lock.acquireLock(lockName, 3600, 0, 1);
+		if (succ) {
+			walletService.quartzUpdate(configService.getBatchUpdateSize());
+			lock.unLock(lockName);
+		}else{
+			log.warn("获取分布式锁失败， 跳过执行的任务");
+		}
 	}
 
 	@Log
 	@Override
 	public void quartzPay() {
-		walletService.quartzPay();
+
+		String lockName = SimpleExclusiveLock.PRE_EXEC_LOCK + "quartzPay";
+		boolean succ = lock.acquireLock(lockName, 3600, 0, 1);
+		if(succ){
+			walletService.quartzPay(configService.getBatchPaySize());
+			lock.unLock(lockName);
+		}else{
+			log.warn("获取分布式锁失败， 跳过执行的任务");
+		}
 	}
 
 
@@ -154,17 +180,17 @@ public class WalletApiImpl implements WalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public void auditWalletPerson(Long walletId, String name, Byte idType, String idNo,
-		Byte status, Long auditType) {
-		walletService.auditWalletPerson(walletId, name, idType, idNo, status, auditType);
+	public void activeWalletPerson(Long walletId, String name, Byte idType, String idNo,
+		Long auditType) {
+		walletService.activeWalletPerson(walletId, name, idType, idNo, auditType);
 	}
 
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public void auditWalletCompany(Long walletId, String companyName, Byte status, Long auditType) {
-		walletService.auditWalletCompany(walletId, companyName, status, auditType);
+	public void activeWalletCompany(Long walletId, String companyName, Long auditType) {
+		walletService.activeWalletCompany(walletId, companyName, auditType);
 	}
 
 	@Log

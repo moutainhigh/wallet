@@ -83,21 +83,21 @@ public class WalletController {
 	}
 
 	@ApiOperation("富慧通审核企业商家钱包")
-	@PostMapping(UrlConstant.AUDIT_WALLET_COMPANY)
-	public ResponseValue auditWalletCompany(
+	@PostMapping(UrlConstant.ACTIVE_WALLET_COMPANY)
+	public ResponseValue activeWalletCompany(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包ID", required = true, example = "2") @RequestParam("wallet_id") Long walletId,
 		@ApiParam(value = "公司名称", required = true) @RequestParam("company_name") String companyName,
 		@ApiParam(value = "钱包状态: 1:待审核，2：激活,3：禁用", required = true) @RequestParam("status") Byte status,
 		@ApiParam(value = "审核方式，1：运营，3：银企直连，5：通联", required = true, example = "6") @RequestParam("audit_type") Long auditType
 	) {
-		walletApi.auditWalletCompany(walletId, companyName, status, auditType);
+		walletApi.activeWalletCompany(walletId, companyName, auditType);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
 
 	@ApiOperation("富慧通审核个人商家钱包")
-	@PostMapping(UrlConstant.AUDIT_WALLET_PERSON)
-	public ResponseValue auditWalletPerson(
+	@PostMapping(UrlConstant.ACTIVE_WALLET_PERSON)
+	public ResponseValue activeWalletPerson(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包ID", required = true, example = "2") @RequestParam("wallet_id") Long walletId,
 		@ApiParam(value = "姓名", required = true) @RequestParam("name") String name,
@@ -106,7 +106,7 @@ public class WalletController {
 		@ApiParam(value = "钱包状态: 1:待审核，2：激活,3：禁用", required = true) @RequestParam("status") Byte status,
 		@ApiParam(value = "审核方式，1：运营，3：银企直连，5：通联", required = true, example = "6") @RequestParam("audit_type") Long auditType
 	) {
-		walletApi.auditWalletPerson(walletId, name, idType, idNo, status, auditType);
+		walletApi.activeWalletPerson(walletId, name, idType, idNo, auditType);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
 

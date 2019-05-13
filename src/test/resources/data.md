@@ -61,7 +61,31 @@ acctno:	990B8950900000818 acctname:	浦发2478952744
 
 
 ``` 8800非网银授权
-
+  {
+    "key": "wlpay.paystatus.nextRoundSec",
+    "value": "60",
+    "description": null
+  }, 
+  {
+    "key": "wlpay.quartz.paySize",
+    "value": "100",
+    "description": null
+  }, 
+   {
+    "key": "wlpay.quartz.updateSize",
+    "value": "100",
+    "description": null
+  },  
+  {
+    "key": "wlpay.pudong.signUrl",
+    "value": "http://192.168.197.217:5666",
+    "description": null
+  },
+  {
+    "key": "wlpay.pudong.hostUrl",
+    "value": "http://192.168.197.217:5777",
+    "description": null
+  },
   {
     "key": "wlpay.pudong.acctAreaCode",
     "value": "2900",
@@ -119,5 +143,22 @@ acctno:	990B8950900000818 acctname:	浦发2478952744
 对公 952A9997220008092 浦发2489675304 9520 2489675304
 
 个人 6225160293976253    浦发1339591801
+
+```
+
+```
+
+1、新版网银上线通知/培训PPT/相关制度文件/更换一代UKEY的通知见附件1、附件2
+ 
+2、网银设置手册下载网址：
+http://cor.spdb.com.cn/company_e_bank/cpjs_1973/gswy/201801/t20180124_352277.shtml
+ 
+3、新版网银演示版的网址：
+客户号模式：http://www.spdb.com.cn/resourcesW/newentdemo/entprof_login.htm
+网银编号模式：http://www.spdb.com.cn/resourcesW/newentdemo/newentprof_login.htm
+ 
+注意：“网银编号模式”目前提供的业务功能如下：
+l  信息查询、转账支付、网上报销、网上代发、网上预约、网上存款（定期存款、通知存款、大额存单等）、银行理财产品、信息服务管理（短信和邮件通知）、电子账单服务、跨境汇款和网上结售汇、证券公司第三方存管、银衍转账、中登出入金、代理贵金属、资产托管、银企对账、我的信息台和网银管理
+l  其他功能在网银专业版提供
 
 ```

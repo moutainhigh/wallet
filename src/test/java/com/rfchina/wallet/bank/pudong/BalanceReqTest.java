@@ -8,10 +8,16 @@ import com.rfchina.wallet.server.bank.pudong.domain.response.BalanceRespBody.Bal
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Value;
+
 import static com.rfchina.wallet.bank.pudong.TestingData.*;
 
 @Slf4j
 public class BalanceReqTest {
+
+	private String signUrl = "http://192.168.197.217:5666";
+
+	private String hostUrl = "http://192.168.197.217:5777";
 
 	@Test
 	public void lanch() throws Exception {
@@ -21,7 +27,7 @@ public class BalanceReqTest {
 			.packetId(PACKET_ID)
 			.build();
 
-		Balance balance = req.lanch(new OkHttpClient.Builder().build());
+		Balance balance = req.lanch(hostUrl, signUrl, new OkHttpClient.Builder().build());
 		log.info(JSON.toJSONString(balance));
 		assertTrue(balance != null);
 	}

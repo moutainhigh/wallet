@@ -28,6 +28,7 @@ import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.SysFlag;
 import com.rfchina.wallet.server.msic.EnumWallet.TransStatusAQ53;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletLogStatus;
+import com.rfchina.wallet.server.service.ConfigService;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -49,9 +50,6 @@ import org.springframework.stereotype.Component;
 @Component
 public class HandlerAQ52 implements PuDongHandler {
 
-	@Value("${wlpay.pudong.masterid}")
-	private String masterId;
-
 	@Value("${wlpay.pudong.project.number}")
 	private String projectNumber;
 
@@ -60,6 +58,9 @@ public class HandlerAQ52 implements PuDongHandler {
 
 	@Value("${wlpay.pudong.project.costcode}")
 	private String costItemCode;
+
+	@Autowired
+	private ConfigService configService;
 
 	@Autowired
 	private WalletCardDao walletCardDao;
@@ -133,9 +134,9 @@ public class HandlerAQ52 implements PuDongHandler {
 		String packetId = IdGenerator
 			.createBizId(IdGenerator.PREFIX_WALLET, IdGenerator.DEFAULT_LENGTH, (orderId) -> true);
 		PriPayReqBuilder req = PriPayReqBuilder.builder()
-			.masterId(masterId)
+			.masterId(configService.getMasterId())
 			.packetId(packetId)
-			.transMasterID(masterId)
+			.transMasterID(configService.getMasterId())
 			.projectNumber(projectNumber)
 			.projectName(projectName)
 			.costItemCode(costItemCode)
@@ -145,7 +146,8 @@ public class HandlerAQ52 implements PuDongHandler {
 			.payReqList(payReqs)
 			.build();
 
-		PriPayRespBody resp = req.lanch(new Builder().build());
+		PriPayRespBody resp = req.lanch(configService.getHostUrl(), configService.getSignUrl(),
+			new Builder().build());
 
 		PayInResp payInResp = PayInResp.builder()
 			.acceptNo(resp.getHandleSeqNo())
@@ -158,10 +160,10 @@ public class HandlerAQ52 implements PuDongHandler {
 		Date endDate = DateUtil.addDate2(createTime, 7);
 
 		PriPayQuery53Builder req53 = PriPayQuery53Builder.builder()
-			.masterId(masterId)
+			.masterId(configService.getMasterId())
 			.packetId(IdGenerator.createBizId(IdGenerator.PREFIX_WALLET,
 				IdGenerator.DEFAULT_LENGTH, (orderId) -> true))
-			.transMasterID(masterId)
+			.transMasterID(configService.getMasterId())
 			.projectNumber(projectNumber)
 			.handleSeqNo(acceptNo)
 			.beginDate(DateUtil.formatDate(createTime, "yyyyMMdd"))
@@ -171,7 +173,8 @@ public class HandlerAQ52 implements PuDongHandler {
 			.build();
 
 		try {
-			PriPayQuery53RespBody respBody = req53.lanch(new Builder().build());
+			PriPayQuery53RespBody respBody = req53.lanch(configService.getHostUrl(),
+				configService.getSignUrl(),new Builder().build());
 			if (respBody.getLists() != null && respBody.getLists().getList() != null) {
 				PriPayQuery53RespWrapper wrapper = respBody.getLists().getList().get(0);
 
@@ -191,17 +194,18 @@ public class HandlerAQ52 implements PuDongHandler {
 		}
 
 		PriPayQuery54Builder req54 = PriPayQuery54Builder.builder()
-			.masterId(masterId)
+			.masterId(configService.getMasterId())
 			.packetId(IdGenerator.createBizId(IdGenerator.PREFIX_WALLET,
 				IdGenerator.DEFAULT_LENGTH, (orderId) -> true))
-			.transMasterID(masterId)
+			.transMasterID(configService.getMasterId())
 			.projectNumber(projectNumber)
 			.transDate(DateUtil.formatDate(createTime, "yyyyMMdd"))
 			.handleSeqNo(acceptNo)
 			.build();
 
 		try {
-			PriPayQuery54RespBody respBody = req54.lanch(new Builder().build());
+			PriPayQuery54RespBody respBody = req54.lanch(configService.getHostUrl(),
+				configService.getSignUrl(),new Builder().build());
 			if (respBody.getLists() != null && respBody.getLists().getList() != null) {
 				List<PriPayResp> priPayResps = respBody.getLists().getList().stream()
 					.map(wrapper -> {
@@ -214,7 +218,7 @@ public class HandlerAQ52 implements PuDongHandler {
 					WalletLogStatus status = WalletLogStatus.parsePuDongAQ54(rs.getStatus());
 
 					WalletLog walletLog = walletLogDao
-						.selectByAcctAndElecNo(respBody.getHandleSeqNo()
+						.selectByHostAcctAndElecNo(respBody.getHandleSeqNo()
 							, rs.getBizLog(), WalletLogStatus.PROCESSING.getValue());
 					if (walletLog != null) {
 						walletLog.setSeqNo(rs.getDetailNo());

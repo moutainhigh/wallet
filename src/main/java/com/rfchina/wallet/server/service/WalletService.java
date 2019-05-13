@@ -30,11 +30,13 @@ import com.rfchina.wallet.server.mapper.ext.WalletLogExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletUserExtDao;
 import com.rfchina.wallet.server.model.ext.AcceptNo;
+import com.rfchina.wallet.server.model.ext.BatchNo;
 import com.rfchina.wallet.server.model.ext.PayInResp;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp.WalletInfoRespBuilder;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
+import com.rfchina.wallet.server.msic.EnumWallet.LOCKSTATUS;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletLogStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletType;
@@ -88,6 +90,7 @@ public class WalletService {
 	@Autowired
 	private WalletLogExtDao walletLogExtDao;
 
+
 	/**
 	 * 查询出佣结果
 	 */
@@ -125,27 +128,42 @@ public class WalletService {
 	/**
 	 * 定时支付
 	 */
-	public void quartzPay() {
-		List<String> acceptNos = walletLogExtDao.selectUnSendBatchNo();
-		acceptNos.forEach(batchNo -> {
-			List<WalletLog> walletLogs = walletLogExtDao.selectByBatchNo(batchNo);
-			if (StringUtils.isEmpty(batchNo) || walletLogs.size() == 0) {
-				return;
-			}
-			// 请求网关
-			try {
-				PuDongHandler puDongHandler = handlerHelper.selectByWalletType(null);
-				Tuple<GatewayMethod, PayInResp> rs = puDongHandler.pay(walletLogs);
+	public void quartzPay(Integer batchSize) {
 
-				GatewayMethod method = rs.left;
-				PayInResp payInResp = rs.right;
-				for (WalletLog walletLog : walletLogs) {
-					walletLogExtDao.updateStatusAndAcceptNo(walletLog.getId(),
-						WalletLogStatus.PROCESSING.getValue(), payInResp.getAcceptNo(),
-						method.getValue());
+		List<String> batchNos = walletLogExtDao.selectUnSendBatchNo(batchSize);
+		batchNos.forEach(batchNo -> {
+
+			int c = walletLogExtDao.updateLock(batchNo, LOCKSTATUS.UNLOCK.getValue(),
+				LOCKSTATUS.LOCKED.getValue());
+			if (c > 0) {
+				try {
+					List<WalletLog> walletLogs = walletLogExtDao.selectUnDealByBatchNo(batchNo);
+					if (StringUtils.isEmpty(batchNo) || walletLogs.size() == 0) {
+						return;
+					}
+					// 请求网关
+					try {
+
+						PuDongHandler puDongHandler = handlerHelper.selectByWalletType(null);
+						Tuple<GatewayMethod, PayInResp> rs = puDongHandler.pay(walletLogs);
+
+						// 记录结果
+						GatewayMethod method = rs.left;
+						PayInResp payInResp = rs.right;
+						for (WalletLog walletLog : walletLogs) {
+
+							walletLog.setStatus(WalletLogStatus.PROCESSING.getValue());
+							walletLog.setRefMethod(method.getValue());
+							walletLog.setAcceptNo(payInResp.getAcceptNo());
+							walletLogExtDao.updateByPrimaryKeySelective(walletLog);
+						}
+					} catch (Exception e) {
+						log.error("银行网关支付错误", e);
+					}
+				} finally {
+					walletLogExtDao.updateLock(batchNo, LOCKSTATUS.LOCKED.getValue(),
+						LOCKSTATUS.UNLOCK.getValue());
 				}
-			} catch (Exception e) {
-				log.error("银行网关支付错误", e);
 			}
 		});
 
@@ -155,11 +173,11 @@ public class WalletService {
 	 * 定时更新支付状态
 	 */
 	@PostMq(routingKey = MqConstant.WALLET_PAY_RESULT)
-	public List<PayStatusResp> quartzUpdate() {
+	public List<PayStatusResp> quartzUpdate(Integer batchSize) {
 
 		log.info("scheduler: 开始更新支付状态[银企直连]");
 
-		List<AcceptNo> acceptNos = walletLogExtDao.selectUnFinish();
+		List<AcceptNo> acceptNos = walletLogExtDao.selectUnFinish(batchSize);
 
 		List<WalletLog> result = acceptNos.stream().map(item -> {
 			PuDongHandler handler = handlerHelper.selectByMethod(item.getRefMethod());
@@ -213,7 +231,8 @@ public class WalletService {
 
 		WalletCard walletCard = walletCardDao.selectByDef(walletId);
 
-		return builder.wallet(wallet).defWalletCard(walletCard).bankCardCount(walletCardDao.count(walletId)).build();
+		return builder.wallet(wallet).defWalletCard(walletCard)
+			.bankCardCount(walletCardDao.count(walletId)).build();
 	}
 
 	public WalletInfoResp queryWalletInfoByUserId(Long userId) {
@@ -379,8 +398,8 @@ public class WalletService {
 	/**
 	 * 富慧通审核通过个人商家钱包
 	 */
-	public void auditWalletPerson(Long walletId, String name, Byte idType, String idNo,
-		Byte status, Long auditType) {
+	public void activeWalletPerson(Long walletId, String name, Byte idType, String idNo,
+		Long auditType) {
 
 		WalletPerson walletPerson = walletPersonDao.selectByWalletId(walletId);
 
@@ -397,13 +416,13 @@ public class WalletService {
 			walletPersonDao.insertSelective(walletPerson);
 		}
 
-		walletDao.updateStatus(walletId, status, auditType);
+		walletDao.updateActiveStatus(walletId, auditType);
 	}
 
 	/**
 	 * 富慧通审核通过企业商家钱包
 	 */
-	public void auditWalletCompany(Long walletId, String companyName, Byte status, Long auditType) {
+	public void activeWalletCompany(Long walletId, String companyName, Long auditType) {
 
 		WalletCompany walletCompany = walletCompanyDao.selectByWalletId(walletId);
 
@@ -418,6 +437,6 @@ public class WalletService {
 			walletCompanyDao.insertSelective(walletCompany);
 		}
 
-		walletDao.updateStatus(walletId, status, auditType);
+		walletDao.updateActiveStatus(walletId, auditType);
 	}
 }

@@ -133,6 +133,41 @@ public class EnumWallet {
 	}
 
 	/**
+	 * 授权状态
+	 */
+	public enum TransStatusDO48 implements Valuable<String> {
+		SUCC("0", "交易成功"),
+		COMMU_ERROR("1", "通讯失败"),
+		HOST_REFUSE("2", "主机拒绝"),
+		EBANK_REFUSE("3", "网银拒绝"),
+		AUDIT_REFUSE("4", "授权拒绝"),
+		WAIT_AUDIT("5", "交易录入，待授权"),
+		WAIT_DUIL("9", "待处理"),
+		COMMITED("Z", "交易提交成功"),
+		COMMIT_ERROR("Y", "交易提交不成功");
+
+		private String value;
+		private String valueName;
+
+		TransStatusDO48(String value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public String getValue() {
+			return value;
+		}
+
+		public boolean isEndStatus() {
+			return SUCC.getValue().equals(value)
+				|| HOST_REFUSE.getValue().equals(value)
+				|| EBANK_REFUSE.getValue().equals(value)
+				|| AUDIT_REFUSE.getValue().equals(value);
+		}
+	}
+
+	/**
 	 * 流水类型
 	 */
 	public enum WalletLogType implements Valuable<Byte> {
@@ -398,5 +433,21 @@ public class EnumWallet {
 		}
 	}
 
+	public enum LOCKSTATUS implements Valuable<Byte> {
+		UNLOCK((byte) 1, "未锁"),
+		LOCKED((byte) 2, "锁定");
 
+		private Byte value;
+		private String valueName;
+
+		LOCKSTATUS(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}
+	}
 }

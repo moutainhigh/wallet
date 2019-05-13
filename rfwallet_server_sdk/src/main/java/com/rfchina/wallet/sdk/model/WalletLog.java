@@ -19,6 +19,9 @@ public class WalletLog  {
     @ApiModelProperty("流水金额")
     private Long amount ;
 
+    @ApiModelProperty("网银授权日期")
+    private String auditTime ;
+
     @ApiModelProperty("钱包批次号")
     private String batchNo ;
 
@@ -37,8 +40,14 @@ public class WalletLog  {
     @ApiModelProperty("交易结束时间（浦发只有时分秒，查询成功定为交易结束时间）")
     private String endTime ;
 
+    @ApiModelProperty("银行错误码")
+    private String errCode ;
+
     @ApiModelProperty("错误信息")
     private String errMsg ;
+
+    @ApiModelProperty("核心受理编号")
+    private String hostAcceptNo ;
 
     @ApiModelProperty("ID")
     private Long id ;

@@ -1,5 +1,6 @@
 package com.rfchina.wallet.server.bank.pudong.builder;
 
+import com.alibaba.fastjson.JSON;
 import com.rfchina.wallet.server.bank.pudong.domain.common.RequestHeader;
 import com.rfchina.wallet.server.bank.pudong.domain.common.RequestPacket;
 import com.rfchina.wallet.server.bank.pudong.domain.common.ResponsePacket;
@@ -34,8 +35,6 @@ public abstract class PpdbReqTpl {
 	public static final Charset SERVER_CHARSET = Charset.forName("GBK");
 	private static Boolean isServerGBK = true;
 
-	private String signServerUrl = "http://192.168.197.217:5666";
-	private String gatewayUrl = "http://192.168.197.217:5777";
 
 	protected OkHttpClient client;
 
@@ -44,10 +43,10 @@ public abstract class PpdbReqTpl {
 	 *
 	 * @param xmlData 需要签名的body
 	 */
-	public String sign(String xmlData) throws Exception {
+	public String sign(String signUrl, String xmlData) throws Exception {
 
 		Request request = new Request.Builder()
-			.url(signServerUrl)
+			.url(signUrl)
 			.addHeader("Content-Type", "INFOSEC_SIGN/1.0")
 			.addHeader("Content-Length", String.valueOf(xmlData.length()))
 			.post(RequestBody.create(MediaType.parse("INFOSEC_SIGN/1.0"), reqAdvise(xmlData)))
@@ -69,10 +68,10 @@ public abstract class PpdbReqTpl {
 	 *
 	 * @param signData 网关返回的Signature
 	 */
-	public String unsign(String signData) throws Exception {
+	public String unsign(String signUrl, String signData) throws Exception {
 
 		Request request = new Request.Builder()
-			.url(signServerUrl)
+			.url(signUrl)
 			.addHeader("Content-Type", "INFOSEC_VERIFY_SIGN/1.0")
 			.addHeader("Content-Length", String.valueOf(signData.length()))
 			.post(RequestBody.create(MediaType.parse("INFOSEC_VERIFY_SIGN/1.0")
@@ -89,12 +88,12 @@ public abstract class PpdbReqTpl {
 
 	abstract <T> T buildReqBody();
 
-	protected String parseAndSign(Object reqBody, Class clz) throws Exception {
+	protected String parseAndSign(String signUrl, Object reqBody, Class clz) throws Exception {
 		String xmlBody = XmlUtil.obj2Xml(reqBody, clz);
 		if (log.isDebugEnabled()) {
 			log.debug(xmlBody);
 		}
-		return sign(xmlBody);
+		return sign(signUrl, xmlBody);
 	}
 
 	abstract RequestHeader buildReqestHeader();
@@ -106,11 +105,12 @@ public abstract class PpdbReqTpl {
 			.build();
 	}
 
-	protected ResponsePacket doExec(RequestPacket requestPacket) throws Exception {
+	protected ResponsePacket doExec(String hostUrl, String signUrl, RequestPacket requestPacket)
+		throws Exception {
 		String xmlData = XmlUtil.wrap(XmlUtil.obj2Xml(requestPacket, RequestPacket.class));
 
 		Request request = new Request.Builder()
-			.url(gatewayUrl)
+			.url(hostUrl)
 			.addHeader("Content-Type", "text/plain")
 			.addHeader("Content-Length", String.valueOf(xmlData.length()))
 			.post(RequestBody.create(MediaType.parse("INFOSEC_SIGN/1.0"), reqAdvise(xmlData)))
@@ -118,13 +118,13 @@ public abstract class PpdbReqTpl {
 		Response resp = client.newCall(request).execute();
 
 		String respData = respAdvise(resp.body().bytes());
-		if (log.isDebugEnabled()) {
-			log.debug(respData);
-		}
 		ResponsePacket responsePacket = XmlUtil
 			.xml2Obj(XmlUtil.unwrap(respData), ResponsePacket.class);
 		if (!SUCC.equals(responsePacket.getHead().getReturnCode())) {
-			log.error("银企直连接口错误, request = {} , response = {}", xmlData, respData);
+			// 解析到签名服务接口
+			String unsign = unsign(signUrl, responsePacket);
+			log.error("银企直连接口错误, request = {} , response = {}, body = {}", xmlData, respData,
+				unsign);
 			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_GATEWAY_RESPONSE_ERROR);
 		}
 		return responsePacket;
@@ -138,29 +138,32 @@ public abstract class PpdbReqTpl {
 		return new String(bytes, SERVER_CHARSET);
 	}
 
-	protected String unsign(ResponsePacket responsePacket) throws Exception {
-		return unsign(responsePacket.getBody().getSignature());
+	protected String unsign(String signUrl, ResponsePacket responsePacket) throws Exception {
+		return unsign(signUrl, responsePacket.getBody().getSignature());
 	}
 
 	protected <T> T extractRespObj(String xmlData, Class clz) throws Exception {
 		return XmlUtil.xml2Obj(xmlData, clz);
 	}
 
-	protected <T> T build(OkHttpClient client, Class reqBodyClz, Class respBodyClz)
-		throws Exception {
+	protected <T> T build(String hostUrl, String signUrl, OkHttpClient client, Class reqBodyClz,
+		Class respBodyClz) throws Exception {
 		this.client = client;
 		// 请求体
 		T reqBody = buildReqBody();
 		// 解析到签名服务接口
-		String signature = parseAndSign(reqBody, reqBodyClz);
+		String signature = parseAndSign(signUrl, reqBody, reqBodyClz);
 		// 请求头
 		RequestHeader requestHeader = buildReqestHeader();
 		// 完整请求
 		RequestPacket requestPacket = buildRequestPacket(requestHeader, signature);
 		// 发送请求
-		ResponsePacket responsePacket = doExec(requestPacket);
+		log.info("银企直连-请求接口： header = {}, request = {}", JSON.toJSONString(requestHeader),
+			JSON.toJSONString(reqBody));
+		ResponsePacket responsePacket = doExec(hostUrl, signUrl, requestPacket);
 		// 解析到签名服务接口
-		String unsign = unsign(responsePacket);
+		String unsign = unsign(signUrl, responsePacket);
+		log.info("银企直连-接口响应： response = {}", unsign);
 		// 提取响应结果
 		return extractRespObj(unsign, respBodyClz);
 	}

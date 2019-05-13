@@ -18,6 +18,10 @@ import org.junit.Test;
 @Slf4j
 public class PayReqTest {
 
+	private String signUrl = "http://192.168.197.217:5666";
+
+	private String hostUrl = "http://192.168.197.217:5777";
+
 	@Test
 	public void lanch() throws Exception {
 		PubPayReq payB = PubPayReq.builder()
@@ -41,7 +45,7 @@ public class PayReqTest {
 			.packetId(PACKET_ID)
 			.payList(Arrays.asList(payB))
 			.build();
-		PubPayRespBody resp = req.lanch(new Builder().build());
+		PubPayRespBody resp = req.lanch(hostUrl, signUrl, new Builder().build());
 
 		log.info(JSON.toJSONString(resp));
 		assertTrue(resp != null);

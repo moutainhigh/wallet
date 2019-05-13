@@ -104,13 +104,12 @@ public interface WalletApi {
 	/**
 	 * 富慧通审核个人商家钱包
 	 */
-	void auditWalletPerson(Long walletId, String name, Byte idType, String idNo, Byte status,
-		Long auditType);
+	void activeWalletPerson(Long walletId, String name, Byte idType, String idNo, Long auditType);
 
 	/**
 	 * 富慧通审核企业商家钱包
 	 */
-	void auditWalletCompany(Long walletId, String companyName, Byte status, Long auditType);
+	void activeWalletCompany(Long walletId, String companyName, Long auditType);
 
 	/**
 	 * 发送手机验证码

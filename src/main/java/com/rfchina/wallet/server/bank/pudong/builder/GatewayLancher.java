@@ -9,5 +9,5 @@ import okhttp3.OkHttpClient;
  */
 public interface GatewayLancher<T> {
 
-	T lanch(OkHttpClient client) throws Exception;
+	T lanch(String hostUrl,String signUrl,OkHttpClient client) throws Exception;
 }

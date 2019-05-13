@@ -14,6 +14,10 @@ import static com.rfchina.wallet.bank.pudong.TestingData.*;
 @Slf4j
 public class PayResultReqTest {
 
+	private String signUrl = "http://192.168.197.217:5666";
+
+	private String hostUrl = "http://192.168.197.217:5777";
+
 	@Test
 	public void lanch() throws Exception {
 		PubPayQueryBuilder req = PubPayQueryBuilder.builder()
@@ -21,10 +25,8 @@ public class PayResultReqTest {
 			.acctNo(CMP_ACCT_ID)
 			.beginDate("20190415")
 			.endDate("20190415")
-			.beginNumber("1")
-			.queryNumber("30")
 			.build();
-		PubPayQueryRespBody respBody = req.lanch(new OkHttpClient());
+		PubPayQueryRespBody respBody = req.lanch(hostUrl, signUrl, new OkHttpClient());
 		log.info(JSON.toJSONString(respBody));
 		assertTrue(respBody != null);
 

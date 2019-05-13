@@ -29,7 +29,7 @@ public class PriPayQuery54Builder extends PpdbReqTpl implements GatewayLancher {
 	@ApiModelProperty(value = "费项编码", required = false)
 	private String costItemCode;
 
-	@ApiModelProperty(value = "交易日期",required = true)
+	@ApiModelProperty(value = "交易日期", required = true)
 	private String transDate;
 
 	@ApiModelProperty(value = "电子凭证号", required = false)
@@ -40,8 +40,10 @@ public class PriPayQuery54Builder extends PpdbReqTpl implements GatewayLancher {
 
 
 	@Override
-	public PriPayQuery54RespBody lanch(OkHttpClient client) throws Exception {
-		return super.build(client, PriPayQuery53ReqBody.class, PriPayQuery54RespBody.class);
+	public PriPayQuery54RespBody lanch(String hostUrl, String signUrl, OkHttpClient client)
+		throws Exception {
+		return super.build(hostUrl, signUrl, client, PriPayQuery53ReqBody.class,
+			PriPayQuery54RespBody.class);
 	}
 
 	@Override
