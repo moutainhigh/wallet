@@ -118,16 +118,23 @@ public abstract class PpdbReqTpl {
 		Response resp = client.newCall(request).execute();
 
 		String respData = respAdvise(resp.body().bytes());
-		ResponsePacket responsePacket = XmlUtil
-			.xml2Obj(XmlUtil.unwrap(respData), ResponsePacket.class);
-		if (!SUCC.equals(responsePacket.getHead().getReturnCode())) {
-			// 解析到签名服务接口
-			String unsign = unsign(signUrl, responsePacket);
-			log.error("银企直连接口错误, request = {} , response = {}, body = {}", xmlData, respData,
-				unsign);
-			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_GATEWAY_RESPONSE_ERROR);
+		try {
+			ResponsePacket responsePacket = XmlUtil
+				.xml2Obj(XmlUtil.unwrap(respData), ResponsePacket.class);
+			if (!SUCC.equals(responsePacket.getHead().getReturnCode())) {
+				// 解析到签名服务接口
+				String unsign = unsign(signUrl, responsePacket);
+				log.error("银企直连接口错误, request = {} , response = {}, body = {}", xmlData, respData,
+					unsign);
+				throw new WalletResponseException(
+					EnumWalletResponseCode.PAY_IN_GATEWAY_RESPONSE_ERROR);
+			}
+			return responsePacket;
+		} catch (Exception e) {
+			log.error("银企直连接口错误, request = {} , response = {}", xmlData, respData);
+			throw new WalletResponseException(
+				EnumWalletResponseCode.PAY_IN_GATEWAY_RESPONSE_ERROR);
 		}
-		return responsePacket;
 	}
 
 	private byte[] reqAdvise(String xmlData) {

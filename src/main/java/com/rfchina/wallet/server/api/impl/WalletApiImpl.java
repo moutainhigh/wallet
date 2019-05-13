@@ -76,13 +76,16 @@ public class WalletApiImpl implements WalletApi {
 	@Override
 	public void quartzUpdate() {
 
-		String lockName = SimpleExclusiveLock.PRE_EXEC_LOCK + "quartzUpdate";
+		String lockName = "quartzUpdate";
 		boolean succ = lock.acquireLock(lockName, 3600, 0, 1);
 		if (succ) {
-			walletService.quartzUpdate(configService.getBatchUpdateSize());
-			lock.unLock(lockName);
-		}else{
-			log.warn("获取分布式锁失败， 跳过执行的任务");
+			try {
+				walletService.quartzUpdate(configService.getBatchUpdateSize());
+			} finally {
+				lock.unLock(lockName);
+			}
+		} else {
+			log.warn("获取分布式锁失败， 跳过执行的quartzUpdate任务");
 		}
 	}
 
@@ -90,13 +93,16 @@ public class WalletApiImpl implements WalletApi {
 	@Override
 	public void quartzPay() {
 
-		String lockName = SimpleExclusiveLock.PRE_EXEC_LOCK + "quartzPay";
+		String lockName = "quartzPay";
 		boolean succ = lock.acquireLock(lockName, 3600, 0, 1);
-		if(succ){
-			walletService.quartzPay(configService.getBatchPaySize());
-			lock.unLock(lockName);
-		}else{
-			log.warn("获取分布式锁失败， 跳过执行的任务");
+		if (succ) {
+			try {
+				walletService.quartzPay(configService.getBatchPaySize());
+			} finally {
+				lock.unLock(lockName);
+			}
+		} else {
+			log.warn("获取分布式锁失败， 跳过执行的quartzPay任务");
 		}
 	}
 
@@ -154,8 +160,8 @@ public class WalletApiImpl implements WalletApi {
 	@Override
 	@PostMq(routingKey = MqConstant.WALLET_BANKCARD_BIND)
 	public WalletCardExt bindBankCard(String accessToken, Long walletId, String bankCode,
-									  String bankAccount, String depositName, Integer isDef,
-									  String telephone) {
+		String bankAccount, String depositName, Integer isDef,
+		String telephone) {
 		return walletService.bindBankCard(walletId, bankCode, bankAccount, depositName,
 			isDef, telephone);
 	}
@@ -198,39 +204,49 @@ public class WalletApiImpl implements WalletApi {
 	@SignVerify
 	@Override
 	public ResponseValue sendVerifyCode(String accessToken,
-			Long userId, @ParamValid(pattern = RegexUtil.REGEX_MOBILE) String mobile,
-			@EnumParamValid(valuableEnumClass = com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType.class) Integer type,
-			@ParamValid(nullable = false) String verifyToken, String redirectUrl, String ip) {
+		Long userId, @ParamValid(pattern = RegexUtil.REGEX_MOBILE) String mobile,
+		@EnumParamValid(valuableEnumClass = com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType.class) Integer type,
+		@ParamValid(nullable = false) String verifyToken, String redirectUrl, String ip) {
 
-		com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType enumSendSmsType = EnumUtil.parse(com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType.class, type);
+		com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType enumSendSmsType = EnumUtil
+			.parse(com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType.class, type);
 
-		if (enumSendSmsType == com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType.VERIFY_BINDING_ACCOUNT){
+		if (enumSendSmsType
+			== com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType.VERIFY_BINDING_ACCOUNT) {
 			//检查已绑定钱包的手机号
-			WalletUser walletUser = Optional.ofNullable(walletUserDao.selectByMobile(mobile)).orElseThrow(() -> new WalletResponseException(
+			WalletUser walletUser = Optional.ofNullable(walletUserDao.selectByMobile(mobile))
+				.orElseThrow(() -> new WalletResponseException(
 					WalletResponseCode.EnumWalletResponseCode.WALLET_NOT_BINDING));
 
-			if(walletUser.getStatus() == com.rfchina.wallet.domain.misc.EnumDef.EnumWalletStatus.DISABLE.getValue().byteValue()){
-				throw new WalletResponseException(WalletResponseCode.EnumWalletResponseCode.WALLET_DISABLE);
+			if (walletUser.getStatus()
+				== com.rfchina.wallet.domain.misc.EnumDef.EnumWalletStatus.DISABLE.getValue()
+				.byteValue()) {
+				throw new WalletResponseException(
+					WalletResponseCode.EnumWalletResponseCode.WALLET_DISABLE);
 			}
 		}
 		//直接发送短信
-		return userService.sendSmsVerifyCode(com.rfchina.wallet.domain.misc.EnumDef.EnumVerifyCodeType.LOGIN, mobile, verifyToken, redirectUrl, enumSendSmsType.msg(), ip);
+		return userService
+			.sendSmsVerifyCode(com.rfchina.wallet.domain.misc.EnumDef.EnumVerifyCodeType.LOGIN,
+				mobile, verifyToken, redirectUrl, enumSendSmsType.msg(), ip);
 	}
 
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public WalletUser loginWithVerifyCode(String accessToken, @ParamValid(pattern = RegexUtil.REGEX_MOBILE) String mobile,
-										  @ParamValid(nullable = false, min = 1, max = 6) String verifyCode,
-										  @EnumParamValid(valuableEnumClass = EnumDef.EnumVerifyType.class) Integer type, String ip) {
+	public WalletUser loginWithVerifyCode(String accessToken,
+		@ParamValid(pattern = RegexUtil.REGEX_MOBILE) String mobile,
+		@ParamValid(nullable = false, min = 1, max = 6) String verifyCode,
+		@EnumParamValid(valuableEnumClass = EnumDef.EnumVerifyType.class) Integer type, String ip) {
 		//通过短信验证码登录
 		userService.userLoginWithVerifyCode(mobile, verifyCode, ip);
 
 		//检查帐号是否已开通钱包
 		WalletUser walletUser = walletUserDao.selectByMobile(mobile);
-		if(null == walletUser){
-			throw new WalletResponseException(WalletResponseCode.EnumWalletResponseCode.WALLET_NOT_EXIST);
+		if (null == walletUser) {
+			throw new WalletResponseException(
+				WalletResponseCode.EnumWalletResponseCode.WALLET_NOT_EXIST);
 		}
 
 		return walletUser;
