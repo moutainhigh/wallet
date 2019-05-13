@@ -77,7 +77,7 @@ dependencies {
     compile 'org.tas:post-core:1.0.0'
     compile 'com.rfchina.biztool:redislock:1.0.1'
     compile 'com.rfchina:rfchina-platform-scheduler-spring:1.2.0'
-    compile('com.rfchina:rfchina-platform-spring-intergration:2.0.9') {
+    compile('com.rfchina:rfchina-platform-spring-intergration:2.0.10') {
         exclude group: 'org.springframework.amqp'
     }
     compile 'com.rfchina:rfchina-platform-passport-common:1.2.1'
