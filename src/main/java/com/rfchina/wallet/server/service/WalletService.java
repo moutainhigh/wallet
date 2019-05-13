@@ -15,13 +15,14 @@ import com.rfchina.platform.common.utils.RegexUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.*;
 import com.rfchina.wallet.domain.misc.EnumDef;
+import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode;
-import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.*;
 import com.rfchina.wallet.domain.model.WalletLogCriteria.Criteria;
 import com.rfchina.wallet.domain.model.ext.Bank;
 import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
+import com.rfchina.wallet.domain.model.ext.WalletCardExt;
 import com.rfchina.wallet.server.adapter.UserAdapter;
 import com.rfchina.wallet.server.mapper.ext.WalletCompanyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
@@ -37,7 +38,6 @@ import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletLogStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletType;
-import com.rfchina.wallet.server.msic.MqConstant;
 import com.rfchina.wallet.server.service.handler.HandlerHelper;
 import com.rfchina.wallet.server.service.handler.PuDongHandler;
 import java.util.ArrayList;
@@ -301,12 +301,12 @@ public class WalletService {
 	 * @param isDef 是否默认银行卡: 1:是，2：否
 	 * @param telephone 预留手机号
 	 */
-	public WalletCard bindBankCard(@ParamValid(nullable = false) Long walletId,
-		@ParamValid(nullable = false, min = 12, max = 12) String bankCode,
-		@ParamValid(nullable = false, min = 20, max = 32) String bankAccount,
-		@ParamValid(nullable = false, min = 1, max = 256) String depositName,
-		@EnumParamValid(valuableEnumClass = EnumDef.EnumDefBankCard.class) Integer isDef,
-		@ParamValid(pattern = RegexUtil.REGEX_MOBILE) String telephone) {
+	public WalletCardExt bindBankCard(@ParamValid(nullable = false) Long walletId,
+									  @ParamValid(nullable = false, min = 12, max = 12) String bankCode,
+									  @ParamValid(nullable = false, min = 20, max = 32) String bankAccount,
+									  @ParamValid(nullable = false, min = 1, max = 256) String depositName,
+									  @EnumParamValid(valuableEnumClass = EnumDef.EnumDefBankCard.class) Integer isDef,
+									  @ParamValid(pattern = RegexUtil.REGEX_MOBILE) String telephone) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		if (null == wallet) {
 			throw new WalletResponseException(
@@ -319,9 +319,12 @@ public class WalletService {
 		}
 
 		//更新已绑定的银行卡状态为已解绑
-		walletCardDao.updateWalletCard(walletId, EnumDef.EnumCardBindStatus.UNBIND.getValue(),
+		int effectRows = walletCardDao.updateWalletCard(walletId, EnumDef.EnumCardBindStatus.UNBIND.getValue(),
 			EnumDef.EnumCardBindStatus.BIND.getValue(), null,
 			EnumDef.EnumDefBankCard.NO.getValue());
+
+		//首次绑定银行卡
+		int firstBind = (0==effectRows)? EnumDef.FirstBindBankCard.YES.getValue():EnumDef.FirstBindBankCard.NO.getValue();
 
 		Date now = new Date();
 
@@ -336,13 +339,15 @@ public class WalletService {
 			.lastUpdTime(now)
 			.build();
 
-		int effectRows = walletCardDao.replace(walletCard);
+		effectRows = walletCardDao.replace(walletCard);
 		if (effectRows < 1) {
 			log.error("绑定银行卡失败, wallet: {}, effectRows: {}", JsonUtil.toJSON(wallet), effectRows);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 		}
 
-		return walletCard;
+		WalletCardExt walletCardExt = new WalletCardExt(walletCard);
+		walletCardExt.setFirstBind(firstBind);
+		return walletCardExt;
 	}
 
 	/**

@@ -1,7 +1,6 @@
 package com.rfchina.wallet.server.service.handler;
 
 import com.rfchina.biztools.generate.IdGenerator;
-import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
@@ -21,7 +20,6 @@ import com.rfchina.wallet.server.bank.pudong.domain.util.StringObject;
 import com.rfchina.wallet.server.mapper.ext.BankCodeExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletLogExtDao;
-import com.rfchina.wallet.server.model.ext.PayInReq;
 import com.rfchina.wallet.server.model.ext.PayInResp;
 import com.rfchina.wallet.server.msic.EnumWallet.AQCardType;
 import com.rfchina.wallet.server.msic.EnumWallet.AQPayeeType;
@@ -30,7 +28,7 @@ import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.SysFlag;
 import com.rfchina.wallet.server.msic.EnumWallet.TransStatusAQ53;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletLogStatus;
-import com.rfchina.wallet.server.msic.MqConstant;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;

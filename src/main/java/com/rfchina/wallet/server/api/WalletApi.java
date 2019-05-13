@@ -17,6 +17,7 @@ import com.rfchina.wallet.domain.model.WalletUser;
 import com.rfchina.wallet.domain.model.ext.Bank;
 import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
+import com.rfchina.wallet.domain.model.ext.WalletCardExt;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 
@@ -76,8 +77,8 @@ public interface WalletApi {
 	/**
 	 * 绑定银行卡
 	 */
-	WalletCard bindBankCard(String accessToken, Long walletId, String bankCode, String bankAccount,
-		String depositName, Integer isDef, String telephone);
+	WalletCardExt bindBankCard(String accessToken, Long walletId, String bankCode, String bankAccount,
+							   String depositName, Integer isDef, String telephone);
 
 	/**
 	 * 银行类别列表

@@ -1,6 +1,6 @@
 package com.rfchina.wallet.server.api.impl;
 
-import com.rfchina.api.response.model.user.UserLoginTokenResponseModel;
+import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.passport.token.EnumTokenType;
 import com.rfchina.passport.token.TokenVerify;
 import com.rfchina.platform.common.annotation.EnumParamValid;
@@ -14,6 +14,7 @@ import com.rfchina.platform.common.utils.RegexUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletUserDao;
 import com.rfchina.wallet.domain.misc.EnumDef;
+import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletCard;
@@ -22,13 +23,13 @@ import com.rfchina.wallet.domain.model.WalletUser;
 import com.rfchina.wallet.domain.model.ext.Bank;
 import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
+import com.rfchina.wallet.domain.model.ext.WalletCardExt;
 import com.rfchina.wallet.server.api.WalletApi;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import com.rfchina.wallet.server.service.JuniorWalletService;
 import com.rfchina.wallet.server.service.UserService;
 import com.rfchina.wallet.server.service.WalletService;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -92,6 +93,7 @@ public class WalletApiImpl implements WalletApi {
 	}
 
 	@Log
+	@PostMq(routingKey = MqConstant.WALLET_CREATE)
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
@@ -124,9 +126,10 @@ public class WalletApiImpl implements WalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public WalletCard bindBankCard(String accessToken, Long walletId, String bankCode,
-		String bankAccount, String depositName, Integer isDef,
-		String telephone) {
+	@PostMq(routingKey = MqConstant.WALLET_BANKCARD_BIND)
+	public WalletCardExt bindBankCard(String accessToken, Long walletId, String bankCode,
+									  String bankAccount, String depositName, Integer isDef,
+									  String telephone) {
 		return walletService.bindBankCard(walletId, bankCode, bankAccount, depositName,
 			isDef, telephone);
 	}
