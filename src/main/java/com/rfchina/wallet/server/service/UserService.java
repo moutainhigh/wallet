@@ -6,8 +6,8 @@ import com.rfchina.internal.api.request.user.SendSmsVerifyToMobileRequest;
 import com.rfchina.platform.common.exception.RfchinaResponseException;
 import com.rfchina.platform.common.misc.ResponseCode;
 import com.rfchina.platform.common.misc.ResponseValue;
-import com.rfchina.wallet.domain.misc.Constant;
 import com.rfchina.wallet.domain.misc.EnumDef;
+import com.rfchina.wallet.domain.misc.MsgConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode;
 import com.rfchina.wallet.server.adapter.UserAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +39,7 @@ public class UserService {
      */
     public ResponseValue sendSmsVerifyCode(EnumDef.EnumVerifyCodeType enumVerifyCodeType, String mobile, String token, String redirectUrl, String msg, String ip) {
         SendSmsVerifyToMobileResponseModel sendSmsVerifyToMobileResponseModel = userAdapter.sendSmsToMobileWithCheck(appService.getAccessToken(), mobile, EnumDef.EnumVerifyCodeType.LOGIN.getValue(), msg,
-                Constant.SMS_EFFECTIVE_TIME, redirectUrl, packageClientInfo(token, ip));
+                MsgConstant.SMS_EFFECTIVE_TIME, redirectUrl, packageClientInfo(token, ip));
 
         cacheService.setVerifyCodeToken(enumVerifyCodeType.getValue(), mobile, sendSmsVerifyToMobileResponseModel.getVerifyToken());
 
