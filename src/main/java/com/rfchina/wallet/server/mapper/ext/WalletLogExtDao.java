@@ -4,6 +4,7 @@ import com.rfchina.wallet.domain.mapper.WalletLogMapper;
 import com.rfchina.wallet.domain.model.WalletLog;
 import com.rfchina.wallet.server.model.ext.AcceptNo;
 import com.rfchina.wallet.server.model.ext.BatchNo;
+import com.rfchina.wallet.server.model.ext.HostSeqNo;
 import java.util.Date;
 import java.util.List;
 import org.apache.ibatis.annotations.Param;
@@ -29,6 +30,14 @@ public interface WalletLogExtDao extends WalletLogMapper {
 		"limit #{batchSize}"
 	})
 	List<AcceptNo> selectUnFinish(@Param("batchSize") Integer batchSize);
+
+	@Select({
+		"select distinct host_accept_no as hostAcceptNo,audit_time as auditTime",
+		"from rf_wallet_log",
+		"where accept_no = #{acceptNo}",
+		"limit 1"
+	})
+	HostSeqNo selectHostAcctNo(@Param("acceptNo") String acceptNo);
 
 	@Select({
 		"select * from rf_wallet_log",
@@ -81,4 +90,6 @@ public interface WalletLogExtDao extends WalletLogMapper {
 	})
 	int updateLock(@Param("batchNo") String batchNo, @Param("orgLocked") Byte orgLocked,
 		@Param("destLocked") Byte destLocked);
+
+
 }

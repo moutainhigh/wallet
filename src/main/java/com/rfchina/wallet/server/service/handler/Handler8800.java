@@ -24,6 +24,7 @@ import com.rfchina.wallet.server.bank.pudong.domain.response.PubPayRespBody;
 import com.rfchina.wallet.server.mapper.ext.BankCodeExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletLogExtDao;
+import com.rfchina.wallet.server.model.ext.HostSeqNo;
 import com.rfchina.wallet.server.model.ext.PayInResp;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.RemitLocation;
@@ -163,56 +164,20 @@ public class Handler8800 implements PuDongHandler {
 	@Override
 	public List<WalletLog> updatePayStatus(String acceptNo, Date createTime) {
 
-		// 查询网银受理状态
-		EBankQueryBuilder eBankReq = EBankQueryBuilder.builder()
-			.masterId(configService.getMasterId())
-			.authMasterID(configService.getAuditMasterId())
-			.beginDate(DateUtil.formatDate(createTime, "yyyyMMdd"))
-			.endDate(DateUtil.formatDate(createTime, "yyyyMMdd"))
-			.acceptNo(acceptNo)
-			.build();
-
-		EBankQueryRespBody eBankResp;
-		try {
-			eBankResp = eBankReq.lanch(configService.getHostUrl(), configService.getSignUrl(),
-				new Builder().build());
-		} catch (Exception e) {
-			log.error("银企直连-网银授权状态查询错误", e);
-			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_STATUS_QUERY_ERROR);
-		}
 		walletLogDao.incTryTimes(acceptNo, DateUtil.addSecs(new Date(),
 			configService.getNextRoundSec()));
-		// 如果网银查不到则放弃进一步查询
-		if (eBankResp.getLists() == null || eBankResp.getLists().getList() == null) {
+
+		HostSeqNo hostSeqNo = queryHostSeqNo(acceptNo, createTime);
+		if(hostSeqNo == null){
 			return new ArrayList<>();
 		}
-		List<EBankQueryResp> list = eBankResp.getLists().getList();
-		EBankQueryResp auditResult = list.stream()
-			.filter(resp -> acceptNo.equals(resp.getEntJnlSeqNo()))
-			.findFirst().get();
-		// 网银状态非交易成功
-		if (auditResult == null || !TransStatusDO48.SUCC.getValue()
-			.equals(auditResult.getTransStatus())) {
-			TransStatusDO48 status = EnumUtil.parse(TransStatusDO48.class,
-				auditResult.getTransStatus());
-			if (status != null && status.isEndStatus()) {
-				walletLogDao.updateAcceptNoError(acceptNo, "EBANK-" + auditResult.getTransStatus(),
-					status.getValue());
-			}
-
-			return new ArrayList<>();
-		}
-
-		// 网银成功之后
-		Date auditTime = DateUtil.parse(auditResult.getTransDate(), "yyyyMMdd");
-		walletLogDao.updateHostAcctNo(acceptNo, auditResult.getHostJnlSeqNo(), auditTime);
 
 		PubPayQueryBuilder req = PubPayQueryBuilder.builder()
 			.masterId(configService.getMasterId())
 			.acctNo(configService.getAcctNo())
-			.beginDate(DateUtil.formatDate(auditTime, "yyyyMMdd"))
-			.endDate(DateUtil.formatDate(auditTime, "yyyyMMdd"))
-			.acceptNo(auditResult.getHostJnlSeqNo())
+			.beginDate(DateUtil.formatDate(hostSeqNo.getAuditTime(), "yyyyMMdd"))
+			.endDate(DateUtil.formatDate(hostSeqNo.getAuditTime(), "yyyyMMdd"))
+			.acceptNo(hostSeqNo.getHostAcceptNo())
 			.build();
 
 		PubPayQueryRespBody respBody;
@@ -249,6 +214,61 @@ public class Handler8800 implements PuDongHandler {
 		}
 
 		return new ArrayList<>();
+	}
+
+	private HostSeqNo queryHostSeqNo(String acceptNo, Date createTime) {
+		HostSeqNo hostSeqNo = walletLogDao.selectHostAcctNo(acceptNo);
+		if (hostSeqNo != null) {
+			return hostSeqNo;
+		}
+
+		// 查询网银受理状态
+		EBankQueryBuilder eBankReq = EBankQueryBuilder.builder()
+			.masterId(configService.getMasterId())
+			.authMasterID(configService.getAuditMasterId())
+			.beginDate(DateUtil.formatDate(createTime, "yyyyMMdd"))
+			.endDate(DateUtil.formatDate(createTime, "yyyyMMdd"))
+			.acceptNo(acceptNo)
+			.build();
+
+		EBankQueryRespBody eBankResp;
+		try {
+			eBankResp = eBankReq.lanch(configService.getHostUrl(), configService.getSignUrl(),
+				new Builder().build());
+		} catch (Exception e) {
+			log.error("银企直连-网银授权状态查询错误", e);
+			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_STATUS_QUERY_ERROR);
+		}
+
+		// 如果网银查不到则放弃进一步查询
+		if (eBankResp.getLists() == null || eBankResp.getLists().getList() == null) {
+			return null;
+		}
+		List<EBankQueryResp> list = eBankResp.getLists().getList();
+		EBankQueryResp auditResult = list.stream()
+			.filter(resp -> acceptNo.equals(resp.getEntJnlSeqNo()))
+			.findFirst().get();
+		// 网银状态非交易成功
+		if (auditResult == null || !TransStatusDO48.SUCC.getValue()
+			.equals(auditResult.getTransStatus())) {
+			TransStatusDO48 status = EnumUtil.parse(TransStatusDO48.class,
+				auditResult.getTransStatus());
+			if (status != null && status.isEndStatus()) {
+				walletLogDao.updateAcceptNoError(acceptNo, "EBANK-" + auditResult.getTransStatus(),
+					status.getValue());
+			}
+
+			return null;
+		}
+
+		// 网银成功之后
+		Date auditTime = DateUtil.parse(auditResult.getTransDate(), "yyyyMMdd");
+		walletLogDao.updateHostAcctNo(acceptNo, auditResult.getHostJnlSeqNo(), auditTime);
+
+		return HostSeqNo.builder()
+			.hostAcceptNo(auditResult.getHostJnlSeqNo())
+			.auditTime(auditTime)
+			.build();
 	}
 
 	private WalletCard getWalletCard(Long walletId) {

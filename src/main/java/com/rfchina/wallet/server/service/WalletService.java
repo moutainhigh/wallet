@@ -1,5 +1,6 @@
 package com.rfchina.wallet.server.service;
 
+import com.alibaba.fastjson.JSON;
 import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.platform.common.annotation.EnumParamValid;
 import com.rfchina.platform.common.annotation.ParamValid;
@@ -180,18 +181,21 @@ public class WalletService {
 		List<AcceptNo> acceptNos = walletLogExtDao.selectUnFinish(batchSize);
 
 		List<WalletLog> result = acceptNos.stream().map(item -> {
+
 			PuDongHandler handler = handlerHelper.selectByMethod(item.getRefMethod());
 			List<WalletLog> walletLogs = handler.updatePayStatus(item.getAcceptNo()
 				, item.getCreateTime());
 			return walletLogs;
 		}).reduce((rs, item) -> {
+
 			rs.addAll(item);
 			return rs;
 		}).orElse(new ArrayList<>());
 
 		String elecs = result.stream().map(rs -> rs.getElecChequeNo())
 			.collect(Collectors.joining("|"));
-		log.info("更新批次状态，批次数量= {}，更新笔数= {}，业务凭证号= {}", acceptNos.size(), result.size(), elecs);
+		log.info("更新批次状态，批次数量= {}，更新笔数= {}，批次号={}，业务凭证号= {}", acceptNos.size(), result.size(),
+			JSON.toJSONString(acceptNos), elecs);
 		log.info("scheduler: 结束更新支付状态[银企直连]");
 
 		if (result == null || result.size() == 0) {
@@ -321,11 +325,11 @@ public class WalletService {
 	 * @param telephone 预留手机号
 	 */
 	public WalletCardExt bindBankCard(@ParamValid(nullable = false) Long walletId,
-									  @ParamValid(nullable = false, min = 12, max = 12) String bankCode,
-									  @ParamValid(nullable = false, min = 20, max = 32) String bankAccount,
-									  @ParamValid(nullable = false, min = 1, max = 256) String depositName,
-									  @EnumParamValid(valuableEnumClass = EnumDef.EnumDefBankCard.class) Integer isDef,
-									  @ParamValid(pattern = RegexUtil.REGEX_MOBILE) String telephone) {
+		@ParamValid(nullable = false, min = 12, max = 12) String bankCode,
+		@ParamValid(nullable = false, min = 20, max = 32) String bankAccount,
+		@ParamValid(nullable = false, min = 1, max = 256) String depositName,
+		@EnumParamValid(valuableEnumClass = EnumDef.EnumDefBankCard.class) Integer isDef,
+		@ParamValid(pattern = RegexUtil.REGEX_MOBILE) String telephone) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		if (null == wallet) {
 			throw new WalletResponseException(
@@ -338,12 +342,14 @@ public class WalletService {
 		}
 
 		//更新已绑定的银行卡状态为已解绑
-		int effectRows = walletCardDao.updateWalletCard(walletId, EnumDef.EnumCardBindStatus.UNBIND.getValue(),
-			EnumDef.EnumCardBindStatus.BIND.getValue(), null,
-			EnumDef.EnumDefBankCard.NO.getValue());
+		int effectRows = walletCardDao
+			.updateWalletCard(walletId, EnumDef.EnumCardBindStatus.UNBIND.getValue(),
+				EnumDef.EnumCardBindStatus.BIND.getValue(), null,
+				EnumDef.EnumDefBankCard.NO.getValue());
 
 		//首次绑定银行卡
-		int firstBind = (0==effectRows)? EnumDef.FirstBindBankCard.YES.getValue():EnumDef.FirstBindBankCard.NO.getValue();
+		int firstBind = (0 == effectRows) ? EnumDef.FirstBindBankCard.YES.getValue()
+			: EnumDef.FirstBindBankCard.NO.getValue();
 
 		Date now = new Date();
 
