@@ -46,9 +46,6 @@ public class SpringBaseTest {
 	protected void logStack(Object obj) {
 		StackTraceElement stack = currMethod();
 		log.info("method {},result = {}",
-
-
-
 			stack.getClassName() + "." + stack.getMethodName(),
 			JSON.toJSON(obj));
 	}

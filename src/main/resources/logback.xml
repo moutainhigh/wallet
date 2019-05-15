@@ -4,11 +4,10 @@
   <!-- 控制台输出 -->
   <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{traceId}/%X{spanId}] [%thread] %-5level %logger{50} - %msg%n</pattern>
+      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{traceId}/%X{spanId}] [%thread] %highlight(%-5level) %logger{50} - %replace(%msg){'\d{14,16}', '***'} %replace(%msg){'[12][0-9]{3}[01][0-9][0123][0-9]','********'}%n</pattern>
     </encoder>
   </appender>
-  <appender name="FILE"
-    class="ch.qos.logback.core.rolling.RollingFileAppender">
+  <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <!-- 日志文件 -->
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
       <fileNamePattern>logs/wallet_server.%d{yyyy-MM-dd}.log</fileNamePattern>
@@ -16,11 +15,11 @@
     </rollingPolicy>
 
     <encoder>
-      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{traceId}/%X{spanId}] [%thread] %-5level %logger{50} - %msg%n</pattern>
+      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{traceId}/%X{spanId}] [%thread] %highlight(%-5level) %logger{50} - %replace(%msg){'\d{14,16}', '***'} %replace(%msg){'[12][0-9]{3}[01][0-9][0123][0-9]','********'}%n</pattern>
     </encoder>
   </appender>
 
-  <logger name="com.rfchina" level="DEBUG" additivity="false">
+  <logger name="com.rfchina" level="INFO" additivity="false">
     <appender-ref ref="FILE"/>
     <appender-ref ref="CONSOLE"/>
   </logger>
