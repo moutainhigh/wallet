@@ -63,8 +63,7 @@ dependencies {
 
     // 日志工具
     compile('org.slf4j:jcl-over-slf4j:1.7.21')
-    compile('io.springfox:springfox-swagger2:2.9.2')
-    compile('io.springfox:springfox-swagger-ui:2.9.2')
+    compile('com.rfchina.swagger:swagger-starter:1.0.0-SNAPSHOT')
     compile('com.rfchina:rfchina-commons-zipkin:1.1.3')
 
     // 本地依赖
