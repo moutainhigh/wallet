@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <configuration>
+
+  <conversionRule conversionWord="boundedMsg" converterClass="com.rfchina.platform.common.log.converter.SensitiveDataConverter"> </conversionRule>
   <!-- 控制台输出 -->
   <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
     <encoder>
-      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{traceId}/%X{spanId}] [%thread] %highlight(%-5level) %logger{50} - %replace(%msg){'[12][0-9]{3}[01][0-9][0123][0-9]','********'}%n</pattern>
+      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{traceId}/%X{spanId}] [%thread] %highlight(%-5level) %logger{50} - %boundedMsg{password_format=password,password_pattern=*,other_format=idNo:5*2`id_no:5*2`bank_account:*4}%n</pattern>
     </encoder>
   </appender>
   <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -15,7 +17,7 @@
     </rollingPolicy>
 
     <encoder>
-      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{traceId}/%X{spanId}] [%thread] %highlight(%-5level) %logger{50} - %replace(%msg){'[12][0-9]{3}[01][0-9][0123][0-9]','********'}%n</pattern>
+      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{traceId}/%X{spanId}] [%thread] %highlight(%-5level) %logger{50} - %boundedMsg{password_format=password,password_pattern=*,other_format=idNo:5*2`id_no:5*2`bank_account:*4}%n</pattern>
     </encoder>
   </appender>
 
