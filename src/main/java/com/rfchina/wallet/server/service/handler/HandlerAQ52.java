@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.OkHttpClient;
 import okhttp3.OkHttpClient.Builder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -73,6 +74,9 @@ public class HandlerAQ52 implements PuDongHandler {
 
 	@Autowired
 	private BankCodeExtDao bankCodeExtDao;
+
+	@Autowired
+	private OkHttpClient client;
 
 	private PuDongHandler next;
 
@@ -147,7 +151,7 @@ public class HandlerAQ52 implements PuDongHandler {
 			.build();
 
 		PriPayRespBody resp = req.lanch(configService.getHostUrl(), configService.getSignUrl(),
-			new Builder().build());
+			client);
 
 		PayInResp payInResp = PayInResp.builder()
 			.acceptNo(resp.getHandleSeqNo())
@@ -174,7 +178,7 @@ public class HandlerAQ52 implements PuDongHandler {
 
 		try {
 			PriPayQuery53RespBody respBody = req53.lanch(configService.getHostUrl(),
-				configService.getSignUrl(),new Builder().build());
+				configService.getSignUrl(),client);
 			if (respBody.getLists() != null && respBody.getLists().getList() != null) {
 				PriPayQuery53RespWrapper wrapper = respBody.getLists().getList().get(0);
 
@@ -205,7 +209,7 @@ public class HandlerAQ52 implements PuDongHandler {
 
 		try {
 			PriPayQuery54RespBody respBody = req54.lanch(configService.getHostUrl(),
-				configService.getSignUrl(),new Builder().build());
+				configService.getSignUrl(),client);
 			if (respBody.getLists() != null && respBody.getLists().getList() != null) {
 				List<PriPayResp> priPayResps = respBody.getLists().getList().stream()
 					.map(wrapper -> {

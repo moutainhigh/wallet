@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.OkHttpClient;
 import okhttp3.OkHttpClient.Builder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -69,6 +70,9 @@ public class Handler8800 implements PuDongHandler {
 
 	@Autowired
 	private BankCodeExtDao bankCodeExtDao;
+
+	@Autowired
+	private OkHttpClient client;
 
 	private PuDongHandler next;
 
@@ -155,7 +159,7 @@ public class Handler8800 implements PuDongHandler {
 			.build();
 
 		PubPayRespBody resp = req.lanch(configService.getHostUrl(), configService.getSignUrl(),
-			new Builder().build());
+			client);
 		PayInResp payInResp = BeanUtil.newInstance(resp, PayInResp.class);
 
 		return new Tuple<>(getGatewayMethod(), payInResp);
@@ -168,7 +172,7 @@ public class Handler8800 implements PuDongHandler {
 			configService.getNextRoundSec()));
 
 		HostSeqNo hostSeqNo = queryHostSeqNo(acceptNo, createTime);
-		if(hostSeqNo == null){
+		if (hostSeqNo == null) {
 			return new ArrayList<>();
 		}
 
@@ -182,8 +186,7 @@ public class Handler8800 implements PuDongHandler {
 
 		PubPayQueryRespBody respBody;
 		try {
-			respBody = req.lanch(configService.getHostUrl(), configService.getSignUrl(),
-				new Builder().build());
+			respBody = req.lanch(configService.getHostUrl(), configService.getSignUrl(), client);
 		} catch (Exception e) {
 			log.error("银企直连-网关支付状态查询错误", e);
 			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_STATUS_QUERY_ERROR);
@@ -234,7 +237,7 @@ public class Handler8800 implements PuDongHandler {
 		EBankQueryRespBody eBankResp;
 		try {
 			eBankResp = eBankReq.lanch(configService.getHostUrl(), configService.getSignUrl(),
-				new Builder().build());
+				client);
 		} catch (Exception e) {
 			log.error("银企直连-网银授权状态查询错误", e);
 			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_STATUS_QUERY_ERROR);

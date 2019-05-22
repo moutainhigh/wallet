@@ -6,6 +6,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.rfchina.passport.misc.SessionThreadLocal;
+import java.util.concurrent.TimeUnit;
+import okhttp3.OkHttpClient;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +25,15 @@ public class BeanConfig {
 	@Bean
 	public SessionThreadLocal sessionThreadLocal() {
 		return new SessionThreadLocal();
+	}
+
+	@Bean
+	public OkHttpClient okHttpClient() {
+		return new OkHttpClient.Builder()
+			.connectTimeout(60, TimeUnit.SECONDS)
+			.readTimeout(60, TimeUnit.SECONDS)
+			.writeTimeout(60, TimeUnit.SECONDS)
+			.build();
 	}
 
 }
