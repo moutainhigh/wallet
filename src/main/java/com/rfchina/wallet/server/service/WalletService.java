@@ -11,8 +11,10 @@ import com.rfchina.platform.common.misc.SymbolConstant;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.platform.common.utils.DateUtil;
+import com.rfchina.platform.common.utils.EmailUtil;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.platform.common.utils.RegexUtil;
+import com.rfchina.platform.spring.SpringContext;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.*;
 import com.rfchina.wallet.domain.misc.EnumDef;
@@ -51,6 +53,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -90,6 +95,12 @@ public class WalletService {
 
 	@Autowired
 	private WalletLogExtDao walletLogExtDao;
+
+	@Autowired
+	private JavaMailSenderImpl javaMailSender;
+
+	@Autowired
+	private ConfigService configService;
 
 
 	/**
@@ -161,13 +172,26 @@ public class WalletService {
 					} catch (Exception e) {
 
 						log.error("银行网关支付错误", e);
+						StringBuilder builder = new StringBuilder();
 						for (WalletLog walletLog : walletLogs) {
 
-							walletLog.setStatus(WalletLogStatus.FAIL.getValue());
+							walletLog.setStatus(WalletLogStatus.WAIT_DEAL.getValue());
 							walletLog.setErrCode("SLW-0001");
-							walletLog.setErrMsg("银行网关支付错误");
+							walletLog.setErrMsg("由于某种原因转账失败，需要人工介入核查");
 							walletLogExtDao.updateByPrimaryKeySelective(walletLog);
+							builder.append("流水" + walletLog.getId()).append(",")
+								.append(JSON.toJSONString(walletLog))
+								.append("</br>");
+
 						}
+						builder.append("<br/>异常").append(e.getMessage());
+
+						// 邮件通知
+						String title = String.format("*******钱包[%s]转账失败", configService.getEnv());
+						String msg = builder.toString();
+						String[] emails = configService.getNotifyEmail().split("|");
+						sendEmail(title, msg, emails);
+
 					}
 				} finally {
 					walletLogExtDao.updateLock(batchNo, LOCKSTATUS.LOCKED.getValue(),
@@ -177,6 +201,21 @@ public class WalletService {
 		});
 
 	}
+
+	public void sendEmail(String title, String msg, String[] receives) {
+		try {
+			SimpleMailMessage message = new SimpleMailMessage();
+			message.setFrom(configService.getEmailSender());
+			message.setTo(receives);
+			message.setSubject(title);
+			message.setText(msg);
+			message.setSentDate(new Date());
+			javaMailSender.send(message);
+		} catch (Exception e) {
+			log.error("邮件发送失败", e);
+		}
+	}
+
 
 	/**
 	 * 定时更新支付状态

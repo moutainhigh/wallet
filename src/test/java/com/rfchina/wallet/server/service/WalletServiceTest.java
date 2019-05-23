@@ -61,4 +61,10 @@ public class WalletServiceTest extends SpringBaseTest {
 		Long walletId = 3L;
 		walletService.activeWalletCompany(walletId, "公司", 1L);
 	}
+
+	@Test
+	public void sendEmail() {
+		walletService.sendEmail("测试", "测试邮件",
+			new String[]{"niezengming@rfchina.com", "xiejueheng@rfchina.com"});
+	}
 }

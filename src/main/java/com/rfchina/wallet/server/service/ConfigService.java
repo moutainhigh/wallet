@@ -73,5 +73,14 @@ public class ConfigService {
 	@Value("${wlpay.quartz.paySize}")
 	private Integer batchPaySize;
 
+	@Value("${wlpay.notify.email}")
+	private String notifyEmail;
+
+	@Value("${email.sender}")
+	private String emailSender;
+
+	@Value(value = "${active.env}")
+	private String env;
+
 	// 银企直连 END
 }

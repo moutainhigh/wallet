@@ -197,7 +197,8 @@ public class EnumWallet {
 		PROCESSING((byte) 2, "银行受理中"),
 		SUCC((byte) 3, "交易成功"),
 		FAIL((byte) 4, "交易失败"),
-		REVOKE((byte) 5, "撤销");
+		REVOKE((byte) 5, "撤销"),
+		WAIT_DEAL((byte) 6, "待处理");
 
 		private Byte value;
 		private String valueName;
