@@ -13,6 +13,9 @@ import java.util.ArrayList;
 */
 @Data
 public class WalletUser  {
+    @ApiModelProperty("业务定制内容")
+    private String businessRemark ;
+
     @ApiModelProperty("创建日期")
     private String createTime ;
 

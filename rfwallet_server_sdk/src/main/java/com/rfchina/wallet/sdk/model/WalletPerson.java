@@ -34,6 +34,9 @@ public class WalletPerson  {
     @ApiModelProperty("姓名")
     private String name ;
 
+    @ApiModelProperty("实名认证类型，1:身份证实名,2:手机号实名")
+    private Integer realLevel ;
+
     @ApiModelProperty("电话")
     private String tel ;
 

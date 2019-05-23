@@ -85,7 +85,7 @@ public class WalletLog  {
     @ApiModelProperty("交易状态。 1: 待发送银行网关，2：银行受理中，3：交易成功，4：交易失败，5：撤销")
     private Integer status ;
 
-    @ApiModelProperty("流水类型，1：直接转帐，2：收入，3：支出")
+    @ApiModelProperty("流水类型，1：财务结算，2：收入，3：支出")
     private Integer type ;
 
     @ApiModelProperty("钱包ID")

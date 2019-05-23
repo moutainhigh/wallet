@@ -136,6 +136,39 @@
 }
 ```
 
+###  银行支行信息
+
+请求地址: /wallet_server/v1/wallet/bank/bank
+
+请求类型: POST
+
+请求参数:
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|bank_code|是|银行编码|
+
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": "", //消息
+"data": {
+              area_code: "" , //所属地区
+        bank_code: "" , //银行行号
+        bank_name: "" , //银行名称
+        city_name: "" , //所属省市
+        class_code: "" , //所属分类代码
+        class_name: "" , //所属分类行名
+        id: "" , //ID
+        province_name: "" , //所属地区
+        weight: ""  //
+
+  }
+}
+```
+
 ###  绑定银行卡(对公)
 
 请求地址: /wallet_server/v1/m/wallet/bank_card/bind
@@ -281,7 +314,8 @@
   "code": 1001,//状态码
   "msg": "", //消息
 "data": {
-              create_time: "" , //创建日期
+              business_remark: "" , //业务定制内容
+        create_time: "" , //创建日期
         last_upd_time: "" , //钱包信息最后更新日期
         mobile: "" , //登录手机号
         register_progress: "" , //注册进度, 1:已通过身份验证, 2:已绑定银行卡
@@ -380,6 +414,7 @@
         id_type: "" , //证件类型，1:身份证
         last_upd_time: "" , //钱包信息最后更新日期
         name: "" , //姓名
+        real_level: "" , //实名认证类型，1:身份证实名,2:手机号实名
         tel: "" , //电话
         wallet_id: ""  //关联的钱包ID
 
@@ -461,6 +496,7 @@
         id_type: "" , //证件类型，1:身份证
         last_upd_time: "" , //钱包信息最后更新日期
         name: "" , //姓名
+        real_level: "" , //实名认证类型，1:身份证实名,2:手机号实名
         tel: "" , //电话
         wallet_id: ""  //关联的钱包ID
 
@@ -566,7 +602,7 @@
         remark: "" , //备注
         seq_no: "" , //交易流水号
         status: "" , //交易状态。 1: 待发送银行网关，2：银行受理中，3：交易成功，4：交易失败，5：撤销
-        type: "" , //流水类型，1：直接转帐，2：收入，3：支出
+        type: "" , //流水类型，1：财务结算，2：收入，3：支出
         wallet_id: ""  //钱包ID
 
             },]
