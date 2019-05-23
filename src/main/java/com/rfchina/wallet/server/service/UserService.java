@@ -38,7 +38,7 @@ public class UserService {
      * @return
      */
     public ResponseValue sendSmsVerifyCode(EnumDef.EnumVerifyCodeType enumVerifyCodeType, String mobile, String token, String redirectUrl, String msg, String ip) {
-        SendSmsVerifyToMobileResponseModel sendSmsVerifyToMobileResponseModel = userAdapter.sendSmsToMobileWithCheck(appService.getAccessToken(), mobile, EnumDef.EnumVerifyCodeType.LOGIN.getValue(), msg,
+        SendSmsVerifyToMobileResponseModel sendSmsVerifyToMobileResponseModel = userAdapter.sendSmsToMobileWithCheck(appService.getWalletAccessToken(), mobile, EnumDef.EnumVerifyCodeType.LOGIN.getValue(), msg,
                 MsgConstant.SMS_EFFECTIVE_TIME, redirectUrl, packageClientInfo(token, ip));
 
         cacheService.setVerifyCodeToken(enumVerifyCodeType.getValue(), mobile, sendSmsVerifyToMobileResponseModel.getVerifyToken());
@@ -76,6 +76,6 @@ public class UserService {
         }
 
         return userAdapter
-                .userLoginWithVerifyRequest(appService.getAccessToken(), mobile, verifyCode, token, ip);
+                .userLoginWithVerifyRequest(appService.getWalletAccessToken(), mobile, verifyCode, token, ip);
     }
 }
