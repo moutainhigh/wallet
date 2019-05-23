@@ -39,9 +39,11 @@ public class JuniorWalletService {
 	@Autowired
 	private WalletExtDao walletDao;
 
-
 	@Autowired
 	private HandlerHelper handlerHelper;
+
+	@Autowired
+	private ConfigService configService;
 
 	@Value("${wlpay.pudong.acctno}")
 	private String cmpAcctNo;
@@ -83,7 +85,7 @@ public class JuniorWalletService {
 					String.valueOf(payInReq.getPayPurpose()) : null)
 				.note(payInReq.getNote())
 				.status(WalletLogStatus.SENDING.getValue())
-				.queryTime(DateUtil.addSecs(new Date(), 30))
+				.queryTime(DateUtil.addSecs(new Date(), configService.getNextRoundSec()))
 				.createTime(new Date())
 				.build();
 

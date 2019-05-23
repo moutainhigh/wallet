@@ -139,7 +139,7 @@ public class WalletService {
 			if (c > 0) {
 				try {
 					List<WalletLog> walletLogs = walletLogExtDao.selectUnDealByBatchNo(batchNo);
-					if (StringUtils.isEmpty(batchNo) || walletLogs.size() == 0) {
+					if (StringUtils.isEmpty(batchNo) || walletLogs.isEmpty()) {
 						return;
 					}
 					// 请求网关
@@ -159,7 +159,15 @@ public class WalletService {
 							walletLogExtDao.updateByPrimaryKeySelective(walletLog);
 						}
 					} catch (Exception e) {
+
 						log.error("银行网关支付错误", e);
+						for (WalletLog walletLog : walletLogs) {
+
+							walletLog.setStatus(WalletLogStatus.FAIL.getValue());
+							walletLog.setErrCode("SLW-0001");
+							walletLog.setErrMsg("银行网关支付错误");
+							walletLogExtDao.updateByPrimaryKeySelective(walletLog);
+						}
 					}
 				} finally {
 					walletLogExtDao.updateLock(batchNo, LOCKSTATUS.LOCKED.getValue(),
