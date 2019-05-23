@@ -82,7 +82,7 @@ public class WalletApiImpl implements WalletApi {
 				lock.unLock(lockName);
 			}
 		} else {
-			log.warn("获取分布式锁失败， 跳过执行的quartzUpdate任务");
+			log.warn("获取分布式锁失败， 跳过执行的quartzUpdatePayStatus任务");
 		}
 	}
 
