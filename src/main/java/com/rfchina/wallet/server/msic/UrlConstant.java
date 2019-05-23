@@ -86,6 +86,11 @@ public class UrlConstant {
 	public static final String WALLET_BANK_LIST = VERSION + "/wallet/bank/bank_list";
 
 	/**
+	 * 银行支行信息
+	 */
+	public static final String WALLET_BANK = VERSION + "/wallet/bank/bank";
+
+	/**
 	 * 发送短信验证码
 	 */
 	public static final String WALLET_SEND_VERIFY_CODE = VERSION + "/m/wallet/send_verify_code";

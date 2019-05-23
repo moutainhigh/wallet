@@ -10,10 +10,7 @@ import com.rfchina.platform.common.misc.ResponseValue;
 import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.platform.common.utils.RegexUtil;
 import com.rfchina.wallet.domain.misc.EnumDef;
-import com.rfchina.wallet.domain.model.Wallet;
-import com.rfchina.wallet.domain.model.WalletCard;
-import com.rfchina.wallet.domain.model.WalletLog;
-import com.rfchina.wallet.domain.model.WalletUser;
+import com.rfchina.wallet.domain.model.*;
 import com.rfchina.wallet.domain.model.ext.Bank;
 import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
@@ -100,6 +97,12 @@ public interface WalletApi {
 	 */
 	List<Bank> bankList(String classCode, String areaCode);
 
+	/**
+	 * 银行支行信息
+	 * @param bankCode
+	 * @return
+	 */
+	BankCode bank(String bankCode);
 
 	/**
 	 * 富慧通审核个人商家钱包

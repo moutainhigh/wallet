@@ -3,10 +3,7 @@ package com.rfchina.wallet.server.web;
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.ResponseValue;
 import com.rfchina.platform.common.page.Pagination;
-import com.rfchina.wallet.domain.model.Wallet;
-import com.rfchina.wallet.domain.model.WalletCard;
-import com.rfchina.wallet.domain.model.WalletLog;
-import com.rfchina.wallet.domain.model.WalletUser;
+import com.rfchina.wallet.domain.model.*;
 import com.rfchina.wallet.domain.model.ext.Bank;
 import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
@@ -170,6 +167,12 @@ public class WalletController {
 		@ApiParam(value = "地区编码", required = true) @RequestParam("area_code") String areaCode) {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, walletApi
 			.bankList(classCode, areaCode));
+	}
+
+	@ApiOperation("银行支行信息")
+	@PostMapping(UrlConstant.WALLET_BANK)
+	public ResponseValue<BankCode> bank(@ApiParam(value = "银行编码", required = true) @RequestParam("bank_code") String bankCode){
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, walletApi.bank(bankCode));
 	}
 
 	@ApiOperation("发送短信验证码")

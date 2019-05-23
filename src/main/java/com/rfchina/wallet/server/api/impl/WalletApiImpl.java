@@ -17,10 +17,7 @@ import com.rfchina.wallet.domain.mapper.ext.WalletUserDao;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode;
-import com.rfchina.wallet.domain.model.Wallet;
-import com.rfchina.wallet.domain.model.WalletCard;
-import com.rfchina.wallet.domain.model.WalletLog;
-import com.rfchina.wallet.domain.model.WalletUser;
+import com.rfchina.wallet.domain.model.*;
 import com.rfchina.wallet.domain.model.ext.Bank;
 import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
@@ -180,6 +177,11 @@ public class WalletApiImpl implements WalletApi {
 	public List<Bank> bankList(@ParamValid(nullable = false) String classCode,
 		@ParamValid(nullable = false) String areaCode) {
 		return walletService.bankList(classCode, areaCode);
+	}
+
+	@Override
+	public BankCode bank(String bankCode) {
+		return walletService.bank(bankCode);
 	}
 
 	@Log

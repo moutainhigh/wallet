@@ -401,6 +401,17 @@ public class WalletService {
 		return bankCodeDao.selectBankList(classCode, areaCode);
 	}
 
+
+	public BankCode bank(String bankCode){
+		BankCodeCriteria bankCodeCriteria = new BankCodeCriteria();
+		bankCodeCriteria.createCriteria().andBankCodeEqualTo(bankCode);
+		List<BankCode> bankCodeList = bankCodeDao.selectByExample(bankCodeCriteria);
+		if(bankCodeList.isEmpty()){
+			return null;
+		}
+		return bankCodeList.get(0);
+	}
+
 	/**
 	 * 富慧通审核通过个人商家钱包
 	 */
