@@ -11,6 +11,7 @@ jenkins job: platform-rfwallet-super-server-dev
 - 调整client参数
 - 修正令牌验证
 - 增加错误邮件通知
+- fix:15622	
 
 ## 1.0.0_b1_2019051518_Beta
 ### [变动说明]
