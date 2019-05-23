@@ -25,7 +25,7 @@ public class PayStatusResp  {
     @ApiModelProperty("失败原因")
     private String errMsg ;
 
-    @ApiModelProperty("交易状态。 1: 待发送银行网关，2：银行受理中，3：交易成功，4：交易失败，5：撤销")
+    @ApiModelProperty("交易状态。 1: 待发送银行网关，2：银行受理中，3：交易成功，4：交易失败，5：撤销，6：待处理")
     private Integer status ;
 
     @ApiModelProperty("交易日期")
