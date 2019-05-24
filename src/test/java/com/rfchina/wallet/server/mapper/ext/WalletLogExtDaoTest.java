@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import com.rfchina.wallet.server.SpringBaseTest;
 import com.rfchina.wallet.server.model.ext.HostSeqNo;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletLogStatus;
-import org.apache.commons.lang3.StringUtils;
+import java.util.Date;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -24,8 +24,12 @@ public class WalletLogExtDaoTest extends SpringBaseTest {
 	@Test
 	public void updateAcceptNoError() {
 		walletLogExtDao
-			.updateAcceptNoError("5248342611", null, "TEST-0", "测试失败");
-		walletLogExtDao
-			.updateAcceptNoError("5248342611", WalletLogStatus.FAIL.getValue(), "TEST-0", "测试失败");
+			.updateAcceptNoErrMsg("5248342611", "TEST-0", "测试失败");
+	}
+
+	@Test
+	public void updateAcceptNoStatus() {
+		walletLogExtDao.updateAcceptNoStatus("5248342611",
+			WalletLogStatus.FAIL.getValue(), new Date(), new Date());
 	}
 }

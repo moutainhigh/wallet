@@ -41,7 +41,6 @@ import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
-import okhttp3.OkHttpClient.Builder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -219,6 +218,9 @@ public class Handler8800 implements PuDongHandler {
 		return new ArrayList<>();
 	}
 
+	/**
+	 * 查询网银受理号
+	 */
 	private HostSeqNo queryHostSeqNo(String acceptNo, Date createTime) {
 		HostSeqNo hostSeqNo = walletLogDao.selectHostAcctNo(acceptNo);
 		if (hostSeqNo != null) {
@@ -251,21 +253,26 @@ public class Handler8800 implements PuDongHandler {
 		EBankQueryResp auditResult = list.stream()
 			.filter(resp -> acceptNo.equals(resp.getEntJnlSeqNo()))
 			.findFirst().get();
+		if (auditResult == null) {
+			return null;
+		}
 		// 网银状态非交易成功
-		if (auditResult == null || !TransStatusDO48.SUCC.getValue()
-			.equals(auditResult.getTransStatus())) {
-			TransStatusDO48 status = EnumUtil.parse(TransStatusDO48.class,
-				auditResult.getTransStatus());
+		Date auditTime = DateUtil.parse(auditResult.getTransDate(), "yyyyMMdd");
+		if (!TransStatusDO48.SUCC.getValue().equals(auditResult.getTransStatus())) {
+			TransStatusDO48 status = EnumUtil
+				.parse(TransStatusDO48.class, auditResult.getTransStatus());
 
-			WalletLogStatus fail = (status.isEndStatus()) ? WalletLogStatus.FAIL : null;
-			walletLogDao.updateAcceptNoError(acceptNo, fail.getValue(),
-				"EBANK-" + auditResult.getTransStatus(), status.getValueName());
+			walletLogDao.updateAcceptNoErrMsg(acceptNo, "EBANK-" + auditResult.getTransStatus(),
+				status != null ? status.getValueName() : "文档未记录状态");
+			if (status != null && status.isEndStatus()) {
+				walletLogDao.updateAcceptNoStatus(acceptNo, WalletLogStatus.FAIL.getValue(),
+					auditTime, new Date());
+			}
 
 			return null;
 		}
 
 		// 网银成功之后
-		Date auditTime = DateUtil.parse(auditResult.getTransDate(), "yyyyMMdd");
 		walletLogDao.updateHostAcctNo(acceptNo, auditResult.getHostJnlSeqNo(), auditTime);
 
 		return HostSeqNo.builder()
