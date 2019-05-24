@@ -256,10 +256,10 @@ public class Handler8800 implements PuDongHandler {
 			.equals(auditResult.getTransStatus())) {
 			TransStatusDO48 status = EnumUtil.parse(TransStatusDO48.class,
 				auditResult.getTransStatus());
-			if (status != null && status.isEndStatus()) {
-				walletLogDao.updateAcceptNoError(acceptNo, "EBANK-" + auditResult.getTransStatus(),
-					status.getValue());
-			}
+
+			WalletLogStatus fail = (status.isEndStatus()) ? WalletLogStatus.FAIL : null;
+			walletLogDao.updateAcceptNoError(acceptNo, fail.getValue(),
+				"EBANK-" + auditResult.getTransStatus(), status.getValueName());
 
 			return null;
 		}

@@ -159,6 +159,10 @@ public class EnumWallet {
 			return value;
 		}
 
+		public String getValueName(){
+			return valueName;
+		}
+
 		public boolean isEndStatus() {
 			return SUCC.getValue().equals(value)
 				|| HOST_REFUSE.getValue().equals(value)
