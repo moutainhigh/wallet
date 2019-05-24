@@ -4,6 +4,9 @@
 jenkins job: platform-rfwallet-super-server-dev
 
 ```
+## 1.0.0_b3_2019052410_Beta
+### [变动说明]
+- 修改网银日志记录
 
 ## 1.0.0_b2_2019052318_Beta
 ### [变动说明]
