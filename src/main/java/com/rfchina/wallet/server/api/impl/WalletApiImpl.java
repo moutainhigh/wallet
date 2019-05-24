@@ -74,7 +74,7 @@ public class WalletApiImpl implements WalletApi {
 	public void quartzUpdate() {
 
 		String lockName = "quartzUpdate";
-		boolean succ = lock.acquireLock(lockName, 3600, 0, 1);
+		boolean succ = lock.acquireLock(lockName, 600, 0, 1);
 		if (succ) {
 			try {
 				walletService.quartzUpdate(configService.getBatchUpdateSize());
@@ -91,7 +91,7 @@ public class WalletApiImpl implements WalletApi {
 	public void quartzPay() {
 
 		String lockName = "quartzPay";
-		boolean succ = lock.acquireLock(lockName, 3600, 0, 1);
+		boolean succ = lock.acquireLock(lockName, 600, 0, 1);
 		if (succ) {
 			try {
 				walletService.quartzPay(configService.getBatchPaySize());
