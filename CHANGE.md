@@ -4,9 +4,14 @@
 jenkins job: platform-rfwallet-super-server-test
 
 ```
+## 1.0.0_b5_2019052418_Beta
+### [变动说明]
+- fix:15622	
+
 ## 1.0.0_b4_2019052411_Beta
 ### [变动说明]
 - 记录授权拒绝的时间 fixbug:15675
+
 
 ## 1.0.0_b3_2019052410_Beta
 ### [变动说明]
