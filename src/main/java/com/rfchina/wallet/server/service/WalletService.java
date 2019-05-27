@@ -411,7 +411,7 @@ public class WalletService {
 			.lastUpdTime(now)
 			.build();
 
-		effectRows = walletCardDao.replace(walletCard);
+		effectRows = walletCardDao.insertSelective(walletCard);
 		if (effectRows < 1) {
 			log.error("绑定银行卡失败, wallet: {}, effectRows: {}", JsonUtil.toJSON(wallet), effectRows);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
