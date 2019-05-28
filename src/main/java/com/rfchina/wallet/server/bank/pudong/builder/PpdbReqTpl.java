@@ -3,8 +3,10 @@ package com.rfchina.wallet.server.bank.pudong.builder;
 import com.alibaba.fastjson.JSON;
 import com.rfchina.wallet.server.bank.pudong.domain.common.RequestHeader;
 import com.rfchina.wallet.server.bank.pudong.domain.common.RequestPacket;
+import com.rfchina.wallet.server.bank.pudong.domain.common.ResponseHeader;
 import com.rfchina.wallet.server.bank.pudong.domain.common.ResponsePacket;
 import com.rfchina.wallet.server.bank.pudong.domain.common.SignedBody;
+import com.rfchina.wallet.server.bank.pudong.domain.exception.GatewayError;
 import com.rfchina.wallet.server.bank.pudong.domain.util.XmlUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
@@ -121,13 +123,16 @@ public abstract class PpdbReqTpl {
 		try {
 			ResponsePacket responsePacket = XmlUtil
 				.xml2Obj(XmlUtil.unwrap(respData), ResponsePacket.class);
-			if (!SUCC.equals(responsePacket.getHead().getReturnCode())) {
+			ResponseHeader head = responsePacket.getHead();
+			if (!SUCC.equals(head.getReturnCode())) {
 				// 解析到签名服务接口
 				String unsign = unsign(signUrl, responsePacket);
 				log.error("银企直连接口错误, request = {} , response = {}, body = {}", xmlData, respData,
 					unsign);
-				throw new WalletResponseException(
-					EnumWalletResponseCode.PAY_IN_GATEWAY_RESPONSE_ERROR);
+				throw GatewayError.builder()
+					.errCode(requestPacket.getHead().getTransCode() + "-ERR-" + head.getReturnCode())
+					.errMsg(head.getReturnMsg())
+					.build();
 			}
 			return responsePacket;
 		} catch (Exception e) {

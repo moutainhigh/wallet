@@ -107,6 +107,9 @@ public class Handler8800 implements PuDongHandler {
 				throw new WalletResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST
 					, String.valueOf(walletLog.getWalletId()));
 			}
+			if(walletLog.getAmount() <= 0){
+				throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_AMOUNT_ERROR);
+			}
 
 			// 必须注意，分转换为0.00元
 			BigDecimal bigAmount = new BigDecimal(walletLog.getAmount())

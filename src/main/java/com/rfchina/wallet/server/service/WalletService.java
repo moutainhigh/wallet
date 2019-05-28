@@ -27,6 +27,7 @@ import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
 import com.rfchina.wallet.domain.model.ext.WalletCardExt;
 import com.rfchina.wallet.server.adapter.UserAdapter;
+import com.rfchina.wallet.server.bank.pudong.domain.exception.GatewayError;
 import com.rfchina.wallet.server.mapper.ext.WalletCompanyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletLogExtDao;
@@ -130,6 +131,7 @@ public class WalletService {
 				.amount(walletLog.getAmount())
 				.transDate(DateUtil.formatDate(walletLog.getCreateTime()))
 				.status(walletLog.getStatus())
+				.errCode(walletLog.getErrCode())
 				.errMsg(walletLog.getErrMsg())
 				.build();
 		}).collect(Collectors.toList());
@@ -172,17 +174,20 @@ public class WalletService {
 					} catch (Exception e) {
 
 						log.error("银行网关支付错误", e);
+						String errCode = e instanceof GatewayError ? ((GatewayError) e).getErrCode()
+							: "SLW-0001";
+						String errMsg = e instanceof GatewayError ? ((GatewayError) e).getErrMsg()
+							: "由于某种原因转账失败，需要人工介入核查";
 						StringBuilder builder = new StringBuilder();
 						for (WalletLog walletLog : walletLogs) {
 
 							walletLog.setStatus(WalletLogStatus.WAIT_DEAL.getValue());
-							walletLog.setErrCode("SLW-0001");
-							walletLog.setErrMsg("由于某种原因转账失败，需要人工介入核查");
+							walletLog.setErrCode(errCode);
+							walletLog.setErrMsg(errMsg);
 							walletLogExtDao.updateByPrimaryKeySelective(walletLog);
 							builder.append("流水" + walletLog.getId()).append(",")
 								.append(JSON.toJSONString(walletLog))
 								.append("</br>");
-
 						}
 						builder.append("<br/>异常").append(e.getMessage());
 
@@ -449,11 +454,11 @@ public class WalletService {
 	}
 
 
-	public BankCode bank(String bankCode){
+	public BankCode bank(String bankCode) {
 		BankCodeCriteria bankCodeCriteria = new BankCodeCriteria();
 		bankCodeCriteria.createCriteria().andBankCodeEqualTo(bankCode);
 		List<BankCode> bankCodeList = bankCodeDao.selectByExample(bankCodeCriteria);
-		if(bankCodeList.isEmpty()){
+		if (bankCodeList.isEmpty()) {
 			return null;
 		}
 		return bankCodeList.get(0);

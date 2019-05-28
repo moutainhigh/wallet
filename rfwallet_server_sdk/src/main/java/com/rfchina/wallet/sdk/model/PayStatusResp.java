@@ -22,6 +22,9 @@ public class PayStatusResp  {
     @ApiModelProperty("业务凭证号")
     private String bizNo ;
 
+    @ApiModelProperty("错误码")
+    private String errCode ;
+
     @ApiModelProperty("失败原因")
     private String errMsg ;
 
