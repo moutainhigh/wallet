@@ -4,6 +4,11 @@
 jenkins job: platform-rfwallet-super-server-test
 
 ```
+
+## 
+### [变动说明]
+- 增加银企直连的终态Y fixbug: 15796	
+
 ## 1.0.0_b5_2019052418_Beta
 ### [变动说明]
 - fix:15622	
