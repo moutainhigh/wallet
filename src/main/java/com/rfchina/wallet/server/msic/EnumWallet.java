@@ -167,7 +167,8 @@ public class EnumWallet {
 			return SUCC.getValue().equals(value)
 				|| HOST_REFUSE.getValue().equals(value)
 				|| EBANK_REFUSE.getValue().equals(value)
-				|| AUDIT_REFUSE.getValue().equals(value);
+				|| AUDIT_REFUSE.getValue().equals(value)
+				|| COMMIT_ERROR.getValue().equals(value);
 		}
 	}
 
