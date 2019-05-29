@@ -98,7 +98,7 @@ public class EnumWallet {
 	/**
 	 * 交易状态
 	 */
-	public enum TransStatus8800 implements Valuable<String> {
+	public enum TransStatus8804 implements Valuable<String> {
 		WAIT_FILLING("0", "待补录", "该笔支付需要柜员手工补录必要支付信息"),
 		WAIT_RECORD("1", "待记帐", "该笔支付已经处在等待柜员处理记账"),
 		WAIT_AUDIT("2", "待复核", "该笔支付处于等待柜员处理复核阶段"),
@@ -112,7 +112,7 @@ public class EnumWallet {
 		private String valueName;
 		private String description;
 
-		TransStatus8800(String value, String valueName, String description) {
+		TransStatus8804(String value, String valueName, String description) {
 			this.value = value;
 			this.valueName = valueName;
 			this.description = description;
@@ -127,9 +127,10 @@ public class EnumWallet {
 			return description;
 		}
 
-		public static TransStatus8800 parse(String value) {
-			return EnumUtil.parse(TransStatus8800.class, value);
+		public static TransStatus8804 parse(String value) {
+			return EnumUtil.parse(TransStatus8804.class, value);
 		}
+
 	}
 
 	/**

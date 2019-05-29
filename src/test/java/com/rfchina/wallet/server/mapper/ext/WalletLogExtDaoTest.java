@@ -23,8 +23,8 @@ public class WalletLogExtDaoTest extends SpringBaseTest {
 
 	@Test
 	public void updateAcceptNoError() {
-		walletLogExtDao
-			.updateAcceptNoErrMsg("5248342611", "TEST-0", "测试失败");
+//		walletLogExtDao
+//			.updateAcceptNoErrMsg("5248342611", "TEST-0", "测试失败");
 	}
 
 	@Test

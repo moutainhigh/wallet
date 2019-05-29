@@ -20,7 +20,7 @@ public class HandlerHelper {
 	@Autowired
 	private Handler8800 handler8800;
 
-	private PuDongHandler rootHandler;
+	private EBankHandler rootHandler;
 
 	@PostConstruct
 	public void init() {
@@ -29,8 +29,8 @@ public class HandlerHelper {
 		handlerAQ52.setNext(handler8800);
 	}
 
-	public PuDongHandler selectByWalletType(Byte walletType) {
-		PuDongHandler currHandler = rootHandler;
+	public EBankHandler selectByWalletType(Byte walletType) {
+		EBankHandler currHandler = rootHandler;
 
 		while (currHandler != null) {
 			if (currHandler.isSupportWalletType(walletType)) {
@@ -43,8 +43,8 @@ public class HandlerHelper {
 			"type = " + walletType);
 	}
 
-	public PuDongHandler selectByMethod(Byte refMethod) {
-		PuDongHandler currHandler = rootHandler;
+	public EBankHandler selectByMethod(Byte refMethod) {
+		EBankHandler currHandler = rootHandler;
 
 		while (currHandler != null) {
 			if (currHandler.isSupportMethod(refMethod)) {
@@ -55,4 +55,5 @@ public class HandlerHelper {
 
 		throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_METHOD_NOT_FOUND);
 	}
+
 }

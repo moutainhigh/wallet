@@ -26,19 +26,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 @Slf4j
 public class SpringBaseTest {
 
-	@Value("${test.app.secret}")
-	protected String appSecret;
-	@Value("${test.app.id}")
-	protected String appId;
-
-	@Autowired
-	private AppService appService;
-
-	@Autowired
-	private SessionThreadLocal sessionThreadLocal;
-
-	protected String accessToken;
-
 	private StackTraceElement currMethod() {
 		return Thread.currentThread().getStackTrace()[3];
 	}
@@ -50,28 +37,5 @@ public class SpringBaseTest {
 			JSON.toJSON(obj));
 	}
 
-	@Before
-	public void autoSign() {
-		sign(null);
-	}
 
-	public void sign(Map<String, String> custom) {
-		accessToken = appService.getAccessToken();
-		sessionThreadLocal.addTimestamp(String.valueOf(System.currentTimeMillis() / 1000));
-		Map<String, String> params = BeanUtil.asPureStringMap(
-			"access_token", accessToken,
-			"timestamp", String.valueOf(System.currentTimeMillis() / 1000)
-		);
-		if (custom != null) {
-			params.putAll(custom);
-		}
-		Map<String, String[]> reqParams = new HashMap<>();
-		for (String key : params.keySet()) {
-			String value = params.get(key);
-			reqParams.put(key, new String[]{value});
-		}
-		sessionThreadLocal.addRequestParameters(reqParams);
-		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
-		sessionThreadLocal.addSign(sign);
-	}
 }

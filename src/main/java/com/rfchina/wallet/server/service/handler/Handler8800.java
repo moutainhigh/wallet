@@ -15,6 +15,7 @@ import com.rfchina.wallet.domain.model.WalletLog;
 import com.rfchina.wallet.server.bank.pudong.builder.EBankQueryBuilder;
 import com.rfchina.wallet.server.bank.pudong.builder.PubPayQueryBuilder;
 import com.rfchina.wallet.server.bank.pudong.builder.PubPayReqBuilder;
+import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
 import com.rfchina.wallet.server.bank.pudong.domain.request.PubPayReq;
 import com.rfchina.wallet.server.bank.pudong.domain.response.EBankQueryResp;
 import com.rfchina.wallet.server.bank.pudong.domain.response.EBankQueryRespBody;
@@ -29,7 +30,7 @@ import com.rfchina.wallet.server.model.ext.PayInResp;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.RemitLocation;
 import com.rfchina.wallet.server.msic.EnumWallet.SysFlag;
-import com.rfchina.wallet.server.msic.EnumWallet.TransStatus8800;
+import com.rfchina.wallet.server.msic.EnumWallet.TransStatus8804;
 import com.rfchina.wallet.server.msic.EnumWallet.TransStatusDO48;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletLogStatus;
 import com.rfchina.wallet.server.service.ConfigService;
@@ -37,10 +38,13 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -53,7 +57,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 @Data
-public class Handler8800 implements PuDongHandler {
+public class Handler8800 implements EBankHandler {
 
 	@Autowired
 	private ConfigService configService;
@@ -73,7 +77,7 @@ public class Handler8800 implements PuDongHandler {
 	@Autowired
 	private OkHttpClient client;
 
-	private PuDongHandler next;
+	private EBankHandler next;
 
 
 	@Override
@@ -95,8 +99,8 @@ public class Handler8800 implements PuDongHandler {
 
 	@Override
 	public Tuple<GatewayMethod, PayInResp> pay(List<WalletLog> payInReqs) throws Exception {
-		int limit = 20;
-		if (payInReqs.size() > limit) {
+
+		if (payInReqs == null || payInReqs.isEmpty() || payInReqs.size() > 20) {
 			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_BATCH_LIMIT);
 		}
 
@@ -107,7 +111,7 @@ public class Handler8800 implements PuDongHandler {
 				throw new WalletResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST
 					, String.valueOf(walletLog.getWalletId()));
 			}
-			if(walletLog.getAmount() <= 0){
+			if (walletLog.getAmount() <= 0) {
 				throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_AMOUNT_ERROR);
 			}
 
@@ -143,8 +147,7 @@ public class Handler8800 implements PuDongHandler {
 				.payeeType(walletCard.getIsPublic().equals("1") ? "0" : "1")
 				.payeeBankSelectFlag(isOtherRemit ? "1" : null)
 				.payeeBankNo(isOtherRemit ? walletCard.getBankCode() : null)
-				.payPurpose(
-					walletLog.getPayPurpose() != null ? walletLog.getPayPurpose().toString() : null)
+				.payPurpose(walletLog.getPayPurpose() != null ? walletLog.getPayPurpose() : null)
 				.build();
 
 		}).collect(Collectors.toList());
@@ -156,7 +159,7 @@ public class Handler8800 implements PuDongHandler {
 			.masterId(configService.getMasterId())
 			.packetId(packetId)
 			.authMasterId(configService.getAuditMasterId())
-			.packageNo(packetId)
+			.packageNo(payInReqs.get(0).getBatchNo())
 			.payList(payReqs)
 			.build();
 
@@ -200,16 +203,19 @@ public class Handler8800 implements PuDongHandler {
 
 			// 更新银行回单到流水表
 			return results.stream().map(rs -> {
+				TransStatus8804 transStatus = TransStatus8804.parse(rs.getTransStatus());
 				WalletLogStatus status = WalletLogStatus.parsePuDong8804(rs.getTransStatus());
-				TransStatus8800 transStatus = TransStatus8800.parse(rs.getTransStatus());
+				Tuple<String, String> tuple = extractErrCode(rs.getNote());
 
 				WalletLog walletLog = walletLogDao.selectByHostAcctAndElecNo(rs.getAcceptNo()
 					, rs.getElecChequeNo(), WalletLogStatus.PROCESSING.getValue());
 				if (walletLog != null) {
 					walletLog.setSeqNo(rs.getSeqNo());
 					walletLog.setStatus(status.getValue());
-					walletLog.setErrCode("CORE-" + rs.getTransStatus());
-					walletLog.setErrMsg(transStatus != null ? transStatus.getDescription()
+					walletLog.setErrStatus("CORE:" + rs.getTransStatus());
+					walletLog.setErrCode(tuple.left);
+					walletLog.setSysErrMsg(tuple.right);
+					walletLog.setUserErrMsg(transStatus != null ? transStatus.getDescription()
 						: ("未知状态" + rs.getTransStatus()));
 					walletLog.setEndTime(new Date());
 					walletLogDao.updateByPrimaryKeySelective(walletLog);
@@ -219,6 +225,34 @@ public class Handler8800 implements PuDongHandler {
 		}
 
 		return new ArrayList<>();
+	}
+
+	private Tuple<String, String> extractErrCode(String note) {
+
+		String errCode = null;
+		String errMsg = null;
+
+		if(StringUtils.isNotBlank(note)) {
+			Pattern pattern = Pattern.compile("");
+			Matcher matcher = pattern.matcher(note);
+			if (matcher.matches()) {
+				errCode = matcher.group(1);
+			}
+			errMsg = note.contains("|") ? note.split("|")[1] : note;
+		}
+
+		return new Tuple<>(errCode,errMsg);
+	}
+
+	@Override
+	public void onGatewayErr(WalletLog walletLog, IGatewayError err) {
+		// 确切失败的单业务会重新发起新的转账，其他的单进入待处理状态
+		Byte status = err.isUserErr() ? WalletLogStatus.FAIL.getValue()
+			: WalletLogStatus.WAIT_DEAL.getValue();
+		walletLog.setStatus(status);
+		walletLog.setErrCode(err.getErrCode());
+		walletLog.setSysErrMsg(err.getErrMsg());
+		walletLogDao.updateByPrimaryKeySelective(walletLog);
 	}
 
 	/**
@@ -265,7 +299,8 @@ public class Handler8800 implements PuDongHandler {
 			TransStatusDO48 status = EnumUtil
 				.parse(TransStatusDO48.class, auditResult.getTransStatus());
 
-			walletLogDao.updateAcceptNoErrMsg(acceptNo, "EBANK-" + auditResult.getTransStatus(),
+			walletLogDao.updateAcceptNoErrMsg(acceptNo, "EBANK:" + auditResult.getTransStatus()
+				, "EBANK:" + auditResult.getFailCode(),
 				status != null ? status.getValueName() : "文档未记录状态");
 			if (status != null && status.isEndStatus()) {
 				walletLogDao.updateAcceptNoStatus(acceptNo, WalletLogStatus.FAIL.getValue(),

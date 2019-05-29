@@ -78,11 +78,12 @@ public interface WalletLogExtDao extends WalletLogMapper {
 		@Param("hostAcceptNo") String hostJnlSeqNo, @Param("auditTime") Date auditTime);
 
 	@Update({"update rf_wallet_log"
-		, "set err_code = #{errCode}, err_msg = #{errMsg}"
+		, "set err_status = #{errStatus}, err_code = #{errCode}, user_err_msg = #{errMsg}"
 		, "where accept_no = #{acceptNo} and status = 2"
 	})
 	void updateAcceptNoErrMsg(@Param("acceptNo") String acceptNo,
-		@Param("errCode") String errCode, @Param("errMsg") String errMsg);
+		@Param("errStatus") String errStatus, @Param("errCode") String errCode,
+		@Param("errMsg") String errMsg);
 
 	@Update({"update rf_wallet_log"
 		, "set status = #{status}, audit_time = #{auditTime}, end_time = #{endTime}"

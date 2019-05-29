@@ -127,7 +127,7 @@ public abstract class PpdbReqTpl {
 			if (!SUCC.equals(head.getReturnCode())) {
 				// 解析到签名服务接口
 				String unsign = unsign(signUrl, responsePacket);
-				log.error("银企直连接口错误, request = {} , response = {}, body = {}", xmlData, respData,
+				log.error("银企直连接口错误, request = {} , response = {}, bodyUnsign = {}", xmlData, respData,
 					unsign);
 				throw GatewayError.builder()
 					.errCode(requestPacket.getHead().getTransCode() + "-ERR-" + head.getReturnCode())

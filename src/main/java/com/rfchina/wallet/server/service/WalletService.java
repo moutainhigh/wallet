@@ -11,10 +11,8 @@ import com.rfchina.platform.common.misc.SymbolConstant;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.platform.common.utils.DateUtil;
-import com.rfchina.platform.common.utils.EmailUtil;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.platform.common.utils.RegexUtil;
-import com.rfchina.platform.spring.SpringContext;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.*;
 import com.rfchina.wallet.domain.misc.EnumDef;
@@ -27,14 +25,15 @@ import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
 import com.rfchina.wallet.domain.model.ext.WalletCardExt;
 import com.rfchina.wallet.server.adapter.UserAdapter;
-import com.rfchina.wallet.server.bank.pudong.domain.exception.GatewayError;
+import com.rfchina.wallet.server.bank.pudong.domain.exception.GatewayErrPredicate;
+import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
+import com.rfchina.wallet.server.bank.pudong.domain.util.ExceptionUtil;
 import com.rfchina.wallet.server.mapper.ext.WalletCompanyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletLogExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletUserExtDao;
 import com.rfchina.wallet.server.model.ext.AcceptNo;
-import com.rfchina.wallet.server.model.ext.BatchNo;
 import com.rfchina.wallet.server.model.ext.PayInResp;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
@@ -45,7 +44,7 @@ import com.rfchina.wallet.server.msic.EnumWallet.WalletLogStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletType;
 import com.rfchina.wallet.server.service.handler.HandlerHelper;
-import com.rfchina.wallet.server.service.handler.PuDongHandler;
+import com.rfchina.wallet.server.service.handler.EBankHandler;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -55,7 +54,6 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -103,6 +101,9 @@ public class WalletService {
 	@Autowired
 	private ConfigService configService;
 
+	@Autowired
+	private GatewayErrPredicate gatewayErrPredicate;
+
 
 	/**
 	 * 查询出佣结果
@@ -132,7 +133,7 @@ public class WalletService {
 				.transDate(DateUtil.formatDate(walletLog.getCreateTime()))
 				.status(walletLog.getStatus())
 				.errCode(walletLog.getErrCode())
-				.errMsg(walletLog.getErrMsg())
+				.errMsg(walletLog.getUserErrMsg())
 				.build();
 		}).collect(Collectors.toList());
 
@@ -156,10 +157,11 @@ public class WalletService {
 						return;
 					}
 					// 请求网关
+					EBankHandler handler = null;
 					try {
 
-						PuDongHandler puDongHandler = handlerHelper.selectByWalletType(null);
-						Tuple<GatewayMethod, PayInResp> rs = puDongHandler.pay(walletLogs);
+						handler = handlerHelper.selectByWalletType(null);
+						Tuple<GatewayMethod, PayInResp> rs = handler.pay(walletLogs);
 
 						// 记录结果
 						GatewayMethod method = rs.left;
@@ -174,28 +176,23 @@ public class WalletService {
 					} catch (Exception e) {
 
 						log.error("银行网关支付错误", e);
-						String errCode = e instanceof GatewayError ? ((GatewayError) e).getErrCode()
-							: "SLW-0001";
-						String errMsg = e instanceof GatewayError ? ((GatewayError) e).getErrMsg()
-							: "由于某种原因转账失败，需要人工介入核查";
-						StringBuilder builder = new StringBuilder();
-						for (WalletLog walletLog : walletLogs) {
-
-							walletLog.setStatus(WalletLogStatus.WAIT_DEAL.getValue());
-							walletLog.setErrCode(errCode);
-							walletLog.setErrMsg(errMsg);
-							walletLogExtDao.updateByPrimaryKeySelective(walletLog);
-							builder.append("流水" + walletLog.getId()).append(",")
-								.append(JSON.toJSONString(walletLog))
-								.append("</br>");
+						IGatewayError err = ExceptionUtil.explain(e, gatewayErrPredicate);
+						if(handler != null) {
+							for (WalletLog walletLog : walletLogs) {
+								handler.onGatewayErr(walletLog, err);
+							}
 						}
-						builder.append("<br/>异常").append(e.getMessage());
+//						StringBuilder builder = new StringBuilder();
+//							builder.append("流水" + walletLog.getId()).append(",")
+//								.append(JSON.toJSONString(walletLog))
+//								.append("</br>");
+//						builder.append("<br/>异常").append(e.getMessage());
 
 						// 邮件通知
-						String title = String.format("*******钱包[%s]转账失败", configService.getEnv());
-						String msg = builder.toString();
-						String[] emails = configService.getNotifyEmail().split("|");
-						sendEmail(title, msg, emails);
+//						String title = String.format("*******钱包[%s]转账失败", configService.getEnv());
+//						String msg = builder.toString();
+//						String[] emails = configService.getNotifyEmail().split("|");
+//						sendEmail(title, msg, emails);
 
 					}
 				} finally {
@@ -234,7 +231,7 @@ public class WalletService {
 
 		List<WalletLog> result = acceptNos.stream().map(item -> {
 
-			PuDongHandler handler = handlerHelper.selectByMethod(item.getRefMethod());
+			EBankHandler handler = handlerHelper.selectByMethod(item.getRefMethod());
 			List<WalletLog> walletLogs = handler.updatePayStatus(item.getAcceptNo()
 				, item.getCreateTime());
 			return walletLogs;
@@ -260,7 +257,7 @@ public class WalletService {
 				.transDate(DateUtil.formatDate(rs.getCreateTime()))
 				.amount(rs.getAmount())
 				.status(rs.getStatus())
-				.errMsg(rs.getErrMsg())
+				.errMsg(rs.getUserErrMsg())
 				.build())
 			.collect(Collectors.toList());
 	}

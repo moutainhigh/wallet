@@ -10,6 +10,7 @@ import com.rfchina.wallet.domain.model.WalletLog;
 import com.rfchina.wallet.server.bank.pudong.builder.PriPayQuery53Builder;
 import com.rfchina.wallet.server.bank.pudong.builder.PriPayQuery54Builder;
 import com.rfchina.wallet.server.bank.pudong.builder.PriPayReqBuilder;
+import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
 import com.rfchina.wallet.server.bank.pudong.domain.request.PriPayReq;
 import com.rfchina.wallet.server.bank.pudong.domain.response.PriPayQuery53RespBody;
 import com.rfchina.wallet.server.bank.pudong.domain.response.PriPayQuery53RespBody.PriPayQuery53RespWrapper;
@@ -38,7 +39,6 @@ import java.util.stream.Collectors;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
-import okhttp3.OkHttpClient.Builder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -49,7 +49,7 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Data
 @Component
-public class HandlerAQ52 implements PuDongHandler {
+public class HandlerAQ52 implements EBankHandler {
 
 	@Value("${wlpay.pudong.project.number}")
 	private String projectNumber;
@@ -78,7 +78,7 @@ public class HandlerAQ52 implements PuDongHandler {
 	@Autowired
 	private OkHttpClient client;
 
-	private PuDongHandler next;
+	private EBankHandler next;
 
 	public boolean isSupportWalletType(Byte walletType) {
 //		return WalletType.PERSON.getValue().byteValue() == walletType;
@@ -227,7 +227,7 @@ public class HandlerAQ52 implements PuDongHandler {
 					if (walletLog != null) {
 						walletLog.setSeqNo(rs.getDetailNo());
 						walletLog.setStatus(status.getValue());
-						walletLog.setErrMsg(rs.getErrMsg());
+						walletLog.setSysErrMsg(rs.getErrMsg());
 						walletLog.setEndTime(new Date());
 						walletLogDao.updateByPrimaryKeySelective(walletLog);
 					}
@@ -242,6 +242,11 @@ public class HandlerAQ52 implements PuDongHandler {
 		}
 
 		return new ArrayList<>();
+	}
+
+	@Override
+	public void onGatewayErr(WalletLog walletLog, IGatewayError err) {
+
 	}
 
 

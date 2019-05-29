@@ -71,3 +71,58 @@ A3F2d6lBEOoJg4ATccY6</signature></body><head><masterID>2000040752</masterID><pac
 ```unsigned response body
 <body><totalCount>0</totalCount><lists name="LoopResult"/></body>
 ```
+
+
+```fail
+<?xml version="1.0" encoding="utf-8"?>
+
+<body>
+  <totalCount>2</totalCount>
+  <lists name="LoopResult">
+    <list>
+      <elecChequeNo>2019051490091011</elecChequeNo>
+      <acceptNo>PT19YQ0000029318</acceptNo>
+      <serialNo>1</serialNo>
+      <transDate>20190514</transDate>
+      <bespeakDate>20190515</bespeakDate>
+      <PromiseDate>20190515</PromiseDate>
+      <acctNo>990B8950900000818</acctNo>
+      <acctName>浦发2478952744</acctName>
+      <payeeAcctNo>6225160293976253</payeeAcctNo>
+      <payeeName>浦发1339591801</payeeName>
+      <payeeType/>
+      <payeeBankName/>
+      <payeeAddress/>
+      <amount>1.00</amount>
+      <sysFlag>0</sysFlag>
+      <remitLocation>1</remitLocation>
+      <note>test|&lt;错误原因:EGG0042 处理失败[EGG0042][内部错误,锁定二级账户约定转账登记簿[BTSGX]失败，请重试!&gt;</note>
+      <transStatus>8</transStatus>
+      <seqNo>020196367032</seqNo>
+    </list>
+    <list>
+      <elecChequeNo>2019051496659700</elecChequeNo>
+      <acceptNo>PT19YQ0000029318</acceptNo>
+      <serialNo>2</serialNo>
+      <transDate>20190514</transDate>
+      <bespeakDate>20190515</bespeakDate>
+      <PromiseDate>20190515</PromiseDate>
+      <acctNo>990B8950900000818</acctNo>
+      <acctName>浦发2478952744</acctName>
+      <payeeAcctNo>6225160293976253</payeeAcctNo>
+      <payeeName>浦发1339591801</payeeName>
+      <payeeType/>
+      <payeeBankName/>
+      <payeeAddress/>
+      <amount>1.00</amount>
+      <sysFlag>0</sysFlag>
+      <remitLocation>1</remitLocation>
+      <note>test</note>
+      <transStatus>4</transStatus>
+      <seqNo>020196367032</seqNo>
+    </list>
+  </lists>
+</body>
+
+
+```

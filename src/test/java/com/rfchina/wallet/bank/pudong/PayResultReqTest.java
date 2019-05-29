@@ -23,8 +23,10 @@ public class PayResultReqTest {
 		PubPayQueryBuilder req = PubPayQueryBuilder.builder()
 			.masterId(MASTER_ID)
 			.acctNo(CMP_ACCT_ID)
-			.beginDate("20190415")
-			.endDate("20190415")
+//			.acceptNo("PT19YQ0000029318")
+			.elecChequeNo("2019052961033604")
+			.beginDate("20190529")
+			.endDate("20190529")
 			.build();
 		PubPayQueryRespBody respBody = req.lanch(hostUrl, signUrl, new OkHttpClient());
 		log.info(JSON.toJSONString(respBody));

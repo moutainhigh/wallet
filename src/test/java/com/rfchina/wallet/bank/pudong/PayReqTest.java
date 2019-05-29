@@ -32,8 +32,8 @@ public class PayReqTest {
 			.payeeName(ACCT_B_NAME)
 //			.payeeType(PayeeType.PUBLIC_ACCOUNT.getValue())
 //			.payeeBankName("") // 跨行转帐时必须输入
-			.amount(
-				BigDecimal.ONE.divide(BigDecimal.TEN).setScale(2, BigDecimal.ROUND_DOWN).toString())
+			.amount(BigDecimal.ONE.divide(BigDecimal.TEN)
+				.setScale(2, BigDecimal.ROUND_DOWN).toString())
 			.sysFlag(SysFlag.SELF.getValue())
 			.remitLocation(RemitLocation.SELF.getValue())
 			.note("测试")

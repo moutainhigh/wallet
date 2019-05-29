@@ -6,6 +6,7 @@ import com.rfchina.passport.misc.SessionThreadLocal;
 import com.rfchina.platform.common.security.SecurityCoder;
 import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.platform.common.utils.SignUtil;
+import com.rfchina.wallet.server.SignedSpringTest;
 import com.rfchina.wallet.server.SpringBaseTest;
 import com.rfchina.wallet.server.api.WalletApi;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
@@ -21,7 +22,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-public class WalletApiImplTest extends SpringBaseTest {
+public class WalletApiImplTest extends SignedSpringTest {
 
 	@Autowired
 	private WalletApi walletApi;

@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class GatewayError extends Exception implements IGatewayError {
-
+public class UserInfoError extends Exception implements IGatewayError {
 	/**
 	 * 网银错误码
 	 */
@@ -20,11 +19,11 @@ public class GatewayError extends Exception implements IGatewayError {
 	 */
 	private String errMsg;
 
-	public boolean isGatewayErr() {
+	public boolean isUserErr() {
 		return true;
 	}
 
-	public GatewayError(Exception e){
+	public UserInfoError(Exception e){
 		super(e);
 	}
 }
