@@ -13,15 +13,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.Builder;
+import lombok.Getter;
 import okhttp3.OkHttpClient;
 
 /**
  * @author nzm
  */
 @Builder
+@Getter
 public class PriPayReqBuilder extends PpdbReqTpl implements GatewayLancher {
 
-	private final static String transCode = "AQ52";
+	private final  String transCode = "AQ52";
 	private String masterId;
 	private String packetId;
 

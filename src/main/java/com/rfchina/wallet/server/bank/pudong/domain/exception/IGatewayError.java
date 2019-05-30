@@ -2,6 +2,8 @@ package com.rfchina.wallet.server.bank.pudong.domain.exception;
 
 public interface IGatewayError {
 
+	String getTransCode();
+
 	default String getErrCode() {
 		return "SLW-0001";
 	}

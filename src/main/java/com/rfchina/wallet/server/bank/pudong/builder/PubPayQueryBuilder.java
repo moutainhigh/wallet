@@ -7,15 +7,17 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.validation.constraints.NotNull;
 import lombok.Builder;
+import lombok.Getter;
 import okhttp3.OkHttpClient;
 
 /**
  * @author nzm
  */
 @Builder
+@Getter
 public class PubPayQueryBuilder extends PpdbReqTpl implements GatewayLancher<PubPayQueryRespBody> {
 
-	private final static String transCode = "8804";
+	private final String transCode = "8804";
 	@NotNull
 	private String masterId;
 	@NotNull

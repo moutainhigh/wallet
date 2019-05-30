@@ -131,6 +131,12 @@ public class EnumWallet {
 			return EnumUtil.parse(TransStatus8804.class, value);
 		}
 
+		public boolean isEndStatus(){
+			return FINISH.getValue().equals(this.getValue())
+				|| REJECT.getValue().equals(this.getValue())
+				|| REVOKE.getValue().equals(this.getValue());
+		}
+
 	}
 
 	/**
@@ -232,8 +238,6 @@ public class EnumWallet {
 			switch (tranStatus) {
 				case "4":
 					return SUCC;
-				case "8":
-					return FAIL;
 				case "9":
 					return REVOKE;
 				default:

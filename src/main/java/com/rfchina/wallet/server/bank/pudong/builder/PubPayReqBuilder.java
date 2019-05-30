@@ -12,15 +12,17 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import lombok.Builder;
+import lombok.Getter;
 import okhttp3.OkHttpClient;
 
 /**
  * @author nzm
  */
 @Builder
+@Getter
 public class PubPayReqBuilder extends PpdbReqTpl implements GatewayLancher<PubPayRespBody> {
 
-	private final static String transCode = "8800";
+	private final String transCode = "8800";
 	private String masterId;
 	private String packetId;
 

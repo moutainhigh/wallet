@@ -27,7 +27,7 @@ public interface WalletLogExtDao extends WalletLogMapper {
 		"select distinct accept_no as acceptNo,ref_method as refMethod, create_time as createTime",
 		"from rf_wallet_log",
 		"where status = 2 and query_time < CURRENT_TIMESTAMP and curr_try_times < max_try_times",
-		"limit #{batchSize}"
+		"order by accept_no asc limit #{batchSize}"
 	})
 	List<AcceptNo> selectUnFinish(@Param("batchSize") Integer batchSize);
 

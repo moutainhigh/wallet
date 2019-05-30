@@ -8,15 +8,17 @@ import com.rfchina.wallet.server.bank.pudong.domain.response.PriPayQuery54RespBo
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Date;
 import lombok.Builder;
+import lombok.Getter;
 import okhttp3.OkHttpClient;
 
 /**
  * @author nzm
  */
 @Builder
+@Getter
 public class PriPayQuery54Builder extends PpdbReqTpl implements GatewayLancher {
 
-	private final static String transCode = "AQ54";
+	private final String transCode = "AQ54";
 	private String masterId;
 	private String packetId;
 

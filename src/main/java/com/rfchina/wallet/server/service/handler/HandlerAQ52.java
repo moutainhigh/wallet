@@ -245,7 +245,7 @@ public class HandlerAQ52 implements EBankHandler {
 	}
 
 	@Override
-	public void onGatewayErr(WalletLog walletLog, IGatewayError err) {
+	public void onAskErr(WalletLog walletLog, IGatewayError err) {
 
 	}
 

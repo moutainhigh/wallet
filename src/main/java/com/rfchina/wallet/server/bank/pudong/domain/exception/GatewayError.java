@@ -12,6 +12,10 @@ import lombok.NoArgsConstructor;
 public class GatewayError extends Exception implements IGatewayError {
 
 	/**
+	 * 交易码
+	 */
+	private String transCode;
+	/**
 	 * 网银错误码
 	 */
 	private String errCode;
@@ -24,7 +28,7 @@ public class GatewayError extends Exception implements IGatewayError {
 		return true;
 	}
 
-	public GatewayError(Exception e){
+	public GatewayError(Exception e) {
 		super(e);
 	}
 }

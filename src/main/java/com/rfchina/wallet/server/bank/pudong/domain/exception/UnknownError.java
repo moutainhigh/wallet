@@ -1,12 +1,20 @@
 package com.rfchina.wallet.server.bank.pudong.domain.exception;
 
+import lombok.Data;
 
+@Data
 public class UnknownError extends Exception implements IGatewayError {
-	public String getErrCode(){
+
+	/**
+	 * 交易码
+	 */
+	private String transCode;
+
+	public String getErrCode() {
 		return "SLW-0001";
 	}
 
-	public String getErrMsg(){
+	public String getErrMsg() {
 		return "某种未知原因失败，需要人工介入排查";
 	}
 
@@ -14,7 +22,7 @@ public class UnknownError extends Exception implements IGatewayError {
 		return true;
 	}
 
-	public UnknownError(Exception e){
+	public UnknownError(Exception e) {
 		super(e);
 	}
 }

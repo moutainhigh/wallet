@@ -7,15 +7,17 @@ import io.swagger.annotations.ApiModelProperty;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import lombok.Builder;
+import lombok.Getter;
 import okhttp3.OkHttpClient;
 
 /**
  * @author nzm
  */
 @Builder
+@Getter
 public class EBankQueryBuilder extends PpdbReqTpl implements GatewayLancher<EBankQueryRespBody> {
 
-	private final static String transCode = "DO48";
+	private final String transCode = "DO48";
 	private String masterId;
 
 	@ApiModelProperty(value = "指定授权客户号", required = true)

@@ -10,4 +10,6 @@ import okhttp3.OkHttpClient;
 public interface GatewayLancher<T> {
 
 	T lanch(String hostUrl,String signUrl,OkHttpClient client) throws Exception;
+
+	String getTransCode();
 }

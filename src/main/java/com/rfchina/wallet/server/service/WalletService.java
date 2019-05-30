@@ -25,8 +25,8 @@ import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
 import com.rfchina.wallet.domain.model.ext.WalletCardExt;
 import com.rfchina.wallet.server.adapter.UserAdapter;
-import com.rfchina.wallet.server.bank.pudong.domain.exception.GatewayErrPredicate;
 import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
+import com.rfchina.wallet.server.bank.pudong.domain.predicate.ExactErrPredicate;
 import com.rfchina.wallet.server.bank.pudong.domain.util.ExceptionUtil;
 import com.rfchina.wallet.server.mapper.ext.WalletCompanyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
@@ -45,6 +45,8 @@ import com.rfchina.wallet.server.msic.EnumWallet.WalletStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletType;
 import com.rfchina.wallet.server.service.handler.HandlerHelper;
 import com.rfchina.wallet.server.service.handler.EBankHandler;
+import io.github.xdiamond.client.annotation.AllKeyListener;
+import io.github.xdiamond.client.event.ConfigEvent;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -102,7 +104,7 @@ public class WalletService {
 	private ConfigService configService;
 
 	@Autowired
-	private GatewayErrPredicate gatewayErrPredicate;
+	private ExactErrPredicate gatewayErrPredicate;
 
 
 	/**
@@ -177,22 +179,11 @@ public class WalletService {
 
 						log.error("银行网关支付错误", e);
 						IGatewayError err = ExceptionUtil.explain(e, gatewayErrPredicate);
-						if(handler != null) {
+						if (handler != null) {
 							for (WalletLog walletLog : walletLogs) {
-								handler.onGatewayErr(walletLog, err);
+								handler.onAskErr(walletLog, err);
 							}
 						}
-//						StringBuilder builder = new StringBuilder();
-//							builder.append("流水" + walletLog.getId()).append(",")
-//								.append(JSON.toJSONString(walletLog))
-//								.append("</br>");
-//						builder.append("<br/>异常").append(e.getMessage());
-
-						// 邮件通知
-//						String title = String.format("*******钱包[%s]转账失败", configService.getEnv());
-//						String msg = builder.toString();
-//						String[] emails = configService.getNotifyEmail().split("|");
-//						sendEmail(title, msg, emails);
 
 					}
 				} finally {
@@ -204,6 +195,25 @@ public class WalletService {
 
 	}
 
+
+	public void test() {
+		//						StringBuilder builder = new StringBuilder();
+//							builder.append("流水" + walletLog.getId()).append(",")
+//								.append(JSON.toJSONString(walletLog))
+//								.append("</br>");
+//						builder.append("<br/>异常").append(e.getMessage());
+
+		// 邮件通知
+//						String title = String.format("*******钱包[%s]转账失败", configService.getEnv());
+//						String msg = builder.toString();
+//						String[] emails = configService.getNotifyEmail().split("|");
+//						sendEmail(title, msg, emails);
+
+	}
+
+	/**
+	 * 发送邮件
+	 */
 	public void sendEmail(String title, String msg, String[] receives) {
 		try {
 			SimpleMailMessage message = new SimpleMailMessage();

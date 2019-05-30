@@ -10,6 +10,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserInfoError extends Exception implements IGatewayError {
+
+	/**
+	 * 交易码
+	 */
+	private String transCode;
 	/**
 	 * 网银错误码
 	 */
@@ -23,7 +28,7 @@ public class UserInfoError extends Exception implements IGatewayError {
 		return true;
 	}
 
-	public UserInfoError(Exception e){
+	public UserInfoError(Exception e) {
 		super(e);
 	}
 }

@@ -130,7 +130,8 @@ public abstract class PpdbReqTpl {
 				log.error("银企直连接口错误, request = {} , response = {}, bodyUnsign = {}", xmlData, respData,
 					unsign);
 				throw GatewayError.builder()
-					.errCode(requestPacket.getHead().getTransCode() + "-ERR-" + head.getReturnCode())
+					.transCode(requestPacket.getHead().getTransCode())
+					.errCode(head.getReturnCode())
 					.errMsg(head.getReturnMsg())
 					.build();
 			}

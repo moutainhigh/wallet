@@ -7,6 +7,8 @@ import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.wallet.server.SpringBaseTest;
 import com.rfchina.wallet.server.model.ext.PayInReq;
 import com.rfchina.wallet.server.model.ext.PayInResp;
+import io.github.xdiamond.client.annotation.AllKeyListener;
+import io.github.xdiamond.client.event.ConfigEvent;
 import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;

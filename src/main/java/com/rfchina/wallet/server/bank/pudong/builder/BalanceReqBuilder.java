@@ -10,15 +10,17 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Optional;
 import lombok.Builder;
+import lombok.Getter;
 import okhttp3.OkHttpClient;
 
 /**
  * @author nzm
  */
 @Builder
+@Getter
 public class BalanceReqBuilder extends PpdbReqTpl implements GatewayLancher<Balance> {
 
-	private final static String transCode = "4402";
+	private final  String transCode = "4402";
 	private String masterId;
 	private String packetId;
 	private String acctNo;
