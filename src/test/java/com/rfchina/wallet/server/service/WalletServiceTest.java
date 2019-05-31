@@ -64,7 +64,7 @@ public class WalletServiceTest extends SpringBaseTest {
 
 	@Test
 	public void sendEmail() {
-		walletService.sendEmail("测试", "测试邮件",
-			new String[]{"niezengming@rfchina.com", "xiejueheng@rfchina.com"});
+		walletService.sendEmail("测试", "测试邮件", "niezengming@rfchina.com,xiejueheng@rfchina.com");
 	}
+
 }

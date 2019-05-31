@@ -6,6 +6,7 @@ import com.rfchina.platform.spring.SpringContext;
 
 import com.rfchina.passport.misc.SessionThreadLocal;
 import com.rfchina.wallet.server.bank.pudong.domain.predicate.ExactErrPredicate;
+import com.rfchina.wallet.server.service.ConfigService;
 import io.github.xdiamond.client.annotation.AllKeyListener;
 import io.github.xdiamond.client.annotation.OneKeyListener;
 import io.github.xdiamond.client.event.ConfigEvent;
@@ -59,5 +60,6 @@ public class BeanConfig {
 		log.info("change key wlpay.pudong.exactErr, event : {}", event);
 		gatewayErrPredicate.parseText(event.getValue());
 	}
+
 
 }

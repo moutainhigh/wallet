@@ -31,15 +31,24 @@ public class WalletController {
 	@Autowired
 	private WalletApi walletApi;
 
-	@ApiOperation("初级钱包-查询支付状态")
-	@PostMapping(UrlConstant.JUNIOR_WALLET_QUERY)
-	public ResponseValue<List<PayStatusResp>> queryPayStatus(
+	@ApiOperation("查询支付状态")
+	@PostMapping(UrlConstant.WALLET_APPLY_QUERY)
+	public ResponseValue<List<PayStatusResp>> queryWalletApply(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "业务凭证号(业务方定义唯一)", required = false, example = "123") @RequestParam(value = "biz_no", required = false) String bizNo,
 		@ApiParam(value = "钱包批次号", required = false) @RequestParam(value = "batch_no", required = false) String batchNo
 	) {
-		List<PayStatusResp> resp = walletApi.queryWalletLog(accessToken, bizNo, batchNo);
+		List<PayStatusResp> resp = walletApi.queryWalletApply(accessToken, bizNo, batchNo);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, resp);
+	}
+
+	@ApiOperation("重做问题单")
+	@PostMapping(UrlConstant.WALLET_APPLY_REDO)
+	public ResponseValue redoWalletApply(
+		@ApiParam(value = "流水id", required = true, example = "1") @RequestParam(value = "wallet_log_id") Long walletLogId
+	) {
+		walletApi.redo(walletLogId);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
 
 	@ApiOperation("查询钱包信息（企业or个人）")
@@ -109,7 +118,7 @@ public class WalletController {
 
 	@ApiOperation("钱包流水")
 	@PostMapping(UrlConstant.WALLET_LOG_LIST)
-	public ResponseValue<Pagination<WalletLog>> walletLogList(
+	public ResponseValue<Pagination<WalletApply>> walletLogList(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
 		@ApiParam(value = "开始时间") @RequestParam(value = "start_time", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date startTime,
@@ -118,7 +127,7 @@ public class WalletController {
 		@ApiParam(value = "查询列表的起始偏移量，从0开始，即offset: 5是指从列表里的第六个开始读取", required = true) @RequestParam(value = "offset") long offset,
 		@ApiParam(value = "非必填, false:否, true:是, 是否返回数据总量, 默认false") @RequestParam(value = "stat", required = false) Boolean stat) {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, walletApi
-			.walletLogList(accessToken, walletId, startTime, endTime, limit, offset, stat));
+			.walletApplyList(accessToken, walletId, startTime, endTime, limit, offset, stat));
 	}
 
 	@ApiOperation("钱包绑定的银行卡列表")
@@ -171,30 +180,33 @@ public class WalletController {
 
 	@ApiOperation("银行支行信息")
 	@PostMapping(UrlConstant.WALLET_BANK)
-	public ResponseValue<BankCode> bank(@ApiParam(value = "银行编码", required = true) @RequestParam("bank_code") String bankCode){
+	public ResponseValue<BankCode> bank(
+		@ApiParam(value = "银行编码", required = true) @RequestParam("bank_code") String bankCode) {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, walletApi.bank(bankCode));
 	}
 
 	@ApiOperation("发送短信验证码")
 	@PostMapping(UrlConstant.WALLET_SEND_VERIFY_CODE)
 	public ResponseValue<Map<String, Object>> sendVerifyCode(
-			@RequestParam("access_token") String accessToken,
-			@ApiParam(value = "手机号码", required = true) @RequestParam(value = "mobile") String mobile,
-			@ApiParam(value = "验证码类型, 1:登录, 2:验证已开通钱包帐号", required = true) @RequestParam("type") Integer type,
-			@ApiParam(value = "反作弊结果查询token", required = true) @RequestParam("verify_token") String verifyToken,
-			@ApiParam(value = "触发图形验证码并验证成功后重定向地址") @RequestParam(value = "redirect_url", required = false) String redirectUrl,
-			@ApiParam(value = "来源IP", required = true) @RequestParam(value = "ip") String ip){
-		return walletApi.sendVerifyCode(accessToken,null, mobile,type,verifyToken,redirectUrl, ip);
+		@RequestParam("access_token") String accessToken,
+		@ApiParam(value = "手机号码", required = true) @RequestParam(value = "mobile") String mobile,
+		@ApiParam(value = "验证码类型, 1:登录, 2:验证已开通钱包帐号", required = true) @RequestParam("type") Integer type,
+		@ApiParam(value = "反作弊结果查询token", required = true) @RequestParam("verify_token") String verifyToken,
+		@ApiParam(value = "触发图形验证码并验证成功后重定向地址") @RequestParam(value = "redirect_url", required = false) String redirectUrl,
+		@ApiParam(value = "来源IP", required = true) @RequestParam(value = "ip") String ip) {
+		return walletApi
+			.sendVerifyCode(accessToken, null, mobile, type, verifyToken, redirectUrl, ip);
 	}
 
 	@ApiOperation("通过短信验证码登录")
 	@PostMapping(UrlConstant.WALLET_LOGIN_WITH_VERIFY_CODE)
 	public ResponseValue<WalletUser> loginWithVerifyCode(
-			@RequestParam("access_token") String accessToken,
-			@ApiParam(value = "手机号码", required = true) @RequestParam("mobile") String mobile,
-			@ApiParam(value = "验证码", required = true) @RequestParam("verify_code") String verifyCode,
-			@ApiParam(value = "短信类型, 1:登录当前钱包, 2:登录已开通钱包", required = true) @RequestParam("type") Integer type,
-			@ApiParam(value = "来源IP", required = true) @RequestParam(value = "ip") String ip){
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, walletApi.loginWithVerifyCode(accessToken, mobile, verifyCode, type, ip));
+		@RequestParam("access_token") String accessToken,
+		@ApiParam(value = "手机号码", required = true) @RequestParam("mobile") String mobile,
+		@ApiParam(value = "验证码", required = true) @RequestParam("verify_code") String verifyCode,
+		@ApiParam(value = "短信类型, 1:登录当前钱包, 2:登录已开通钱包", required = true) @RequestParam("type") Integer type,
+		@ApiParam(value = "来源IP", required = true) @RequestParam(value = "ip") String ip) {
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
+			walletApi.loginWithVerifyCode(accessToken, mobile, verifyCode, type, ip));
 	}
 }

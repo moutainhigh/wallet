@@ -27,7 +27,12 @@ public interface WalletApi {
 	/**
 	 * 查询出佣结果
 	 */
-	List<PayStatusResp> queryWalletLog(String accessToken, String bizNo, String batchNo);
+	List<PayStatusResp> queryWalletApply(String accessToken, String bizNo, String batchNo);
+
+	/**
+	 * 重做订单
+	 */
+	void redo(Long walletLogId);
 
 	/**
 	 * 定时更新支付状态
@@ -38,6 +43,11 @@ public interface WalletApi {
 	 * 定时支付
 	 */
 	void quartzPay();
+
+	/**
+	 * 定时通知
+	 */
+	void quartzNotify();
 
 	/**
 	 * 查询钱包明细
@@ -61,7 +71,7 @@ public interface WalletApi {
 	 * @param startTime 开始时间
 	 * @param endTime 结束时间
 	 */
-	Pagination<WalletLog> walletLogList(String accessToekn, Long walletId, Date startTime,
+	Pagination<WalletApply> walletApplyList(String accessToekn, Long walletId, Date startTime,
 		Date endTime, int limit, long offset, Boolean stat);
 
 	/**
@@ -134,4 +144,6 @@ public interface WalletApi {
 	 * @return
 	 */
 	WalletUser loginWithVerifyCode(String accessToken, String mobile,String verifyCode,Integer type, String ip);
+
+
 }

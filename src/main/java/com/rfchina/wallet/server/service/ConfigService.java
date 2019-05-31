@@ -39,7 +39,6 @@ public class ConfigService {
 	private boolean signEnable;
 
 	// 银企直连
-
 	@Value("${wlpay.pudong.signUrl}")
 	private String signUrl;
 
@@ -63,7 +62,9 @@ public class ConfigService {
 
 	@Value("${wlpay.pudong.auditMasterId}")
 	private String auditMasterId;
+	// 银企直连 END
 
+	// 钱包支付
 	@Value("${wlpay.paystatus.nextRoundSec}")
 	private Integer nextRoundSec;
 
@@ -73,14 +74,17 @@ public class ConfigService {
 	@Value("${wlpay.quartz.paySize}")
 	private Integer batchPaySize;
 
-	@Value("${wlpay.notify.email}")
-	private String notifyEmail;
+	@Value("${wlpay.notify.devEmail}")
+	private String notifyDevEmail;
+
+	@Value("${wlpay.notify.bizEmail}")
+	private String notifyBizEmail;
 
 	@Value("${email.sender}")
 	private String emailSender;
 
 	@Value(value = "${active.env}")
 	private String env;
+	// 钱包支付 END
 
-	// 银企直连 END
 }

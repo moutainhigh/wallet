@@ -29,6 +29,9 @@ public class PayStatusResp {
 	@ApiModelProperty(value = "错误码")
 	private String errCode;
 
-	@ApiModelProperty(value = "失败原因")
-	private String errMsg;
+	@ApiModelProperty(value = "用户错误信息")
+	private String userErrMsg;
+
+	@ApiModelProperty(value = "系统错误信息")
+	private String sysErrMsg;
 }

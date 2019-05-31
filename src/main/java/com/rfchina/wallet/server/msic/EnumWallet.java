@@ -131,7 +131,7 @@ public class EnumWallet {
 			return EnumUtil.parse(TransStatus8804.class, value);
 		}
 
-		public boolean isEndStatus(){
+		public boolean isEndStatus() {
 			return FINISH.getValue().equals(this.getValue())
 				|| REJECT.getValue().equals(this.getValue())
 				|| REVOKE.getValue().equals(this.getValue());
@@ -166,7 +166,7 @@ public class EnumWallet {
 			return value;
 		}
 
-		public String getValueName(){
+		public String getValueName() {
 			return valueName;
 		}
 
@@ -204,18 +204,19 @@ public class EnumWallet {
 	/**
 	 * 交易状态。 1: 待发送银行网关，2：银行受理中，3：交易成功，4：交易失败，5：撤销
 	 */
-	public enum WalletLogStatus implements Valuable<Byte> {
+	public enum WalletApplyStatus implements Valuable<Byte> {
 		SENDING((byte) 1, "待发送银行网关"),
 		PROCESSING((byte) 2, "银行受理中"),
 		SUCC((byte) 3, "交易成功"),
-		FAIL((byte) 4, "交易失败"),
+		FAIL((byte) 4, "交易失败(确切失败)"),
 		REVOKE((byte) 5, "撤销"),
-		WAIT_DEAL((byte) 6, "待处理");
+		WAIT_DEAL((byte) 6, "待处理"),
+		REDO((byte) 7, "等待重新发起");
 
 		private Byte value;
 		private String valueName;
 
-		WalletLogStatus(Byte value, String valueName) {
+		WalletApplyStatus(Byte value, String valueName) {
 			this.value = value;
 			this.valueName = valueName;
 		}
@@ -234,7 +235,7 @@ public class EnumWallet {
 		 * 3-待授权：该笔支付处于等待客户进行网银授权阶段； 4-完成：该笔支付处理成功，客户记账成功； 8-拒绝：该笔支付处理失败，被拒绝；如果对外支付时被人民银行退票则也会将该笔支付状态置为拒绝，同时冲回客户扣出的钱款；
 		 * 9-撤销：该笔支付已被撤销；客户和柜员都可以对待处理的支付进行撤销动作；
 		 */
-		public static WalletLogStatus parsePuDong8804(String tranStatus) {
+		public static WalletApplyStatus parsePuDong8804(String tranStatus) {
 			switch (tranStatus) {
 				case "4":
 					return SUCC;
@@ -248,7 +249,7 @@ public class EnumWallet {
 		/**
 		 * 0：成功 1：失败 2：处理中
 		 */
-		public static WalletLogStatus parsePuDongAQ54(String tranStatus) {
+		public static WalletApplyStatus parsePuDongAQ54(String tranStatus) {
 			switch (tranStatus) {
 				case "0":
 					return SUCC;
@@ -444,16 +445,32 @@ public class EnumWallet {
 		}
 	}
 
-	public enum LOCKSTATUS implements Valuable<Byte> {
+	public enum LockStatus implements Valuable<Byte> {
 		UNLOCK((byte) 1, "未锁"),
 		LOCKED((byte) 2, "锁定");
 
 		private Byte value;
 		private String valueName;
 
-		LOCKSTATUS(Byte value, String valueName) {
+		LockStatus(Byte value, String valueName) {
 			this.value = value;
 			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}
+	}
+
+	public enum NotifyType implements Valuable<Byte> {
+		DEVELOPER((byte) 1),
+		BUSINESS((byte) 2);
+
+		private Byte value;
+
+		NotifyType(byte value) {
+			this.value = value;
 		}
 
 		@Override

@@ -23,8 +23,10 @@ import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
 import com.rfchina.wallet.domain.model.ext.WalletCardExt;
 import com.rfchina.wallet.server.api.WalletApi;
+import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
+import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyStatus;
 import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.JuniorWalletService;
 import com.rfchina.wallet.server.service.UserService;
@@ -59,14 +61,22 @@ public class WalletApiImpl implements WalletApi {
 	@Autowired
 	private ConfigService configService;
 
+	@Autowired
+	private WalletApplyExtDao walletApplyExtDao;
+
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public List<PayStatusResp> queryWalletLog(String accessToken,
+	public List<PayStatusResp> queryWalletApply(String accessToken,
 		@ParamValid(nullable = true) String bizNo,
 		@ParamValid(nullable = true) String batchNo) {
-		return walletService.queryWalletLog(bizNo, batchNo);
+		return walletService.queryWalletApply(bizNo, batchNo);
+	}
+
+	@Override
+	public void redo(@ParamValid(nullable = false) Long walletLogId) {
+		walletService.redo(walletLogId);
 	}
 
 	@Log
@@ -74,7 +84,7 @@ public class WalletApiImpl implements WalletApi {
 	public void quartzUpdate() {
 
 		String lockName = "quartzUpdate";
-		boolean succ = lock.acquireLock(lockName, 600, 0, 1);
+		boolean succ = lock.acquireLock(lockName, 900, 0, 1);
 		if (succ) {
 			try {
 				walletService.quartzUpdate(configService.getBatchUpdateSize());
@@ -91,7 +101,7 @@ public class WalletApiImpl implements WalletApi {
 	public void quartzPay() {
 
 		String lockName = "quartzPay";
-		boolean succ = lock.acquireLock(lockName, 600, 0, 1);
+		boolean succ = lock.acquireLock(lockName, 1800, 0, 1);
 		if (succ) {
 			try {
 				walletService.quartzPay(configService.getBatchPaySize());
@@ -100,6 +110,27 @@ public class WalletApiImpl implements WalletApi {
 			}
 		} else {
 			log.warn("获取分布式锁失败， 跳过执行的quartzPay任务");
+		}
+	}
+
+	@Override
+	public void quartzNotify() {
+		String lockName = "quartzNotify";
+		boolean succ = lock.acquireLock(lockName, 600, 0, 1);
+		if (succ) {
+			try {
+				List<WalletApply> walletApplys = walletApplyExtDao
+					.selectByStatusNotified(WalletApplyStatus.WAIT_DEAL.getValue(), 200);
+				walletService.notifyDeveloper(walletApplys);
+
+				walletApplys = walletApplyExtDao
+					.selectByStatusNotified(WalletApplyStatus.REDO.getValue(), 200);
+				walletService.notifyBusiness(walletApplys);
+			} finally {
+				lock.unLock(lockName);
+			}
+		} else {
+			log.warn("获取分布式锁失败， 跳过执行的{}任务", lockName);
 		}
 	}
 
@@ -137,7 +168,7 @@ public class WalletApiImpl implements WalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public Pagination<WalletLog> walletLogList(String accessToken, Long walletId, Date startTime,
+	public Pagination<WalletApply> walletApplyList(String accessToken, Long walletId, Date startTime,
 		Date endTime, int limit, long offset, Boolean stat) {
 		return walletService.walletLogList(walletId, startTime, endTime,
 			limit, offset, stat);

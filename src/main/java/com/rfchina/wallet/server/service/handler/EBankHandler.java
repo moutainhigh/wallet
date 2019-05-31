@@ -1,7 +1,7 @@
 package com.rfchina.wallet.server.service.handler;
 
 import com.rfchina.platform.common.misc.Tuple;
-import com.rfchina.wallet.domain.model.WalletLog;
+import com.rfchina.wallet.domain.model.WalletApply;
 import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
 import com.rfchina.wallet.server.model.ext.PayInResp;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
@@ -22,11 +22,11 @@ public interface EBankHandler {
 
 	GatewayMethod getGatewayMethod();
 
-	Tuple<GatewayMethod, PayInResp> pay(List<WalletLog> payInReqs) throws Exception;
+	Tuple<GatewayMethod, PayInResp> pay(List<WalletApply> payInReqs) throws Exception;
 
-	List<WalletLog> updatePayStatus(String acceptNo, Date createTime);
+	List<WalletApply> updatePayStatus(String acceptNo, Date createTime);
 
 	EBankHandler getNext();
 
-	void onAskErr(WalletLog walletLog, IGatewayError err);
+	void onAskErr(WalletApply walletLog, IGatewayError err);
 }

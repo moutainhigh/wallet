@@ -2,21 +2,23 @@ package com.rfchina.wallet.server.mapper.ext;
 
 import static org.junit.Assert.*;
 
+import com.rfchina.wallet.domain.model.WalletApply;
 import com.rfchina.wallet.server.SpringBaseTest;
 import com.rfchina.wallet.server.model.ext.HostSeqNo;
-import com.rfchina.wallet.server.msic.EnumWallet.WalletLogStatus;
+import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyStatus;
 import java.util.Date;
+import java.util.List;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class WalletLogExtDaoTest extends SpringBaseTest {
 
 	@Autowired
-	private WalletLogExtDao walletLogExtDao;
+	private WalletApplyExtDao walletApplyExtDao;
 
 	@Test
 	public void selectHostAcctNo() {
-		HostSeqNo hostSeqNo = walletLogExtDao.selectHostAcctNo("5248588993");
+		HostSeqNo hostSeqNo = walletApplyExtDao.selectHostAcctNo("5248588993");
 		assertTrue(hostSeqNo != null);
 		assertTrue(hostSeqNo.getHostAcceptNo() != null);
 	}
@@ -29,7 +31,14 @@ public class WalletLogExtDaoTest extends SpringBaseTest {
 
 	@Test
 	public void updateAcceptNoStatus() {
-		walletLogExtDao.updateAcceptNoStatus("5248342611",
-			WalletLogStatus.FAIL.getValue(), new Date(), new Date());
+		walletApplyExtDao.updateAcceptNoStatus("5248342611",
+			WalletApplyStatus.FAIL.getValue(), new Date(), new Date());
+	}
+
+	@Test
+	public void selectByStatusNotified(){
+		List<WalletApply> walletLogs = walletApplyExtDao
+			.selectByStatusNotified(WalletApplyStatus.WAIT_DEAL.getValue(), 100);
+		assertTrue(!walletLogs.isEmpty());
 	}
 }

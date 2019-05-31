@@ -19,17 +19,27 @@ public class UrlConstant {
 	/**
 	 * 查询支付状态
 	 */
-	public static final String JUNIOR_WALLET_QUERY = VERSION + "/m/wallet/query_pay_status";
+	public static final String WALLET_APPLY_QUERY = VERSION + "/m/wallet/query_wallet_apply";
+
+	/**
+	 * 重做问题单
+	 */
+	public static final String WALLET_APPLY_REDO = VERSION + "/m/wallet/redo_pay";
 
 	/**
 	 * 定时支付
 	 */
-	public static final String WALLET_PAY = VERSION + "/schedule/quartz_pay";
+	public static final String QUARTZ_WALLET_PAY = VERSION + "/schedule/quartz_pay";
 
 	/**
 	 * 定时更新支付状态
 	 */
-	public static final String WALLET_UPDATE_PAY_STATUS = VERSION + "/schedule/quartz_update_pay_status";
+	public static final String QUARTZ_UPDATE_PAY_STATUS = VERSION + "/schedule/quartz_update_pay_status";
+
+	/**
+	 * 定时支付
+	 */
+	public static final String QUARTZ_NOTIFY = VERSION + "/schedule/quartz_notify";
 
 	/**
 	 * 查询钱包信息（企业or个人）

@@ -5,8 +5,8 @@ import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.model.BankCode;
+import com.rfchina.wallet.domain.model.WalletApply;
 import com.rfchina.wallet.domain.model.WalletCard;
-import com.rfchina.wallet.domain.model.WalletLog;
 import com.rfchina.wallet.server.bank.pudong.builder.PriPayQuery53Builder;
 import com.rfchina.wallet.server.bank.pudong.builder.PriPayQuery54Builder;
 import com.rfchina.wallet.server.bank.pudong.builder.PriPayReqBuilder;
@@ -19,8 +19,8 @@ import com.rfchina.wallet.server.bank.pudong.domain.response.PriPayResp;
 import com.rfchina.wallet.server.bank.pudong.domain.response.PriPayRespBody;
 import com.rfchina.wallet.server.bank.pudong.domain.util.StringObject;
 import com.rfchina.wallet.server.mapper.ext.BankCodeExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
-import com.rfchina.wallet.server.mapper.ext.WalletLogExtDao;
 import com.rfchina.wallet.server.model.ext.PayInResp;
 import com.rfchina.wallet.server.msic.EnumWallet.AQCardType;
 import com.rfchina.wallet.server.msic.EnumWallet.AQPayeeType;
@@ -28,7 +28,7 @@ import com.rfchina.wallet.server.msic.EnumWallet.AQTransType;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.SysFlag;
 import com.rfchina.wallet.server.msic.EnumWallet.TransStatusAQ53;
-import com.rfchina.wallet.server.msic.EnumWallet.WalletLogStatus;
+import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyStatus;
 import com.rfchina.wallet.server.service.ConfigService;
 
 import java.math.BigDecimal;
@@ -67,7 +67,7 @@ public class HandlerAQ52 implements EBankHandler {
 	private WalletCardDao walletCardDao;
 
 	@Autowired
-	private WalletLogExtDao walletLogDao;
+	private WalletApplyExtDao walletApplyDao;
 
 	@Autowired
 	private WalletExtDao walletDao;
@@ -96,7 +96,7 @@ public class HandlerAQ52 implements EBankHandler {
 	/**
 	 * 对私转帐
 	 */
-	public Tuple<GatewayMethod, PayInResp> pay(List<WalletLog> payInReqs) throws Exception {
+	public Tuple<GatewayMethod, PayInResp> pay(List<WalletApply> payInReqs) throws Exception {
 		int seq = 1;
 
 		List<PriPayReq> payReqs = payInReqs.stream().map(payInReq -> {
@@ -160,7 +160,7 @@ public class HandlerAQ52 implements EBankHandler {
 		return new Tuple<>(getGatewayMethod(), payInResp);
 	}
 
-	public List<WalletLog> updatePayStatus(String acceptNo, Date createTime) {
+	public List<WalletApply> updatePayStatus(String acceptNo, Date createTime) {
 		Date endDate = DateUtil.addDate2(createTime, 7);
 
 		PriPayQuery53Builder req53 = PriPayQuery53Builder.builder()
@@ -184,8 +184,8 @@ public class HandlerAQ52 implements EBankHandler {
 
 				if (TransStatusAQ53.FAIL.getValue().toString()
 					.equals(wrapper.getBatchHandleStatus())) {
-					walletLogDao.updateStatusByAcceptNo(wrapper.getHandleSeqNo(),
-						WalletLogStatus.FAIL.getValue(), TransStatusAQ53.FAIL.getValueName());
+					walletApplyDao.updateStatusByAcceptNo(wrapper.getHandleSeqNo(),
+						WalletApplyStatus.FAIL.getValue(), TransStatusAQ53.FAIL.getValueName());
 				}
 				if (!TransStatusAQ53.SUCC.getValue().toString()
 					.equals(wrapper.getBatchHandleStatus())) {
@@ -219,19 +219,19 @@ public class HandlerAQ52 implements EBankHandler {
 					}).collect(Collectors.toList());
 
 				return priPayResps.stream().map(rs -> {
-					WalletLogStatus status = WalletLogStatus.parsePuDongAQ54(rs.getStatus());
+					WalletApplyStatus status = WalletApplyStatus.parsePuDongAQ54(rs.getStatus());
 
-					WalletLog walletLog = walletLogDao
+					WalletApply walletApply = walletApplyDao
 						.selectByHostAcctAndElecNo(respBody.getHandleSeqNo()
-							, rs.getBizLog(), WalletLogStatus.PROCESSING.getValue());
-					if (walletLog != null) {
-						walletLog.setSeqNo(rs.getDetailNo());
-						walletLog.setStatus(status.getValue());
-						walletLog.setSysErrMsg(rs.getErrMsg());
-						walletLog.setEndTime(new Date());
-						walletLogDao.updateByPrimaryKeySelective(walletLog);
+							, rs.getBizLog(), WalletApplyStatus.PROCESSING.getValue());
+					if (walletApply != null) {
+						walletApply.setSeqNo(rs.getDetailNo());
+						walletApply.setStatus(status.getValue());
+						walletApply.setSysErrMsg(rs.getErrMsg());
+						walletApply.setEndTime(new Date());
+						walletApplyDao.updateByPrimaryKeySelective(walletApply);
 					}
-					return walletLog;
+					return walletApply;
 				}).filter(rs -> rs != null).collect(Collectors.toList());
 
 			}
@@ -245,7 +245,7 @@ public class HandlerAQ52 implements EBankHandler {
 	}
 
 	@Override
-	public void onAskErr(WalletLog walletLog, IGatewayError err) {
+	public void onAskErr(WalletApply walletApply, IGatewayError err) {
 
 	}
 

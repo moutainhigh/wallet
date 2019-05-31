@@ -2,6 +2,8 @@ package com.rfchina.wallet.server.web;
 
 import com.rfchina.platform.common.misc.SymbolConstant;
 import com.rfchina.platform.common.utils.DateUtil;
+import io.github.xdiamond.client.annotation.OneKeyListener;
+import io.github.xdiamond.client.event.ConfigEvent;
 import java.io.File;
 import java.util.Date;
 import javax.servlet.http.HttpServletResponse;
@@ -41,4 +43,8 @@ public class EchoController {
 	}
 
 
+	@OneKeyListener(key="srv.base.home")
+	public void onPropertyChange(ConfigEvent event){
+		srvBaseHome = event.getValue();
+	}
 }

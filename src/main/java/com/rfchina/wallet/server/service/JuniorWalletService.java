@@ -6,13 +6,13 @@ import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
+import com.rfchina.wallet.domain.model.WalletApply;
 import com.rfchina.wallet.domain.model.WalletCard;
-import com.rfchina.wallet.domain.model.WalletLog;
+import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
-import com.rfchina.wallet.server.mapper.ext.WalletLogExtDao;
 import com.rfchina.wallet.server.model.ext.PayInReq;
 import com.rfchina.wallet.server.model.ext.PayInResp;
-import com.rfchina.wallet.server.msic.EnumWallet.WalletLogStatus;
+import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletLogType;
 import com.rfchina.wallet.server.service.handler.HandlerHelper;
 
@@ -34,7 +34,7 @@ public class JuniorWalletService {
 	private WalletCardDao walletCardDao;
 
 	@Autowired
-	private WalletLogExtDao walletLogDao;
+	private WalletApplyExtDao walletApplyDao;
 
 	@Autowired
 	private WalletExtDao walletDao;
@@ -71,7 +71,7 @@ public class JuniorWalletService {
 			payInReq.setElecChequeNo(IdGenerator.createBizId("", 16, id -> true));
 			payInReq.setBatchNo(batchNo);
 
-			WalletLog walletLog = WalletLog.builder()
+			WalletApply walletApply = WalletApply.builder()
 				.walletId(payInReq.getWalletId())
 				.type(WalletLogType.TRANSFER.getValue())
 				.amount(payInReq.getAmount())
@@ -84,12 +84,12 @@ public class JuniorWalletService {
 				.payPurpose(payInReq.getPayPurpose() != null ?
 					String.valueOf(payInReq.getPayPurpose()) : null)
 				.note(payInReq.getNote())
-				.status(WalletLogStatus.SENDING.getValue())
+				.status(WalletApplyStatus.SENDING.getValue())
 				.queryTime(DateUtil.addSecs(new Date(), configService.getNextRoundSec()))
 				.createTime(new Date())
 				.build();
 
-			walletLogDao.insertSelective(walletLog);
+			walletApplyDao.insertSelective(walletApply);
 		});
 
 		return PayInResp.builder()

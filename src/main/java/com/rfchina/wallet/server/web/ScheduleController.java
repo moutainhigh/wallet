@@ -1,7 +1,6 @@
 package com.rfchina.wallet.server.web;
 
 import com.rfchina.scheduler.annotation.FuScheduleTaskReporter;
-import com.rfchina.wallet.server.api.JuniorWalletApi;
 import com.rfchina.wallet.server.api.WalletApi;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +18,7 @@ public class ScheduleController {
 	private WalletApi walletApi;
 
 
-	@RequestMapping(value = UrlConstant.WALLET_UPDATE_PAY_STATUS, method = RequestMethod.POST)
+	@RequestMapping(value = UrlConstant.QUARTZ_UPDATE_PAY_STATUS, method = RequestMethod.POST)
 	@FuScheduleTaskReporter
 	public String quartzUpdatePayStatus(
 		@RequestParam("schedule_id") String scheduleId,
@@ -34,7 +33,7 @@ public class ScheduleController {
 		return "success";
 	}
 
-	@RequestMapping(value = UrlConstant.WALLET_PAY, method = RequestMethod.POST)
+	@RequestMapping(value = UrlConstant.QUARTZ_WALLET_PAY, method = RequestMethod.POST)
 	@FuScheduleTaskReporter
 	public String quartzPay(
 		@RequestParam("schedule_id") String scheduleId,
@@ -49,4 +48,21 @@ public class ScheduleController {
 
 		return "success";
 	}
+
+	@RequestMapping(value = UrlConstant.QUARTZ_NOTIFY, method = RequestMethod.POST)
+	@FuScheduleTaskReporter
+	public String quartzNotify(
+		@RequestParam("schedule_id") String scheduleId,
+		@RequestParam("timestamp") String timestamp,
+		@RequestParam("sign") String sign) {
+
+		log.info("scheduler: 开始执行任务[{}]", "quartzNotify");
+
+		walletApi.quartzNotify();
+
+		log.info("scheduler: 完成任务[{}]", "quartzNotify");
+
+		return "success";
+	}
+
 }
