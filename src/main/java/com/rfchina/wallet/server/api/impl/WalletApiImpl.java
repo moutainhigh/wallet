@@ -75,8 +75,15 @@ public class WalletApiImpl implements WalletApi {
 	}
 
 	@Override
-	public void redo(@ParamValid(nullable = false) Long walletLogId) {
-		walletService.redo(walletLogId);
+	public void redoWalletApply(@ParamValid(nullable = false) Long walletLogId) {
+
+		String lockName = "redoWalletApply";
+		lock.acquireLockUsingException(lockName,60,0,1);
+		try {
+			walletService.redo(walletLogId);
+		}finally {
+			lock.unLock(lockName);
+		}
 	}
 
 	@Log

@@ -9,11 +9,11 @@ import java.util.ArrayList;
 
     
 /**
-* WalletLog
+* WalletApply
 */
 @Data
-public class WalletLog  {
-    @ApiModelProperty("受理编号")
+public class WalletApply  {
+    @ApiModelProperty("网银受理编号")
     private String acceptNo ;
 
     @ApiModelProperty("流水金额")
@@ -43,8 +43,8 @@ public class WalletLog  {
     @ApiModelProperty("银行错误码")
     private String errCode ;
 
-    @ApiModelProperty("错误信息")
-    private String errMsg ;
+    @ApiModelProperty("银行错误状态")
+    private String errStatus ;
 
     @ApiModelProperty("核心受理编号")
     private String hostAcceptNo ;
@@ -52,11 +52,17 @@ public class WalletLog  {
     @ApiModelProperty("ID")
     private Long id ;
 
+    @ApiModelProperty("发起方。 1：系统发起  2：用户发起")
+    private Integer lancher ;
+
     @ApiModelProperty("最大尝试次数")
     private Integer maxTryTimes ;
 
     @ApiModelProperty("附言(不超过100)")
     private String note ;
+
+    @ApiModelProperty("1:已通知技术 2:已通知业务")
+    private Integer notified ;
 
     @ApiModelProperty("支付用途 收款人为个人客户时必须输入 1-工资、奖金收入 2-稿费、演出费等劳务费用 3-债券、期货、信托等投资的本金和收益 4-个人债权或产权转让收益 5-个人贷款转存 6-证券交易结算资金和期货交易保证金 7-集成、赠予款项 8-保险理赔、保费退换等款项 9-纳税退还 A-农、副、矿产品销售收入")
     private String payPurpose ;
@@ -82,11 +88,20 @@ public class WalletLog  {
     @ApiModelProperty("交易流水号")
     private String seqNo ;
 
-    @ApiModelProperty("交易状态。 1: 待发送银行网关，2：银行受理中，3：交易成功，4：交易失败，5：撤销，6：待处理")
+    @ApiModelProperty("银行处理阶段")
+    private String stage ;
+
+    @ApiModelProperty("交易状态。 1: 待发送银行网关，2：银行受理中，3：交易成功，4：交易失败(确切失败)，5：撤销，6：待处理，7：等待重新发起(用户或系统)")
     private Integer status ;
 
-    @ApiModelProperty("流水类型，1：财务结算，2：收入，3：支出")
+    @ApiModelProperty("系统错误信息")
+    private String sysErrMsg ;
+
+    @ApiModelProperty("类型，1：财务结算，2：收入，3：支出")
     private Integer type ;
+
+    @ApiModelProperty("用户错误信息")
+    private String userErrMsg ;
 
     @ApiModelProperty("钱包ID")
     private Long walletId ;

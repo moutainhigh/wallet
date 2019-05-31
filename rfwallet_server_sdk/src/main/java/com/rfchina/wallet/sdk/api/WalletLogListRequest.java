@@ -40,7 +40,7 @@ public class WalletLogListRequest extends  AbstractApiRequest {
 
   @Override
   public Class<?> getResponseModelClass() {
-    return PaginationWalletLog.class;
+    return PaginationWalletApply.class;
   }
 
   @Override

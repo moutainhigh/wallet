@@ -7,9 +7,9 @@ import com.rfchina.platform.sdk2.request.AbstractApiRequest;
 import lombok.Builder;
 import io.swagger.annotations.ApiModelProperty;
 
-/** 初级钱包-查询支付状态 */
+/** 查询支付状态 */
 @Builder
-public class QueryPayStatusRequest extends  AbstractApiRequest {
+public class QueryWalletApplyRequest extends  AbstractApiRequest {
 
   @ApiModelProperty("access_token")
   private String accessToken ;
@@ -23,7 +23,7 @@ public class QueryPayStatusRequest extends  AbstractApiRequest {
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/wallet/query_pay_status";
+    return "/wallet_server/v1/m/wallet/query_wallet_apply";
   }
 
   @Override

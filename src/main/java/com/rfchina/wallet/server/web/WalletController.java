@@ -47,7 +47,7 @@ public class WalletController {
 	public ResponseValue redoWalletApply(
 		@ApiParam(value = "流水id", required = true, example = "1") @RequestParam(value = "wallet_log_id") Long walletLogId
 	) {
-		walletApi.redo(walletLogId);
+		walletApi.redoWalletApply(walletLogId);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
 

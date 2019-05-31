@@ -32,7 +32,7 @@ public interface WalletApi {
 	/**
 	 * 重做订单
 	 */
-	void redo(Long walletLogId);
+	void redoWalletApply(Long walletLogId);
 
 	/**
 	 * 定时更新支付状态

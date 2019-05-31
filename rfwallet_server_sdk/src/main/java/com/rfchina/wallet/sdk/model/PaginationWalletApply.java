@@ -9,12 +9,12 @@ import java.util.ArrayList;
 
     
 /**
-* PaginationWalletLog
+* PaginationWalletApply
 */
 @Data
-public class PaginationWalletLog  {
+public class PaginationWalletApply  {
     @ApiModelProperty("")
-    private List<WalletLog> list ;
+    private List<WalletApply> list ;
 
     @ApiModelProperty("")
     private Integer pageLimit ;

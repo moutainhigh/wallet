@@ -31,6 +31,9 @@ public class WalletCard  {
     @ApiModelProperty("开户名")
     private String depositName ;
 
+    @ApiModelProperty("ID")
+    private Long id ;
+
     @ApiModelProperty("是否默认银行卡: 1:是，2：否")
     private Integer isDef ;
 
