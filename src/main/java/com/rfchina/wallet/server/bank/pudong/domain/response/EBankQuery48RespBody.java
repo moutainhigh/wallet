@@ -10,7 +10,7 @@ import lombok.Data;
 @XmlRootElement(name = "body")
 @XmlAccessorType(XmlAccessType.FIELD)
 @Data
-public class EBankQueryRespBody {
+public class EBankQuery48RespBody {
 
 	@ApiModelProperty(value = "总笔数")
 	private String totalCount;
@@ -23,6 +23,6 @@ public class EBankQueryRespBody {
 	@Data
 	public static class Lists {
 
-		private List<EBankQueryResp> list;
+		private List<EBankQuery48Resp> list;
 	}
 }

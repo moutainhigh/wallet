@@ -540,6 +540,7 @@
 
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
+|access_token|是|access_token|
 |wallet_log_id|是|流水id|
 
 

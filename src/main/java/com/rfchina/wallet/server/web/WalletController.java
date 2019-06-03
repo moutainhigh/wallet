@@ -45,9 +45,10 @@ public class WalletController {
 	@ApiOperation("重做问题单")
 	@PostMapping(UrlConstant.WALLET_APPLY_REDO)
 	public ResponseValue redoWalletApply(
+		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "流水id", required = true, example = "1") @RequestParam(value = "wallet_log_id") Long walletLogId
 	) {
-		walletApi.redoWalletApply(walletLogId);
+		walletApi.redoWalletApply(accessToken, walletLogId);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
 

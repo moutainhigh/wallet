@@ -125,22 +125,22 @@ public class WalletService {
 			criteria.andBatchNoEqualTo(batchNo);
 		}
 
-		List<WalletApply> walletLogs = walletApplyDao.selectByExample(example);
-		if (walletLogs.isEmpty()) {
+		List<WalletApply> walletApplies = walletApplyDao.selectByExample(example);
+		if (walletApplies.isEmpty()) {
 			throw new RfchinaResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST
 				, batchNo + "_" + bizNo);
 		}
 
-		return walletLogs.stream().map(walletLog -> {
+		return walletApplies.stream().map(walletApply -> {
 			return PayStatusResp.builder()
-				.bizNo(walletLog.getBizNo())
-				.batchNo(walletLog.getBatchNo())
-				.amount(walletLog.getAmount())
-				.transDate(DateUtil.formatDate(walletLog.getCreateTime()))
-				.status(walletLog.getStatus())
-				.errCode(walletLog.getErrCode())
-				.userErrMsg(walletLog.getUserErrMsg())
-				.sysErrMsg(walletLog.getSysErrMsg())
+				.bizNo(walletApply.getBizNo())
+				.batchNo(walletApply.getBatchNo())
+				.amount(walletApply.getAmount())
+				.transDate(DateUtil.formatDate(walletApply.getCreateTime()))
+				.status(walletApply.getStatus())
+				.errCode(walletApply.getErrCode())
+				.userErrMsg(walletApply.getUserErrMsg())
+				.sysErrMsg(walletApply.getSysErrMsg())
 				.build();
 		}).collect(Collectors.toList());
 
@@ -149,29 +149,29 @@ public class WalletService {
 	/**
 	 * 重做问题单
 	 */
-	public void redo(Long walletLogId) {
+	public void redo(Long walletApplyId) {
 
-		WalletApply walletLog = walletApplyExtDao.selectByPrimaryKey(walletLogId);
-		if (walletLog == null) {
+		WalletApply walletApply = walletApplyExtDao.selectByPrimaryKey(walletApplyId);
+		if (walletApply == null) {
 			throw new RfchinaResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST
-				, walletLogId.toString());
+				, walletApplyId.toString());
 		}
 
-		if (walletLog.getStatus().byteValue() != WalletApplyStatus.REDO.getValue()) {
+		if (walletApply.getStatus().byteValue() != WalletApplyStatus.REDO.getValue()) {
 			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_APPLY_STATUS_ERROR);
 		}
 
-		walletLog.setStatus(WalletApplyStatus.SENDING.getValue());
-		walletLog.setStage(null);
-		walletLog.setUserErrMsg(null);
-		walletLog.setSysErrMsg(null);
-		walletLog.setErrStatus(null);
-		walletLog.setErrCode(null);
-		walletLog.setAcceptNo(null);
-		walletLog.setEndTime(null);
-		walletLog.setAuditTime(null);
-		walletLog.setBatchNo(null);
-		walletApplyExtDao.updateByPrimaryKey(walletLog);
+		walletApply.setStatus(WalletApplyStatus.SENDING.getValue());
+		walletApply.setStage(null);
+		walletApply.setUserErrMsg(null);
+		walletApply.setSysErrMsg(null);
+		walletApply.setErrStatus(null);
+		walletApply.setErrCode(null);
+		walletApply.setAcceptNo(null);
+		walletApply.setEndTime(null);
+		walletApply.setAuditTime(null);
+		walletApply.setBatchNo(null);
+		walletApplyExtDao.updateByPrimaryKey(walletApply);
 	}
 
 	/**
@@ -186,8 +186,9 @@ public class WalletService {
 				LockStatus.LOCKED.getValue());
 			if (c > 0) {
 				try {
-					List<WalletApply> walletLogs = walletApplyExtDao.selectUnDealByBatchNo(batchNo);
-					if (StringUtils.isEmpty(batchNo) || walletLogs.isEmpty()) {
+					List<WalletApply> walletApplies = walletApplyExtDao
+						.selectUnDealByBatchNo(batchNo);
+					if (StringUtils.isEmpty(batchNo) || walletApplies.isEmpty()) {
 						return;
 					}
 					// 请求网关
@@ -195,25 +196,25 @@ public class WalletService {
 					try {
 
 						handler = handlerHelper.selectByWalletType(null);
-						Tuple<GatewayMethod, PayInResp> rs = handler.pay(walletLogs);
+						Tuple<GatewayMethod, PayInResp> rs = handler.pay(walletApplies);
 
 						// 记录结果
 						GatewayMethod method = rs.left;
 						PayInResp payInResp = rs.right;
-						for (WalletApply walletLog : walletLogs) {
+						for (WalletApply walletApply : walletApplies) {
 
-							walletLog.setStatus(WalletApplyStatus.PROCESSING.getValue());
-							walletLog.setRefMethod(method.getValue());
-							walletLog.setAcceptNo(payInResp.getAcceptNo());
-							walletApplyExtDao.updateByPrimaryKeySelective(walletLog);
+							walletApply.setStatus(WalletApplyStatus.PROCESSING.getValue());
+							walletApply.setRefMethod(method.getValue());
+							walletApply.setAcceptNo(payInResp.getAcceptNo());
+							walletApplyExtDao.updateByPrimaryKeySelective(walletApply);
 						}
 					} catch (Exception e) {
 
 						log.error("银行网关支付错误", e);
-						IGatewayError err = ExceptionUtil.explain(e, gatewayErrPredicate);
+						IGatewayError err = ExceptionUtil.explain(e);
 						if (handler != null) {
-							for (WalletApply walletLog : walletLogs) {
-								handler.onAskErr(walletLog, err);
+							for (WalletApply walletApply : walletApplies) {
+								handler.onAskErr(walletApply, err);
 							}
 						}
 
@@ -241,9 +242,9 @@ public class WalletService {
 		List<WalletApply> result = acceptNos.stream().map(item -> {
 
 			EBankHandler handler = handlerHelper.selectByMethod(item.getRefMethod());
-			List<WalletApply> walletLogs = handler.updatePayStatus(item.getAcceptNo()
+			List<WalletApply> walletApplies = handler.updatePayStatus(item.getAcceptNo()
 				, item.getCreateTime());
-			return walletLogs;
+			return walletApplies;
 		}).reduce((rs, item) -> {
 
 			rs.addAll(item);
@@ -275,9 +276,9 @@ public class WalletService {
 	/**
 	 * 通知研发
 	 */
-	public void notifyDeveloper(List<WalletApply> walletLogs) {
+	public void notifyDeveloper(List<WalletApply> walletApplies) {
 
-		if (walletLogs.isEmpty()) {
+		if (walletApplies.isEmpty()) {
 			return;
 		}
 
@@ -291,16 +292,17 @@ public class WalletService {
 			.append("<td>").append("下单时间").append("</td>")
 			.append("<td>").append("备注").append("</td>")
 			.append("</tr>");
-		for (WalletApply walletLog : walletLogs) {
-			BigDecimal amount = new BigDecimal(walletLog.getAmount());
+		for (WalletApply walletApply : walletApplies) {
+			BigDecimal amount = new BigDecimal(walletApply.getAmount());
 			amount = amount.divide(new BigDecimal("100"), 2, RoundingMode.DOWN);
 			builder.append("<tr>")
-				.append("<td>").append(walletLog.getId()).append("</td>")
-				.append("<td>").append(walletLog.getBizNo()).append("</td>")
+				.append("<td>").append(walletApply.getId()).append("</td>")
+				.append("<td>").append(walletApply.getBizNo()).append("</td>")
 				.append("<td>").append(amount).append("</td>")
-				.append("<td>").append(walletLog.getSysErrMsg()).append("</td>")
-				.append("<td>").append(DateUtil.formatDate(walletLog.getCreateTime()))
-				.append("</td>").append("<td>").append(JSON.toJSONString(walletLog)).append("</td>")
+				.append("<td>").append(walletApply.getSysErrMsg()).append("</td>")
+				.append("<td>").append(DateUtil.formatDate(walletApply.getCreateTime()))
+				.append("</td>").append("<td>").append(JSON.toJSONString(walletApply))
+				.append("</td>")
 				.append("</tr>");
 		}
 		builder.append("</table>");
@@ -309,7 +311,7 @@ public class WalletService {
 		String msg = builder.toString();
 		sendEmail(title, msg, configService.getNotifyDevEmail());
 
-		List<Long> ids = walletLogs.stream().map(walletLog -> walletLog.getId())
+		List<Long> ids = walletApplies.stream().map(walletApply -> walletApply.getId())
 			.collect(Collectors.toList());
 		walletApplyExtDao.updateNotified(ids, NotifyType.DEVELOPER.getValue());
 	}
@@ -317,9 +319,9 @@ public class WalletService {
 	/**
 	 * 通知业务
 	 */
-	public void notifyBusiness(List<WalletApply> walletLogs) {
+	public void notifyBusiness(List<WalletApply> walletApplies) {
 
-		if (walletLogs.isEmpty()) {
+		if (walletApplies.isEmpty()) {
 			return;
 		}
 
@@ -335,16 +337,16 @@ public class WalletService {
 			.append("<td>").append("备注").append("</td>")
 			.append("</tr>");
 
-		for (WalletApply walletLog : walletLogs) {
+		for (WalletApply walletApply : walletApplies) {
 
-			BigDecimal amount = new BigDecimal(walletLog.getAmount());
+			BigDecimal amount = new BigDecimal(walletApply.getAmount());
 			amount = amount.divide(new BigDecimal("100"), 2, RoundingMode.DOWN);
 			builder.append("<tr>")
-				.append("<td>").append(walletLog.getId()).append("</td>")
-				.append("<td>").append(walletLog.getBizNo()).append("</td>")
+				.append("<td>").append(walletApply.getId()).append("</td>")
+				.append("<td>").append(walletApply.getBizNo()).append("</td>")
 				.append("<td>").append(amount).append("</td>")
-				.append("<td>").append(walletLog.getSysErrMsg()).append("</td>")
-				.append("<td>").append(DateUtil.formatDate(walletLog.getCreateTime()))
+				.append("<td>").append(walletApply.getSysErrMsg()).append("</td>")
+				.append("<td>").append(DateUtil.formatDate(walletApply.getCreateTime()))
 				.append("</td>")
 				.append("<td>").append("常见失败进入重新发起通道").append("</td>")
 				.append("</tr>");
@@ -356,7 +358,7 @@ public class WalletService {
 		String msg = builder.toString();
 		sendEmail(title, msg, configService.getNotifyBizEmail());
 
-		List<Long> ids = walletLogs.stream().map(walletLog -> walletLog.getId())
+		List<Long> ids = walletApplies.stream().map(walletApply -> walletApply.getId())
 			.collect(Collectors.toList());
 		walletApplyExtDao.updateNotified(ids, NotifyType.BUSINESS.getValue());
 
@@ -453,7 +455,7 @@ public class WalletService {
 	 * @param startTime 开始时间
 	 * @param endTime 结束时间
 	 */
-	public Pagination<WalletApply> walletLogList(@ParamValid(nullable = false) Long walletId,
+	public Pagination<WalletApply> walletApplyList(@ParamValid(nullable = false) Long walletId,
 		Date startTime, Date endTime,
 		@ParamValid(min = 1, max = SymbolConstant.QUERY_LIMIT) int limit,
 		@ParamValid(min = 0) long offset, Boolean stat) {

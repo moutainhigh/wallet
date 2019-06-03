@@ -1,15 +1,7 @@
 package com.rfchina.wallet.server.api;
 
-import com.rfchina.passport.token.EnumTokenType;
-import com.rfchina.passport.token.TokenVerify;
-import com.rfchina.platform.common.annotation.EnumParamValid;
-import com.rfchina.platform.common.annotation.Log;
-import com.rfchina.platform.common.annotation.ParamValid;
-import com.rfchina.platform.common.annotation.SignVerify;
 import com.rfchina.platform.common.misc.ResponseValue;
 import com.rfchina.platform.common.page.Pagination;
-import com.rfchina.platform.common.utils.RegexUtil;
-import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.model.*;
 import com.rfchina.wallet.domain.model.ext.Bank;
 import com.rfchina.wallet.domain.model.ext.BankArea;
@@ -32,7 +24,7 @@ public interface WalletApi {
 	/**
 	 * 重做订单
 	 */
-	void redoWalletApply(Long walletLogId);
+	void redoWalletApply(String accessToken, Long walletLogId);
 
 	/**
 	 * 定时更新支付状态

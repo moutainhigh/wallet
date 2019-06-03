@@ -74,14 +74,18 @@ public class WalletApiImpl implements WalletApi {
 		return walletService.queryWalletApply(bizNo, batchNo);
 	}
 
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
 	@Override
-	public void redoWalletApply(@ParamValid(nullable = false) Long walletLogId) {
+	public void redoWalletApply(String accessToken,
+		@ParamValid(nullable = false) Long walletLogId) {
 
 		String lockName = "redoWalletApply";
-		lock.acquireLockUsingException(lockName,60,0,1);
+		lock.acquireLockUsingException(lockName, 60, 0, 1);
 		try {
 			walletService.redo(walletLogId);
-		}finally {
+		} finally {
 			lock.unLock(lockName);
 		}
 	}
@@ -175,9 +179,10 @@ public class WalletApiImpl implements WalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public Pagination<WalletApply> walletApplyList(String accessToken, Long walletId, Date startTime,
+	public Pagination<WalletApply> walletApplyList(String accessToken, Long walletId,
+		Date startTime,
 		Date endTime, int limit, long offset, Boolean stat) {
-		return walletService.walletLogList(walletId, startTime, endTime,
+		return walletService.walletApplyList(walletId, startTime, endTime,
 			limit, offset, stat);
 	}
 

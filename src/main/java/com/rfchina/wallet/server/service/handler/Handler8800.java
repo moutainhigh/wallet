@@ -12,29 +12,37 @@ import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.BankCode;
 import com.rfchina.wallet.domain.model.WalletApply;
 import com.rfchina.wallet.domain.model.WalletCard;
-import com.rfchina.wallet.server.bank.pudong.builder.EBankQueryBuilder;
+import com.rfchina.wallet.server.bank.pudong.builder.EBankQuery48Builder;
+import com.rfchina.wallet.server.bank.pudong.builder.EBankQuery49Builder;
 import com.rfchina.wallet.server.bank.pudong.builder.PubPayQueryBuilder;
 import com.rfchina.wallet.server.bank.pudong.builder.PubPayReqBuilder;
 import com.rfchina.wallet.server.bank.pudong.domain.exception.GatewayError;
 import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
 import com.rfchina.wallet.server.bank.pudong.domain.predicate.ExactErrPredicate;
+import com.rfchina.wallet.server.bank.pudong.domain.predicate.UserRedoPredicate;
 import com.rfchina.wallet.server.bank.pudong.domain.request.PubPayReq;
-import com.rfchina.wallet.server.bank.pudong.domain.response.EBankQueryResp;
-import com.rfchina.wallet.server.bank.pudong.domain.response.EBankQueryRespBody;
+import com.rfchina.wallet.server.bank.pudong.domain.response.EBankQuery48Resp;
+import com.rfchina.wallet.server.bank.pudong.domain.response.EBankQuery48RespBody;
+import com.rfchina.wallet.server.bank.pudong.domain.response.EBankQuery49Resp;
+import com.rfchina.wallet.server.bank.pudong.domain.response.EBankQuery49RespBody;
+import com.rfchina.wallet.server.bank.pudong.domain.response.EBankQuery49RespVo;
 import com.rfchina.wallet.server.bank.pudong.domain.response.PubPayQueryRespBody;
 import com.rfchina.wallet.server.bank.pudong.domain.response.PubPayQueryRespBody.PayResult;
 import com.rfchina.wallet.server.bank.pudong.domain.response.PubPayRespBody;
 import com.rfchina.wallet.server.bank.pudong.domain.util.ExceptionUtil;
+import com.rfchina.wallet.server.bank.pudong.domain.util.StringObject;
 import com.rfchina.wallet.server.mapper.ext.BankCodeExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.model.ext.HostSeqNo;
 import com.rfchina.wallet.server.model.ext.PayInResp;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
+import com.rfchina.wallet.server.msic.EnumWallet.LancherType;
 import com.rfchina.wallet.server.msic.EnumWallet.RemitLocation;
 import com.rfchina.wallet.server.msic.EnumWallet.SysFlag;
 import com.rfchina.wallet.server.msic.EnumWallet.TransStatus8804;
 import com.rfchina.wallet.server.msic.EnumWallet.TransStatusDO48;
+import com.rfchina.wallet.server.msic.EnumWallet.TransStatusDO49;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyStatus;
 import com.rfchina.wallet.server.service.ConfigService;
 import java.math.BigDecimal;
@@ -80,6 +88,9 @@ public class Handler8800 implements EBankHandler {
 
 	@Autowired
 	private ExactErrPredicate exactErrPredicate;
+
+	@Autowired
+	private UserRedoPredicate userRedoPredicate;
 
 	private EBankHandler next;
 
@@ -151,7 +162,8 @@ public class Handler8800 implements EBankHandler {
 				.payeeType(walletCard.getIsPublic().equals("1") ? "0" : "1")
 				.payeeBankSelectFlag(isOtherRemit ? "1" : null)
 				.payeeBankNo(isOtherRemit ? walletCard.getBankCode() : null)
-				.payPurpose(walletApply.getPayPurpose() != null ? walletApply.getPayPurpose() : null)
+				.payPurpose(
+					walletApply.getPayPurpose() != null ? walletApply.getPayPurpose() : null)
 				.build();
 
 		}).collect(Collectors.toList());
@@ -180,10 +192,20 @@ public class Handler8800 implements EBankHandler {
 		walletApplyDao.incTryTimes(acceptNo, DateUtil.addSecs(new Date(),
 			configService.getNextRoundSec()));
 
-		// 查询网银授权
-		HostSeqNo hostSeqNo = queryHostSeqNo(acceptNo, createTime);
-		if (hostSeqNo == null) {
-			return new ArrayList<>();
+		HostSeqNo hostSeqNo = walletApplyDao.selectHostAcctNo(acceptNo);
+		hostSeqNo = (hostSeqNo == null) ? new HostSeqNo() : hostSeqNo;
+		// 数据库没有网银受理号
+		if (StringUtils.isBlank(hostSeqNo.getHostAcceptNo())) {
+			// 查询包授权
+			Tuple<String, Date> tuple = doEBankPackageQuery(acceptNo, createTime);
+			// 网银未授权的
+			if (tuple == null) {
+				return new ArrayList<>();
+			}
+			hostSeqNo.setHostAcceptNo(tuple.left);
+			hostSeqNo.setAuditTime(tuple.right);
+			// 查询明细授权
+			doEBankDetailQuery(acceptNo, hostSeqNo);
 		}
 
 		// 查核心支付结果
@@ -216,18 +238,21 @@ public class Handler8800 implements EBankHandler {
 					// 如果是终态
 					TransStatus8804 transStatus = TransStatus8804.parse(rs.getTransStatus());
 					if (transStatus.isEndStatus()) {
-						WalletApplyStatus logStatus;
+						WalletApplyStatus status;
 						// 核心拒绝的，需要进一步判断错误码
 						if (TransStatus8804.REJECT.getValue().equals(transStatus.getValue())) {
 							if (exactErrPredicate.test(err)) {
-								logStatus = WalletApplyStatus.FAIL;
+								boolean userRedo = userRedoPredicate.test(err);
+								status = userRedo ? WalletApplyStatus.REDO : WalletApplyStatus.FAIL;
+								walletApply.setLancher(userRedo ? LancherType.USER.getValue()
+									: LancherType.SYS.getValue());
 							} else {
-								logStatus = WalletApplyStatus.WAIT_DEAL;
+								status = WalletApplyStatus.WAIT_DEAL;
 							}
 						} else {
-							logStatus = WalletApplyStatus.parsePuDong8804(rs.getTransStatus());
+							status = WalletApplyStatus.parsePuDong8804(rs.getTransStatus());
 						}
-						walletApply.setStatus(logStatus.getValue());
+						walletApply.setStatus(status.getValue());
 						walletApply.setEndTime(new Date());
 					}
 
@@ -255,7 +280,6 @@ public class Handler8800 implements EBankHandler {
 
 		String errCode = ExceptionUtil.extractErrCode(note);
 		String errMsg = note;
-
 		return GatewayError.builder()
 			.errCode(errCode)
 			.errMsg(errMsg)
@@ -265,64 +289,67 @@ public class Handler8800 implements EBankHandler {
 	@Override
 	public void onAskErr(WalletApply walletApply, IGatewayError err) {
 		// 确切失败的单业务会重新发起新的转账，其他的单进入待处理状态
-		Byte status = err.isUserErr() ? WalletApplyStatus.FAIL.getValue()
-			: WalletApplyStatus.WAIT_DEAL.getValue();
+		boolean exactErr = exactErrPredicate.test(err);
+		boolean userRedo = userRedoPredicate.test(err);
+
+		Byte status = !exactErr ? WalletApplyStatus.WAIT_DEAL.getValue() :
+			(userRedo ? WalletApplyStatus.REDO.getValue() : WalletApplyStatus.FAIL.getValue());
 		walletApply.setStatus(status);
 		walletApply.setStage(err.getTransCode());
 		walletApply.setErrCode(err.getErrCode());
 		walletApply.setSysErrMsg(err.getErrMsg());
 		walletApply.setUserErrMsg("系统错误");
+		if (exactErr) {
+			walletApply.setLancher(userRedo ? LancherType.USER.getValue()
+				: LancherType.SYS.getValue());
+		}
 		walletApplyDao.updateByPrimaryKeySelective(walletApply);
 	}
 
 	/**
-	 * 查询网银受理号
+	 * 查询网银包受理状态
 	 */
-	private HostSeqNo queryHostSeqNo(String acceptNo, Date createTime) {
-		HostSeqNo hostSeqNo = walletApplyDao.selectHostAcctNo(acceptNo);
-		if (hostSeqNo != null) {
-			return hostSeqNo;
-		}
+	private Tuple<String, Date> doEBankPackageQuery(String acceptNo, Date createTime) {
 
 		// 查询网银受理状态
-		EBankQueryBuilder eBankReq = EBankQueryBuilder.builder()
+		EBankQuery48Builder req = EBankQuery48Builder.builder()
 			.masterId(configService.getMasterId())
 			.authMasterID(configService.getAuditMasterId())
 			.beginDate(DateUtil.formatDate(createTime, "yyyyMMdd"))
 			.endDate(DateUtil.formatDate(createTime, "yyyyMMdd"))
 			.acceptNo(acceptNo)
 			.build();
-
-		EBankQueryRespBody eBankResp;
+		EBankQuery48RespBody resp;
 		try {
-			eBankResp = eBankReq.lanch(configService.getHostUrl(), configService.getSignUrl(),
+			resp = req.lanch(configService.getHostUrl(), configService.getSignUrl(),
 				client);
 		} catch (Exception e) {
 			log.error("银企直连-网银授权状态查询错误", e);
 			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_STATUS_QUERY_ERROR);
 		}
-
 		// 如果网银查不到则放弃进一步查询
-		if (eBankResp.getLists() == null || eBankResp.getLists().getList() == null) {
+		if (resp.getLists() == null || resp.getLists().getList() == null) {
 			return null;
 		}
-		List<EBankQueryResp> list = eBankResp.getLists().getList();
-		EBankQueryResp auditResult = list.stream()
-			.filter(resp -> acceptNo.equals(resp.getEntJnlSeqNo()))
+		List<EBankQuery48Resp> list = resp.getLists().getList();
+		EBankQuery48Resp audit48Result = list.stream()
+			.filter(result -> acceptNo.equals(result.getEntJnlSeqNo()))
 			.findFirst().get();
-		if (auditResult == null) {
+		if (audit48Result == null) {
 			return null;
 		}
 		// 网银状态非交易成功
-		Date auditTime = StringUtils.isNotBlank(auditResult.getTransDate()) ?
-			DateUtil.parse(auditResult.getTransDate(), "yyyyMMdd") : null;
-		if (!TransStatusDO48.SUCC.getValue().equals(auditResult.getTransStatus())) {
+		Date auditTime = StringUtils.isNotBlank(audit48Result.getTransDate()) ?
+			DateUtil.parse(audit48Result.getTransDate(), "yyyyMMdd") : null;
+		if (!TransStatusDO48.SUCC.getValue().equals(audit48Result.getTransStatus())) {
 			TransStatusDO48 status = EnumUtil
-				.parse(TransStatusDO48.class, auditResult.getTransStatus());
-
-			walletApplyDao.updateAcceptNoErrMsg(acceptNo, "EBANK:" + auditResult.getTransStatus()
-				, "EBANK:" + auditResult.getFailCode(),
+				.parse(TransStatusDO48.class, audit48Result.getTransStatus());
+			// 更新中间状态和错误码
+			walletApplyDao.updateAcceptNoErrMsg(acceptNo, req.getTransCode()
+				, "EBANK:" + audit48Result.getTransStatus()
+				, "EBANK:" + audit48Result.getFailCode(),
 				status != null ? status.getValueName() : "文档未记录状态");
+			// 如果是未成功的终态，关闭这批交易
 			if (status != null && status.isEndStatus()) {
 				walletApplyDao.updateAcceptNoStatus(acceptNo, WalletApplyStatus.FAIL.getValue(),
 					auditTime, new Date());
@@ -330,14 +357,50 @@ public class Handler8800 implements EBankHandler {
 
 			return null;
 		}
-
 		// 网银成功之后
-		walletApplyDao.updateHostAcctNo(acceptNo, auditResult.getHostJnlSeqNo(), auditTime);
+		walletApplyDao.updateHostAcctNo(acceptNo, audit48Result.getHostJnlSeqNo(), auditTime);
 
-		return HostSeqNo.builder()
-			.hostAcceptNo(auditResult.getHostJnlSeqNo())
-			.auditTime(auditTime)
+		return new Tuple<>(audit48Result.getHostJnlSeqNo(), auditTime);
+	}
+
+	/**
+	 * 查询网银明细授权
+	 */
+	private void doEBankDetailQuery(String acceptNo, HostSeqNo hostSeqNo) {
+		// 网银授权明细
+		EBankQuery49Builder req = EBankQuery49Builder.builder()
+			.masterId(configService.getMasterId())
+			.authMasterID(configService.getAuditMasterId())
+			.entJnlSeqNo(acceptNo)
 			.build();
+		EBankQuery49RespBody resp;
+		try {
+			resp = req.lanch(configService.getHostUrl(), configService.getSignUrl(), client);
+		} catch (Exception e) {
+			log.error("银企直连-网银授权状态查询错误", e);
+			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_STATUS_QUERY_ERROR);
+		}
+		// 如果网银查不到则放弃进一步查询
+		if (resp.getLists() == null || resp.getLists().getList() == null) {
+			return;
+		}
+		for (EBankQuery49Resp resp49 : resp.getLists().getList()) {
+
+			EBankQuery49RespVo respVo = StringObject.parseStringObject(resp49.getDetailedContent()
+				, EBankQuery49RespVo.class, "\\|");
+			// 关闭授权失败的单
+			if (TransStatusDO49.REFUSE.getValue().equals(respVo.getStatus())) {
+				WalletApply walletApply = walletApplyDao.selectByHostAcctAndElecNo(acceptNo
+					, respVo.getElecChequeNo(), WalletApplyStatus.PROCESSING.getValue());
+				walletApply.setStage(req.getTransCode());
+				walletApply.setStatus(WalletApplyStatus.FAIL.getValue());
+				walletApply.setErrStatus(respVo.getStatus());
+				walletApply.setUserErrMsg(TransStatusDO49.REFUSE.getValue());
+				walletApply.setAuditTime(hostSeqNo.getAuditTime());
+				walletApply.setEndTime(new Date());
+				walletApplyDao.updateByPrimaryKeySelective(walletApply);
+			}
+		}
 	}
 
 	private WalletCard getWalletCard(Long walletId) {

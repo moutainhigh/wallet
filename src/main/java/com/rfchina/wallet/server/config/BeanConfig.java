@@ -2,10 +2,12 @@ package com.rfchina.wallet.server.config;
 
 import com.alibaba.fastjson.JSON;
 import com.rfchina.biztools.lock.SimpleExclusiveLock;
+import com.rfchina.internal.api.request.ApiRequestConstant.User;
 import com.rfchina.platform.spring.SpringContext;
 
 import com.rfchina.passport.misc.SessionThreadLocal;
 import com.rfchina.wallet.server.bank.pudong.domain.predicate.ExactErrPredicate;
+import com.rfchina.wallet.server.bank.pudong.domain.predicate.UserRedoPredicate;
 import com.rfchina.wallet.server.service.ConfigService;
 import io.github.xdiamond.client.annotation.AllKeyListener;
 import io.github.xdiamond.client.annotation.OneKeyListener;
@@ -27,6 +29,8 @@ public class BeanConfig {
 
 	@Autowired
 	private ExactErrPredicate gatewayErrPredicate;
+	@Autowired
+	private UserRedoPredicate userRedoPredicate;
 
 	@Bean
 	public SpringContext springContext() {
@@ -61,5 +65,18 @@ public class BeanConfig {
 		gatewayErrPredicate.parseText(event.getValue());
 	}
 
+	@Bean
+	public UserRedoPredicate userRedoPredicate(
+		@Value("${wlpay.pudong.userRedoErr}") String userRedoErr) {
+		UserRedoPredicate predicate = new UserRedoPredicate();
+		predicate.parseText(userRedoErr);
+		return predicate;
+	}
+
+	@OneKeyListener(key = "wlpay.pudong.userRedoErr")
+	public void onUserRedoErrChange(ConfigEvent event) {
+		log.info("change key wlpay.pudong.userRedoErr, event : {}", event);
+		userRedoPredicate.parseText(event.getValue());
+	}
 
 }

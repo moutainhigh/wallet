@@ -2,7 +2,7 @@ package com.rfchina.wallet.server.api.impl;
 
 import static junit.framework.TestCase.assertTrue;
 
-import com.rfchina.wallet.server.SignedSpringTest;
+import com.rfchina.wallet.server.SpringApiTest;
 import com.rfchina.wallet.server.api.WalletApi;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
@@ -10,7 +10,7 @@ import java.util.List;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class WalletApiImplTest extends SignedSpringTest {
+public class WalletApiImplTest extends SpringApiTest {
 
 	@Autowired
 	private WalletApi walletApi;

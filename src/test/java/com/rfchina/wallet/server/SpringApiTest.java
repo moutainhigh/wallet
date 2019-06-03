@@ -11,7 +11,7 @@ import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-public class SignedSpringTest extends SpringBaseTest{
+public class SpringApiTest extends SpringBaseTest{
 
 
 	@Value("${test.app.secret}")

@@ -11,6 +11,9 @@ import io.swagger.annotations.ApiModelProperty;
 @Builder
 public class RedoWalletApplyRequest extends  AbstractApiRequest {
 
+  @ApiModelProperty("access_token")
+  private String accessToken ;
+
   @ApiModelProperty("流水id")
   private Long walletLogId ;
 
@@ -28,6 +31,9 @@ public class RedoWalletApplyRequest extends  AbstractApiRequest {
   @Override
   public Map<String, String> getTextParmas() {
     Map<String, String> parameters = new HashMap<>(2);
+      if(accessToken != null){
+        parameters.put("access_token", accessToken.toString());
+      }
       if(walletLogId != null){
         parameters.put("wallet_log_id", walletLogId.toString());
       }

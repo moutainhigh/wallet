@@ -8,8 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+import lombok.Data;
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
+@Getter
 public class ExactErrPredicate implements Predicate<IGatewayError> {
 
 	private Map<String, String> exactCodeSet = new HashMap<>(20);

@@ -37,14 +37,14 @@ public class StringObject {
 			}
 
 			return buf.toString();
-		}catch (Exception e){
-			log.error("对象转String错误",e);
+		} catch (Exception e) {
+			log.error("对象转String错误", e);
 			return null;
 		}
 
 	}
 
-	public static <T>T parseStringObject(String text, Class clz, String splitStr) {
+	public static <T> T parseStringObject(String text, Class clz, String splitStr) {
 		try {
 			String[] vals = text.split(splitStr);
 			Object obj = clz.newInstance();
@@ -52,12 +52,14 @@ public class StringObject {
 			for (Field field : fields) {
 				field.setAccessible(true);
 				StringIndex index = field.getDeclaredAnnotation(StringIndex.class);
-				field.set(obj, vals[index.value() - 1]);
+				if (index != null) {
+					field.set(obj, vals[index.value() - 1]);
+				}
 			}
 
-			return (T)obj;
-		}catch (Exception e){
-			log.error("String转对象错误",e);
+			return (T) obj;
+		} catch (Exception e) {
+			log.error("String转对象错误", e);
 			return null;
 		}
 	}

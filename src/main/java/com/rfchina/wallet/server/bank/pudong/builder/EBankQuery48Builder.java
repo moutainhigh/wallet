@@ -1,8 +1,8 @@
 package com.rfchina.wallet.server.bank.pudong.builder;
 
 import com.rfchina.wallet.server.bank.pudong.domain.common.RequestHeader;
-import com.rfchina.wallet.server.bank.pudong.domain.request.EBankQueryReqBody;
-import com.rfchina.wallet.server.bank.pudong.domain.response.EBankQueryRespBody;
+import com.rfchina.wallet.server.bank.pudong.domain.request.EBankQuery48ReqBody;
+import com.rfchina.wallet.server.bank.pudong.domain.response.EBankQuery48RespBody;
 import io.swagger.annotations.ApiModelProperty;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -15,7 +15,7 @@ import okhttp3.OkHttpClient;
  */
 @Builder
 @Getter
-public class EBankQueryBuilder extends PpdbReqTpl implements GatewayLancher<EBankQueryRespBody> {
+public class EBankQuery48Builder extends PpdbReqTpl implements GatewayLancher<EBankQuery48RespBody> {
 
 	private final String transCode = "DO48";
 	private String masterId;
@@ -33,8 +33,8 @@ public class EBankQueryBuilder extends PpdbReqTpl implements GatewayLancher<EBan
 	private String acceptNo;
 
 	@Override
-	EBankQueryReqBody buildReqBody() {
-		return EBankQueryReqBody.builder()
+	EBankQuery48ReqBody buildReqBody() {
+		return EBankQuery48ReqBody.builder()
 			.authMasterID(authMasterID)
 			.beginDate(beginDate)
 			.endDate(endDate)
@@ -57,7 +57,7 @@ public class EBankQueryBuilder extends PpdbReqTpl implements GatewayLancher<EBan
 	}
 
 	@Override
-	public EBankQueryRespBody lanch(String hostUrl,String signUrl,OkHttpClient client) throws Exception {
-		return super.build(hostUrl,signUrl,client, EBankQueryReqBody.class, EBankQueryRespBody.class);
+	public EBankQuery48RespBody lanch(String hostUrl,String signUrl,OkHttpClient client) throws Exception {
+		return super.build(hostUrl,signUrl,client, EBankQuery48ReqBody.class, EBankQuery48RespBody.class);
 	}
 }

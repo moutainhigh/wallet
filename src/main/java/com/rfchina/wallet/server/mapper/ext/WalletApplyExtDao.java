@@ -76,10 +76,10 @@ public interface WalletApplyExtDao extends WalletApplyMapper {
 		@Param("hostAcceptNo") String hostJnlSeqNo, @Param("auditTime") Date auditTime);
 
 	@Update({"update rf_wallet_apply"
-		, "set err_status = #{errStatus}, err_code = #{errCode}, user_err_msg = #{errMsg}"
+		, "set stage = #{stage}, err_status = #{errStatus}, err_code = #{errCode}, user_err_msg = #{errMsg}"
 		, "where accept_no = #{acceptNo} and status = 2"
 	})
-	void updateAcceptNoErrMsg(@Param("acceptNo") String acceptNo,
+	void updateAcceptNoErrMsg(@Param("acceptNo") String acceptNo, @Param("stage") String stage,
 		@Param("errStatus") String errStatus, @Param("errCode") String errCode,
 		@Param("errMsg") String errMsg);
 
@@ -114,4 +114,12 @@ public interface WalletApplyExtDao extends WalletApplyMapper {
 	@ResultMap("com.rfchina.wallet.domain.mapper.WalletApplyMapper.BaseResultMap")
 	List<WalletApply> selectByStatusNotified(@Param("status") Byte status,
 		@Param("limit") Integer limit);
+
+	@Update({"update rf_wallet_apply"
+		, "set status = #{status}, audit_time = #{auditTime}, end_time = #{endTime}"
+		, "where elec_cheque_no = #{elecChequeNo} and status = 2"
+	})
+	void updateElecNoStatus(@Param("elecChequeNo") String elecChequeNo,
+		@Param("status") Byte status,
+		@Param("auditTime") Date auditTime, @Param("endTime") Date endTime);
 }

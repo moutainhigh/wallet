@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class EBankQueryResp {
+public class EBankQuery48Resp {
 
 	@ApiModelProperty(value = "包号")
 	private String packageNo;

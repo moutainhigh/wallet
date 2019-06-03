@@ -14,6 +14,15 @@ public class ExceptionUtil {
 
 	private static PredicatePatterns errCodePatterns = new PredicatePatterns();
 
+
+	public static IGatewayError explain(Exception e) {
+		if (e instanceof GatewayError) {
+			return (IGatewayError) e;
+		} else {
+			return new UnknownError(e);
+		}
+	}
+
 	public static IGatewayError explain(Exception e, Predicate<IGatewayError> isUser) {
 		if (e instanceof GatewayError) {
 
@@ -48,7 +57,7 @@ public class ExceptionUtil {
 
 		public PredicatePatterns() {
 			super(2);
-		add(Pattern.compile(".+错误原因:(\\w+).+"));
+			add(Pattern.compile(".+错误原因:(\\w+).+"));
 		}
 	}
 }

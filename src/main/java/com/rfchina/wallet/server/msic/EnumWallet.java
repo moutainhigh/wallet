@@ -140,7 +140,7 @@ public class EnumWallet {
 	}
 
 	/**
-	 * 授权状态
+	 * 包授权状态
 	 */
 	public enum TransStatusDO48 implements Valuable<String> {
 		SUCC("0", "交易成功"),
@@ -177,6 +177,33 @@ public class EnumWallet {
 				|| AUDIT_REFUSE.getValue().equals(value)
 				|| COMMIT_ERROR.getValue().equals(value);
 		}
+	}
+
+	/**
+	 * 明细授权状态
+	 */
+	public enum TransStatusDO49 implements Valuable<String> {
+		WAIT_AUDIT("0", "待授权"),
+		HAS_AUDIT("1", "已授权"),
+		REFUSE("5", "授权拒绝");
+
+		private String value;
+		private String valueName;
+
+		TransStatusDO49(String value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public String getValue() {
+			return value;
+		}
+
+		public String getValueName() {
+			return valueName;
+		}
+
 	}
 
 	/**
@@ -471,6 +498,24 @@ public class EnumWallet {
 
 		NotifyType(byte value) {
 			this.value = value;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}
+	}
+
+	public enum LancherType implements Valuable<Byte> {
+		SYS((byte) 1, "系统发起"),
+		USER((byte) 2, "用户发起");
+
+		private Byte value;
+		private String valueName;
+
+		LancherType(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
 		}
 
 		@Override
