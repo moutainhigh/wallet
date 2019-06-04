@@ -5,7 +5,7 @@ jenkins job: platform-rfwallet-super-server-test
 
 ```
 
-## 
+## 1.0.0_b7_2019060417_Beta
 ### [变动说明]
 - 修改错误机制
 - 增加DO49网银授权明细	
