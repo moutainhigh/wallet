@@ -37,9 +37,10 @@ public class Handler8800Test extends SpringBaseTest {
 
 	@Test
 	public void p0102UpdatePayStatus() {
-		String acceptNo = "5248622006";
+		String acceptNo = "5000301621";
+		String createTime = "2019-06-04";
 		List<WalletApply> walletLogs = handler8800.updatePayStatus(acceptNo,
-			DateUtil.parse("2019-05-16", DateUtil.STANDARD_DTAE_PATTERN));
+			DateUtil.parse(createTime, DateUtil.STANDARD_DTAE_PATTERN));
 		assertTrue(walletLogs.size() > 0);
 	}
 

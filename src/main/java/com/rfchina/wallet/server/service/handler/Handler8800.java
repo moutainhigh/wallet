@@ -55,6 +55,7 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 
@@ -87,9 +88,11 @@ public class Handler8800 implements EBankHandler {
 	private OkHttpClient client;
 
 	@Autowired
+	@Qualifier("exactErrPredicate")
 	private ExactErrPredicate exactErrPredicate;
 
 	@Autowired
+	@Qualifier("userRedoPredicate")
 	private UserRedoPredicate userRedoPredicate;
 
 	private EBankHandler next;
@@ -194,6 +197,7 @@ public class Handler8800 implements EBankHandler {
 
 		HostSeqNo hostSeqNo = walletApplyDao.selectHostAcctNo(acceptNo);
 		hostSeqNo = (hostSeqNo == null) ? new HostSeqNo() : hostSeqNo;
+		hostSeqNo.setHostAcceptNo(null);
 		// 数据库没有网银受理号
 		if (StringUtils.isBlank(hostSeqNo.getHostAcceptNo())) {
 			// 查询包授权
@@ -390,12 +394,12 @@ public class Handler8800 implements EBankHandler {
 				, EBankQuery49RespVo.class, "\\|");
 			// 关闭授权失败的单
 			if (TransStatusDO49.REFUSE.getValue().equals(respVo.getStatus())) {
-				WalletApply walletApply = walletApplyDao.selectByHostAcctAndElecNo(acceptNo
+				WalletApply walletApply = walletApplyDao.selectByAcctAndElecNo(acceptNo
 					, respVo.getElecChequeNo(), WalletApplyStatus.PROCESSING.getValue());
 				walletApply.setStage(req.getTransCode());
 				walletApply.setStatus(WalletApplyStatus.FAIL.getValue());
 				walletApply.setErrStatus(respVo.getStatus());
-				walletApply.setUserErrMsg(TransStatusDO49.REFUSE.getValue());
+				walletApply.setUserErrMsg(TransStatusDO49.REFUSE.getValueName());
 				walletApply.setAuditTime(hostSeqNo.getAuditTime());
 				walletApply.setEndTime(new Date());
 				walletApplyDao.updateByPrimaryKeySelective(walletApply);

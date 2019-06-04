@@ -59,14 +59,24 @@ public interface WalletApplyExtDao extends WalletApplyMapper {
 
 	@Select({
 		"select * from rf_wallet_apply"
-		, "where host_accept_no = #{acceptNo} and elec_cheque_no = #{elecChequeNo} "
+		, "where host_accept_no = #{hostAcceptNo} and elec_cheque_no = #{elecChequeNo} "
 		, " and status = #{status}"
 		, "limit 1"
 	})
 	@ResultMap("com.rfchina.wallet.domain.mapper.WalletApplyMapper.BaseResultMap")
-	WalletApply selectByHostAcctAndElecNo(@Param("acceptNo") String acceptNo,
+	WalletApply selectByHostAcctAndElecNo(@Param("hostAcceptNo") String hostAcceptNo,
 		@Param("elecChequeNo") String elecChequeNo, @Param("status") Byte status);
 
+
+	@Select({
+		"select * from rf_wallet_apply"
+		, "where accept_no = #{acceptNo} and elec_cheque_no = #{elecChequeNo} "
+		, " and status = #{status}"
+		, "limit 1"
+	})
+	@ResultMap("com.rfchina.wallet.domain.mapper.WalletApplyMapper.BaseResultMap")
+	WalletApply selectByAcctAndElecNo(@Param("acceptNo") String acceptNo,
+		@Param("elecChequeNo") String elecChequeNo, @Param("status") Byte status);
 
 	@Update({"update rf_wallet_apply"
 		, "set host_accept_no = #{hostAcceptNo} , audit_time = #{auditTime}"

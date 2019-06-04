@@ -5,7 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication(scanBasePackages="com.rfchina.wallet.server")
+@SpringBootApplication(scanBasePackages = "com.rfchina.wallet.server")
 @EnableFuScheduleTask
 @EnableAutoConfiguration
 public class WalletServerApplication {

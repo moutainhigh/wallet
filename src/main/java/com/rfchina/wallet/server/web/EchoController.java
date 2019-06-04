@@ -23,8 +23,6 @@ public class EchoController {
 	@Value(value = "${srv.base.home}")
 	private String srvBaseHome;
 
-	private final static Logger LOGGER = LoggerFactory.getLogger(EchoController.class);
-
 	@RequestMapping(value = "index", produces = MediaType.TEXT_PLAIN_VALUE, method = RequestMethod.GET)
 	public String index(HttpServletResponse response) throws Exception {
 
@@ -43,8 +41,9 @@ public class EchoController {
 	}
 
 
-	@OneKeyListener(key="srv.base.home")
-	public void onPropertyChange(ConfigEvent event){
+	@OneKeyListener(key = "srv.base.home")
+	public void onPropertyChange(ConfigEvent event) {
 		srvBaseHome = event.getValue();
+		log.warn("srv.base.home had been change to {}", srvBaseHome);
 	}
 }

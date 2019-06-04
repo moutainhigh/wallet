@@ -108,7 +108,7 @@ public class WalletService {
 	private ConfigService configService;
 
 	@Autowired
-	private ExactErrPredicate gatewayErrPredicate;
+	private ExactErrPredicate exactErrPredicate;
 
 
 	/**

@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,8 +29,11 @@ import org.springframework.context.annotation.Import;
 public class BeanConfig {
 
 	@Autowired
-	private ExactErrPredicate gatewayErrPredicate;
+	@Qualifier("exactErrPredicate")
+	private ExactErrPredicate exactErrPredicate;
+
 	@Autowired
+	@Qualifier("userRedoPredicate")
 	private UserRedoPredicate userRedoPredicate;
 
 	@Bean
@@ -51,8 +55,8 @@ public class BeanConfig {
 			.build();
 	}
 
-	@Bean
-	public ExactErrPredicate gatewayErrPredicate(
+	@Bean(name = "exactErrPredicate")
+	public ExactErrPredicate exactErrPredicate(
 		@Value("${wlpay.pudong.exactErr}") String exactErr) {
 		ExactErrPredicate predicate = new ExactErrPredicate();
 		predicate.parseText(exactErr);
@@ -62,10 +66,10 @@ public class BeanConfig {
 	@OneKeyListener(key = "wlpay.pudong.exactErr")
 	public void onExactErrChange(ConfigEvent event) {
 		log.info("change key wlpay.pudong.exactErr, event : {}", event);
-		gatewayErrPredicate.parseText(event.getValue());
+		exactErrPredicate.parseText(event.getValue());
 	}
 
-	@Bean
+	@Bean(name = "userRedoPredicate")
 	public UserRedoPredicate userRedoPredicate(
 		@Value("${wlpay.pudong.userRedoErr}") String userRedoErr) {
 		UserRedoPredicate predicate = new UserRedoPredicate();
