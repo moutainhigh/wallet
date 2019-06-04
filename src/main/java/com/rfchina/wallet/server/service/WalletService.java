@@ -472,9 +472,9 @@ public class WalletService {
 		}
 
 		List<WalletApply> data = walletApplyDao.selectList(walletId, queryStartTime, queryEndTime,
-			limit, offset);
+			null,limit, offset);
 		long total = Optional.ofNullable(stat).orElse(false) ? walletApplyDao.selectCount(
-			walletId, queryStartTime, queryEndTime) : 0L;
+			walletId, queryStartTime, queryEndTime, null) : 0L;
 
 		return new Pagination.PaginationBuilder<WalletApply>().offset(offset).pageLimit(limit)
 			.data(data)
