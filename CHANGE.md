@@ -5,6 +5,11 @@ jenkins job: platform-rfwallet-super-server-test
 
 ```
 
+## 
+### [变动说明]
+- 修改错误机制
+- 增加DO49网银授权明细	
+
 ## 1.0.0_b6_2019052814_Beta
 ### [变动说明]
 - 增加银企直连的终态Y fixbug: 15796	
