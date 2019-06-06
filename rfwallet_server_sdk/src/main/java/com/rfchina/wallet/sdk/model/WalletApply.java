@@ -52,7 +52,7 @@ public class WalletApply  {
     @ApiModelProperty("ID")
     private Long id ;
 
-    @ApiModelProperty("发起方。 1：系统发起  2：用户发起")
+    @ApiModelProperty("发起方。 1：钱包系统发起  2：用户发起")
     private Integer lancher ;
 
     @ApiModelProperty("最大尝试次数")
@@ -91,7 +91,7 @@ public class WalletApply  {
     @ApiModelProperty("银行处理阶段")
     private String stage ;
 
-    @ApiModelProperty("交易状态。 1: 待发送银行网关，2：银行受理中，3：交易成功，4：交易失败(确切失败)，5：撤销，6：待处理，7：等待重新发起(用户或系统)")
+    @ApiModelProperty("交易状态。 1: 待发送银行网关，2：银行受理中，3：交易成功，4：交易失败(确切失败)，5：撤销，6：待处理，7：等待重试(用户或系统)")
     private Integer status ;
 
     @ApiModelProperty("系统错误信息")
