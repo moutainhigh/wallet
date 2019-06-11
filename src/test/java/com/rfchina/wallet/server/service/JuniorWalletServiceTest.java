@@ -21,7 +21,23 @@ public class JuniorWalletServiceTest extends SpringBaseTest {
 	private JuniorWalletService juniorWalletService;
 
 	@Test
-	public void p0101PayIn() {
+	public void p0101PayInSingle() {
+		PayInReq req1 = PayInReq.builder()
+			.walletId(2L)
+			.amount(61100000000000L)
+			.bizNo(IdGenerator.createBizId("OVR", 16, (orderId) -> true))
+			.note("测试")
+			.payPurpose((byte) 1)
+			.build();
+
+		PayInResp respBody = juniorWalletService.payIn(Arrays.asList(req1));
+		logStack(respBody);
+
+		assertNotNull(respBody);
+	}
+
+	@Test
+	public void p0102PayInBatch() {
 		PayInReq req1 = PayInReq.builder()
 			.walletId(2L)
 			.amount(1L)

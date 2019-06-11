@@ -124,15 +124,16 @@ public abstract class PpdbReqTpl {
 			ResponsePacket responsePacket = XmlUtil
 				.xml2Obj(XmlUtil.unwrap(respData), ResponsePacket.class);
 			ResponseHeader head = responsePacket.getHead();
+			SignedBody body = responsePacket.getBody();
+			// 银企直连接口错误时，返回的接口没有进行签名
 			if (!SUCC.equals(head.getReturnCode())) {
-				// 解析到签名服务接口
-				String unsign = unsign(signUrl, responsePacket);
-				log.error("银企直连接口错误, request = {} , response = {}, bodyUnsign = {}", xmlData, respData,
-					unsign);
+				log.error("银企直连接口错误, request = {} , response = {}", xmlData, respData);
+				String errMsg = StringUtils.isNotBlank(head.getReturnMsg()) ? head.getReturnMsg()
+					: (body != null ? body.getReturnMsg() : null);
 				throw GatewayError.builder()
 					.transCode(requestPacket.getHead().getTransCode())
 					.errCode(head.getReturnCode())
-					.errMsg(head.getReturnMsg())
+					.errMsg(errMsg)
 					.build();
 			}
 			return responsePacket;

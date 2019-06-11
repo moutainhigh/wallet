@@ -173,8 +173,7 @@ public class Handler8800 implements EBankHandler {
 
 		String packetId = IdGenerator
 			.createBizId(IdGenerator.PREFIX_WALLET, IdGenerator.DEFAULT_LENGTH, (orderId) -> true);
-		PubPayReqBuilder req = PubPayReqBuilder
-			.builder()
+		PubPayReqBuilder req = PubPayReqBuilder.builder()
 			.masterId(configService.getMasterId())
 			.packetId(packetId)
 			.authMasterId(configService.getAuditMasterId())

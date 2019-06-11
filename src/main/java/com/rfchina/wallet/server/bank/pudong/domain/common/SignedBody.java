@@ -15,4 +15,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SignedBody {
 	private String signature;
+
+	/**
+	 * 交易对应的返回码 （响应头）
+	 */
+	private String returnCode;
+
+	/**
+	 * 错误码对应的错误信息内容
+	 */
+	private String returnMsg;
 }

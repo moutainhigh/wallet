@@ -17,6 +17,7 @@ import com.rfchina.wallet.domain.mapper.ext.WalletUserDao;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode;
+import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.*;
 import com.rfchina.wallet.domain.model.ext.Bank;
 import com.rfchina.wallet.domain.model.ext.BankArea;
@@ -290,8 +291,7 @@ public class WalletApiImpl implements WalletApi {
 		//检查帐号是否已开通钱包
 		WalletUser walletUser = walletUserDao.selectByMobile(mobile);
 		if (null == walletUser) {
-			throw new WalletResponseException(
-				WalletResponseCode.EnumWalletResponseCode.WALLET_NOT_EXIST);
+			throw new WalletResponseException(EnumWalletResponseCode.WALLET_ACCOUNT_NOT_EXIST);
 		}
 
 		return walletUser;

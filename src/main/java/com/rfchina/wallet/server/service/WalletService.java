@@ -508,8 +508,7 @@ public class WalletService {
 		@ParamValid(pattern = RegexUtil.REGEX_MOBILE) String telephone) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		if (null == wallet) {
-			throw new WalletResponseException(
-				WalletResponseCode.EnumWalletResponseCode.WALLET_NOT_EXIST);
+			throw new WalletResponseException(EnumWalletResponseCode.WALLET_ACCOUNT_NOT_EXIST);
 		}
 
 		BankCode bankCodeResult = bankCodeDao.selectByBankCode(bankCode);

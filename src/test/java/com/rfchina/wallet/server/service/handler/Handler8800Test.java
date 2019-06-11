@@ -26,7 +26,7 @@ public class Handler8800Test extends SpringBaseTest {
 
 	@Test
 	public void p0101Pay() throws Exception {
-		WalletApply walletApply = walletApplyDao.selectByPrimaryKey(110L);
+		WalletApply walletApply = walletApplyDao.selectByPrimaryKey(202L);
 
 		Tuple<GatewayMethod, PayInResp> tuple = handler8800.pay(Arrays.asList(walletApply));
 		assertNotNull(tuple);
