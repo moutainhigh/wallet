@@ -16,7 +16,7 @@ public interface WalletApplyExtDao extends WalletApplyMapper {
 	@Select({
 		"select distinct batch_no ",
 		"from rf_wallet_apply",
-		"where status = 1",
+		"where status = 1 and batch_no is not null",
 		"limit #{batchSize}"
 	})
 	List<String> selectUnSendBatchNo(@Param("batchSize") Integer batchSize);

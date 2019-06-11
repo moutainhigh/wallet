@@ -170,7 +170,6 @@ public class WalletService {
 		walletApply.setAcceptNo(null);
 		walletApply.setEndTime(null);
 		walletApply.setAuditTime(null);
-		walletApply.setBatchNo(null);
 		walletApplyExtDao.updateByPrimaryKey(walletApply);
 	}
 
@@ -206,7 +205,15 @@ public class WalletService {
 							walletApply.setStatus(WalletApplyStatus.PROCESSING.getValue());
 							walletApply.setRefMethod(method.getValue());
 							walletApply.setAcceptNo(payInResp.getAcceptNo());
-							walletApplyExtDao.updateByPrimaryKeySelective(walletApply);
+							walletApply.setStage(null);
+							walletApply.setUserErrMsg(null);
+							walletApply.setSysErrMsg(null);
+							walletApply.setErrStatus(null);
+							walletApply.setErrCode(null);
+							walletApply.setAcceptNo(null);
+							walletApply.setEndTime(null);
+							walletApply.setAuditTime(null);
+							walletApplyExtDao.updateByPrimaryKey(walletApply);
 						}
 					} catch (Exception e) {
 

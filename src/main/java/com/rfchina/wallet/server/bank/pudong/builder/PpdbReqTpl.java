@@ -137,6 +137,8 @@ public abstract class PpdbReqTpl {
 					.build();
 			}
 			return responsePacket;
+		} catch (GatewayError e) {
+			throw e;
 		} catch (Exception e) {
 			log.error("银企直连接口错误, request = {} , response = {}", xmlData, respData);
 			throw new WalletResponseException(

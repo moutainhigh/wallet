@@ -135,8 +135,7 @@ public class Handler8800 implements EBankHandler {
 
 			// 必须注意，分转换为0.00元
 			BigDecimal bigAmount = new BigDecimal(walletApply.getAmount())
-				.divide(new BigDecimal("100"))
-				.setScale(2, BigDecimal.ROUND_DOWN);
+				.divide(new BigDecimal("100"), 2, BigDecimal.ROUND_DOWN);
 
 			BankCode bankCode = bankCodeExtDao.selectByCode(walletCard.getBankCode());
 			if (bankCode == null) {
@@ -247,8 +246,7 @@ public class Handler8800 implements EBankHandler {
 							if (exactErrPredicate.test(err)) {
 								boolean userRedo = userRedoPredicate.test(err);
 								status = userRedo ? WalletApplyStatus.REDO : WalletApplyStatus.FAIL;
-								walletApply.setLancher(userRedo ? LancherType.USER.getValue()
-									: LancherType.SYS.getValue());
+								walletApply.setLancher(userRedo ? LancherType.USER.getValue() : 0);
 							} else {
 								status = WalletApplyStatus.WAIT_DEAL;
 							}
@@ -266,7 +264,7 @@ public class Handler8800 implements EBankHandler {
 					walletApply.setSysErrMsg(err.getErrMsg());
 					walletApply.setUserErrMsg(transStatus != null ? transStatus.getDescription()
 						: ("未知状态" + rs.getTransStatus()));
-					walletApplyDao.updateByPrimaryKeySelective(walletApply);
+					walletApplyDao.updateByPrimaryKey(walletApply);
 				}
 				return walletApply;
 			}).filter(rs -> rs != null).collect(Collectors.toList());
@@ -282,7 +280,8 @@ public class Handler8800 implements EBankHandler {
 	public IGatewayError extractErrCode(String note) {
 
 		String errCode = ExceptionUtil.extractErrCode(note);
-		String errMsg = note;
+		String errMsg = StringUtils.isNotBlank(note) && note.contains("|") ?
+			note.split("|")[1] : null;
 		return GatewayError.builder()
 			.errCode(errCode)
 			.errMsg(errMsg)
@@ -301,7 +300,7 @@ public class Handler8800 implements EBankHandler {
 		walletApply.setStage(err.getTransCode());
 		walletApply.setErrCode(err.getErrCode());
 		walletApply.setSysErrMsg(err.getErrMsg());
-		walletApply.setUserErrMsg("系统错误");
+		walletApply.setUserErrMsg("发起交易异常");
 		if (exactErr) {
 			walletApply.setLancher(userRedo ? LancherType.USER.getValue()
 				: LancherType.SYS.getValue());
@@ -324,8 +323,7 @@ public class Handler8800 implements EBankHandler {
 			.build();
 		EBankQuery48RespBody resp;
 		try {
-			resp = req.lanch(configService.getHostUrl(), configService.getSignUrl(),
-				client);
+			resp = req.lanch(configService.getHostUrl(), configService.getSignUrl(), client);
 		} catch (Exception e) {
 			log.error("银企直连-网银授权状态查询错误", e);
 			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_STATUS_QUERY_ERROR);
@@ -350,8 +348,8 @@ public class Handler8800 implements EBankHandler {
 			// 更新中间状态和错误码
 			walletApplyDao.updateAcceptNoErrMsg(acceptNo, req.getTransCode()
 				, "EBANK:" + audit48Result.getTransStatus()
-				, "EBANK:" + audit48Result.getFailCode(),
-				status != null ? status.getValueName() : "文档未记录状态");
+				, "EBANK:" + audit48Result.getFailCode()
+				, status != null ? status.getValueName() : "文档未记录状态");
 			// 如果是未成功的终态，关闭这批交易
 			if (status != null && status.isEndStatus()) {
 				walletApplyDao.updateAcceptNoStatus(acceptNo, WalletApplyStatus.FAIL.getValue(),
