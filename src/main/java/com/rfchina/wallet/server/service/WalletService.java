@@ -210,21 +210,21 @@ public class WalletService {
 							walletApply.setSysErrMsg(null);
 							walletApply.setErrStatus(null);
 							walletApply.setErrCode(null);
-							walletApply.setAcceptNo(null);
 							walletApply.setEndTime(null);
 							walletApply.setAuditTime(null);
 							walletApplyExtDao.updateByPrimaryKey(walletApply);
 						}
 					} catch (Exception e) {
 
-						log.error("银行网关支付错误", e);
 						IGatewayError err = ExceptionUtil.explain(e);
 						if (handler != null) {
 							for (WalletApply walletApply : walletApplies) {
 								handler.onAskErr(walletApply, err);
 							}
 						}
-
+						if (err instanceof UnknownError) {
+							log.error("银行网关支付错误", e);
+						}
 					}
 				} finally {
 					walletApplyExtDao.updateLock(batchNo, LockStatus.LOCKED.getValue(),
@@ -479,7 +479,7 @@ public class WalletService {
 		}
 
 		List<WalletApply> data = walletApplyDao.selectList(walletId, queryStartTime, queryEndTime,
-			null,limit, offset);
+			null, limit, offset);
 		long total = Optional.ofNullable(stat).orElse(false) ? walletApplyDao.selectCount(
 			walletId, queryStartTime, queryEndTime, null) : 0L;
 
