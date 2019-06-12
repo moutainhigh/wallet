@@ -4,6 +4,10 @@
 jenkins job: platform-rfwallet-super-server-test
 
 ```
+## 1.0.0_b10_2019061218_Beta
+### [变动说明]
+- 修改MQ框架日期格式
+- 完善系统错误消息
 
 ## 1.0.0_b9_2019061217_Beta
 ### [变动说明]

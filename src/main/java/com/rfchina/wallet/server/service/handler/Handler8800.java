@@ -260,13 +260,16 @@ public class Handler8800 implements EBankHandler {
 						walletApply.setEndTime(new Date());
 					}
 
+					String userErrMsg = transStatus != null ? transStatus.getDescription()
+						: ("未知状态" + rs.getTransStatus());
+					String sysErrMsg = StringUtils.isNotBlank(err.getErrMsg()) ? err.getErrMsg()
+						: userErrMsg;
 					walletApply.setSeqNo(rs.getSeqNo());
 					walletApply.setStage(req.getTransCode());
 					walletApply.setErrStatus(rs.getTransStatus());
 					walletApply.setErrCode(err.getErrCode());
-					walletApply.setSysErrMsg(err.getErrMsg());
-					walletApply.setUserErrMsg(transStatus != null ? transStatus.getDescription()
-						: ("未知状态" + rs.getTransStatus()));
+					walletApply.setSysErrMsg(sysErrMsg);
+					walletApply.setUserErrMsg(userErrMsg);
 					walletApplyDao.updateByPrimaryKey(walletApply);
 				}
 				return walletApply;
@@ -411,6 +414,7 @@ public class Handler8800 implements EBankHandler {
 				walletApply.setStatus(WalletApplyStatus.FAIL.getValue());
 				walletApply.setErrStatus(respVo.getStatus());
 				walletApply.setUserErrMsg(TransStatusDO49.REFUSE.getValueName());
+				walletApply.setSysErrMsg(TransStatusDO49.REFUSE.getValueName());
 				walletApply.setAuditTime(hostSeqNo.getAuditTime());
 				walletApply.setEndTime(new Date());
 				walletApplyDao.updateByPrimaryKeySelective(walletApply);

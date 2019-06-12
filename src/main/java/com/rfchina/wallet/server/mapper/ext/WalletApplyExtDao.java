@@ -86,7 +86,8 @@ public interface WalletApplyExtDao extends WalletApplyMapper {
 		@Param("hostAcceptNo") String hostJnlSeqNo, @Param("auditTime") Date auditTime);
 
 	@Update({"update rf_wallet_apply"
-		, "set stage = #{stage}, err_status = #{errStatus}, err_code = #{errCode}, user_err_msg = #{errMsg}"
+		, "set stage = #{stage}, err_status = #{errStatus}, err_code = #{errCode}"
+		, ", user_err_msg = #{errMsg}, sys_err_msg = #{errMsg}"
 		, "where accept_no = #{acceptNo} and status = 2"
 	})
 	void updateAcceptNoErrMsg(@Param("acceptNo") String acceptNo, @Param("stage") String stage,
