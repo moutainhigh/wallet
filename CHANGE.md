@@ -5,6 +5,10 @@ jenkins job: platform-rfwallet-super-server-test
 
 ```
 
+## 1.0.0_b9_2019061217_Beta
+### [变动说明]
+- 发起交易失败时增加MQ通知 fixbug:16365
+
 ## 1.0.0_b8_2019061118_Beta
 ### [变动说明]
 - 修正批次号被清空问题 fixBug:16329
