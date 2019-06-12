@@ -245,8 +245,8 @@ public class HandlerAQ52 implements EBankHandler {
 	}
 
 	@Override
-	public void onAskErr(WalletApply walletApply, IGatewayError err) {
-
+	public WalletApply onAskErr(WalletApply walletApply, IGatewayError err) {
+		return walletApply;
 	}
 
 

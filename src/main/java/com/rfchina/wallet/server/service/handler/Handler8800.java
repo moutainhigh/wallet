@@ -1,6 +1,7 @@
 package com.rfchina.wallet.server.service.handler;
 
 import com.rfchina.biztools.generate.IdGenerator;
+import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.BeanUtil;
@@ -8,6 +9,7 @@ import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EnumUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
+import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.BankCode;
 import com.rfchina.wallet.domain.model.WalletApply;
@@ -288,8 +290,9 @@ public class Handler8800 implements EBankHandler {
 			.build();
 	}
 
+	@PostMq(routingKey = MqConstant.WALLET_PAY_RESULT)
 	@Override
-	public void onAskErr(WalletApply walletApply, IGatewayError err) {
+	public WalletApply onAskErr(WalletApply walletApply, IGatewayError err) {
 		// 确切失败的单业务会重新发起新的转账，其他的单进入待处理状态
 		boolean exactErr = exactErrPredicate.test(err);
 		boolean userRedo = userRedoPredicate.test(err);
@@ -306,6 +309,7 @@ public class Handler8800 implements EBankHandler {
 				: LancherType.SYS.getValue());
 		}
 		walletApplyDao.updateByPrimaryKeySelective(walletApply);
+		return walletApply;
 	}
 
 	/**

@@ -28,5 +28,5 @@ public interface EBankHandler {
 
 	EBankHandler getNext();
 
-	void onAskErr(WalletApply walletLog, IGatewayError err);
+	WalletApply onAskErr(WalletApply walletLog, IGatewayError err);
 }
