@@ -4,6 +4,7 @@ import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.wallet.domain.model.WalletApply;
 import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
 import com.rfchina.wallet.server.model.ext.PayInResp;
+import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import java.util.Date;
 import java.util.List;
@@ -28,5 +29,5 @@ public interface EBankHandler {
 
 	EBankHandler getNext();
 
-	WalletApply onAskErr(WalletApply walletLog, IGatewayError err);
+	PayStatusResp onAskErr(WalletApply walletLog, IGatewayError err);
 }

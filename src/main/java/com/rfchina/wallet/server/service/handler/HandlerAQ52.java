@@ -22,6 +22,7 @@ import com.rfchina.wallet.server.mapper.ext.BankCodeExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.model.ext.PayInResp;
+import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.msic.EnumWallet.AQCardType;
 import com.rfchina.wallet.server.msic.EnumWallet.AQPayeeType;
 import com.rfchina.wallet.server.msic.EnumWallet.AQTransType;
@@ -178,7 +179,7 @@ public class HandlerAQ52 implements EBankHandler {
 
 		try {
 			PriPayQuery53RespBody respBody = req53.lanch(configService.getHostUrl(),
-				configService.getSignUrl(),client);
+				configService.getSignUrl(), client);
 			if (respBody.getLists() != null && respBody.getLists().getList() != null) {
 				PriPayQuery53RespWrapper wrapper = respBody.getLists().getList().get(0);
 
@@ -209,7 +210,7 @@ public class HandlerAQ52 implements EBankHandler {
 
 		try {
 			PriPayQuery54RespBody respBody = req54.lanch(configService.getHostUrl(),
-				configService.getSignUrl(),client);
+				configService.getSignUrl(), client);
 			if (respBody.getLists() != null && respBody.getLists().getList() != null) {
 				List<PriPayResp> priPayResps = respBody.getLists().getList().stream()
 					.map(wrapper -> {
@@ -245,8 +246,16 @@ public class HandlerAQ52 implements EBankHandler {
 	}
 
 	@Override
-	public WalletApply onAskErr(WalletApply walletApply, IGatewayError err) {
-		return walletApply;
+	public PayStatusResp onAskErr(WalletApply walletApply, IGatewayError err) {
+		return PayStatusResp.builder()
+			.batchNo(walletApply.getBatchNo())
+			.bizNo(walletApply.getBizNo())
+			.transDate(DateUtil.formatDate(walletApply.getCreateTime()))
+			.amount(walletApply.getAmount())
+			.status(walletApply.getStatus())
+			.userErrMsg(walletApply.getUserErrMsg())
+			.sysErrMsg(walletApply.getSysErrMsg())
+			.build();
 	}
 
 

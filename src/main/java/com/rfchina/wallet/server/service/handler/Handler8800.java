@@ -38,6 +38,7 @@ import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.model.ext.HostSeqNo;
 import com.rfchina.wallet.server.model.ext.PayInResp;
+import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.LancherType;
 import com.rfchina.wallet.server.msic.EnumWallet.RemitLocation;
@@ -292,7 +293,7 @@ public class Handler8800 implements EBankHandler {
 
 	@PostMq(routingKey = MqConstant.WALLET_PAY_RESULT)
 	@Override
-	public WalletApply onAskErr(WalletApply walletApply, IGatewayError err) {
+	public PayStatusResp onAskErr(WalletApply walletApply, IGatewayError err) {
 		// 确切失败的单业务会重新发起新的转账，其他的单进入待处理状态
 		boolean exactErr = exactErrPredicate.test(err);
 		boolean userRedo = userRedoPredicate.test(err);
@@ -309,7 +310,16 @@ public class Handler8800 implements EBankHandler {
 				: LancherType.SYS.getValue());
 		}
 		walletApplyDao.updateByPrimaryKeySelective(walletApply);
-		return walletApply;
+
+		return PayStatusResp.builder()
+			.batchNo(walletApply.getBatchNo())
+			.bizNo(walletApply.getBizNo())
+			.transDate(DateUtil.formatDate(walletApply.getCreateTime()))
+			.amount(walletApply.getAmount())
+			.status(walletApply.getStatus())
+			.userErrMsg(walletApply.getUserErrMsg())
+			.sysErrMsg(walletApply.getSysErrMsg())
+			.build();
 	}
 
 	/**

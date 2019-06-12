@@ -30,6 +30,6 @@ public class DefaultMqAdvice extends AbstractMqAdvice {
 		amqpTemplate.convertAndSend(
 			StringUtils.isBlank(msg.getExchageName()) ? exchangeName : msg.getExchageName(),
 			msg.getRoutingKey(),
-			msg.getMessage());
+			msg.getMessage(null));
 	}
 }
