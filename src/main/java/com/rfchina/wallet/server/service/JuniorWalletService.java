@@ -67,8 +67,6 @@ public class JuniorWalletService {
 				throw new WalletResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST
 					, String.valueOf(payInReq.getWalletId()));
 			}
-
-			payInReq.setElecChequeNo(IdGenerator.createBizId("", 16, id -> true));
 			payInReq.setBatchNo(batchNo);
 
 			WalletApply walletApply = WalletApply.builder()
@@ -76,8 +74,6 @@ public class JuniorWalletService {
 				.type(WalletLogType.TRANSFER.getValue())
 				.amount(payInReq.getAmount())
 				.payerAccount(cmpAcctNo)
-				.payeeType(walletCard.getIsPublic())
-				.payeeAccount(walletCard.getBankAccount())
 				.batchNo(payInReq.getBatchNo())
 				.bizNo(payInReq.getBizNo())
 				.elecChequeNo(payInReq.getElecChequeNo())

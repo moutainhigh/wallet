@@ -140,6 +140,11 @@ public class Handler8800 implements EBankHandler {
 			BigDecimal bigAmount = new BigDecimal(walletApply.getAmount())
 				.divide(new BigDecimal("100"), 2, BigDecimal.ROUND_DOWN);
 
+			walletApply.setElecChequeNo(IdGenerator.createBizId("", 16, id -> true));
+			walletApply.setPayeeType(walletCard.getIsPublic());
+			walletApply.setPayeeAccount(walletCard.getBankAccount());
+			walletApplyDao.updateByPrimaryKeySelective(walletApply);
+
 			BankCode bankCode = bankCodeExtDao.selectByCode(walletCard.getBankCode());
 			if (bankCode == null) {
 				throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_BATCH_LIMIT);
@@ -287,7 +292,8 @@ public class Handler8800 implements EBankHandler {
 
 		String errCode = ExceptionUtil.extractErrCode(note);
 		String errMsg = StringUtils.isNotBlank(note) && note.contains("|") ?
-			note.split("|")[1] : null;
+			note.split("\\|")[1] : null;
+		errMsg = StringUtils.isNotBlank(errMsg) ? errMsg.replaceAll("&lt;|&gt;", "") : null;
 		return GatewayError.builder()
 			.errCode(errCode)
 			.errMsg(errMsg)

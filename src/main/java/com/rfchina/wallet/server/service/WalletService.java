@@ -1,6 +1,7 @@
 package com.rfchina.wallet.server.service;
 
 import com.alibaba.fastjson.JSON;
+import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.platform.common.annotation.EnumParamValid;
 import com.rfchina.platform.common.annotation.ParamValid;
@@ -43,6 +44,7 @@ import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.LockStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.NotifyType;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyStatus;
+import com.rfchina.wallet.server.msic.EnumWallet.WalletLogType;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletType;
 import com.rfchina.wallet.server.service.handler.HandlerHelper;

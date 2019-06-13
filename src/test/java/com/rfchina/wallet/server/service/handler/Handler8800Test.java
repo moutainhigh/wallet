@@ -46,7 +46,7 @@ public class Handler8800Test extends SpringBaseTest {
 
 	@Test
 	public void extractErrCode() {
-		String note = "推荐成交金域中央C-1栋1148|&lt;错误原因:EGG0346 收款人账号户名信息不符&gt;";
+		String note = "推荐成交金域中央C-1栋1148|&lt;错误原因:EGG0042 处理失败[EGG0044][帐户[990B8950900000818   ]余额不足&gt;";
 		IGatewayError err = handler8800.extractErrCode(note);
 		assertTrue(err.getErrCode().equals("EGG0346"));
 	}
