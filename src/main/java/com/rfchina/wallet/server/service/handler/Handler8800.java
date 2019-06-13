@@ -47,6 +47,7 @@ import com.rfchina.wallet.server.msic.EnumWallet.TransStatus8804;
 import com.rfchina.wallet.server.msic.EnumWallet.TransStatusDO48;
 import com.rfchina.wallet.server.msic.EnumWallet.TransStatusDO49;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyStatus;
+import com.rfchina.wallet.server.service.CacheService;
 import com.rfchina.wallet.server.service.ConfigService;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -97,6 +98,9 @@ public class Handler8800 implements EBankHandler {
 	@Autowired
 	@Qualifier("userRedoPredicate")
 	private UserRedoPredicate userRedoPredicate;
+
+	@Autowired
+	private CacheService cacheService;
 
 	private EBankHandler next;
 
@@ -178,8 +182,7 @@ public class Handler8800 implements EBankHandler {
 
 		}).collect(Collectors.toList());
 
-		String packetId = IdGenerator
-			.createBizId(IdGenerator.PREFIX_WALLET, IdGenerator.DEFAULT_LENGTH, (orderId) -> true);
+		String packetId = genPkgId();
 		PubPayReqBuilder req = PubPayReqBuilder.builder()
 			.masterId(configService.getMasterId())
 			.packetId(packetId)
@@ -191,6 +194,7 @@ public class Handler8800 implements EBankHandler {
 		PubPayRespBody resp = req.lanch(configService.getHostUrl(), configService.getSignUrl(),
 			client);
 		PayInResp payInResp = BeanUtil.newInstance(resp, PayInResp.class);
+		payInResp.setPacketId(packetId);
 
 		return new Tuple<>(getGatewayMethod(), payInResp);
 	}
@@ -221,6 +225,7 @@ public class Handler8800 implements EBankHandler {
 		// 查核心支付结果
 		PubPayQueryBuilder req = PubPayQueryBuilder.builder()
 			.masterId(configService.getMasterId())
+			.packetId(genPkgId())
 			.acctNo(configService.getAcctNo())
 			.beginDate(DateUtil.formatDate(hostSeqNo.getAuditTime(), "yyyyMMdd"))
 			.endDate(DateUtil.formatDate(hostSeqNo.getAuditTime(), "yyyyMMdd"))
@@ -339,6 +344,7 @@ public class Handler8800 implements EBankHandler {
 		// 查询网银受理状态
 		EBankQuery48Builder req = EBankQuery48Builder.builder()
 			.masterId(configService.getMasterId())
+			.packetId(genPkgId())
 			.authMasterID(configService.getAuditMasterId())
 			.beginDate(DateUtil.formatDate(createTime, "yyyyMMdd"))
 			.endDate(DateUtil.formatDate(createTime, "yyyyMMdd"))
@@ -394,6 +400,7 @@ public class Handler8800 implements EBankHandler {
 		// 网银授权明细
 		EBankQuery49Builder req = EBankQuery49Builder.builder()
 			.masterId(configService.getMasterId())
+			.packetId(genPkgId())
 			.authMasterID(configService.getAuditMasterId())
 			.entJnlSeqNo(acceptNo)
 			.build();
@@ -430,5 +437,19 @@ public class Handler8800 implements EBankHandler {
 
 	private WalletCard getWalletCard(Long walletId) {
 		return walletCardDao.selectByDef(walletId);
+	}
+
+
+	/**
+	 * 获取报文流水号
+	 */
+	public String genPkgId() {
+		Long pkgSegment = configService.getPkgSegment();
+		Long currPkgId = cacheService.getCurrPkgId();
+		Long idx = pkgSegment + currPkgId;
+
+		StringBuilder builder = new StringBuilder("SLP");
+		builder.append(idx.toString());
+		return builder.toString();
 	}
 }

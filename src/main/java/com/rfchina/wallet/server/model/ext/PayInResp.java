@@ -18,4 +18,7 @@ public class PayInResp {
 	@ApiModelProperty(value = "受理编号", hidden = true)
 	private String acceptNo;
 
+	@ApiModelProperty(value = "报文流水号", hidden = true)
+	private String packetId;
+
 }

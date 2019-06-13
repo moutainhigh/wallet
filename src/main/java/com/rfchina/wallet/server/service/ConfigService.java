@@ -62,6 +62,9 @@ public class ConfigService {
 
 	@Value("${wlpay.pudong.auditMasterId}")
 	private String auditMasterId;
+
+	@Value("${wlpay.pudong.pkgSegment}")
+	private Long pkgSegment;
 	// 银企直连 END
 
 	// 钱包支付

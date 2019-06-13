@@ -19,6 +19,7 @@ public class EBankQuery48Builder extends PpdbReqTpl implements GatewayLancher<EB
 
 	private final String transCode = "DO48";
 	private String masterId;
+	private String packetId;
 
 	@ApiModelProperty(value = "指定授权客户号", required = true)
 	private String authMasterID;
@@ -50,7 +51,7 @@ public class EBankQuery48Builder extends PpdbReqTpl implements GatewayLancher<EB
 		return RequestHeader.builder()
 			.transCode(transCode)
 			.signFlag(SIGN_FLAG)
-			.packetID(String.valueOf(System.currentTimeMillis()))
+			.packetID(packetId)
 			.masterID(masterId)
 			.timeStamp(format.format(new Date()))
 			.build();

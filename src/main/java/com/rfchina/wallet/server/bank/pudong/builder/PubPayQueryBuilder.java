@@ -20,6 +20,7 @@ public class PubPayQueryBuilder extends PpdbReqTpl implements GatewayLancher<Pub
 	private final String transCode = "8804";
 	@NotNull
 	private String masterId;
+	private String packetId;
 	@NotNull
 	private String acctNo;
 	@NotNull
@@ -49,7 +50,7 @@ public class PubPayQueryBuilder extends PpdbReqTpl implements GatewayLancher<Pub
 		return RequestHeader.builder()
 			.transCode(transCode)
 			.signFlag(SIGN_FLAG)
-			.packetID(String.valueOf(System.currentTimeMillis()))
+			.packetID(packetId)
 			.masterID(masterId)
 			.timeStamp(format.format(new Date()))
 			.build();

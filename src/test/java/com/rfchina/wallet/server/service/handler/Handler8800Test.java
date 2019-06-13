@@ -48,6 +48,13 @@ public class Handler8800Test extends SpringBaseTest {
 	public void extractErrCode() {
 		String note = "推荐成交金域中央C-1栋1148|&lt;错误原因:EGG0042 处理失败[EGG0044][帐户[990B8950900000818   ]余额不足&gt;";
 		IGatewayError err = handler8800.extractErrCode(note);
-		assertTrue(err.getErrCode().equals("EGG0346"));
+		assertTrue(err.getErrCode().equals("EGG0042"));
+	}
+
+	@Test
+	public void genPkgId() {
+		Long pkgId = handler8800.genPkgId();
+		logStack(pkgId);
+		assertTrue(pkgId != null);
 	}
 }
