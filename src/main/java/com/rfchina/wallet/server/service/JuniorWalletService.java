@@ -62,6 +62,12 @@ public class JuniorWalletService {
 		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> true);
 		payInReqs.forEach(payInReq -> {
 
+			// 金额大于零
+			if (payInReq.getAmount() <= 0) {
+				throw new WalletResponseException(
+					EnumWalletResponseCode.PAY_IN_AMOUNT_ERROR);
+			}
+			// 用户必须已经绑卡
 			WalletCard walletCard = getWalletCard(payInReq.getWalletId());
 			if (walletCard == null) {
 				throw new WalletResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST
@@ -76,7 +82,6 @@ public class JuniorWalletService {
 				.payerAccount(cmpAcctNo)
 				.batchNo(payInReq.getBatchNo())
 				.bizNo(payInReq.getBizNo())
-				.elecChequeNo(payInReq.getElecChequeNo())
 				.payPurpose(payInReq.getPayPurpose() != null ?
 					String.valueOf(payInReq.getPayPurpose()) : null)
 				.note(payInReq.getNote())

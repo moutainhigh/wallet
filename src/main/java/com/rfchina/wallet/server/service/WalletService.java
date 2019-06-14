@@ -1,7 +1,6 @@
 package com.rfchina.wallet.server.service;
 
 import com.alibaba.fastjson.JSON;
-import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.platform.common.annotation.EnumParamValid;
 import com.rfchina.platform.common.annotation.ParamValid;
@@ -18,7 +17,6 @@ import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.*;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.MqConstant;
-import com.rfchina.wallet.domain.misc.WalletResponseCode;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.*;
 import com.rfchina.wallet.domain.model.WalletApplyCriteria.Criteria;
@@ -30,21 +28,21 @@ import com.rfchina.wallet.server.adapter.UserAdapter;
 import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
 import com.rfchina.wallet.server.bank.pudong.domain.predicate.ExactErrPredicate;
 import com.rfchina.wallet.server.bank.pudong.domain.util.ExceptionUtil;
+import com.rfchina.wallet.server.mapper.ext.GatewayTransExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCompanyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletUserExtDao;
-import com.rfchina.wallet.server.model.ext.AcceptNo;
-import com.rfchina.wallet.server.model.ext.PayInResp;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
+import com.rfchina.wallet.server.model.ext.PayStatusResp.PayStatusRespBuilder;
+import com.rfchina.wallet.server.model.ext.PayTuple;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp.WalletInfoRespBuilder;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.LockStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.NotifyType;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyStatus;
-import com.rfchina.wallet.server.msic.EnumWallet.WalletLogType;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletType;
 import com.rfchina.wallet.server.service.handler.HandlerHelper;
@@ -54,6 +52,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import java.util.stream.Collectors;
@@ -112,6 +111,12 @@ public class WalletService {
 	@Autowired
 	private ExactErrPredicate exactErrPredicate;
 
+	@Autowired
+	private GatewayTransService gatewayTransService;
+
+	@Autowired
+	private GatewayTransExtDao gatewayTransDao;
+
 
 	/**
 	 * 查询出佣结果
@@ -133,17 +138,30 @@ public class WalletService {
 				, batchNo + "_" + bizNo);
 		}
 
+		// 查询支付单对应交易
+		List<Long> tranIds = walletApplies.stream().map(apply -> apply.getCurrTransId())
+			.collect(Collectors.toList());
+		List<GatewayTrans> gatewayTrans = gatewayTransService.getTransIds(tranIds);
+		Map<String, GatewayTrans> transMap = gatewayTrans.stream()
+			.collect(
+				Collectors.toMap(trans -> trans.getWalletApplyId().toString(), trans -> trans));
+
 		return walletApplies.stream().map(walletApply -> {
-			return PayStatusResp.builder()
+
+			PayStatusRespBuilder builder = PayStatusResp.builder()
 				.bizNo(walletApply.getBizNo())
 				.batchNo(walletApply.getBatchNo())
 				.amount(walletApply.getAmount())
 				.transDate(DateUtil.formatDate(walletApply.getCreateTime()))
-				.status(walletApply.getStatus())
-				.errCode(walletApply.getErrCode())
-				.userErrMsg(walletApply.getUserErrMsg())
-				.sysErrMsg(walletApply.getSysErrMsg())
-				.build();
+				.status(walletApply.getStatus());
+			String key = walletApply.getId().toString();
+			if (transMap.containsKey(key)) {
+				GatewayTrans trans = transMap.get(key);
+				builder.errCode(trans.getErrCode())
+					.userErrMsg(trans.getUserErrMsg())
+					.sysErrMsg(trans.getSysErrMsg());
+			}
+			return builder.build();
 		}).collect(Collectors.toList());
 
 	}
@@ -163,15 +181,9 @@ public class WalletService {
 			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_APPLY_STATUS_ERROR);
 		}
 
+		GatewayTrans trans = gatewayTransService.createTrans(walletApply);
+		walletApply.setCurrTransId(trans.getId());
 		walletApply.setStatus(WalletApplyStatus.SENDING.getValue());
-		walletApply.setStage(null);
-		walletApply.setUserErrMsg(null);
-		walletApply.setSysErrMsg(null);
-		walletApply.setErrStatus(null);
-		walletApply.setErrCode(null);
-		walletApply.setAcceptNo(null);
-		walletApply.setEndTime(null);
-		walletApply.setAuditTime(null);
 		walletApplyExtDao.updateByPrimaryKey(walletApply);
 	}
 
@@ -185,43 +197,63 @@ public class WalletService {
 
 			int c = walletApplyExtDao.updateLock(batchNo, LockStatus.UNLOCK.getValue(),
 				LockStatus.LOCKED.getValue());
-			if (c > 0) {
+			if (c <= 0) {
+				log.error("锁定记录失败, batchNo = {}", batchNo);
+			}else {
 				try {
-					List<WalletApply> walletApplies = walletApplyExtDao
-						.selectUnDealByBatchNo(batchNo);
+					List<WalletApply> walletApplies = walletApplyExtDao.selectByBatchNo(batchNo
+						, WalletApplyStatus.SENDING.getValue());
 					if (StringUtils.isEmpty(batchNo) || walletApplies.isEmpty()) {
 						return;
+					}
+
+					for (WalletApply walletApply : walletApplies) {
+
+						WalletCard walletCard = walletCardDao
+							.selectByDef(walletApply.getWalletId());
+						if (walletCard == null) {
+							log.warn("钱包[{}]没有绑定银行卡，跳过申请单[{}]", walletApply.getWalletId(),
+								walletApply.getId());
+							return;
+						}
+						fillCardInfo(walletApply, walletCard);
 					}
 					// 请求网关
 					EBankHandler handler = null;
 					try {
 
 						handler = handlerHelper.selectByWalletType(null);
-						Tuple<GatewayMethod, PayInResp> rs = handler.pay(walletApplies);
+						Tuple<GatewayMethod, PayTuple> rs = handler.pay(walletApplies);
 
 						// 记录结果
 						GatewayMethod method = rs.left;
-						PayInResp payInResp = rs.right;
+						PayTuple payInResp = rs.right;
 						for (WalletApply walletApply : walletApplies) {
-
+							// 更新申请单
 							walletApply.setStatus(WalletApplyStatus.PROCESSING.getValue());
-							walletApply.setRefMethod(method.getValue());
-							walletApply.setAcceptNo(payInResp.getAcceptNo());
-							walletApply.setStage(null);
-							walletApply.setUserErrMsg(null);
-							walletApply.setSysErrMsg(null);
-							walletApply.setErrStatus(null);
-							walletApply.setErrCode(null);
-							walletApply.setEndTime(null);
-							walletApply.setAuditTime(null);
-							walletApplyExtDao.updateByPrimaryKey(walletApply);
+							walletApplyExtDao.updateByPrimaryKeySelective(walletApply);
+
+							// 更新交易记录
+							GatewayTrans gatewayTrans = gatewayTransService
+								.selOrCrtTrans(walletApply);
+							gatewayTrans.setAcceptNo(payInResp.getAcceptNo());
+							gatewayTrans.setPacketId(payInResp.getPacketId());
+							gatewayTrans.setElecChequeNo(
+								payInResp.getElecMap()
+									.get(gatewayTrans.getWalletApplyId().toString()));
+							gatewayTrans.setRefMethod(method.getValue());
+							gatewayTransService.updateTrans(gatewayTrans);
 						}
 					} catch (Exception e) {
 
 						IGatewayError err = ExceptionUtil.explain(e);
 						if (handler != null) {
 							for (WalletApply walletApply : walletApplies) {
-								handler.onAskErr(walletApply, err);
+								try {
+									handler.onAskErr(walletApply, err);
+								} catch (Exception ex) {
+									log.error("", ex);
+								}
 							}
 						}
 						if (err instanceof UnknownError) {
@@ -239,6 +271,20 @@ public class WalletService {
 
 
 	/**
+	 * 卡信息填入钱包申请
+	 */
+	private void fillCardInfo(WalletApply walletApply, WalletCard walletCard) {
+		// 卡信息填入钱包申请
+		walletApply.setPayerAccount(configService.getAcctNo());
+		walletApply.setPayeeAccount(walletCard.getBankAccount());
+		walletApply.setPayeeName(walletCard.getDepositName());
+		walletApply.setPayeeType(walletCard.getIsPublic());
+		walletApply.setPayeeBankCode(walletCard.getBankCode());
+		walletApplyDao.updateByPrimaryKeySelective(walletApply);
+	}
+
+
+	/**
 	 * 定时更新支付状态
 	 */
 	@PostMq(routingKey = MqConstant.WALLET_PAY_RESULT)
@@ -246,39 +292,40 @@ public class WalletService {
 
 		log.info("scheduler: 开始更新支付状态[银企直连]");
 
-		List<AcceptNo> acceptNos = walletApplyExtDao.selectUnFinish(batchSize);
+		List<String> batchNos = walletApplyExtDao.selectUnFinishBatchNo(batchSize);
 
-		List<WalletApply> result = acceptNos.stream().map(item -> {
+		List<Tuple<WalletApply, GatewayTrans>> result = batchNos.stream().map(batchNo -> {
 
-			EBankHandler handler = handlerHelper.selectByMethod(item.getRefMethod());
-			List<WalletApply> walletApplies = handler.updatePayStatus(item.getAcceptNo()
-				, item.getCreateTime());
-			return walletApplies;
+			EBankHandler handler = handlerHelper.selectByWalletType(null);
+			return handler.updatePayStatus(batchNo);
 		}).reduce((rs, item) -> {
 
 			rs.addAll(item);
 			return rs;
 		}).orElse(new ArrayList<>());
 
-		String elecs = result.stream().map(rs -> rs.getElecChequeNo())
-			.collect(Collectors.joining("|"));
-		log.info("更新批次状态，批次数量= {}，更新笔数= {}，批次号={}，业务凭证号= {}", acceptNos.size(), result.size(),
-			JSON.toJSONString(acceptNos), elecs);
+		log.info("更新批次状态，批次数量= {}，更新笔数= {}，批次号={}", batchNos.size(), result.size(),
+			JSON.toJSONString(batchNos));
 		log.info("scheduler: 结束更新支付状态[银企直连]");
 
 		if (result == null || result.size() == 0) {
 			return new ArrayList<>();
 		}
+
 		return result.stream()
-			.map(rs -> PayStatusResp.builder()
-				.batchNo(rs.getBatchNo())
-				.bizNo(rs.getBizNo())
-				.transDate(DateUtil.formatDate(rs.getCreateTime()))
-				.amount(rs.getAmount())
-				.status(rs.getStatus())
-				.userErrMsg(rs.getUserErrMsg())
-				.sysErrMsg(rs.getSysErrMsg())
-				.build())
+			.map(rs -> {
+				WalletApply apply = rs.left;
+				GatewayTrans trans = rs.right;
+				return PayStatusResp.builder()
+					.batchNo(apply.getBatchNo())
+					.bizNo(apply.getBizNo())
+					.transDate(DateUtil.formatDate(trans.getCreateTime()))
+					.amount(apply.getAmount())
+					.status(apply.getStatus())
+					.userErrMsg(trans.getUserErrMsg())
+					.sysErrMsg(trans.getSysErrMsg())
+					.build();
+			})
 			.collect(Collectors.toList());
 	}
 
@@ -302,13 +349,14 @@ public class WalletService {
 			.append("<td>").append("备注").append("</td>")
 			.append("</tr>");
 		for (WalletApply walletApply : walletApplies) {
+			GatewayTrans trans = gatewayTransService.selOrCrtTrans(walletApply);
 			BigDecimal amount = new BigDecimal(walletApply.getAmount());
 			amount = amount.divide(new BigDecimal("100"), 2, RoundingMode.DOWN);
 			builder.append("<tr>")
 				.append("<td>").append(walletApply.getId()).append("</td>")
 				.append("<td>").append(walletApply.getBizNo()).append("</td>")
 				.append("<td>").append(amount).append("</td>")
-				.append("<td>").append(walletApply.getSysErrMsg()).append("</td>")
+				.append("<td>").append(trans.getSysErrMsg()).append("</td>")
 				.append("<td>").append(DateUtil.formatDate(walletApply.getCreateTime()))
 				.append("</td>").append("<td>").append(JSON.toJSONString(walletApply))
 				.append("</td>")
@@ -322,7 +370,9 @@ public class WalletService {
 
 		List<Long> ids = walletApplies.stream().map(walletApply -> walletApply.getId())
 			.collect(Collectors.toList());
-		walletApplyExtDao.updateNotified(ids, NotifyType.DEVELOPER.getValue());
+		if (!ids.isEmpty()) {
+			walletApplyExtDao.updateNotified(ids, NotifyType.DEVELOPER.getValue());
+		}
 	}
 
 	/**
@@ -347,14 +397,14 @@ public class WalletService {
 			.append("</tr>");
 
 		for (WalletApply walletApply : walletApplies) {
-
+			GatewayTrans trans = gatewayTransService.selOrCrtTrans(walletApply);
 			BigDecimal amount = new BigDecimal(walletApply.getAmount());
 			amount = amount.divide(new BigDecimal("100"), 2, RoundingMode.DOWN);
 			builder.append("<tr>")
 				.append("<td>").append(walletApply.getId()).append("</td>")
 				.append("<td>").append(walletApply.getBizNo()).append("</td>")
 				.append("<td>").append(amount).append("</td>")
-				.append("<td>").append(walletApply.getSysErrMsg()).append("</td>")
+				.append("<td>").append(trans.getSysErrMsg()).append("</td>")
 				.append("<td>").append(DateUtil.formatDate(walletApply.getCreateTime()))
 				.append("</td>")
 				.append("<td>").append("常见失败进入重新发起通道").append("</td>")
@@ -369,7 +419,9 @@ public class WalletService {
 
 		List<Long> ids = walletApplies.stream().map(walletApply -> walletApply.getId())
 			.collect(Collectors.toList());
-		walletApplyExtDao.updateNotified(ids, NotifyType.BUSINESS.getValue());
+		if (!ids.isEmpty()) {
+			walletApplyExtDao.updateNotified(ids, NotifyType.BUSINESS.getValue());
+		}
 
 	}
 

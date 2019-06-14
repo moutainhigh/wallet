@@ -132,11 +132,11 @@ public class WalletApiImpl implements WalletApi {
 		if (succ) {
 			try {
 				List<WalletApply> walletApplys = walletApplyExtDao
-					.selectByStatusNotified(WalletApplyStatus.WAIT_DEAL.getValue(), 200);
+					.selectByStatusNotNotified(WalletApplyStatus.WAIT_DEAL.getValue(), 200);
 				walletService.notifyDeveloper(walletApplys);
 
 				walletApplys = walletApplyExtDao
-					.selectByStatusNotified(WalletApplyStatus.REDO.getValue(), 200);
+					.selectByStatusNotNotified(WalletApplyStatus.REDO.getValue(), 200);
 				walletService.notifyBusiness(walletApplys);
 			} finally {
 				lock.unLock(lockName);

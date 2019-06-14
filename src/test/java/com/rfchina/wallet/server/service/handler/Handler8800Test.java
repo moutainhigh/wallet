@@ -4,11 +4,13 @@ import static org.junit.Assert.*;
 
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.DateUtil;
+import com.rfchina.wallet.domain.model.GatewayTrans;
 import com.rfchina.wallet.domain.model.WalletApply;
 import com.rfchina.wallet.server.SpringBaseTest;
 import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
 import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.model.ext.PayInResp;
+import com.rfchina.wallet.server.model.ext.PayTuple;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import java.util.Arrays;
 import java.util.List;
@@ -28,7 +30,7 @@ public class Handler8800Test extends SpringBaseTest {
 	public void p0101Pay() throws Exception {
 		WalletApply walletApply = walletApplyDao.selectByPrimaryKey(202L);
 
-		Tuple<GatewayMethod, PayInResp> tuple = handler8800.pay(Arrays.asList(walletApply));
+		Tuple<GatewayMethod, PayTuple> tuple = handler8800.pay(Arrays.asList(walletApply));
 		assertNotNull(tuple);
 		assertNotNull(tuple.right);
 		assertNotNull(tuple.right.getAcceptNo());
@@ -37,10 +39,8 @@ public class Handler8800Test extends SpringBaseTest {
 
 	@Test
 	public void p0102UpdatePayStatus() {
-		String acceptNo = "5000301621";
-		String createTime = "2019-06-04";
-		List<WalletApply> walletLogs = handler8800.updatePayStatus(acceptNo,
-			DateUtil.parse(createTime, DateUtil.STANDARD_DTAE_PATTERN));
+		String batchNo = "SLW20190614056040341";
+		List<Tuple<WalletApply, GatewayTrans>> walletLogs = handler8800.updatePayStatus(batchNo);
 		assertTrue(walletLogs.size() > 0);
 	}
 
@@ -53,7 +53,7 @@ public class Handler8800Test extends SpringBaseTest {
 
 	@Test
 	public void genPkgId() {
-		Long pkgId = handler8800.genPkgId();
+		String pkgId = handler8800.genPkgId();
 		logStack(pkgId);
 		assertTrue(pkgId != null);
 	}

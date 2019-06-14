@@ -15,9 +15,6 @@ import org.springframework.stereotype.Component;
 public class HandlerHelper {
 
 	@Autowired
-	private HandlerAQ52 handlerAQ52;
-
-	@Autowired
 	private Handler8800 handler8800;
 
 	private EBankHandler rootHandler;
@@ -25,8 +22,7 @@ public class HandlerHelper {
 	@PostConstruct
 	public void init() {
 
-		rootHandler = handlerAQ52;
-		handlerAQ52.setNext(handler8800);
+		rootHandler = handler8800;
 	}
 
 	public EBankHandler selectByWalletType(Byte walletType) {
