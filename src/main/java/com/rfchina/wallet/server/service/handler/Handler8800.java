@@ -396,7 +396,7 @@ public class Handler8800 implements EBankHandler {
 		List<EBankQuery48Resp> list = resp.getLists().getList();
 		EBankQuery48Resp audit48Result = list.stream()
 			.filter(result -> result.getEntJnlSeqNo().equals(firstTrans.getAcceptNo()))
-			.findFirst().get();
+			.findFirst().orElse(null);
 		if (audit48Result == null) {
 			log.error("网银查询不到该笔交易 req = {} , resp = {}", JSON.toJSONString(req)
 				, JSON.toJSONString(resp));
