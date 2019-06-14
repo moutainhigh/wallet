@@ -4,6 +4,11 @@
 jenkins job: platform-rfwallet-super-server-test
 
 ```
+## 1.0.0_b11_2019061416_Beta
+### [变动说明]
+- 拆分walletapply表
+- 异常消息模式提取不完全 fixbug:16398
+
 ## 1.0.0_b10_2019061218_Beta
 ### [变动说明]
 - 修改MQ框架日期格式
