@@ -200,7 +200,7 @@ public class Handler8800 implements EBankHandler {
 
 	@Override
 	public List<Tuple<WalletApply, GatewayTrans>> updatePayStatus(String batchNo) {
-
+		log.info("开始更新批次号 [{}]", batchNo);
 		walletApplyDao.incTryTimes(batchNo, DateUtil.addSecs(new Date(),
 			configService.getNextRoundSec()));
 

@@ -170,7 +170,7 @@ public class WalletService {
 	 * 重做问题单
 	 */
 	public void redo(Long walletApplyId) {
-
+		log.info("重做问题单 [{}]", walletApplyId);
 		WalletApply walletApply = walletApplyExtDao.selectByPrimaryKey(walletApplyId);
 		if (walletApply == null) {
 			throw new RfchinaResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST
@@ -199,7 +199,8 @@ public class WalletService {
 				LockStatus.LOCKED.getValue());
 			if (c <= 0) {
 				log.error("锁定记录失败, batchNo = {}", batchNo);
-			}else {
+			} else {
+				log.info("开始更新批次号 [{}]", batchNo);
 				try {
 					List<WalletApply> walletApplies = walletApplyExtDao.selectByBatchNo(batchNo
 						, WalletApplyStatus.SENDING.getValue());
