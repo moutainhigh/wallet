@@ -9,4 +9,5 @@ public class TestingData {
 	public static final String PACKET_ID = String.valueOf(System.currentTimeMillis());
 	public static final String CMP_ACCT_ID = "990B8950900000818";
 	public static final String CMP_ACCT_NAME = "浦发2000040752";
+	public static final String AUTH_MASTER_ID = "2478952744";
 }

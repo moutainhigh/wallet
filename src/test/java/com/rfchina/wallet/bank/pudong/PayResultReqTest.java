@@ -22,11 +22,12 @@ public class PayResultReqTest {
 	public void lanch() throws Exception {
 		PubPayQueryBuilder req = PubPayQueryBuilder.builder()
 			.masterId(MASTER_ID)
+			.packetId(PACKET_ID)
 			.acctNo(CMP_ACCT_ID)
-//			.acceptNo("PT19YQ0000029318")
-			.elecChequeNo("2019052961033604")
-			.beginDate("20190529")
-			.endDate("20190529")
+			.acceptNo("PT19YQ0000053069")
+//			.elecChequeNo("2019052961033604")
+			.beginDate("20190613")
+			.endDate("20190613")
 			.build();
 		PubPayQueryRespBody respBody = req.lanch(hostUrl, signUrl, new OkHttpClient());
 		log.info(JSON.toJSONString(respBody));
