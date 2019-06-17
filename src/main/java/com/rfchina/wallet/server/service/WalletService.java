@@ -295,15 +295,16 @@ public class WalletService {
 
 		List<String> batchNos = walletApplyExtDao.selectUnFinishBatchNo(batchSize);
 
-		List<Tuple<WalletApply, GatewayTrans>> result = batchNos.stream().map(batchNo -> {
-
+		List<Tuple<WalletApply, GatewayTrans>> result = new ArrayList<>();
+		for (String batchNo : batchNos) {
 			EBankHandler handler = handlerHelper.selectByWalletType(null);
-			return handler.updatePayStatus(batchNo);
-		}).reduce((rs, item) -> {
-
-			rs.addAll(item);
-			return rs;
-		}).orElse(new ArrayList<>());
+			try {
+				List<Tuple<WalletApply, GatewayTrans>> tuples = handler.updatePayStatus(batchNo);
+				result.addAll(tuples);
+			} catch (Exception e) {
+				log.error("定时更新支付状态, 异常！", e);
+			}
+		}
 
 		log.info("更新批次状态，批次数量= {}，更新笔数= {}，批次号={}", batchNos.size(), result.size(),
 			JSON.toJSONString(batchNos));

@@ -1,5 +1,6 @@
 package com.rfchina.wallet.server.api.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.rfchina.biztools.mq.AbstractMqAdvice;
 import com.rfchina.biztools.mq.SimpleMqMsg;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +27,7 @@ public class DefaultMqAdvice extends AbstractMqAdvice {
 		if (msg == null) {
 			return;
 		}
-		log.info("发送MQ {}", msg);
+		log.info("发送MQ {}", JSON.toJSONString(msg));
 		amqpTemplate.convertAndSend(
 			StringUtils.isBlank(msg.getExchageName()) ? exchangeName : msg.getExchageName(),
 			msg.getRoutingKey(),
