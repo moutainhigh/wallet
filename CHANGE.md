@@ -4,6 +4,11 @@
 jenkins job: platform-rfwallet-super-server-test
 
 ```
+## 1.0.0_b12_2019061710_Beta
+### [变动说明]
+- 捕捉更新异常
+- 更新MQ日志
+
 ## 1.0.0_b11_2019061416_Beta
 ### [变动说明]
 - 拆分walletapply表
