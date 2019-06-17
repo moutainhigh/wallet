@@ -64,6 +64,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import springfox.documentation.spring.web.json.Json;
 
 
 /**
@@ -245,9 +246,20 @@ public class Handler8800 implements EBankHandler {
 		PubPayQueryRespBody respBody;
 		try {
 			respBody = req.lanch(configService.getHostUrl(), configService.getSignUrl(), client);
-		} catch (
-			Exception e) {
+		} catch (Exception e) {
 			log.error("银企直连-网关支付状态查询错误", e);
+			IGatewayError err = ExceptionUtil.explain(e);
+			walletApplies.forEach(walletApply->{
+				if(WalletApplyStatus.PROCESSING.getValue() == walletApply.getStatus()) {
+					GatewayTrans gatewayTrans = gatewayTransService.selOrCrtTrans(walletApply);
+					gatewayTrans.setStage(err.getTransCode());
+					gatewayTrans.setErrCode(err.getErrCode());
+					gatewayTrans.setSysErrMsg(err.getErrMsg());
+					gatewayTrans.setUserErrMsg("查询交易异常");
+					gatewayTransService.updateTrans(gatewayTrans);
+				}
+			});
+
 			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_STATUS_QUERY_ERROR);
 		}
 
@@ -370,6 +382,11 @@ public class Handler8800 implements EBankHandler {
 
 		Tuple<WalletApply, GatewayTrans> tuple = applyTuples.get(0);
 		GatewayTrans firstTrans = tuple.right;
+
+		if (StringUtils.isBlank(firstTrans.getAcceptNo())) {
+			log.error("交易的受理号为空 {}", JSON.toJSONString(firstTrans));
+			return false;
+		}
 
 		// 查询网银受理状态
 		EBankQuery48Builder req = EBankQuery48Builder.builder()

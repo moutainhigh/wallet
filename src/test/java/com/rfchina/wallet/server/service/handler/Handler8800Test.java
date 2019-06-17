@@ -39,7 +39,7 @@ public class Handler8800Test extends SpringBaseTest {
 
 	@Test
 	public void p0102UpdatePayStatus() {
-		String batchNo = "SLW20190611080355784";
+		String batchNo = "SLW20190614877253321";
 		List<Tuple<WalletApply, GatewayTrans>> walletLogs = handler8800.updatePayStatus(batchNo);
 		assertTrue(walletLogs != null);
 	}
