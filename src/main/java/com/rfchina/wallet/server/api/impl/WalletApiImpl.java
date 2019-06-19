@@ -8,6 +8,8 @@ import com.rfchina.platform.common.annotation.EnumParamValid;
 import com.rfchina.platform.common.annotation.Log;
 import com.rfchina.platform.common.annotation.ParamValid;
 import com.rfchina.platform.common.annotation.SignVerify;
+import com.rfchina.platform.common.exception.RfchinaResponseException;
+import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.ResponseValue;
 import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.platform.common.utils.EnumUtil;
@@ -82,12 +84,17 @@ public class WalletApiImpl implements WalletApi {
 	public void redoWalletApply(String accessToken,
 		@ParamValid(nullable = false) Long walletLogId) {
 
-		String lockName = "redoWalletApply";
-		lock.acquireLockUsingException(lockName, 60, 0, 1);
-		try {
-			walletService.redo(walletLogId);
-		} finally {
-			lock.unLock(lockName);
+		String lockName = "redoWalletApply：" + walletLogId;
+		boolean succ = lock.acquireLock(lockName, 60, 0, 1);
+		if (succ) {
+			try {
+				walletService.redo(walletLogId);
+			} finally {
+				lock.unLock(lockName);
+			}
+		} else {
+			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_REDO_DUPLICATE,
+				walletLogId.toString());
 		}
 	}
 
