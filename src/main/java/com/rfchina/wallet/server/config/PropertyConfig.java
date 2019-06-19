@@ -1,43 +1,33 @@
 package com.rfchina.wallet.server.config;
 
-import com.rfchina.wallet.server.bank.pudong.domain.predicate.ExactErrPredicate;
+import com.rfchina.biztools.xdiamond.XDiamondDynamicConfiguration;
 import com.rfchina.wallet.server.service.ConfigService;
-import io.github.xdiamond.client.annotation.AllKeyListener;
-import io.github.xdiamond.client.annotation.OneKeyListener;
-import io.github.xdiamond.client.event.ConfigEvent;
-import java.lang.reflect.Field;
+import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
-@Slf4j
+/**
+ * xdiamond配置变化自动更新
+ *
+ * @author nzm
+ */
 @Configuration
+@Import(XDiamondDynamicConfiguration.class)
+@Slf4j
 public class PropertyConfig {
 
 	@Autowired
 	private ConfigService configService;
 
-
-	@AllKeyListener
-	public void onPropertyChange(ConfigEvent event) {
-
-		Field[] fields = ConfigService.class.getDeclaredFields();
-		for (Field field : fields) {
-			Value anno = field.getDeclaredAnnotation(Value.class);
-			String value = anno.value();
-			if (value.equals("${" + event.getKey() + "}")) {
-				try {
-					field.setAccessible(true);
-					field.set(configService, event.getValue());
-					log.info("set key {} to {}", event.getKey(), event.getValue());
-				} catch (IllegalAccessException e) {
-					log.error("更新配置失败", e);
-				}
-				break;
-			}
-		}
+	@Bean
+	public XDiamondDynamicConfiguration xDiamondDynamicConfiguration(){
+		log.info("开启xDiamond动态配置");
+		return XDiamondDynamicConfiguration.builder()
+			.advisors(Arrays.asList(configService))  // 此处为@Value所在的类，配置更新时自动扫描、变更@Value内部变量;平台配置统一在ConfigService，其他分散配置的项目，请换成对应的Service
+			.build();
 	}
-
 
 }

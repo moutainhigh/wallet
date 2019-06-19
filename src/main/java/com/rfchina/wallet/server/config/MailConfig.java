@@ -6,6 +6,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
+/**
+ * 邮件配置
+ *
+ * @author nzm
+ */
 @Configuration
 public class MailConfig {
 

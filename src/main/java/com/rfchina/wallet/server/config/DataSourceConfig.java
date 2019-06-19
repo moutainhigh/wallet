@@ -16,6 +16,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 
+/**
+ * 数据源及mybatis配置
+ *
+ * @author nzm
+ */
 @Configuration
 @MapperScan(basePackages = {"com.rfchina.wallet.domain.mapper","com.rfchina.wallet.server.mapper"}, sqlSessionTemplateRef = "sqlSessionTemplate")
 @Slf4j

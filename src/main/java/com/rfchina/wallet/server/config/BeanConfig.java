@@ -1,18 +1,12 @@
 package com.rfchina.wallet.server.config;
 
-import com.alibaba.fastjson.JSON;
 import com.rfchina.biztools.lock.SimpleExclusiveLock;
-import com.rfchina.internal.api.request.ApiRequestConstant.User;
-import com.rfchina.platform.spring.SpringContext;
-
 import com.rfchina.passport.misc.SessionThreadLocal;
+import com.rfchina.platform.spring.SpringContext;
 import com.rfchina.wallet.server.bank.pudong.domain.predicate.ExactErrPredicate;
 import com.rfchina.wallet.server.bank.pudong.domain.predicate.UserRedoPredicate;
-import com.rfchina.wallet.server.service.ConfigService;
-import io.github.xdiamond.client.annotation.AllKeyListener;
 import io.github.xdiamond.client.annotation.OneKeyListener;
 import io.github.xdiamond.client.event.ConfigEvent;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
@@ -23,6 +17,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 
+
+/**
+ * 项目配置
+ *
+ * @author nzm
+ */
 @Slf4j
 @Configuration
 @Import(SimpleExclusiveLock.class)

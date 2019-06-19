@@ -23,6 +23,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
 
+/**
+ * MVC配置，配置拦截器、异常处理、消息转换等
+ *
+ * @author nzm
+ */
 @Configuration
 @EnableWebMvc
 public class WebMvcConfig implements WebMvcConfigurer {

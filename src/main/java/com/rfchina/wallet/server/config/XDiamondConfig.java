@@ -9,6 +9,11 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 
+/**
+ * XDiamond配置
+ *
+ * @author nzm
+ */
 @Configuration
 @AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE)
 public class XDiamondConfig {

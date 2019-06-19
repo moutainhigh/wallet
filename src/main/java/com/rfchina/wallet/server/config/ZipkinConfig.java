@@ -6,10 +6,17 @@ import com.rfchina.platform.zipkin.handler.ServletTracingFilter;
 import com.rfchina.platform.zipkin.handler.WebMvcInterceptor;
 import com.rfchina.platform.zipkin.injector.spring.MysqlInjector;
 import javax.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
+/**
+ * ZipkinSupport配置
+ *
+ * @author nzm
+ */
 // 标明为配置类
 @Configuration
 @EnableWebMvc
@@ -17,15 +24,20 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @Import({WebMvcInterceptor.class, ServletTracingFilter.class,MysqlInjector.class,ZipkinReport.class})
 public class ZipkinConfig {
 
+	@Value("${zipkin.collector.url}")
+	private String zipkinUrl;
+
+	@Value("${zipkin.service.enable}")
+	private Boolean zipkinEnable;
+
 	@PostConstruct
 	public void init(){
 		// Zipkin的总开关
-		ZipkinContext.setEnable(true);
+		ZipkinContext.setEnable(zipkinEnable);
 		// Zipkin收集器地址
-		ZipkinContext.setZipkinUrl("http://192.168.197.205:9411/api/v2/spans");
+		ZipkinContext.setZipkinUrl(zipkinUrl);
 		// 本地服务名称
 		ZipkinContext.setServiceName("wallet-server");
-
 		// 初始化上下文
 		ZipkinContext.init();
 	}

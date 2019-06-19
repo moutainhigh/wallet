@@ -73,6 +73,7 @@ dependencies {
     compile('com.rfchina.biztool:spring-mq:1.0.1')
     compile 'org.tas:post-core:1.0.0'
     compile 'com.rfchina.biztool:redislock:1.0.2'
+    compile 'com.rfchina.biztool:xdiamond-dynamic:1.0.0'
     compile 'com.rfchina:rfchina-platform-scheduler-spring:1.2.0'
     compile('com.rfchina:rfchina-platform-spring-intergration:2.0.10') {
         exclude group: 'org.springframework.amqp'
