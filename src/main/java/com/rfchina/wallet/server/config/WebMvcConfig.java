@@ -46,9 +46,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 		registry.addInterceptor(allInterceptor)
-			.addPathPatterns("/**");
+			.addPathPatterns("/**")
+			.excludePathPatterns("/index");
 		registry.addInterceptor(basicInterceptor)
-			.addPathPatterns("/**");
+			.addPathPatterns("/**")
+			.excludePathPatterns("/index");
 	}
 
 	@Bean

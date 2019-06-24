@@ -15,7 +15,6 @@ import org.springframework.context.annotation.Import;
  * @author nzm
  */
 @Configuration
-@Import(XDiamondDynamicConfiguration.class)
 @Slf4j
 public class PropertyConfig {
 
