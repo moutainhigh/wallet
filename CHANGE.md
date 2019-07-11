@@ -4,7 +4,7 @@
 jenkins job: platform-rfwallet-super-server-test
 
 ```
-## 1.0.0_b13_2019062009_Beta
+## 1.0.0_b13_2019062009_Beta 1.0.0_2019062009_Release
 ### [变动说明]
 - 添加配置动态更新
 
