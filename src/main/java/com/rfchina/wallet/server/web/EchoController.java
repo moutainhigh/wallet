@@ -23,7 +23,7 @@ public class EchoController {
 	@Value(value = "${srv.base.home}")
 	private String srvBaseHome;
 
-	@RequestMapping(value = "index", produces = MediaType.TEXT_PLAIN_VALUE, method = RequestMethod.GET)
+	@RequestMapping(value = "index", method = RequestMethod.GET)
 	public String index(HttpServletResponse response) throws Exception {
 
 		String separator = srvBaseHome.endsWith(SymbolConstant.SYMBOL_SLASH) ? ""
@@ -33,7 +33,7 @@ public class EchoController {
 			response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
 			response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,
 				"system is under maintenance, date: " + DateUtil.formatDate(new Date()));
-			return null;
+			return "System is under maintenance, please wait. date: " + DateUtil.formatDate(new Date());
 		}
 
 		return "Hello rfwallet-server ! today: " + DateUtil

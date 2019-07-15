@@ -47,10 +47,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
 	public void addInterceptors(InterceptorRegistry registry) {
 		registry.addInterceptor(allInterceptor)
 			.addPathPatterns("/**")
-			.excludePathPatterns("/index");
+			.excludePathPatterns("/index")
+			.excludePathPatterns("/error");
 		registry.addInterceptor(basicInterceptor)
 			.addPathPatterns("/**")
-			.excludePathPatterns("/index");
+			.excludePathPatterns("/index")
+			.excludePathPatterns("/error");
 	}
 
 	@Bean
