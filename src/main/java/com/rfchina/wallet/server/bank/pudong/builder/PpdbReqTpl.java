@@ -92,9 +92,7 @@ public abstract class PpdbReqTpl {
 
 	protected String parseAndSign(String signUrl, Object reqBody, Class clz) throws Exception {
 		String xmlBody = XmlUtil.obj2Xml(reqBody, clz);
-		if (log.isDebugEnabled()) {
-			log.debug(xmlBody);
-		}
+		log.info("银企直连，请求报文 {}",xmlBody);
 		return sign(signUrl, xmlBody);
 	}
 

@@ -157,6 +157,9 @@ public class Handler8800 implements EBankHandler {
 			boolean isOtherRemit = SysFlag.OTHER.getValue().equals(sysFlag)
 				&& RemitLocation.OTHER.getValue().equals(remitLocation);
 
+			String payeeBankName =
+				SysFlag.OTHER.getValue().equals(sysFlag) ? bankCode.getBankName() : null;
+
 			String elecNo = IdGenerator.createBizId("", 16, id -> {
 				return !gatewayTransService.existElecNo(id);
 			});
@@ -172,6 +175,7 @@ public class Handler8800 implements EBankHandler {
 				.remitLocation(remitLocation)
 				.note(walletApply.getNote())
 				.payeeType(walletApply.getPayeeType().equals("1") ? "0" : "1")
+				.payeeBankName(payeeBankName)
 				.payeeBankSelectFlag(isOtherRemit ? "1" : null)
 				.payeeBankNo(isOtherRemit ? walletApply.getPayeeBankCode() : null)
 				.payPurpose(
@@ -249,8 +253,8 @@ public class Handler8800 implements EBankHandler {
 		} catch (Exception e) {
 			log.error("银企直连-网关支付状态查询错误", e);
 			IGatewayError err = ExceptionUtil.explain(e);
-			walletApplies.forEach(walletApply->{
-				if(WalletApplyStatus.PROCESSING.getValue() == walletApply.getStatus()) {
+			walletApplies.forEach(walletApply -> {
+				if (WalletApplyStatus.PROCESSING.getValue() == walletApply.getStatus()) {
 					GatewayTrans gatewayTrans = gatewayTransService.selOrCrtTrans(walletApply);
 					gatewayTrans.setStage(err.getTransCode());
 					gatewayTrans.setErrCode(err.getErrCode());
