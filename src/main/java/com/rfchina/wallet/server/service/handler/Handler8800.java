@@ -151,8 +151,10 @@ public class Handler8800 implements EBankHandler {
 			String sysFlag = bankCode.getClassCode().equals(configService.getAcctBankCode()) ?
 				SysFlag.SELF.getValue() : SysFlag.OTHER.getValue();
 
-			String remitLocation = bankCode.getAreaCode().equals(configService.getAcctAreaCode()) ?
-				RemitLocation.SELF.getValue() : RemitLocation.OTHER.getValue();
+//			项目vivi需求，所有同城单改成异地，同城不支持自动处理
+//			String remitLocation = bankCode.getAreaCode().equals(configService.getAcctAreaCode()) ?
+//				RemitLocation.SELF.getValue() : RemitLocation.OTHER.getValue();
+			String remitLocation = RemitLocation.OTHER.getValue();
 
 			boolean isOtherRemit = SysFlag.OTHER.getValue().equals(sysFlag)
 				&& RemitLocation.OTHER.getValue().equals(remitLocation);
