@@ -4,6 +4,10 @@
 jenkins job: platform-rfwallet-super-server-test
 
 ```
+## 1.0.2_2019073014_Release
+### [变动说明]
+- 所有转账走人行汇路，废弃同城汇路
+
 ## 1.0.1_2019072917_Release
 ### [变动说明]
 - 修复他行的名称填写问题
