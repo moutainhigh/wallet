@@ -4,6 +4,10 @@
 jenkins job: platform-rfwallet-super-server-test
 
 ```
+## 1.0.3_2019080910_Beta
+### [变动说明]
+- 增加网络异常日志
+
 ## 1.0.2_2019073014_Release
 ### [变动说明]
 - 所有转账走人行汇路，废弃同城汇路
