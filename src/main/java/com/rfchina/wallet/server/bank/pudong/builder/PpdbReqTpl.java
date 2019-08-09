@@ -184,6 +184,7 @@ public abstract class PpdbReqTpl {
 
 	private void checkRespCode(Response resp) {
 		if (resp.code() != 200) {
+			log.error(resp.toString());
 			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_GATEWAY_REQUEST_ERROR);
 		}
 	}
