@@ -257,10 +257,12 @@ public class WalletService {
 								}
 							}
 						}
-						if (err instanceof UnknownError) {
+//						if (err instanceof UnknownError) {
 							log.error("银行网关支付错误", e);
-						}
+//						}
 					}
+				} catch (Exception e) {
+					log.error("", e);
 				} finally {
 					walletApplyExtDao.updateLock(batchNo, LockStatus.LOCKED.getValue(),
 						LockStatus.UNLOCK.getValue());
