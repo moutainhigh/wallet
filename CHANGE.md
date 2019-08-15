@@ -4,6 +4,10 @@
 jenkins job: platform-rfwallet-super-server-test
 
 ```
+## 1.0.3_2019081515_Release
+### [变动说明]
+- 修改发布文档
+
 ## 1.0.3_2019080910_Beta
 ### [变动说明]
 - 增加网络异常日志
