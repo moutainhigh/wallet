@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        projectVersion = '1.0.0-SNAPSHOT'
+        projectVersion = '1.0.1'
         projectGroup = 'com.rfchina'
         artifactId = 'platform-sdk2-wallet-server'
         lombokVersion = '1.16.10'
@@ -34,9 +34,6 @@ group = "${projectGroup}"
 version = "${projectVersion}"
 sourceCompatibility = 1.8
 
-//jar {
-//    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
-//}
 
 dependencies {
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
@@ -46,20 +43,4 @@ dependencies {
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 }
 
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            //指定项目部署到的中央库地址
-            repository(url: "http://192.168.197.28:8081/repository/maven-snapshots/") {
-                authentication(userName: 'admin', password: 'rf123456')
-            }
-
-            pom.groupId = "${projectGroup}"
-            pom.artifactId = "${artifactId}"
-            pom.version = "${projectVersion}"
-        }
-    }
-//    artifacts {
-//        archives jar
-//    }
-}
+apply from: 'deploy.gradle'

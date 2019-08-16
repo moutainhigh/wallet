@@ -13,14 +13,8 @@ import java.util.ArrayList;
 */
 @Data
 public class WalletApply  {
-    @ApiModelProperty("网银受理编号")
-    private String acceptNo ;
-
     @ApiModelProperty("流水金额")
     private Long amount ;
-
-    @ApiModelProperty("网银授权日期")
-    private String auditTime ;
 
     @ApiModelProperty("钱包批次号")
     private String batchNo ;
@@ -28,31 +22,25 @@ public class WalletApply  {
     @ApiModelProperty("业务凭证号")
     private String bizNo ;
 
+    @ApiModelProperty("银行发起时间")
+    private String bizTime ;
+
     @ApiModelProperty("创建日期")
     private String createTime ;
+
+    @ApiModelProperty("当前交易ID")
+    private Long currTransId ;
 
     @ApiModelProperty("当前尝试次数")
     private Integer currTryTimes ;
 
-    @ApiModelProperty("电子凭证号")
-    private String elecChequeNo ;
-
-    @ApiModelProperty("交易结束时间（浦发只有时分秒，查询成功定为交易结束时间）")
-    private String endTime ;
-
-    @ApiModelProperty("银行错误码")
-    private String errCode ;
-
-    @ApiModelProperty("银行错误状态")
-    private String errStatus ;
-
-    @ApiModelProperty("核心受理编号")
-    private String hostAcceptNo ;
-
     @ApiModelProperty("ID")
     private Long id ;
 
-    @ApiModelProperty("发起方。 1：钱包系统发起  2：用户发起")
+    @ApiModelProperty("银行发起时间")
+    private String lanchTime ;
+
+    @ApiModelProperty("发起方，当订单失败重新发起时可用。 1：钱包系统发起  2：用户发起")
     private Integer lancher ;
 
     @ApiModelProperty("最大尝试次数")
@@ -70,6 +58,12 @@ public class WalletApply  {
     @ApiModelProperty("收款方帐号")
     private String payeeAccount ;
 
+    @ApiModelProperty("收款银行行号")
+    private String payeeBankCode ;
+
+    @ApiModelProperty("收款方户名")
+    private String payeeName ;
+
     @ApiModelProperty("收款账户类型，1：对公账户，2：个人账户")
     private Integer payeeType ;
 
@@ -79,29 +73,14 @@ public class WalletApply  {
     @ApiModelProperty("计划查询时间")
     private String queryTime ;
 
-    @ApiModelProperty("关联接口方法，1：银企直连AQ52，2：银企直连8800")
-    private Integer refMethod ;
-
     @ApiModelProperty("备注")
     private String remark ;
-
-    @ApiModelProperty("交易流水号")
-    private String seqNo ;
-
-    @ApiModelProperty("银行处理阶段")
-    private String stage ;
 
     @ApiModelProperty("交易状态。 1: 待发送银行网关，2：银行受理中，3：交易成功，4：交易失败(确切失败)，5：撤销，6：待处理，7：等待重试(用户或系统)")
     private Integer status ;
 
-    @ApiModelProperty("系统错误信息")
-    private String sysErrMsg ;
-
     @ApiModelProperty("类型，1：财务结算，2：收入，3：支出")
     private Integer type ;
-
-    @ApiModelProperty("用户错误信息")
-    private String userErrMsg ;
 
     @ApiModelProperty("钱包ID")
     private Long walletId ;
