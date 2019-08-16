@@ -1,6 +1,7 @@
 package com.rfchina.wallet.server.model.ext;
 
 import io.swagger.annotations.ApiModelProperty;
+import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,8 +18,23 @@ public class PayStatusResp {
 	@ApiModelProperty(value = "钱包批次号")
 	private String batchNo;
 
-	@ApiModelProperty(value = "交易日期")
-	private String transDate;
+	@ApiModelProperty(name="payee_account", value = "收款方帐号")
+	private String payeeAccount;
+
+	@ApiModelProperty(name="payee_name", value = "收款方户名")
+	private String payeeName;
+
+	@ApiModelProperty(name="payee_type", value = "收款账户类型，1：对公账户，2：个人账户")
+	private Byte payeeType;
+
+	@ApiModelProperty(name="payee_bank_code", value = "收款银行行号")
+	private String payeeBankCode;
+
+	@ApiModelProperty(name="note", value = "附言(不超过100)")
+	private String note;
+
+	@ApiModelProperty(name="remark", value = "备注")
+	private String remark;
 
 	@ApiModelProperty(value = "支付金额")
 	private Long amount;
@@ -34,4 +50,13 @@ public class PayStatusResp {
 
 	@ApiModelProperty(value = "系统错误信息")
 	private String sysErrMsg;
+
+	@ApiModelProperty(name="create_time", value = "创建日期")
+	private Date createTime;
+
+	@ApiModelProperty(name="lanch_time", value = "银行发起时间")
+	private Date lanchTime;
+
+	@ApiModelProperty(name="biz_time", value = "银行交易终态时间")
+	private Date bizTime;
 }

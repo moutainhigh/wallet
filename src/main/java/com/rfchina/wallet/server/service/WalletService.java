@@ -10,6 +10,7 @@ import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.SymbolConstant;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.page.Pagination;
+import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.platform.common.utils.RegexUtil;
@@ -148,20 +149,15 @@ public class WalletService {
 
 		return walletApplies.stream().map(walletApply -> {
 
-			PayStatusRespBuilder builder = PayStatusResp.builder()
-				.bizNo(walletApply.getBizNo())
-				.batchNo(walletApply.getBatchNo())
-				.amount(walletApply.getAmount())
-				.transDate(DateUtil.formatDate(walletApply.getCreateTime()))
-				.status(walletApply.getStatus());
+			PayStatusResp resp = BeanUtil.newInstance(walletApply, PayStatusResp.class);
 			String key = walletApply.getId().toString();
 			if (transMap.containsKey(key)) {
 				GatewayTrans trans = transMap.get(key);
-				builder.errCode(trans.getErrCode())
-					.userErrMsg(trans.getUserErrMsg())
-					.sysErrMsg(trans.getSysErrMsg());
+				resp.setErrCode(trans.getErrCode());
+				resp.setUserErrMsg(trans.getUserErrMsg());
+				resp.setSysErrMsg(trans.getSysErrMsg());
 			}
-			return builder.build();
+			return resp;
 		}).collect(Collectors.toList());
 
 	}
@@ -232,6 +228,7 @@ public class WalletService {
 						for (WalletApply walletApply : walletApplies) {
 							// 更新申请单
 							walletApply.setStatus(WalletApplyStatus.PROCESSING.getValue());
+							walletApply.setLanchTime(new Date());
 							walletApplyExtDao.updateByPrimaryKeySelective(walletApply);
 
 							// 更新交易记录
@@ -320,15 +317,11 @@ public class WalletService {
 			.map(rs -> {
 				WalletApply apply = rs.left;
 				GatewayTrans trans = rs.right;
-				return PayStatusResp.builder()
-					.batchNo(apply.getBatchNo())
-					.bizNo(apply.getBizNo())
-					.transDate(DateUtil.formatDate(trans.getCreateTime()))
-					.amount(apply.getAmount())
-					.status(apply.getStatus())
-					.userErrMsg(trans.getUserErrMsg())
-					.sysErrMsg(trans.getSysErrMsg())
-					.build();
+				PayStatusResp resp = BeanUtil.newInstance(apply, PayStatusResp.class);
+				resp.setErrCode(trans.getErrCode());
+				resp.setUserErrMsg(trans.getUserErrMsg());
+				resp.setSysErrMsg(trans.getSysErrMsg());
+				return resp;
 			})
 			.collect(Collectors.toList());
 	}

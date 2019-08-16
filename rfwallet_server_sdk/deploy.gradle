@@ -1,0 +1,48 @@
+ext {
+    isReleaseVersion = !(project.version =~ /-SNAPSHOT$/)
+}
+
+apply plugin: 'maven'
+
+println 'artifact   ' << project.group << ':' << artifactId << ':' << project.version
+
+install {
+    repositories.mavenInstaller {
+        pom.groupId = "${project.group}"
+        pom.artifactId = "${artifactId}"
+        pom.version = "${project.version}"
+    }
+}
+
+uploadArchives {
+    repositories.mavenDeployer {
+        //指定项目部署到的中央库地址
+        if (project.ext.isReleaseVersion) {
+            repository(url: "http://192.168.197.28:8081/repository/maven-releases/") {
+                authentication(userName: "${mavenUser}", password: "${mavenPassword}")
+            }
+        } else {
+            repository(url: "http://192.168.197.28:8081/repository/maven-snapshots/") {
+                authentication(userName: "${mavenUser}", password: "${mavenPassword}")
+            }
+        }
+
+        pom.groupId = "${project.group}"
+        pom.artifactId = "${artifactId}"
+        pom.version = "${project.version}"
+
+    }
+}
+
+javadoc {
+    options {
+        encoding "UTF-8"
+        charSet 'UTF-8'
+        author true
+        version true
+    }
+}
+
+artifacts {
+    archives jar
+}

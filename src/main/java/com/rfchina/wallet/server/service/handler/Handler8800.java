@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.platform.common.misc.Tuple;
+import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EnumUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
@@ -61,6 +62,8 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.utils.DateUtils;
+import org.eclipse.jetty.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -307,6 +310,10 @@ public class Handler8800 implements EBankHandler {
 							status = WalletApplyStatus.parsePuDong8804(rs.getTransStatus());
 						}
 						walletApply.setStatus(status.getValue());
+						if(StringUtil.isNotBlank(rs.getTransDate())) {
+							walletApply.setBizTime(
+								DateUtil.parse(rs.getTransDate(), DateUtil.STANDARD_DTAE_PATTERN));
+						}
 						walletApplyDao.updateByPrimaryKey(walletApply);
 
 						trans.setEndTime(new Date());
@@ -369,15 +376,11 @@ public class Handler8800 implements EBankHandler {
 		gatewayTrans.setUserErrMsg("发起交易异常");
 		gatewayTransService.updateTrans(gatewayTrans);
 
-		return PayStatusResp.builder()
-			.batchNo(walletApply.getBatchNo())
-			.bizNo(walletApply.getBizNo())
-			.transDate(DateUtil.formatDate(walletApply.getCreateTime()))
-			.amount(walletApply.getAmount())
-			.status(walletApply.getStatus())
-			.userErrMsg(gatewayTrans.getUserErrMsg())
-			.sysErrMsg(gatewayTrans.getSysErrMsg())
-			.build();
+		PayStatusResp resp = BeanUtil.newInstance(walletApply, PayStatusResp.class);
+		resp.setErrCode(gatewayTrans.getErrCode());
+		resp.setUserErrMsg(gatewayTrans.getUserErrMsg());
+		resp.setSysErrMsg(gatewayTrans.getSysErrMsg());
+		return resp;
 	}
 
 	/**
@@ -399,8 +402,8 @@ public class Handler8800 implements EBankHandler {
 			.masterId(configService.getMasterId())
 			.packetId(genPkgId())
 			.authMasterID(configService.getAuditMasterId())
-			.beginDate(DateUtil.formatDate(firstTrans.getCreateTime(), "yyyyMMdd"))
-			.endDate(DateUtil.formatDate(firstTrans.getCreateTime(), "yyyyMMdd"))
+			.beginDate(DateUtil.formatDate(firstTrans.getBizTime(), DateUtil.SHORT_DTAE_PATTERN))
+			.endDate(DateUtil.formatDate(firstTrans.getBizTime(), DateUtil.SHORT_DTAE_PATTERN))
 			.acceptNo(firstTrans.getAcceptNo())
 			.build();
 		EBankQuery48RespBody resp;
