@@ -157,6 +157,7 @@ public class WalletService {
 				resp.setUserErrMsg(trans.getUserErrMsg());
 				resp.setSysErrMsg(trans.getSysErrMsg());
 				resp.setEndTime(trans.getEndTime());
+				resp.setTransDate(DateUtil.formatDate(walletApply.getCreateTime()));
 			}
 			return resp;
 		}).collect(Collectors.toList());
@@ -241,6 +242,7 @@ public class WalletService {
 								payInResp.getElecMap()
 									.get(gatewayTrans.getWalletApplyId().toString()));
 							gatewayTrans.setRefMethod(method.getValue());
+							gatewayTrans.setLanchTime(new Date());
 							gatewayTransService.updateTrans(gatewayTrans);
 						}
 					} catch (Exception e) {

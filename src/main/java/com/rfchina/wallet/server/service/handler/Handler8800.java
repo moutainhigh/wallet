@@ -311,8 +311,10 @@ public class Handler8800 implements EBankHandler {
 						}
 						walletApply.setStatus(status.getValue());
 						if(StringUtil.isNotBlank(rs.getTransDate())) {
-							walletApply.setBizTime(
-								DateUtil.parse(rs.getTransDate(), DateUtil.STANDARD_DTAE_PATTERN));
+							Date bizTime = DateUtil
+								.parse(rs.getTransDate(), DateUtil.STANDARD_DTAE_PATTERN);
+							walletApply.setBizTime(bizTime);
+							trans.setBizTime(bizTime);
 						}
 						walletApplyDao.updateByPrimaryKey(walletApply);
 
@@ -403,8 +405,8 @@ public class Handler8800 implements EBankHandler {
 			.masterId(configService.getMasterId())
 			.packetId(genPkgId())
 			.authMasterID(configService.getAuditMasterId())
-			.beginDate(DateUtil.formatDate(firstTrans.getBizTime(), DateUtil.SHORT_DTAE_PATTERN))
-			.endDate(DateUtil.formatDate(firstTrans.getBizTime(), DateUtil.SHORT_DTAE_PATTERN))
+			.beginDate(DateUtil.formatDate(firstTrans.getLanchTime(), DateUtil.SHORT_DTAE_PATTERN))
+			.endDate(DateUtil.formatDate(firstTrans.getLanchTime(), DateUtil.SHORT_DTAE_PATTERN))
 			.acceptNo(firstTrans.getAcceptNo())
 			.build();
 		EBankQuery48RespBody resp;
