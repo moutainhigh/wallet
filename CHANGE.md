@@ -4,6 +4,11 @@
 jenkins job: platform-rfwallet-super-server-test
 
 ```
+## 1.0.4_b1_2019090210_Beta
+### [变动说明]
+- 调整银企核心的查询时间
+- 新增推送银行时间和交易结束日期
+
 ## 1.0.3_2019081515_Release
 ### [变动说明]
 - 修改发布文档

@@ -57,7 +57,7 @@ public class PayStatusResp {
 	@ApiModelProperty(name="lanch_time", value = "银行发起时间")
 	private Date lanchTime;
 
-	@ApiModelProperty(name="biz_time", value = "银行交易终态时间")
+	@ApiModelProperty(name="biz_time", value = "银行交易终态日期")
 	private Date bizTime;
 
 	@ApiModelProperty(name="end_time", value = "交易结束时间（浦发只有时分秒，查询成功定为交易结束时间）")

@@ -432,8 +432,7 @@ public class Handler8800 implements EBankHandler {
 			return false;
 		}
 		// 网银状态非交易成功
-		Date auditTime = StringUtils.isNotBlank(audit48Result.getTransDate()) ?
-			DateUtil.parse(audit48Result.getTransDate(), "yyyyMMdd") : null;
+		Date auditTime = new Date();
 		if (!TransStatusDO48.SUCC.getValue().equals(audit48Result.getTransStatus())) {
 			TransStatusDO48 status = EnumUtil
 				.parse(TransStatusDO48.class, audit48Result.getTransStatus());
