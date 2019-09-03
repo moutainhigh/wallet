@@ -312,7 +312,7 @@ public class Handler8800 implements EBankHandler {
 						walletApply.setStatus(status.getValue());
 						if(StringUtil.isNotBlank(rs.getTransDate())) {
 							Date bizTime = DateUtil
-								.parse(rs.getTransDate(), DateUtil.STANDARD_DTAE_PATTERN);
+								.parse(rs.getTransDate(), DateUtil.SHORT_DTAE_PATTERN);
 							walletApply.setBizTime(bizTime);
 							trans.setBizTime(bizTime);
 						}
