@@ -4,6 +4,10 @@
 jenkins job: platform-rfwallet-super-server-test
 
 ```
+## 1.0.4_b2_2019090310_Beta
+### [变动说明]
+-  修正8804日期解析格式
+
 ## 1.0.4_b1_2019090210_Beta
 ### [变动说明]
 - 调整银企核心的查询时间
