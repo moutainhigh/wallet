@@ -4,6 +4,10 @@
 jenkins job: platform-rfwallet-super-server-test
 
 ```
+## 1.0.4_b3_2019090311_Beta
+### [变动说明]
+- 查单接口新增银行信息返回
+
 ## 1.0.4_b2_2019090310_Beta
 ### [变动说明]
 -  修正8804日期解析格式
