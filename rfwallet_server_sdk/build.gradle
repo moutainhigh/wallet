@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        projectVersion = '1.0.1'
+        projectVersion = '1.0.2'
         projectGroup = 'com.rfchina'
         artifactId = 'platform-sdk2-wallet-server'
         lombokVersion = '1.16.10'

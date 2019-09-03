@@ -1,5 +1,6 @@
 package com.rfchina.wallet.server.model.ext;
 
+import com.rfchina.wallet.domain.model.BankCode;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.Date;
 import lombok.AllArgsConstructor;
@@ -29,6 +30,9 @@ public class PayStatusResp {
 
 	@ApiModelProperty(name="payee_bank_code", value = "收款银行行号")
 	private String payeeBankCode;
+
+	@ApiModelProperty(name="payee_bank_info", value = "收款银行信息")
+	private BankCode payeeBankInfo;
 
 	@ApiModelProperty(name="note", value = "附言(不超过100)")
 	private String note;

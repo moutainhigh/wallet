@@ -353,10 +353,32 @@
               amount: "" , //支付金额
         batch_no: "" , //钱包批次号
         biz_no: "" , //业务凭证号
+        biz_time: "" , //银行交易终态日期
+        create_time: "" , //创建日期
+        end_time: "" , //交易结束时间（浦发只有时分秒，查询成功定为交易结束时间）
         err_code: "" , //错误码
+        lanch_time: "" , //银行发起时间
+        note: "" , //附言(不超过100)
+        payee_account: "" , //收款方帐号
+        payee_bank_code: "" , //收款银行行号
+        payee_bank_info: {
+                        area_code: "" , //所属地区
+        bank_code: "" , //银行行号
+        bank_name: "" , //银行名称
+        city_name: "" , //所属省市
+        class_code: "" , //所属分类代码
+        class_name: "" , //所属分类行名
+        id: "" , //ID
+        province_name: "" , //所属地区
+        weight: ""  //
+
+            },
+        payee_name: "" , //收款方户名
+        payee_type: "" , //收款账户类型，1：对公账户，2：个人账户
+        remark: "" , //备注
         status: "" , //交易状态。 1: 待发送银行网关，2：银行受理中，3：交易成功，4：交易失败，5：撤销，6：待处理
         sys_err_msg: "" , //系统错误信息
-        trans_date: "" , //交易日期
+        trans_date: "" , //钱包收单日期
         user_err_msg: ""  //用户错误信息
 
       
@@ -608,36 +630,29 @@
   "msg": "", //消息
 "data": {
               list: [{
-                        accept_no: "" , //网银受理编号
-        amount: "" , //流水金额
-        audit_time: "" , //网银授权日期
+                        amount: "" , //流水金额
         batch_no: "" , //钱包批次号
         biz_no: "" , //业务凭证号
+        biz_time: "" , //银行交易终态时间
         create_time: "" , //创建日期
+        curr_trans_id: "" , //当前交易ID
         curr_try_times: "" , //当前尝试次数
-        elec_cheque_no: "" , //电子凭证号
-        end_time: "" , //交易结束时间（浦发只有时分秒，查询成功定为交易结束时间）
-        err_code: "" , //银行错误码
-        err_status: "" , //银行错误状态
-        host_accept_no: "" , //核心受理编号
         id: "" , //ID
-        lancher: "" , //发起方。 1：钱包系统发起  2：用户发起
+        lanch_time: "" , //银行发起时间
+        lancher: "" , //发起方，当订单失败重新发起时可用。 1：钱包系统发起  2：用户发起
         max_try_times: "" , //最大尝试次数
         note: "" , //附言(不超过100)
         notified: "" , //1:已通知技术 2:已通知业务
         pay_purpose: "" , //支付用途 收款人为个人客户时必须输入 1-工资、奖金收入 2-稿费、演出费等劳务费用 3-债券、期货、信托等投资的本金和收益 4-个人债权或产权转让收益 5-个人贷款转存 6-证券交易结算资金和期货交易保证金 7-集成、赠予款项 8-保险理赔、保费退换等款项 9-纳税退还 A-农、副、矿产品销售收入
         payee_account: "" , //收款方帐号
+        payee_bank_code: "" , //收款银行行号
+        payee_name: "" , //收款方户名
         payee_type: "" , //收款账户类型，1：对公账户，2：个人账户
         payer_account: "" , //付款方帐号
         query_time: "" , //计划查询时间
-        ref_method: "" , //关联接口方法，1：银企直连AQ52，2：银企直连8800
         remark: "" , //备注
-        seq_no: "" , //交易流水号
-        stage: "" , //银行处理阶段
         status: "" , //交易状态。 1: 待发送银行网关，2：银行受理中，3：交易成功，4：交易失败(确切失败)，5：撤销，6：待处理，7：等待重试(用户或系统)
-        sys_err_msg: "" , //系统错误信息
         type: "" , //类型，1：财务结算，2：收入，3：支出
-        user_err_msg: "" , //用户错误信息
         wallet_id: ""  //钱包ID
 
             },]

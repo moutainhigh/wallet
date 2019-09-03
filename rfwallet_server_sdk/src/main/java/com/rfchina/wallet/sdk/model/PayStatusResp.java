@@ -22,7 +22,7 @@ public class PayStatusResp  {
     @ApiModelProperty("业务凭证号")
     private String bizNo ;
 
-    @ApiModelProperty("银行交易终态时间")
+    @ApiModelProperty("银行交易终态日期")
     private String bizTime ;
 
     @ApiModelProperty("创建日期")
@@ -46,6 +46,9 @@ public class PayStatusResp  {
     @ApiModelProperty("收款银行行号")
     private String payeeBankCode ;
 
+    @ApiModelProperty("收款银行信息")
+    private BankCode payeeBankInfo ;
+
     @ApiModelProperty("收款方户名")
     private String payeeName ;
 
@@ -60,6 +63,9 @@ public class PayStatusResp  {
 
     @ApiModelProperty("系统错误信息")
     private String sysErrMsg ;
+
+    @ApiModelProperty("钱包收单日期")
+    private String transDate ;
 
     @ApiModelProperty("用户错误信息")
     private String userErrMsg ;

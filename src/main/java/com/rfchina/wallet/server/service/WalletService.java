@@ -159,6 +159,10 @@ public class WalletService {
 				resp.setEndTime(trans.getEndTime());
 				resp.setTransDate(DateUtil.formatDate(walletApply.getCreateTime()));
 			}
+			if(!StringUtils.isEmpty(walletApply.getPayeeBankCode())){
+				BankCode bankCode = bankCodeDao.selectByBankCode(walletApply.getPayeeBankCode());
+				resp.setPayeeBankInfo(bankCode);
+			}
 			return resp;
 		}).collect(Collectors.toList());
 

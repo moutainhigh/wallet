@@ -22,7 +22,7 @@ public class WalletApply  {
     @ApiModelProperty("业务凭证号")
     private String bizNo ;
 
-    @ApiModelProperty("银行发起时间")
+    @ApiModelProperty("银行交易终态时间")
     private String bizTime ;
 
     @ApiModelProperty("创建日期")
