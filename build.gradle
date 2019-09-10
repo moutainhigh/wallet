@@ -58,7 +58,12 @@ dependencies {
     compile('io.github.hengyunabc.xdiamond:xdiamond-client:1.0.4')
     compile('dom4j:dom4j:1.6.1')
     compile('com.alibaba:fastjson:1.2.29')
-
+    
+    //通联sdk
+    compile 'com.allinpay:yunst-sdk:0.0.1'
+    compile 'log4j:log4j:1.2.17'
+    compile 'com.alibaba:fastjson:1.2.47'
+    compile 'org.bouncycastle:bcprov-jdk16:1.46'
     // 日志工具
     compile('org.slf4j:jcl-over-slf4j:1.7.21')
     compile('com.rfchina.swagger:swagger-starter:1.0.0-SNAPSHOT')
