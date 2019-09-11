@@ -1,4 +1,4 @@
-package com.rfchina.wallet.yunst;
+package com.rfchina.wallet.server.bank.yunst;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.rfchina.platform.common.utils.JsonUtil;
@@ -20,6 +20,7 @@ public class CreateMemberTest extends SpringBaseTest {
 		YunstBaseResp reponse = YunstCreateMemberReq.builder$()
 			.bizUserId("FHT" + System.currentTimeMillis()).memberType(2L).source(2L).build()
 			.execute();
+
 
 		if ("OK".equals(reponse.status)) {
 			YunstCreateMemberResp.CreateMemeberResult resp = JsonUtil

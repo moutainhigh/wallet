@@ -1,4 +1,4 @@
-package com.rfchina.wallet.bank.pudong;
+package com.rfchina.wallet.server.pudong;
 
 public class TestingData {
 	public static final String ACCT_B_ID = "952A9997220008092";

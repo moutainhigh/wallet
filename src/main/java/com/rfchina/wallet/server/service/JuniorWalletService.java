@@ -14,7 +14,7 @@ import com.rfchina.wallet.server.model.ext.PayInReq;
 import com.rfchina.wallet.server.model.ext.PayInResp;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletLogType;
-import com.rfchina.wallet.server.service.handler.HandlerHelper;
+import com.rfchina.wallet.server.service.handler.pudong.HandlerHelper;
 
 import java.util.Date;
 import java.util.List;

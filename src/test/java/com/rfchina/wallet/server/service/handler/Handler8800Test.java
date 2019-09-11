@@ -3,15 +3,14 @@ package com.rfchina.wallet.server.service.handler;
 import static org.junit.Assert.*;
 
 import com.rfchina.platform.common.misc.Tuple;
-import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.domain.model.GatewayTrans;
 import com.rfchina.wallet.domain.model.WalletApply;
 import com.rfchina.wallet.server.SpringBaseTest;
 import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
 import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
-import com.rfchina.wallet.server.model.ext.PayInResp;
 import com.rfchina.wallet.server.model.ext.PayTuple;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
+import com.rfchina.wallet.server.service.handler.pudong.Handler8800;
 import java.util.Arrays;
 import java.util.List;
 import org.junit.Test;
