@@ -2,9 +2,9 @@ package com.rfchina.wallet.yunst;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.rfchina.platform.common.utils.JsonUtil;
-import com.rfchina.wallet.server.yunst.request.YunstCreateMemberReq;
-import com.rfchina.wallet.server.yunst.response.YunstBaseResp;
-import com.rfchina.wallet.server.yunst.response.YunstCreateMemberResp;
+import com.rfchina.wallet.server.bank.yunst.request.YunstCreateMemberReq;
+import com.rfchina.wallet.server.bank.yunst.response.YunstBaseResp;
+import com.rfchina.wallet.server.bank.yunst.response.YunstCreateMemberResp;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 

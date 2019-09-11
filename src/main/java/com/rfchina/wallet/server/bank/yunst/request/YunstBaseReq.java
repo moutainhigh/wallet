@@ -1,10 +1,10 @@
-package com.rfchina.wallet.server.yunst.request;
+package com.rfchina.wallet.server.bank.yunst.request;
 
 import com.allinpay.yunst.sdk.YunClient;
 import com.allinpay.yunst.sdk.bean.YunRequest;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.rfchina.platform.common.utils.JsonUtil;
-import com.rfchina.wallet.server.yunst.response.YunstBaseResp;
+import com.rfchina.wallet.server.bank.yunst.response.YunstBaseResp;
 
 import java.lang.reflect.Field;
 import java.util.Objects;

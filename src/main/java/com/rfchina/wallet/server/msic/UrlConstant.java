@@ -109,4 +109,21 @@ public class UrlConstant {
 	 * 短信验证码登录
 	 */
 	public static final String WALLET_LOGIN_WITH_VERIFY_CODE = VERSION + "/m/wallet/login_with_verify_code";
+
+	/**
+	 * 创建云商通会员
+	 */
+	public static final String YUNST_CREATE_MEMBER = VERSION + "/m/yunst/create_member";
+	/**
+	 * 云商通发送短信验证码
+	 */
+	public static final String YUNST_SMS_VERIFY_CODE = VERSION + "/m/yunst/sms_verify_code";
+	/**
+	 * 云商通绑定手机
+	 */
+	public static final String YUNST_BIND_PHONE = VERSION + "/m/yunst/bind_phone";
+	/**
+	 * 云商通修改手机
+	 */
+	public static final String YUNST_MODIFY_PHONE = VERSION + "/m/yunst/modify_phone";
 }

@@ -1,4 +1,4 @@
-package com.rfchina.wallet.server.yunst.response;
+package com.rfchina.wallet.server.bank.yunst.response;
 
 import lombok.Data;
 

@@ -1,4 +1,4 @@
-package com.rfchina.wallet.server.yunst.response;
+package com.rfchina.wallet.server.bank.yunst.response;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
@@ -7,8 +7,6 @@ import lombok.Data;
 @Data
 @Builder
 public class YunstCreateMemberResp {
-	@ApiModelProperty(value = "状态.0：成功 1：失败")
-	private String status;
 	@ApiModelProperty(value = "错误信息")
 	private String errorMsg;
 	@ApiModelProperty(value = "结果数据")

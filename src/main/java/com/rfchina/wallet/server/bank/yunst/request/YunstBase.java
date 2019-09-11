@@ -1,4 +1,4 @@
-package com.rfchina.wallet.server.yunst.request;
+package com.rfchina.wallet.server.bank.yunst.request;
 
 import java.io.Serializable;
 
