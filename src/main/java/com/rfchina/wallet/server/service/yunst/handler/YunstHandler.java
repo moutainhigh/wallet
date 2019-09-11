@@ -8,11 +8,9 @@ import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.platform.common.utils.Valuable;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
+import com.rfchina.wallet.server.bank.yunst.request.*;
+import com.rfchina.wallet.server.bank.yunst.response.YunstMemberInfoResp;
 import com.rfchina.wallet.server.config.YunstConfig;
-import com.rfchina.wallet.server.bank.yunst.request.YunstBindPhoneReq;
-import com.rfchina.wallet.server.bank.yunst.request.YunstChangeBindPhoneReq;
-import com.rfchina.wallet.server.bank.yunst.request.YunstCreateMemberReq;
-import com.rfchina.wallet.server.bank.yunst.request.YunstSMSVerificationCodeReq;
 import com.rfchina.wallet.server.bank.yunst.response.YunstBaseResp;
 import com.rfchina.wallet.server.bank.yunst.response.YunstCreateMemberResp;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,6 +117,27 @@ public class YunstHandler {
 			return new Tuple<>(true, null);
 		}
 		return new Tuple<>(false, reponse.getMessage());
+	}
+
+	/**
+	 * 获取会员信息
+	 */
+	public YunstMemberInfoResp getMemberInfo(String bizUserId, Integer type) throws Exception {
+		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
+		YunstBaseResp reponse = YunstGetMemberInfoReq.builder$()
+				.bizUserId(bizUserId)
+				.build()
+				.execute();
+
+		if (YunstBaseRespStatus.SUCCESS.getValue().equals(reponse.status)) {
+			YunstMemberInfoResp.CreateMemeberResult result = JsonUtil.toObject(reponse.getSignedValue(),
+					YunstMemberInfoResp.CreateMemeberResult.class, objectMapper -> {
+						objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+					});
+			return YunstMemberInfoResp.builder().data(result).build();
+		} else {
+			return YunstMemberInfoResp.builder().errorMsg(reponse.message).build();
+		}
 	}
 
 	public enum YunstBaseRespStatus implements Valuable<String> {

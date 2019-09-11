@@ -126,4 +126,8 @@ public class UrlConstant {
 	 * 云商通修改手机
 	 */
 	public static final String YUNST_MODIFY_PHONE = VERSION + "/m/yunst/modify_phone";
+	/**
+	 * 云商通查询会员信息
+	 */
+	public static final String YUNST_MEMBER_INFO = VERSION + "/m/yunst/member_info";
 }
