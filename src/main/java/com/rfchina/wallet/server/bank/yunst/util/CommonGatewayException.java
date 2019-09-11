@@ -1,8 +1,7 @@
 package com.rfchina.wallet.server.bank.yunst.util;
 
-import com.rfchina.platform.common.misc.ResponseCode;
-import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
+import com.rfchina.wallet.domain.misc.WalletResponseCode;
 
 public class CommonGatewayException extends WalletResponseException {
 
@@ -16,8 +15,8 @@ public class CommonGatewayException extends WalletResponseException {
 	 */
 	private String bankErrMsg;
 
-	public CommonGatewayException(EnumResponseCode code, String bankErrCode,String bankErrMsg) {
-		super(code.getValue(), ResponseCode.getMsg(code), null);
+	public CommonGatewayException(WalletResponseCode.EnumWalletResponseCode code, String bankErrCode,String bankErrMsg) {
+		super(code.getValue(), WalletResponseCode.getMsg(code), null);
 		this.bankErrMsg = bankErrMsg;
 		this.bankErrCode = bankErrCode;
 	}
