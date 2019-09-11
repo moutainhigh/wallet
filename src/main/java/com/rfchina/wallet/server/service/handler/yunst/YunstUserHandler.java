@@ -16,19 +16,27 @@ import com.rfchina.wallet.server.bank.yunst.request.*;
 import com.rfchina.wallet.server.bank.yunst.response.YunstMemberInfoResp;
 import com.rfchina.wallet.server.bank.yunst.response.YunstBaseResp;
 import com.rfchina.wallet.server.bank.yunst.response.YunstCreateMemberResp;
+import com.rfchina.wallet.server.bank.yunst.util.YunstTpl;
 import com.rfchina.wallet.server.service.ConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 
 @Component
+@Import(YunstTpl.class)
 public class YunstUserHandler {
+
 	public static final Long TERMINAL_TYPE = 2L; // 终端类型 2-PC
 	public static final String MEMBER_TYPE_PREFIX_PERSON = "U";
 	public static final String MEMBER_TYPE_PREFIX_COMPANY = "C";
+
 	@Autowired
 	private ConfigService configService;
+
+	@Autowired
+	private YunstTpl yunstTpl;
 
 	@PostConstruct
 	public void init() {
@@ -48,80 +56,72 @@ public class YunstUserHandler {
 			memberType = YunstMemberType.PERSON;
 		}
 		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
-		YunstBaseResp reponse = YunstCreateMemberReq.builder$()
-				.bizUserId(bizUserId)
-				.memberType(memberType.getValue())
-				.source(TERMINAL_TYPE)
-				.build()
-				.execute();
+		YunstCreateMemberReq req = YunstCreateMemberReq.builder$()
+			.bizUserId(bizUserId)
+			.memberType(memberType.getValue())
+			.source(TERMINAL_TYPE)
+			.build();
 
-		if (YunstBaseRespStatus.SUCCESS.getValue().equals(reponse.status)) {
-			YunstCreateMemberResp.CreateMemeberResult result = JsonUtil.toObject(reponse.getSignedValue(),
-					YunstCreateMemberResp.CreateMemeberResult.class, objectMapper -> {
-						objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-					});
-			return YunstCreateMemberResp.builder().data(result).build();
-		} else {
-			return YunstCreateMemberResp.builder().errorMsg(reponse.message).build();
-		}
+		return yunstTpl.execute(req, YunstCreateMemberResp.class);
 	}
 
 	/**
 	 * 发送短信验证码
 	 */
-	public Tuple<Boolean, String> sendVerificationCode(String bizUserId, Integer type, String phone, Integer bizType)
-			throws Exception {
+	public Tuple<Boolean, String> sendVerificationCode(String bizUserId, Integer type, String phone,
+		Integer bizType) throws Exception {
 		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
-		YunstBaseResp reponse = YunstSMSVerificationCodeReq.builder$()
-				.bizUserId(bizUserId)
-				.phone(phone)
-				.verificationCodeType(bizType.longValue())
-				.build()
-				.execute();
+		YunstSMSVerificationCodeReq req = YunstSMSVerificationCodeReq.builder$()
+			.bizUserId(bizUserId)
+			.phone(phone)
+			.verificationCodeType(bizType.longValue())
+			.build();
 
-		if (YunstBaseRespStatus.SUCCESS.getValue().equals(reponse.status)) {
+		YunstBaseResp resp = yunstTpl.execute(req, YunstBaseResp.class);
+		if (YunstBaseRespStatus.SUCCESS.getValue().equals(resp.status)) {
 			return new Tuple<>(true, null);
 		}
-		return new Tuple<>(false, reponse.getMessage());
+		return new Tuple<>(false, resp.getMessage());
 	}
 
 	/**
 	 * 绑定手机
 	 */
-	public Tuple<Boolean, String> bindPhone(String bizUserId, Integer type, String phone, String verificationCode)
-			throws Exception {
+	public Tuple<Boolean, String> bindPhone(String bizUserId, Integer type, String phone,
+		String verificationCode) throws Exception {
 		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
-		YunstBaseResp reponse = YunstBindPhoneReq.builder$()
-				.bizUserId(bizUserId)
-				.phone(phone)
-				.verificationCode(verificationCode)
-				.build()
-				.execute();
+		YunstBindPhoneReq req = YunstBindPhoneReq.builder$()
+			.bizUserId(bizUserId)
+			.phone(phone)
+			.verificationCode(verificationCode)
+			.build();
 
-		if (YunstBaseRespStatus.SUCCESS.getValue().equals(reponse.status)) {
+		YunstBaseResp resp = yunstTpl.execute(req, YunstBaseResp.class);
+		if (YunstBaseRespStatus.SUCCESS.getValue().equals(resp.status)) {
 			return new Tuple<>(true, null);
 		}
-		return new Tuple<>(false, reponse.getMessage());
+		return new Tuple<>(false, resp.getMessage());
 	}
 
 	/**
 	 * 修改绑定手机
 	 */
-	public Tuple<Boolean, String> modifyPhone(String bizUserId, Integer type, String oldPhone, String newPhone,
-			String verificationCode) throws Exception {
+	public Tuple<Boolean, String> modifyPhone(String bizUserId, Integer type, String oldPhone,
+		String newPhone,
+		String verificationCode) throws Exception {
 		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
-		YunstBaseResp reponse = YunstChangeBindPhoneReq.builder$()
-				.bizUserId(bizUserId)
-				.oldPhone(oldPhone)
-				.newPhone(newPhone)
-				.newVerificationCode(verificationCode)
-				.build()
-				.execute();
+		YunstChangeBindPhoneReq req = YunstChangeBindPhoneReq.builder$()
+			.bizUserId(bizUserId)
+			.oldPhone(oldPhone)
+			.newPhone(newPhone)
+			.newVerificationCode(verificationCode)
+			.build();
 
-		if (YunstBaseRespStatus.SUCCESS.getValue().equals(reponse.status)) {
+		YunstBaseResp resp = yunstTpl.execute(req, YunstBaseResp.class);
+		if (YunstBaseRespStatus.SUCCESS.getValue().equals(resp.status)) {
 			return new Tuple<>(true, null);
 		}
-		return new Tuple<>(false, reponse.getMessage());
+		return new Tuple<>(false, resp.getMessage());
 	}
 
 	/**
@@ -129,20 +129,11 @@ public class YunstUserHandler {
 	 */
 	public YunstMemberInfoResp getMemberInfo(String bizUserId, Integer type) throws Exception {
 		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
-		YunstBaseResp reponse = YunstGetMemberInfoReq.builder$()
-				.bizUserId(bizUserId)
-				.build()
-				.execute();
+		YunstGetMemberInfoReq req = YunstGetMemberInfoReq.builder$()
+			.bizUserId(bizUserId)
+			.build();
 
-		if (YunstBaseRespStatus.SUCCESS.getValue().equals(reponse.status)) {
-			YunstMemberInfoResp.CreateMemeberResult result = JsonUtil.toObject(reponse.getSignedValue(),
-					YunstMemberInfoResp.CreateMemeberResult.class, objectMapper -> {
-						objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-					});
-			return YunstMemberInfoResp.builder().data(result).build();
-		} else {
-			return YunstMemberInfoResp.builder().errorMsg(reponse.message).build();
-		}
+		return yunstTpl.execute(req, YunstMemberInfoResp.class);
 	}
 
 	public enum YunstBaseRespStatus implements Valuable<String> {
@@ -183,7 +174,8 @@ public class YunstUserHandler {
 
 	private String transferToYunstBizUserFormat(String bizUserId, Integer type) {
 		if (type != 1 && type != 2) {
-			throw new WalletResponseException(ResponseCode.EnumResponseCode.COMMON_INVALID_PARAMS, "type");
+			throw new WalletResponseException(ResponseCode.EnumResponseCode.COMMON_INVALID_PARAMS,
+				"type");
 		}
 		if (type == 2) {
 			return MEMBER_TYPE_PREFIX_PERSON + bizUserId;

@@ -64,8 +64,6 @@ public class YunstMemberInfoResp {
 		private String province;
 		@ApiModelProperty(value = "开户行所在市")
 		private String city;
-		@ApiModelProperty(value = "企业地址")
-		private String companyAddress;
 	}
 
 }

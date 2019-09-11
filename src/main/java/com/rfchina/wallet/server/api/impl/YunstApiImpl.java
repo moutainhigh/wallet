@@ -11,8 +11,8 @@ import com.rfchina.wallet.domain.mapper.YunstMemberMapper;
 import com.rfchina.wallet.domain.model.YunstMember;
 import com.rfchina.wallet.server.api.YunstApi;
 import com.rfchina.wallet.server.bank.yunst.response.YunstMemberInfoResp;
-import com.rfchina.wallet.server.service.yunst.handler.YunstHandler;
 import com.rfchina.wallet.server.bank.yunst.response.YunstCreateMemberResp;
+import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class YunstApiImpl implements YunstApi {
 	@Autowired
-	private YunstHandler yunstHandler;
+	private YunstUserHandler yunstHandler;
 	@Autowired
 	private YunstMemberMapper yunstMemberMapper;
 
