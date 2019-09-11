@@ -1,9 +1,8 @@
-package com.rfchina.wallet.bank.pudong;
+package com.rfchina.wallet.server.pudong;
 
 import static junit.framework.TestCase.assertTrue;
 
 import com.alibaba.fastjson.JSON;
-import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.server.bank.pudong.builder.EBankQuery48Builder;
 import com.rfchina.wallet.server.bank.pudong.domain.response.EBankQuery48RespBody;
 import lombok.extern.slf4j.Slf4j;

@@ -1,4 +1,4 @@
-package com.rfchina.wallet.server.service.yunst.handler;
+package com.rfchina.wallet.server.service.handler.yunst;
 
 import com.allinpay.yunst.sdk.YunClient;
 import com.allinpay.yunst.sdk.bean.YunConfig;
@@ -8,30 +8,35 @@ import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.platform.common.utils.Valuable;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
+import com.rfchina.wallet.server.bank.yunst.request.YunstBindPhoneReq;
+import com.rfchina.wallet.server.bank.yunst.request.YunstChangeBindPhoneReq;
+import com.rfchina.wallet.server.bank.yunst.request.YunstCreateMemberReq;
+import com.rfchina.wallet.server.bank.yunst.request.YunstSMSVerificationCodeReq;
 import com.rfchina.wallet.server.bank.yunst.request.*;
 import com.rfchina.wallet.server.bank.yunst.response.YunstMemberInfoResp;
-import com.rfchina.wallet.server.config.YunstConfig;
 import com.rfchina.wallet.server.bank.yunst.response.YunstBaseResp;
 import com.rfchina.wallet.server.bank.yunst.response.YunstCreateMemberResp;
+import com.rfchina.wallet.server.service.ConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 
 @Component
-public class YunstHandler {
+public class YunstUserHandler {
 	public static final Long TERMINAL_TYPE = 2L; // 终端类型 2-PC
 	public static final String MEMBER_TYPE_PREFIX_PERSON = "U";
 	public static final String MEMBER_TYPE_PREFIX_COMPANY = "C";
 	@Autowired
-	private YunstConfig yunstConfig;
+	private ConfigService configService;
 
 	@PostConstruct
 	public void init() {
-		YunClient.configure(new YunConfig(yunstConfig.getServerUrl(), yunstConfig.getSysId(),
-				yunstConfig.getPassword(),
-				yunstConfig.getAlias(), yunstConfig.getVersion(), yunstConfig.getPfxPath(),
-				yunstConfig.getTlCertPath()));
+		YunClient
+			.configure(new YunConfig(configService.getYstServerUrl(), configService.getYstSysId(),
+				configService.getYstPassword(), configService.getYstAlias(),
+				configService.getYstVersion(), configService.getYstPfxPath(),
+				configService.getYstTlCertPath()));
 	}
 
 	/**

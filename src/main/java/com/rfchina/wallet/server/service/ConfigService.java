@@ -90,4 +90,21 @@ public class ConfigService {
 	private String env;
 	// 钱包支付 END
 
+// yunst start
+	@Value("${yunst.serverUrl}")
+	private String ystServerUrl;
+	@Value("${yunst.sysId}")
+	private String ystSysId;
+	@Value("${yunst.pfxPath}")
+	private String ystPfxPath;
+	@Value("${yunst.password}")
+	private String ystPassword;
+	@Value("${yunst.alias}")
+	private String ystAlias;
+	@Value("${yunst.version}")
+	private String ystVersion;
+	@Value("${yunst.tlCertPath}")
+	private String ystTlCertPath;
+// yunst end
+
 }

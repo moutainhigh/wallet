@@ -1,4 +1,4 @@
-package com.rfchina.wallet.server.service.handler;
+package com.rfchina.wallet.server.service.handler.pudong;
 
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;

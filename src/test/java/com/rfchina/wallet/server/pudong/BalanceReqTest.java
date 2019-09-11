@@ -1,4 +1,4 @@
-package com.rfchina.wallet.bank.pudong;
+package com.rfchina.wallet.server.pudong;
 
 import static org.junit.Assert.*;
 
@@ -8,9 +8,8 @@ import com.rfchina.wallet.server.bank.pudong.domain.response.BalanceRespBody.Bal
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Value;
 
-import static com.rfchina.wallet.bank.pudong.TestingData.*;
+import static com.rfchina.wallet.server.pudong.TestingData.*;
 
 @Slf4j
 public class BalanceReqTest {
