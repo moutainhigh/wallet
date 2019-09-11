@@ -1,4 +1,4 @@
-package com.rfchina.wallet.server.service.yunst.handler;
+package com.rfchina.wallet.server.service.handler.yunst;
 
 import com.allinpay.yunst.sdk.YunClient;
 import com.allinpay.yunst.sdk.bean.YunConfig;
@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 
 @Component
-public class YunstHandler {
+public class YunstUserHandler {
 	public static final Long TERMINAL_TYPE = 2L; // 终端类型 2-PC
 	public static final String MEMBER_TYPE_PREFIX_PERSON = "U";
 	public static final String MEMBER_TYPE_PREFIX_COMPANY = "C";
