@@ -41,6 +41,11 @@ jar {
     from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
 }
 
+configurations.all {
+    //每次构建更新snapshot版本jar包
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
 configurations {
     compile.exclude module: 'spring-boot-starter-tomcat'
 }

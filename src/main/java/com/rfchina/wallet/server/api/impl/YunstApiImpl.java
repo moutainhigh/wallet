@@ -10,6 +10,7 @@ import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.YunstMemberMapper;
 import com.rfchina.wallet.domain.model.YunstMember;
 import com.rfchina.wallet.server.api.YunstApi;
+import com.rfchina.wallet.server.bank.yunst.response.YunstMemberInfoResp;
 import com.rfchina.wallet.server.service.yunst.handler.YunstHandler;
 import com.rfchina.wallet.server.bank.yunst.response.YunstCreateMemberResp;
 import lombok.extern.slf4j.Slf4j;
@@ -33,8 +34,11 @@ public class YunstApiImpl implements YunstApi {
 		YunstCreateMemberResp response = yunstHandler.createMember(bizUserId, type);
 		if (response.getData() != null) {
 			YunstCreateMemberResp.CreateMemeberResult data = response.getData();
-			int effectRows = yunstMemberMapper.insertSelective(
-					YunstMember.builder().memberId(data.getUserId()).type(type.byteValue()).build());
+			int effectRows = yunstMemberMapper.insertSelective(YunstMember.builder()
+					.memberId(data.getUserId())
+					.type(type.byteValue())
+					.bizUserId(data.getBizUserId())
+					.build());
 
 			if (effectRows != 1) {
 				log.error("记录云商通会员失败: 云商通会员id:{},业务用户id:{}", data.getUserId(), data.getBizUserId());
@@ -76,6 +80,11 @@ public class YunstApiImpl implements YunstApi {
 			log.error("云商通修改绑定手机失败, 业务用户id:{},旧电话:{},新电话:{},原因:{}", bizUserId, oldPhone, newPhone, tuple.right);
 		}
 		return tuple;
+	}
+
+	@Override
+	public YunstMemberInfoResp getMemberInfo(String accessToken, String bizUserId, Integer type) throws Exception {
+		return null;
 	}
 
 }
