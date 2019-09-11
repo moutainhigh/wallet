@@ -13,7 +13,13 @@ public class YunstMemberInfoResp {
 	private Object data;
 
 	@Data
-	public static class PersonInfoResult{
+	public static class MemberInfoResult {
+		@ApiModelProperty(value = "会员信息")
+		private Object memberInfo;
+	}
+
+	@Data
+	public static class PersonInfoResult {
 		@ApiModelProperty(value = "姓名")
 		private String name;
 		@ApiModelProperty(value = "地址")
@@ -55,7 +61,7 @@ public class YunstMemberInfoResp {
 	}
 
 	@Data
-	public static class CompanyInfoResult{
+	public static class CompanyInfoResult {
 		@ApiModelProperty(value = "企业名称")
 		private String companyName;
 		@ApiModelProperty(value = "企业地址")

@@ -75,7 +75,8 @@ public class YunstApiImpl implements YunstApi {
 	@Override
 	public Tuple<Boolean, String> modifyPhone(String accessToken, String bizUserId, Integer type, String oldPhone,
 			String newPhone, String verificationCode) throws Exception {
-		Tuple<Boolean, String> tuple = yunstUserHandler.modifyPhone(bizUserId, type, oldPhone, newPhone, verificationCode);
+		Tuple<Boolean, String> tuple = yunstUserHandler.modifyPhone(bizUserId, type, oldPhone, newPhone,
+				verificationCode);
 		if (!tuple.left) {
 			log.error("云商通修改绑定手机失败, 业务用户id:{},旧电话:{},新电话:{},原因:{}", bizUserId, oldPhone, newPhone, tuple.right);
 		}

@@ -32,11 +32,9 @@ public class YunstUserHandler {
 
 	@PostConstruct
 	public void init() {
-		YunClient
-			.configure(new YunConfig(configService.getYstServerUrl(), configService.getYstSysId(),
-				configService.getYstPassword(), configService.getYstAlias(),
-				configService.getYstVersion(), configService.getYstPfxPath(),
-				configService.getYstTlCertPath()));
+		YunClient.configure(new YunConfig(configService.getYstServerUrl(), configService.getYstSysId(),
+				configService.getYstPassword(), configService.getYstAlias(), configService.getYstVersion(),
+				configService.getYstPfxPath(), configService.getYstTlCertPath()));
 	}
 
 	/**
@@ -129,20 +127,21 @@ public class YunstUserHandler {
 	 */
 	public YunstMemberInfoResp getMemberInfo(String bizUserId, Integer type) throws Exception {
 		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
-		YunstBaseResp reponse = YunstGetMemberInfoReq.builder$()
-				.bizUserId(bizUserId)
-				.build()
-				.execute();
+		YunstBaseResp reponse = YunstGetMemberInfoReq.builder$().bizUserId(bizUserId).build().execute();
 
 		if (YunstBaseRespStatus.SUCCESS.getValue().equals(reponse.status)) {
-			if (type == 1){
-				YunstMemberInfoResp.CompanyInfoResult result = JsonUtil.toObject(reponse.getSignedValue(),
+			YunstMemberInfoResp.MemberInfoResult memberInfoResult = JsonUtil.toObject(reponse.getSignedValue(),
+					YunstMemberInfoResp.MemberInfoResult.class, objectMapper -> {
+						objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+					});
+			if (type == 1) {
+				YunstMemberInfoResp.CompanyInfoResult result = JsonUtil.toObject(JsonUtil.toJSON(memberInfoResult.getMemberInfo()),
 						YunstMemberInfoResp.CompanyInfoResult.class, objectMapper -> {
 							objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 						});
 				return YunstMemberInfoResp.builder().data(result).build();
-			}else{
-				YunstMemberInfoResp.PersonInfoResult result = JsonUtil.toObject(reponse.getSignedValue(),
+			} else {
+				YunstMemberInfoResp.PersonInfoResult result = JsonUtil.toObject(JsonUtil.toJSON(memberInfoResult.getMemberInfo()),
 						YunstMemberInfoResp.PersonInfoResult.class, objectMapper -> {
 							objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 						});
