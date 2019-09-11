@@ -4,6 +4,7 @@ import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.ResponseValue;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.wallet.server.api.YunstApi;
+import com.rfchina.wallet.server.bank.yunst.response.YunstMemberInfoResp;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import com.rfchina.wallet.server.bank.yunst.response.YunstCreateMemberResp;
 import io.swagger.annotations.Api;
@@ -84,14 +85,14 @@ public class YunstController {
 
 	@ApiOperation("云商通-查询会员信息")
 	@PostMapping(UrlConstant.YUNST_MODIFY_PHONE)
-	public ResponseValue<String> memberInfo(@RequestParam("access_token") String accessToken,
+	public ResponseValue<Object> memberInfo(@RequestParam("access_token") String accessToken,
 			@ApiParam(value = "业务用户id", required = true, example = "123") @RequestParam("biz_user_id") String bizUserId,
 			@ApiParam(value = "业务用户类型", required = true, example = "1") @RequestParam("type") Integer type)
 			throws Exception {
-		Tuple<Boolean, String> resp = yunstApi.modifyPhone(accessToken, bizUserId, type,oldPhone, newPhone, verificationCode);
-		if (!resp.left){
-			return new ResponseValue<>(EnumResponseCode.COMMON_FAILURE, resp.right);
+		YunstMemberInfoResp resp = yunstApi.getMemberInfo(accessToken, bizUserId, type);
+		if (resp.getData() == null) {
+			return new ResponseValue<>(EnumResponseCode.COMMON_FAILURE, resp.getErrorMsg());
 		}
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, "OK");
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, resp.getData());
 	}
 }

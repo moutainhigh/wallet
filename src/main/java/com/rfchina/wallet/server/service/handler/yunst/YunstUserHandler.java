@@ -135,11 +135,19 @@ public class YunstUserHandler {
 				.execute();
 
 		if (YunstBaseRespStatus.SUCCESS.getValue().equals(reponse.status)) {
-			YunstMemberInfoResp.CreateMemeberResult result = JsonUtil.toObject(reponse.getSignedValue(),
-					YunstMemberInfoResp.CreateMemeberResult.class, objectMapper -> {
-						objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-					});
-			return YunstMemberInfoResp.builder().data(result).build();
+			if (type == 1){
+				YunstMemberInfoResp.CompanyInfoResult result = JsonUtil.toObject(reponse.getSignedValue(),
+						YunstMemberInfoResp.CompanyInfoResult.class, objectMapper -> {
+							objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+						});
+				return YunstMemberInfoResp.builder().data(result).build();
+			}else{
+				YunstMemberInfoResp.PersonInfoResult result = JsonUtil.toObject(reponse.getSignedValue(),
+						YunstMemberInfoResp.PersonInfoResult.class, objectMapper -> {
+							objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+						});
+				return YunstMemberInfoResp.builder().data(result).build();
+			}
 		} else {
 			return YunstMemberInfoResp.builder().errorMsg(reponse.message).build();
 		}
