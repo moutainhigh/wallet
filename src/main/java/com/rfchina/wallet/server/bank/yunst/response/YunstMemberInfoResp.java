@@ -14,10 +14,44 @@ public class YunstMemberInfoResp {
 
 	@Data
 	public static class PersonInfoResult{
-		@ApiModelProperty(value = "云商通用户唯一标识")
+		@ApiModelProperty(value = "姓名")
+		private String name;
+		@ApiModelProperty(value = "地址")
+		private String address;
+		@ApiModelProperty(value = "用户状态")
+		private Long userState;
+		@ApiModelProperty(value = "云商通用户id")
 		private String userId;
-		@ApiModelProperty(value = "商户系统用户标识(个人用户:U+userId,企业用户:C+mchId)")
-		private String bizUserId;
+		@ApiModelProperty(value = "国家")
+		private String country;
+		@ApiModelProperty(value = "省份")
+		private String province;
+		@ApiModelProperty(value = "县市")
+		private String area;
+		@ApiModelProperty(value = "手机号码")
+		private String phone;
+		@ApiModelProperty(value = "身份证号码")
+		private String identityCardNo;
+		@ApiModelProperty(value = "是否绑定手机")
+		private Boolean isPhoneChecked;
+		@ApiModelProperty(value = "创建时间")
+		private String registerTime;
+		@ApiModelProperty(value = "创建ip")
+		private String registerIp;
+		@ApiModelProperty(value = "支付失败次数")
+		private String payFailAmount;
+		@ApiModelProperty(value = "是否进行实名认证")
+		private String isIdentityChecked;
+		@ApiModelProperty(value = "实名认证时间")
+		private String realNameTime;
+		@ApiModelProperty(value = "备注")
+		private String remark;
+		@ApiModelProperty(value = "访问终端类型")
+		private Long source;
+		@ApiModelProperty(value = "是否已设置支付密码")
+		private String isSetPayPwd;
+		@ApiModelProperty(value = "是否已签电子协议")
+		private String isSignContract;
 	}
 
 	@Data
@@ -64,8 +98,17 @@ public class YunstMemberInfoResp {
 		private String province;
 		@ApiModelProperty(value = "开户行所在市")
 		private String city;
-		@ApiModelProperty(value = "企业地址")
-		private String companyAddress;
+		@ApiModelProperty(value = "是否已签电子协议")
+		private Boolean isSignContract;
+		@ApiModelProperty(value = "审核状态")
+		private Long status;
+		@ApiModelProperty(value = "审核时间")
+		private String checkTime;
+		@ApiModelProperty(value = "备注")
+		private String remark;
+		@ApiModelProperty(value = "审核失败原因")
+		private String failReason;
+
 	}
 
 }
