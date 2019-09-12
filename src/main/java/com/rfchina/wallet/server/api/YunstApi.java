@@ -1,7 +1,7 @@
 package com.rfchina.wallet.server.api;
 
 import com.rfchina.platform.common.misc.Tuple;
-import com.rfchina.wallet.server.bank.yunst.response.YunstCreateMemberResp;
+import com.rfchina.wallet.server.bank.yunst.response.result.YunstCreateMemberResult;
 import com.rfchina.wallet.server.bank.yunst.response.YunstMemberInfoResp;
 
 public interface YunstApi {
@@ -13,7 +13,7 @@ public interface YunstApi {
 	 * @param type        业务用户类型 1-企业 2-个人
 	 * @return
 	 */
-	YunstCreateMemberResp createYunstMember(String accessToken, String bizUserId, Integer type) throws Exception;
+	YunstCreateMemberResult createYunstMember(String accessToken, String bizUserId, Integer type) throws Exception;
 
 	/**
 	 * 请求短信验证码
@@ -26,8 +26,8 @@ public interface YunstApi {
 	 * @return
 	 * @throws Exception
 	 */
-	Tuple<Boolean, String> requestSmsVerifyCode(String accessToken, String bizUserId, Integer type, String phone,
-			Integer bizType) throws Exception;
+//	Tuple<Boolean, String> requestSmsVerifyCode(String accessToken, String bizUserId, Integer type, String phone,
+//			Integer bizType) throws Exception;
 
 	/**
 	 * 绑定手机
@@ -40,8 +40,8 @@ public interface YunstApi {
 	 * @return
 	 * @throws Exception
 	 */
-	Tuple<Boolean, String> bindPhone(String accessToken, String bizUserId, Integer type, String phone,
-			String verificationCode) throws Exception;
+//	Tuple<Boolean, String> bindPhone(String accessToken, String bizUserId, Integer type, String phone,
+//			String verificationCode) throws Exception;
 
 	/**
 	 * 修改绑定手机
@@ -55,8 +55,8 @@ public interface YunstApi {
 	 * @return
 	 * @throws Exception
 	 */
-	Tuple<Boolean, String> modifyPhone(String accessToken, String bizUserId, Integer type, String oldPhone,
-			String newPhone, String verificationCode) throws Exception;
+//	Tuple<Boolean, String> modifyPhone(String accessToken, String bizUserId, Integer type, String oldPhone,
+//			String newPhone, String verificationCode) throws Exception;
 
 
 	/**
@@ -68,5 +68,5 @@ public interface YunstApi {
 	 * @return
 	 * @throws Exception
 	 */
-	YunstMemberInfoResp getMemberInfo(String accessToken, String bizUserId, Integer type) throws Exception;
+//	Object getMemberInfo(String accessToken, String bizUserId, Integer type) throws Exception;
 }

@@ -13,7 +13,7 @@ import lombok.ToString;
 public class YunstGetMemberInfoReq implements YunstBaseReq {
 
 	private static final long serialVersionUID = -5280141342950809426L;
-	@ApiModelProperty(value = "商户系统用户标识(个人用户:U+userId,企业用户:C+mchId)", required = true)
+	@ApiModelProperty(value = "商户系统用户标识(个人用户:U+userId,企业用户:M+mchId)", required = true)
 	private String bizUserId;
 
 	@Override

@@ -4,7 +4,6 @@ import com.allinpay.yunst.sdk.YunClient;
 import com.allinpay.yunst.sdk.bean.YunConfig;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.rfchina.platform.common.misc.ResponseCode;
-import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.platform.common.utils.Valuable;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
@@ -13,17 +12,19 @@ import com.rfchina.wallet.server.bank.yunst.request.YunstChangeBindPhoneReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstCreateMemberReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSMSVerificationCodeReq;
 import com.rfchina.wallet.server.bank.yunst.request.*;
-import com.rfchina.wallet.server.bank.yunst.response.YunstMemberInfoResp;
-import com.rfchina.wallet.server.bank.yunst.response.YunstBaseResp;
-import com.rfchina.wallet.server.bank.yunst.response.YunstCreateMemberResp;
+import com.rfchina.wallet.server.bank.yunst.response.result.*;
+import com.rfchina.wallet.server.bank.yunst.util.CommonGatewayException;
 import com.rfchina.wallet.server.bank.yunst.util.YunstTpl;
 import com.rfchina.wallet.server.service.ConfigService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.TimeZone;
 
+@Slf4j
 @Component
 @Import(YunstTpl.class)
 public class YunstUserHandler {
@@ -48,7 +49,7 @@ public class YunstUserHandler {
 	/**
 	 * 创建会员
 	 */
-	public YunstCreateMemberResp createMember(String bizUserId, Integer type) throws Exception {
+	public YunstCreateMemberResult createMember(String bizUserId, Integer type) throws Exception {
 		YunstMemberType memberType = YunstMemberType.COMPANY;
 		if (type == 2) {
 			memberType = YunstMemberType.PERSON;
@@ -60,15 +61,13 @@ public class YunstUserHandler {
 				.source(TERMINAL_TYPE)
 				.build();
 
-		return YunstCreateMemberResp.builder()
-				.data(yunstTpl.execute(req, YunstCreateMemberResp.CreateMemeberResult.class))
-				.build();
+		return yunstTpl.execute(req, YunstCreateMemberResult.class);
 	}
 
 	/**
 	 * 发送短信验证码
 	 */
-	public Tuple<Boolean, String> sendVerificationCode(String bizUserId, Integer type, String phone, Integer bizType)
+	public boolean sendVerificationCode(String bizUserId, Integer type, String phone, Integer bizType)
 			throws Exception {
 		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
 		YunstSMSVerificationCodeReq req = YunstSMSVerificationCodeReq.builder$()
@@ -77,17 +76,20 @@ public class YunstUserHandler {
 				.verificationCodeType(bizType.longValue())
 				.build();
 
-		YunstBaseResp resp = yunstTpl.execute(req, YunstBaseResp.class);
-		if (YunstBaseRespStatus.SUCCESS.getValue().equals(resp.status)) {
-			return new Tuple<>(true, null);
+		YunstSendVerificationCodeResult result = null;
+		try {
+			result = yunstTpl.execute(req, YunstSendVerificationCodeResult.class);
+		} catch (CommonGatewayException e) {
+			log.error("请求发送短信验证码失败,bizUserId:{},phone:{},bizType:{}",bizUserId,phone,bizType);
+			return false;
 		}
-		return new Tuple<>(false, resp.getMessage());
+		return true;
 	}
 
 	/**
 	 * 绑定手机
 	 */
-	public Tuple<Boolean, String> bindPhone(String bizUserId, Integer type, String phone, String verificationCode)
+	public boolean bindPhone(String bizUserId, Integer type, String phone, String verificationCode)
 			throws Exception {
 		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
 		YunstBindPhoneReq req = YunstBindPhoneReq.builder$()
@@ -96,17 +98,20 @@ public class YunstUserHandler {
 				.verificationCode(verificationCode)
 				.build();
 
-		YunstBaseResp resp = yunstTpl.execute(req, YunstBaseResp.class);
-		if (YunstBaseRespStatus.SUCCESS.getValue().equals(resp.status)) {
-			return new Tuple<>(true, null);
+		YunstBindPhoneResult result = null;
+		try {
+			result = yunstTpl.execute(req, YunstBindPhoneResult.class);
+		} catch (CommonGatewayException e) {
+			log.error("绑定手机失败,bizUserId:{},phone:{}",bizUserId,phone);
+			return false;
 		}
-		return new Tuple<>(false, resp.getMessage());
+		return true;
 	}
 
 	/**
 	 * 修改绑定手机
 	 */
-	public Tuple<Boolean, String> modifyPhone(String bizUserId, Integer type, String oldPhone, String newPhone,
+	public boolean modifyPhone(String bizUserId, Integer type, String oldPhone, String newPhone,
 			String verificationCode) throws Exception {
 		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
 		YunstChangeBindPhoneReq req = YunstChangeBindPhoneReq.builder$()
@@ -116,21 +121,43 @@ public class YunstUserHandler {
 				.newVerificationCode(verificationCode)
 				.build();
 
-		YunstBaseResp resp = yunstTpl.execute(req, YunstBaseResp.class);
-		if (YunstBaseRespStatus.SUCCESS.getValue().equals(resp.status)) {
-			return new Tuple<>(true, null);
+		YunstModifyPhoneResult result = null;
+		try {
+			result = yunstTpl.execute(req, YunstModifyPhoneResult.class);
+		} catch (CommonGatewayException e) {
+			log.error("修改绑定手机失败,bizUserId:{},oldPhone:{},newPhone:{}",bizUserId,oldPhone,newPhone);
+			return false;
 		}
-		return new Tuple<>(false, resp.getMessage());
+		return true;
 	}
 
 	/**
 	 * 获取会员信息
 	 */
-	public YunstMemberInfoResp getMemberInfo(String bizUserId, Integer type) throws Exception {
+	public Object getMemberInfo(String bizUserId, Integer type) throws Exception {
 		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
 		YunstGetMemberInfoReq req = YunstGetMemberInfoReq.builder$().bizUserId(bizUserId).build();
 
-		return yunstTpl.execute(req, YunstMemberInfoResp.class);
+		YunstMemberInfoResult memberInfoResult = null;
+		try {
+			memberInfoResult = yunstTpl.execute(req, YunstMemberInfoResult.class);
+
+			long memberType = memberInfoResult.getMemberType();
+			if (memberType == YunstMemberType.COMPANY.getValue()){
+				return JsonUtil.toObject(JsonUtil.toJSON(memberInfoResult.getMemberInfo()),YunstMemberInfoResult.CompanyInfoResult.class,objectMapper -> {
+					objectMapper.setTimeZone(TimeZone.getDefault());
+					objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+				});
+			}else {
+				return JsonUtil.toObject(JsonUtil.toJSON(memberInfoResult.getMemberInfo()),YunstMemberInfoResult.PersonInfoResult.class,objectMapper -> {
+					objectMapper.setTimeZone(TimeZone.getDefault());
+					objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+				});
+			}
+		} catch (CommonGatewayException e) {
+			log.error("获取会员信息,bizUserId:{}",bizUserId);
+			return null;
+		}
 	}
 
 	public enum YunstBaseRespStatus implements Valuable<String> {

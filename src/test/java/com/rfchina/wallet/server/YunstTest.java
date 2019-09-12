@@ -1,6 +1,5 @@
 package com.rfchina.wallet.server;
 
-import com.rfchina.wallet.server.bank.yunst.response.YunstMemberInfoResp;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
