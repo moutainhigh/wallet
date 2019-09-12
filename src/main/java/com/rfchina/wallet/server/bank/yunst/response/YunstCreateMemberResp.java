@@ -7,8 +7,6 @@ import lombok.Data;
 @Data
 @Builder
 public class YunstCreateMemberResp {
-	@ApiModelProperty(value = "错误信息")
-	private String errorMsg;
 	@ApiModelProperty(value = "结果数据")
 	private CreateMemeberResult data;
 

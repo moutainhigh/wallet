@@ -5,6 +5,7 @@ import com.rfchina.platform.common.misc.ResponseValue;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.wallet.server.api.YunstApi;
 import com.rfchina.wallet.server.bank.yunst.response.YunstMemberInfoResp;
+import com.rfchina.wallet.server.bank.yunst.util.CommonGatewayException;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import com.rfchina.wallet.server.bank.yunst.response.YunstCreateMemberResp;
 import io.swagger.annotations.Api;
@@ -27,9 +28,11 @@ public class YunstController {
 			@ApiParam(value = "业务用户id", required = true, example = "123") @RequestParam("biz_user_id") String bizUserId,
 			@ApiParam(value = "业务用户类型", required = true, example = "1") @RequestParam("type") Integer type)
 			throws Exception {
-		YunstCreateMemberResp resp = yunstApi.createYunstMember(accessToken, bizUserId, type);
-		if (resp.getData() == null) {
-			return new ResponseValue<>(EnumResponseCode.COMMON_FAILURE, resp.getErrorMsg());
+		YunstCreateMemberResp resp = null;
+		try {
+			resp = yunstApi.createYunstMember(accessToken, bizUserId, type);
+		} catch (CommonGatewayException e) {
+			return new ResponseValue<>(EnumResponseCode.COMMON_FAILURE.getValue(), e.getBankErrMsg());
 		}
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, resp.getData().getUserId());
 	}

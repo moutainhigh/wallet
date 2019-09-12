@@ -4,18 +4,24 @@ import com.rfchina.passport.token.EnumTokenType;
 import com.rfchina.passport.token.TokenVerify;
 import com.rfchina.platform.common.annotation.Log;
 import com.rfchina.platform.common.annotation.SignVerify;
+import com.rfchina.platform.common.exception.RfchinaException;
+import com.rfchina.platform.common.exception.RfchinaRuntimeException;
 import com.rfchina.platform.common.misc.ResponseCode;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.YunstMemberMapper;
+import com.rfchina.wallet.domain.misc.WalletResponseCode;
 import com.rfchina.wallet.domain.model.YunstMember;
 import com.rfchina.wallet.server.api.YunstApi;
 import com.rfchina.wallet.server.bank.yunst.response.YunstMemberInfoResp;
 import com.rfchina.wallet.server.bank.yunst.response.YunstCreateMemberResp;
+import com.rfchina.wallet.server.bank.yunst.util.CommonGatewayException;
 import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Date;
 
 @Slf4j
 @Component
@@ -34,10 +40,12 @@ public class YunstApiImpl implements YunstApi {
 		YunstCreateMemberResp response = yunstHandler.createMember(bizUserId, type);
 		if (response.getData() != null) {
 			YunstCreateMemberResp.CreateMemeberResult data = response.getData();
+			log.info("云商通创建会员成功: 云商通会员id:{},业务用户id:{}", data.getUserId(), data.getBizUserId());
 			int effectRows = yunstMemberMapper.insertSelective(YunstMember.builder()
 					.memberId(data.getUserId())
 					.type(type.byteValue())
 					.bizUserId(data.getBizUserId())
+					.createTime(new Date())
 					.build());
 
 			if (effectRows != 1) {

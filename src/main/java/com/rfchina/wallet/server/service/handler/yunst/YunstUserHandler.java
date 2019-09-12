@@ -40,11 +40,9 @@ public class YunstUserHandler {
 
 	@PostConstruct
 	public void init() {
-		YunClient
-			.configure(new YunConfig(configService.getYstServerUrl(), configService.getYstSysId(),
-				configService.getYstPassword(), configService.getYstAlias(),
-				configService.getYstVersion(), configService.getYstPfxPath(),
-				configService.getYstTlCertPath()));
+		YunClient.configure(new YunConfig(configService.getYstServerUrl(), configService.getYstSysId(),
+				configService.getYstPassword(), configService.getYstAlias(), configService.getYstVersion(),
+				configService.getYstPfxPath(), configService.getYstTlCertPath()));
 	}
 
 	/**
@@ -57,25 +55,27 @@ public class YunstUserHandler {
 		}
 		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
 		YunstCreateMemberReq req = YunstCreateMemberReq.builder$()
-			.bizUserId(bizUserId)
-			.memberType(memberType.getValue())
-			.source(TERMINAL_TYPE)
-			.build();
+				.bizUserId(bizUserId)
+				.memberType(memberType.getValue())
+				.source(TERMINAL_TYPE)
+				.build();
 
-		return yunstTpl.execute(req, YunstCreateMemberResp.class);
+		return YunstCreateMemberResp.builder()
+				.data(yunstTpl.execute(req, YunstCreateMemberResp.CreateMemeberResult.class))
+				.build();
 	}
 
 	/**
 	 * 发送短信验证码
 	 */
-	public Tuple<Boolean, String> sendVerificationCode(String bizUserId, Integer type, String phone,
-		Integer bizType) throws Exception {
+	public Tuple<Boolean, String> sendVerificationCode(String bizUserId, Integer type, String phone, Integer bizType)
+			throws Exception {
 		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
 		YunstSMSVerificationCodeReq req = YunstSMSVerificationCodeReq.builder$()
-			.bizUserId(bizUserId)
-			.phone(phone)
-			.verificationCodeType(bizType.longValue())
-			.build();
+				.bizUserId(bizUserId)
+				.phone(phone)
+				.verificationCodeType(bizType.longValue())
+				.build();
 
 		YunstBaseResp resp = yunstTpl.execute(req, YunstBaseResp.class);
 		if (YunstBaseRespStatus.SUCCESS.getValue().equals(resp.status)) {
@@ -87,14 +87,14 @@ public class YunstUserHandler {
 	/**
 	 * 绑定手机
 	 */
-	public Tuple<Boolean, String> bindPhone(String bizUserId, Integer type, String phone,
-		String verificationCode) throws Exception {
+	public Tuple<Boolean, String> bindPhone(String bizUserId, Integer type, String phone, String verificationCode)
+			throws Exception {
 		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
 		YunstBindPhoneReq req = YunstBindPhoneReq.builder$()
-			.bizUserId(bizUserId)
-			.phone(phone)
-			.verificationCode(verificationCode)
-			.build();
+				.bizUserId(bizUserId)
+				.phone(phone)
+				.verificationCode(verificationCode)
+				.build();
 
 		YunstBaseResp resp = yunstTpl.execute(req, YunstBaseResp.class);
 		if (YunstBaseRespStatus.SUCCESS.getValue().equals(resp.status)) {
@@ -106,16 +106,15 @@ public class YunstUserHandler {
 	/**
 	 * 修改绑定手机
 	 */
-	public Tuple<Boolean, String> modifyPhone(String bizUserId, Integer type, String oldPhone,
-		String newPhone,
-		String verificationCode) throws Exception {
+	public Tuple<Boolean, String> modifyPhone(String bizUserId, Integer type, String oldPhone, String newPhone,
+			String verificationCode) throws Exception {
 		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
 		YunstChangeBindPhoneReq req = YunstChangeBindPhoneReq.builder$()
-			.bizUserId(bizUserId)
-			.oldPhone(oldPhone)
-			.newPhone(newPhone)
-			.newVerificationCode(verificationCode)
-			.build();
+				.bizUserId(bizUserId)
+				.oldPhone(oldPhone)
+				.newPhone(newPhone)
+				.newVerificationCode(verificationCode)
+				.build();
 
 		YunstBaseResp resp = yunstTpl.execute(req, YunstBaseResp.class);
 		if (YunstBaseRespStatus.SUCCESS.getValue().equals(resp.status)) {
@@ -129,9 +128,7 @@ public class YunstUserHandler {
 	 */
 	public YunstMemberInfoResp getMemberInfo(String bizUserId, Integer type) throws Exception {
 		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
-		YunstGetMemberInfoReq req = YunstGetMemberInfoReq.builder$()
-			.bizUserId(bizUserId)
-			.build();
+		YunstGetMemberInfoReq req = YunstGetMemberInfoReq.builder$().bizUserId(bizUserId).build();
 
 		return yunstTpl.execute(req, YunstMemberInfoResp.class);
 	}
@@ -174,8 +171,7 @@ public class YunstUserHandler {
 
 	private String transferToYunstBizUserFormat(String bizUserId, Integer type) {
 		if (type != 1 && type != 2) {
-			throw new WalletResponseException(ResponseCode.EnumResponseCode.COMMON_INVALID_PARAMS,
-				"type");
+			throw new WalletResponseException(ResponseCode.EnumResponseCode.COMMON_INVALID_PARAMS, "type");
 		}
 		if (type == 2) {
 			return MEMBER_TYPE_PREFIX_PERSON + bizUserId;
