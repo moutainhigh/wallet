@@ -65,6 +65,28 @@ public class YunstUserHandler {
 	}
 
 	/**
+	 * 会员电子协议签约(生成前端H5 url)
+	 */
+	public String generateSignContractUrl(String bizUserId, Integer type, String jumpUrl, String backUrl)
+			throws Exception {
+		YunstMemberType memberType = YunstMemberType.COMPANY;
+		if (type == 2) {
+			memberType = YunstMemberType.PERSON;
+		}
+		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
+		YunstSignContractReq req = YunstSignContractReq.builder$()
+				.bizUserId(bizUserId)
+				.jumpUrl(jumpUrl)
+				.backUrl(backUrl)
+				.source(TERMINAL_TYPE)
+				.build();
+		String res = yunstTpl.signRequest(req);
+		String webParamUrl = configService.getSignContractUrl() + "?" + res;
+		log.info("webParamUrl: " + webParamUrl);
+		return webParamUrl;
+	}
+
+	/**
 	 * 发送短信验证码
 	 */
 	public boolean sendVerificationCode(String bizUserId, Integer type, String phone, Integer bizType)
@@ -80,7 +102,7 @@ public class YunstUserHandler {
 		try {
 			result = yunstTpl.execute(req, YunstSendVerificationCodeResult.class);
 		} catch (CommonGatewayException e) {
-			log.error("请求发送短信验证码失败,bizUserId:{},phone:{},bizType:{}",bizUserId,phone,bizType);
+			log.error("请求发送短信验证码失败,bizUserId:{},phone:{},bizType:{}", bizUserId, phone, bizType);
 			return false;
 		}
 		return true;
@@ -89,8 +111,7 @@ public class YunstUserHandler {
 	/**
 	 * 绑定手机
 	 */
-	public boolean bindPhone(String bizUserId, Integer type, String phone, String verificationCode)
-			throws Exception {
+	public boolean bindPhone(String bizUserId, Integer type, String phone, String verificationCode) throws Exception {
 		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
 		YunstBindPhoneReq req = YunstBindPhoneReq.builder$()
 				.bizUserId(bizUserId)
@@ -102,7 +123,7 @@ public class YunstUserHandler {
 		try {
 			result = yunstTpl.execute(req, YunstBindPhoneResult.class);
 		} catch (CommonGatewayException e) {
-			log.error("绑定手机失败,bizUserId:{},phone:{}",bizUserId,phone);
+			log.error("绑定手机失败,bizUserId:{},phone:{}", bizUserId, phone);
 			return false;
 		}
 		return true;
@@ -125,7 +146,7 @@ public class YunstUserHandler {
 		try {
 			result = yunstTpl.execute(req, YunstModifyPhoneResult.class);
 		} catch (CommonGatewayException e) {
-			log.error("修改绑定手机失败,bizUserId:{},oldPhone:{},newPhone:{}",bizUserId,oldPhone,newPhone);
+			log.error("修改绑定手机失败,bizUserId:{},oldPhone:{},newPhone:{}", bizUserId, oldPhone, newPhone);
 			return false;
 		}
 		return true;
@@ -143,21 +164,63 @@ public class YunstUserHandler {
 			memberInfoResult = yunstTpl.execute(req, YunstMemberInfoResult.class);
 
 			long memberType = memberInfoResult.getMemberType();
-			if (memberType == YunstMemberType.COMPANY.getValue()){
-				return JsonUtil.toObject(JsonUtil.toJSON(memberInfoResult.getMemberInfo()),YunstMemberInfoResult.CompanyInfoResult.class,objectMapper -> {
-					objectMapper.setTimeZone(TimeZone.getDefault());
-					objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-				});
-			}else {
-				return JsonUtil.toObject(JsonUtil.toJSON(memberInfoResult.getMemberInfo()),YunstMemberInfoResult.PersonInfoResult.class,objectMapper -> {
-					objectMapper.setTimeZone(TimeZone.getDefault());
-					objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-				});
+			if (memberType == YunstMemberType.COMPANY.getValue()) {
+				return JsonUtil.toObject(JsonUtil.toJSON(memberInfoResult.getMemberInfo()),
+						YunstMemberInfoResult.CompanyInfoResult.class, objectMapper -> {
+							objectMapper.setTimeZone(TimeZone.getDefault());
+							objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+						});
+			} else {
+				return JsonUtil.toObject(JsonUtil.toJSON(memberInfoResult.getMemberInfo()),
+						YunstMemberInfoResult.PersonInfoResult.class, objectMapper -> {
+							objectMapper.setTimeZone(TimeZone.getDefault());
+							objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+						});
 			}
 		} catch (CommonGatewayException e) {
-			log.error("获取会员信息,bizUserId:{}",bizUserId);
+			log.error("获取会员信息,bizUserId:{}", bizUserId);
 			return null;
 		}
+	}
+
+	/**
+	 * 个人实名认证
+	 */
+	public boolean personCertification(String bizUserId, Integer type, String realName, Long identityType,
+			String identityNo) throws Exception {
+		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
+		YunstPersonSetRealNameReq req = YunstPersonSetRealNameReq.builder$()
+				.bizUserId(bizUserId)
+				.isAuth(true)
+				.name(realName)
+				.identityType(identityType)
+				.identityNo(identityNo)
+				.build();
+
+		YunstPersonSetRealNameResult result = null;
+		try {
+			result = yunstTpl.execute(req, YunstPersonSetRealNameResult.class);
+		} catch (CommonGatewayException e) {
+			log.error("个人实名验证失败,bizUserId:{}", bizUserId);
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * 设置企业信息
+	 */
+	public YunstSetCompanyInfoResult setCompanyInfo(String bizUserId, Integer type, Boolean isAuth,
+			YunstSetCompanyInfoReq.CompanyBasicInfo companyBasicInfo) throws Exception {
+		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
+		YunstSetCompanyInfoReq req = YunstSetCompanyInfoReq.builder$()
+				.bizUserId(bizUserId)
+				.isAuth(isAuth)
+				.backUrl(configService.getYunstNotifybackUrl())
+				.companyBasicInfo(companyBasicInfo)
+				.build();
+
+		return yunstTpl.execute(req, YunstSetCompanyInfoResult.class);
 	}
 
 	public enum YunstBaseRespStatus implements Valuable<String> {

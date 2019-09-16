@@ -1,8 +1,6 @@
 package com.rfchina.wallet.server.api;
 
-import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstCreateMemberResult;
-import com.rfchina.wallet.server.bank.yunst.response.YunstMemberInfoResp;
 
 public interface YunstApi {
 	/**

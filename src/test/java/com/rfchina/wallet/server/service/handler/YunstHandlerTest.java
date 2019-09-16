@@ -1,11 +1,13 @@
 package com.rfchina.wallet.server.service.handler;
 
+import com.allinpay.yunst.sdk.util.RSAUtil;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.wallet.domain.model.GatewayTrans;
 import com.rfchina.wallet.domain.model.WalletApply;
 import com.rfchina.wallet.server.SpringBaseTest;
 import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstCreateMemberResult;
+import com.rfchina.wallet.server.bank.yunst.response.result.YunstPersonSetRealNameResult;
 import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.model.ext.PayTuple;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
@@ -70,7 +72,16 @@ public class YunstHandlerTest extends SpringBaseTest {
 		logStack(result);
 	}
 
-
+	@Test
+	public void getPersonCertification() throws Exception {
+		int type = "M".equals(randomPersonCompany())?1:2;
+		String bizUserId = "Test" + randomPersonCompany() + System.currentTimeMillis();
+		String realName = "邬海艳";
+		Long identityType = 1L;
+		String identityNo = RSAUtil.encrypt("362201198806205281");
+		boolean result = yunstUserHandler.personCertification(bizUserId, type, realName,identityType,identityNo);
+		logStack(result);
+	}
 
 	private String randomPersonCompany() {
 		return new Random().nextInt(2) < 1 ? "U" : "M";
