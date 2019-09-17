@@ -17,6 +17,7 @@ import com.rfchina.wallet.server.bank.yunst.util.CommonGatewayException;
 import com.rfchina.wallet.server.bank.yunst.util.YunstTpl;
 import com.rfchina.wallet.server.service.ConfigService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
@@ -30,6 +31,7 @@ import java.util.TimeZone;
 public class YunstUserHandler {
 
 	public static final Long TERMINAL_TYPE = 2L; // 终端类型 2-PC
+	public static final Long BIND_CARD_TYPE = 7L; // 绑卡方式 收银宝快捷支付签约（有银行范围） —支持收银宝快捷支付 —支持提现
 	public static final String MEMBER_TYPE_PREFIX_PERSON = "U";
 	public static final String MEMBER_TYPE_PREFIX_COMPANY = "C";
 
@@ -217,6 +219,52 @@ public class YunstUserHandler {
 				.build();
 
 		return yunstTpl.execute(req, YunstSetCompanyInfoResult.class);
+	}
+
+
+
+	/**
+	 * 申请绑定银行卡
+	 */
+	public YunstApplyBindBankCardResult applyBindBankCard(String bizUserId, Integer type,String cardNo, String name,String phone,Long identityType,
+			String identityNo,String validate,String cvv2) throws Exception {
+		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
+		YunstApplyBindBankCardReq.YunstApplyBindBankCardReqBuilder buider = YunstApplyBindBankCardReq.builder$()
+				.bizUserId(bizUserId)
+				.cardNo(cardNo)
+				.phone(phone)
+				.name(name)
+				.identityType(identityType)
+				.identityNo(identityNo)
+				.cardCheck(BIND_CARD_TYPE)
+				.validate(validate);
+		if (StringUtils.isNotBlank(cvv2)){
+			buider.cvv2(cvv2);
+		}else{
+			buider.isSafeCard(false);
+		}
+
+		return yunstTpl.execute(buider.build(), YunstApplyBindBankCardResult.class);
+	}
+
+
+	/**
+	 * 确认绑定银行卡
+	 */
+	public YunstBindBankCardResult bindBankCard(String bizUserId, Integer type,String tranceNum,String phone,String validate,String cvv2,String verificationCode) throws Exception {
+		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
+		YunstBindBankCardReq.YunstBindBankCardReqBuilder buider = YunstBindBankCardReq.builder$()
+				.bizUserId(bizUserId)
+				.tranceNum(tranceNum)
+				.phone(phone)
+				.validate(validate)
+				.verificationCode(verificationCode);
+		if (StringUtils.isNotBlank(cvv2)){
+			buider.cvv2(cvv2);
+		}
+
+
+		return yunstTpl.execute(buider.build(), YunstBindBankCardResult.class);
 	}
 
 	public enum YunstBaseRespStatus implements Valuable<String> {
