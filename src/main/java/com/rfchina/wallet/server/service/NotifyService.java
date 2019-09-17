@@ -22,6 +22,8 @@ public class NotifyService {
         if (YunstServiceName.MEMBER.getValue().equals(service)){
             if (YunstMethodName.VERIFY_RESULT.getValue().equals(methodName)){
                 this.handleVerfiyResult(params);
+            }else if (YunstMethodName.SIGN_CONTRACT.getValue().equals(methodName)){
+                this.handleSignContractResult(params);
             }else {
                 log.error("云商通回调,未知method参数:{}",methodName);
             }
@@ -44,7 +46,9 @@ public class NotifyService {
     }
 
 
-
+    private void handleSignContractResult(Map<String, String> params){
+        log.info("处理会员电子签约通知");
+    }
 
 
 
@@ -66,7 +70,8 @@ public class NotifyService {
 
 
     public enum YunstMethodName implements Valuable<String> {
-        VERIFY_RESULT("verifyResult");
+        VERIFY_RESULT("verifyResult"),
+        SIGN_CONTRACT("signContract");
 
         private String value;
 
@@ -79,4 +84,5 @@ public class NotifyService {
             return value;
         }
     }
+
 }

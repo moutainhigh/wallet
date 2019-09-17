@@ -67,17 +67,13 @@ public class YunstUserHandler {
 	/**
 	 * 会员电子协议签约(生成前端H5 url)
 	 */
-	public String generateSignContractUrl(String bizUserId, Integer type, String jumpUrl, String backUrl)
+	public String generateSignContractUrl(String bizUserId, Integer type)
 			throws Exception {
-		YunstMemberType memberType = YunstMemberType.COMPANY;
-		if (type == 2) {
-			memberType = YunstMemberType.PERSON;
-		}
 		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
 		YunstSignContractReq req = YunstSignContractReq.builder$()
 				.bizUserId(bizUserId)
-				.jumpUrl(jumpUrl)
-				.backUrl(backUrl)
+				.jumpUrl(configService.getResultJumpUrl())
+				.backUrl(configService.getYunstNotifybackUrl())
 				.source(TERMINAL_TYPE)
 				.build();
 		String res = yunstTpl.signRequest(req);

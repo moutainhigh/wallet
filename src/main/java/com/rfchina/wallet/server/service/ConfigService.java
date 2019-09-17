@@ -105,6 +105,8 @@ public class ConfigService {
 	private String ystVersion;
 	@Value("${yunst.tlCertPath}")
 	private String ystTlCertPath;
+	@Value("${yunst.jumpUrl}")
+	private String resultJumpUrl;
 	@Value("${yunst.notify.backUrl}")
 	private String yunstNotifybackUrl;
 	@Value("${yunst.signContract.gateway.url}")
