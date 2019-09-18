@@ -1,22 +1,16 @@
-package com.rfchina.wallet.server.bank.yunst.response;
+package com.rfchina.wallet.server.bank.yunst.response.result;
 
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Builder;
 import lombok.Data;
 
 @Data
-@Builder
-public class YunstMemberInfoResp {
-	@ApiModelProperty(value = "错误信息")
-	private String errorMsg;
-	@ApiModelProperty(value = "结果数据")
-	private Object data;
-
-	@Data
-	public static class MemberInfoResult {
-		@ApiModelProperty(value = "会员信息")
-		private Object memberInfo;
-	}
+public class YunstMemberInfoResult {
+	@ApiModelProperty(value = "商户系统用户标识(个人用户:U+userId,企业用户:M+mchId)")
+	private String bizUserId;
+	@ApiModelProperty(value = "会员类型")
+	private Long memberType;
+	@ApiModelProperty(value = "会员信息")
+	private Object memberInfo;
 
 	@Data
 	public static class PersonInfoResult {
@@ -114,7 +108,5 @@ public class YunstMemberInfoResp {
 		private String remark;
 		@ApiModelProperty(value = "审核失败原因")
 		private String failReason;
-
 	}
-
 }

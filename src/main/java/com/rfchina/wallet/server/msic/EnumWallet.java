@@ -524,6 +524,24 @@ public class EnumWallet {
 		}
 	}
 
+	public enum ChannelType implements Valuable<Byte> {
+		PUDONG((byte) 1, "浦发银企直连"),
+		YUNST((byte) 2, "通联云商通");
+
+		private Byte value;
+		private String valueName;
+
+		ChannelType(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}
+	}
+
 
 	/**
 	 * 交易状态

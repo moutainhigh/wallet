@@ -9,16 +9,17 @@ import lombok.ToString;
 @Builder(toBuilder = true, builderMethodName = "builder$")
 @Data
 @ToString(callSuper = true)
-@ApiModel(description = "4.1.2 发送短信验证码")
-public class YunstSMSVerificationCodeReq implements YunstBaseReq {
-
-	private static final long serialVersionUID = 1076123197140587252L;
+@ApiModel(description = "4.1.4 会员电子协议签约")
+public class YunstSignContractReq implements YunstBaseReq {
+	private static final long serialVersionUID = 118332437377003408L;
 	@ApiModelProperty(value = "商户系统用户标识(个人用户:U+userId,企业用户:M+mchId)", required = true)
 	private String bizUserId;
-	@ApiModelProperty(value = "电话号码", required = true)
-	private String phone;
-	@ApiModelProperty(value = "验证码类型 9-绑定手机", required = true)
-	private Long verificationCodeType;
+	@ApiModelProperty(value = "签订之后，跳转返回的页面地址", required = true)
+	private String jumpUrl;
+	@ApiModelProperty(value = "后台通知地址", required = true)
+	private String backUrl;
+	@ApiModelProperty(value = "访问终端类型 1-Mobile,2-PC", required = true)
+	private Long source = 2L;
 
 	@Override
 	public String getServcieName() {
@@ -27,6 +28,6 @@ public class YunstSMSVerificationCodeReq implements YunstBaseReq {
 
 	@Override
 	public String getMethodName() {
-		return "sendVerificationCode";
+		return "signContract";
 	}
 }

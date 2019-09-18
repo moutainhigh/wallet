@@ -9,7 +9,9 @@ import com.rfchina.wallet.domain.model.GatewayTrans;
 import com.rfchina.wallet.domain.model.WalletApply;
 import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
 import com.rfchina.wallet.server.bank.yunst.request.GetOrderDetailReq;
+import com.rfchina.wallet.server.bank.yunst.request.YunstQueryBalanceReq;
 import com.rfchina.wallet.server.bank.yunst.response.GetOrderDetailResp;
+import com.rfchina.wallet.server.bank.yunst.response.result.YunstQueryBalanceResult;
 import com.rfchina.wallet.server.bank.yunst.util.CommonGatewayException;
 import com.rfchina.wallet.server.bank.yunst.util.YunstTpl;
 import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
@@ -22,12 +24,14 @@ import com.rfchina.wallet.server.service.GatewayTransService;
 import com.rfchina.wallet.server.service.handler.common.EBankHandler;
 import java.util.Date;
 import java.util.List;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class YunstBizHandler implements EBankHandler {
+@Slf4j
+public class YunstBizHandler  extends YunstBaseHandler implements EBankHandler  {
 
 	@Autowired
 	private YunstTpl yunstTpl;
@@ -91,6 +95,10 @@ public class YunstBizHandler implements EBankHandler {
 				trans.setErrCode(e.getBankErrCode());
 				trans.setSysErrMsg(e.getBankErrMsg());
 				gatewayTransService.updateTrans(trans);
+
+				log.info("", e);
+			} catch (Exception e) {
+				log.error("", e);
 			}
 
 		});
@@ -101,4 +109,18 @@ public class YunstBizHandler implements EBankHandler {
 	public PayStatusResp onAskErr(WalletApply walletLog, IGatewayError err) {
 		return null;
 	}
+
+	/**
+	 * 查询余额
+	 */
+	public YunstQueryBalanceResult queryBalance(String bizUserId, Integer type, String accountSetNo) throws Exception {
+		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
+		YunstQueryBalanceReq req = YunstQueryBalanceReq.builder$()
+			.bizUserId(bizUserId)
+			.accountSetNo(accountSetNo)
+			.build();
+
+		return yunstTpl.execute(req, YunstQueryBalanceResult.class);
+	}
+
 }

@@ -130,4 +130,8 @@ public class UrlConstant {
 	 * 云商通查询会员信息
 	 */
 	public static final String YUNST_MEMBER_INFO = VERSION + "/m/yunst/member_info";
+	/**
+	 * 云商通统一回调
+	 */
+	public static final String YUNST_NOTIFY = VERSION + "/yunst/notify";
 }
