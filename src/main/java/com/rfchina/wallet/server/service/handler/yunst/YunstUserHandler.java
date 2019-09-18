@@ -241,4 +241,14 @@ public class YunstUserHandler extends YunstBaseHandler {
 		return yunstTpl.execute(buider.build(), YunstBindBankCardResult.class);
 	}
 
+	/**
+	 * 解除绑定银行卡
+	 */
+	public YunstUnBindBankCardResult unbindBankCard(String bizUserId, Integer type, String cardNo) throws Exception {
+		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
+		YunstUnBindBankCardReq req = YunstUnBindBankCardReq.builder$().bizUserId(bizUserId).cardNo(cardNo).build();
+
+		return yunstTpl.execute(req, YunstUnBindBankCardResult.class);
+	}
+
 }

@@ -30,20 +30,20 @@ public class YunstController {
 	@Autowired
 	private NotifyService notifyService;
 
-	@ApiOperation("云商通-创建会员")
-	@PostMapping(UrlConstant.YUNST_CREATE_MEMBER)
-	public ResponseValue<String> createYunstMember(@RequestParam("access_token") String accessToken,
-			@ApiParam(value = "业务用户id", required = true, example = "123") @RequestParam("biz_user_id") String bizUserId,
-			@ApiParam(value = "业务用户类型", required = true, example = "1") @RequestParam("type") Integer type)
-			throws Exception {
-		YunstCreateMemberResult result = null;
-		try {
-			result = yunstApi.createYunstMember(accessToken, bizUserId, type);
-		} catch (CommonGatewayException e) {
-			return new ResponseValue<>(EnumResponseCode.COMMON_FAILURE.getValue(), e.getBankErrMsg());
-		}
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result.getUserId());
-	}
+//	@ApiOperation("云商通-创建会员")
+//	@PostMapping(UrlConstant.YUNST_CREATE_MEMBER)
+//	public ResponseValue<String> createYunstMember(@RequestParam("access_token") String accessToken,
+//			@ApiParam(value = "业务用户id", required = true, example = "123") @RequestParam("biz_user_id") String bizUserId,
+//			@ApiParam(value = "业务用户类型", required = true, example = "1") @RequestParam("type") Integer type)
+//			throws Exception {
+//		YunstCreateMemberResult result = null;
+//		try {
+//			result = yunstApi.createYunstMember(accessToken, bizUserId, type);
+//		} catch (CommonGatewayException e) {
+//			return new ResponseValue<>(EnumResponseCode.COMMON_FAILURE.getValue(), e.getBankErrMsg());
+//		}
+//		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result.getUserId());
+//	}
 
 //	@ApiOperation("云商通-请求短信验证码")
 //	@PostMapping(UrlConstant.YUNST_SMS_VERIFY_CODE)
