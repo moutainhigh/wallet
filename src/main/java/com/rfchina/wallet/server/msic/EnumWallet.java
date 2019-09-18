@@ -541,4 +541,46 @@ public class EnumWallet {
 			return value;
 		}
 	}
+
+
+	/**
+	 * 交易状态
+	 */
+	public enum YunstOrderStatus implements Valuable<Long> {
+		WAITING_PAY(1L, "未支付"),
+		FAIL(3L, "交易失败"),
+		SUCC(4L, "交易成功"),
+		SUCC_AND_REFUND(5L, "交易成功-发生退款"),
+		CLOSE(6L, "关闭"),
+		HANDLING(99L, "进行中");
+
+		private Long value;
+		private String valueName;
+
+		YunstOrderStatus(Long value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Long getValue() {
+			return value;
+		}
+
+
+		public WalletApplyStatus toApplyStatus() {
+			switch (this) {
+				case SUCC:
+					return WalletApplyStatus.SUCC;
+				case SUCC_AND_REFUND:
+					return WalletApplyStatus.SUCC;
+				case FAIL:
+					return WalletApplyStatus.FAIL;
+				case CLOSE:
+					return WalletApplyStatus.FAIL;
+				default:
+					return WalletApplyStatus.PROCESSING;
+			}
+		}
+	}
 }

@@ -9,6 +9,7 @@ import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EnumUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
+import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletLevel;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.BankCode;
@@ -50,6 +51,7 @@ import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyStatus;
 import com.rfchina.wallet.server.service.CacheService;
 import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.GatewayTransService;
+import com.rfchina.wallet.server.service.handler.common.EBankHandler;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -110,13 +112,10 @@ public class Handler8800 implements EBankHandler {
 	@Autowired
 	private GatewayTransService gatewayTransService;
 
-	private EBankHandler next;
-
 
 	@Override
-	public boolean isSupportWalletType(Byte walletType) {
-//		return WalletType.COMPANY.getValue().byteValue() == walletType;
-		return true;
+	public boolean isSupportWalletLevel(Byte walletType) {
+		return EnumWalletLevel.JUNIOR.getValue().byteValue() == walletType;
 	}
 
 	@Override
@@ -207,22 +206,8 @@ public class Handler8800 implements EBankHandler {
 	}
 
 	@Override
-	public List<Tuple<WalletApply, GatewayTrans>> updatePayStatus(String batchNo) {
-		log.info("开始更新批次号 [{}]", batchNo);
-		walletApplyDao.incTryTimes(batchNo, DateUtil.addSecs(new Date(),
-			configService.getNextRoundSec()));
-
-		List<WalletApply> walletApplies = walletApplyDao.selectByBatchNo(batchNo
-			, WalletApplyStatus.PROCESSING.getValue());
-		// 如果没有处理中，则结束
-		if (walletApplies.isEmpty()) {
-			return new ArrayList<>();
-		}
-
-		List<Tuple<WalletApply, GatewayTrans>> applyTuples = walletApplies.stream().map(apply -> {
-			GatewayTrans trans = gatewayTransService.selOrCrtTrans(apply);
-			return new Tuple<>(apply, trans);
-		}).collect(Collectors.toList());
+	public List<Tuple<WalletApply, GatewayTrans>> updatePayStatus(
+		List<Tuple<WalletApply, GatewayTrans>> applyTuples) {
 
 		Tuple<WalletApply, GatewayTrans> firstTuple = applyTuples.get(0);
 		GatewayTrans firstTrans = firstTuple.right;
@@ -256,7 +241,8 @@ public class Handler8800 implements EBankHandler {
 		} catch (Exception e) {
 			log.error("银企直连-网关支付状态查询错误", e);
 			IGatewayError err = ExceptionUtil.explain(e);
-			walletApplies.forEach(walletApply -> {
+			applyTuples.forEach(tuple -> {
+				WalletApply walletApply = tuple.left;
 				if (WalletApplyStatus.PROCESSING.getValue() == walletApply.getStatus()) {
 					GatewayTrans gatewayTrans = gatewayTransService.selOrCrtTrans(walletApply);
 					gatewayTrans.setStage(err.getTransCode());
@@ -308,7 +294,7 @@ public class Handler8800 implements EBankHandler {
 							status = WalletApplyStatus.parsePuDong8804(rs.getTransStatus());
 						}
 						walletApply.setStatus(status.getValue());
-						if(StringUtil.isNotBlank(rs.getTransDate())) {
+						if (StringUtil.isNotBlank(rs.getTransDate())) {
 							Date bizTime = DateUtil
 								.parse(rs.getTransDate(), DateUtil.SHORT_DTAE_PATTERN);
 							walletApply.setBizTime(bizTime);

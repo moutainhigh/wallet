@@ -1,7 +1,8 @@
-package com.rfchina.wallet.server.service.handler.pudong;
+package com.rfchina.wallet.server.service.handler.common;
 
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
+import com.rfchina.wallet.server.service.handler.pudong.Handler8800;
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,18 +26,18 @@ public class HandlerHelper {
 		rootHandler = handler8800;
 	}
 
-	public EBankHandler selectByWalletType(Byte walletType) {
+	public EBankHandler selectByWalletLevel(Byte walletLevel) {
 		EBankHandler currHandler = rootHandler;
 
 		while (currHandler != null) {
-			if (currHandler.isSupportWalletType(walletType)) {
+			if (currHandler.isSupportWalletLevel(walletLevel)) {
 				return currHandler;
 			}
 			currHandler = currHandler.getNext();
 		}
 
 		throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_HANDLER_NOT_FOUND,
-			"type = " + walletType);
+			"type = " + walletLevel);
 	}
 
 	public EBankHandler selectByMethod(Byte refMethod) {
