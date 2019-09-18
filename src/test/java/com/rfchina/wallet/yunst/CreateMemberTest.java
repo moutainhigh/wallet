@@ -15,21 +15,23 @@ public class CreateMemberTest extends SpringBaseTest {
 
 	private ConfigService configService;
 
-	@Test
-	public void lanch() throws Exception {
-		YunstBaseResp reponse = YunstCreateMemberReq.builder$()
-			.bizUserId("FHT" + System.currentTimeMillis()).memberType(2L).source(2L).build()
-			.execute();
+//	@Test
+//	public void lanch() throws Exception {
+//		YunstBaseResp reponse = YunstCreateMemberReq.builder$()
+//			.bizUserId("FHT" + System.currentTimeMillis()).memberType(2L).source(2L).build()
+//			.execute();
+//
+//		if ("OK".equals(reponse.status)) {
+//			YunstCreateMemberResp.CreateMemeberResult resp = JsonUtil
+//				.toObject(reponse.getSignedValue(), YunstCreateMemberResp.CreateMemeberResult.class,
+//					objectMapper -> {
+//						objectMapper.configure(
+//							DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+//					});
+//
+//			System.out.println(resp);
+//		}
+//	}
 
-		if ("OK".equals(reponse.status)) {
-			YunstCreateMemberResp.CreateMemeberResult resp = JsonUtil
-				.toObject(reponse.getSignedValue(), YunstCreateMemberResp.CreateMemeberResult.class,
-					objectMapper -> {
-						objectMapper.configure(
-							DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-					});
 
-			System.out.println(resp);
-		}
-	}
 }

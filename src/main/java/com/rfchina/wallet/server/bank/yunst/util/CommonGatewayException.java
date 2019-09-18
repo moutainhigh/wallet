@@ -2,7 +2,9 @@ package com.rfchina.wallet.server.bank.yunst.util;
 
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.misc.WalletResponseCode;
+import lombok.Getter;
 
+@Getter
 public class CommonGatewayException extends WalletResponseException {
 
 	/**

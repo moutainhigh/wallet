@@ -1,4 +1,4 @@
-package com.rfchina.wallet.server.service.handler.pudong;
+package com.rfchina.wallet.server.service.handler.common;
 
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.wallet.domain.model.GatewayTrans;
@@ -17,7 +17,7 @@ import java.util.List;
  */
 public interface EBankHandler {
 
-	boolean isSupportWalletType(Byte walletType);
+	boolean isSupportWalletLevel(Byte walletType);
 
 	boolean isSupportMethod(Byte method);
 
@@ -25,9 +25,14 @@ public interface EBankHandler {
 
 	Tuple<GatewayMethod, PayTuple> pay(List<WalletApply> payInReqs) throws Exception;
 
-	List<Tuple<WalletApply, GatewayTrans>> updatePayStatus(String batchNo);
-
-	EBankHandler getNext();
+	List<Tuple<WalletApply, GatewayTrans>> updatePayStatus(
+		List<Tuple<WalletApply, GatewayTrans>> applyTuples);
 
 	PayStatusResp onAskErr(WalletApply walletLog, IGatewayError err);
+
+	EBankHandler next = null;
+
+	default EBankHandler getNext() {
+		return next;
+	}
 }
