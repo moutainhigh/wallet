@@ -223,11 +223,12 @@ public class YunstHandlerTest extends SpringBaseTest {
 		assertNotNull(yunstApplyBindBankCardResult.getTranceNum());
 		logStack(yunstApplyBindBankCardResult);
 
-		System.out.println("请输入验证码到 /opt/verifyCode.txt 文件");
-		String oldVerificationCode = new String(FileUtil.read("/opt/verifyCode.txt"),"utf-8");
+		String verifyCodePath = System.getProperty("user.dir") + "/src/test/verifyCode";
+		System.out.println("请输入验证码到" + verifyCodePath + "文件");
+		String oldVerificationCode = new String(FileUtil.read(verifyCodePath),"utf-8");
 		String verificationCode = "";
 		while (true){
-			verificationCode = new String(FileUtil.read("/opt/verifyCode.txt"),"utf-8");
+			verificationCode = new String(FileUtil.read(verifyCodePath),"utf-8");
 			if (verificationCode.equals(oldVerificationCode)){
 				TimeUnit.SECONDS.sleep(5);
 			}else {
@@ -241,7 +242,6 @@ public class YunstHandlerTest extends SpringBaseTest {
 				verificationCode);
 		logStack(yunstBindBankCardResult);
 	}
-
 
 	private String randomPersonCompany(Integer type) {
 		if (type == null) {
