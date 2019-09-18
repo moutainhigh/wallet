@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rfchina.platform.common.json.ObjectSetter;
 import com.rfchina.platform.common.misc.ResponseCode;
 import com.rfchina.platform.common.utils.JsonUtil;
+import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.server.bank.yunst.request.YunstBaseReq;
 import com.rfchina.wallet.server.bank.yunst.response.YunstBaseResp;
