@@ -29,12 +29,8 @@ import com.rfchina.wallet.server.adapter.UserAdapter;
 import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
 import com.rfchina.wallet.server.bank.pudong.domain.predicate.ExactErrPredicate;
 import com.rfchina.wallet.server.bank.pudong.domain.util.ExceptionUtil;
-import com.rfchina.wallet.server.mapper.ext.GatewayTransExtDao;
-import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
-import com.rfchina.wallet.server.mapper.ext.WalletCompanyExtDao;
-import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
-import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
-import com.rfchina.wallet.server.mapper.ext.WalletUserExtDao;
+import com.rfchina.wallet.server.bank.yunst.response.result.YunstCreateMemberResult;
+import com.rfchina.wallet.server.mapper.ext.*;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.PayTuple;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
@@ -47,6 +43,7 @@ import com.rfchina.wallet.server.msic.EnumWallet.WalletStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletType;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
 import com.rfchina.wallet.server.service.handler.common.EBankHandler;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -57,6 +54,9 @@ import java.util.Optional;
 
 import java.util.stream.Collectors;
 import javax.mail.internet.MimeMessage;
+
+import com.rfchina.wallet.server.service.handler.yunst.YunstBaseHandler;
+import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jetty.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,6 +117,11 @@ public class WalletService {
 	@Autowired
 	private GatewayTransExtDao gatewayTransDao;
 
+	@Autowired
+	private YunstUserHandler yunstUserHandler;
+
+	@Autowired
+	private WalletChannelExtDao walletChannelDao;
 
 	/**
 	 * 查询出佣结果
@@ -134,17 +139,14 @@ public class WalletService {
 
 		List<WalletApply> walletApplies = walletApplyDao.selectByExample(example);
 		if (walletApplies.isEmpty()) {
-			throw new RfchinaResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST
-				, batchNo + "_" + bizNo);
+			throw new RfchinaResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST, batchNo + "_" + bizNo);
 		}
 
 		// 查询支付单对应交易
-		List<Long> tranIds = walletApplies.stream().map(apply -> apply.getCurrTransId())
-			.collect(Collectors.toList());
+		List<Long> tranIds = walletApplies.stream().map(apply -> apply.getCurrTransId()).collect(Collectors.toList());
 		List<GatewayTrans> gatewayTrans = gatewayTransService.getTransIds(tranIds);
 		Map<String, GatewayTrans> transMap = gatewayTrans.stream()
-			.collect(
-				Collectors.toMap(trans -> trans.getWalletApplyId().toString(), trans -> trans));
+				.collect(Collectors.toMap(trans -> trans.getWalletApplyId().toString(), trans -> trans));
 
 		return walletApplies.stream().map(walletApply -> {
 
@@ -175,8 +177,7 @@ public class WalletService {
 		log.info("重做问题单 [{}]", walletApplyId);
 		WalletApply walletApply = walletApplyExtDao.selectByPrimaryKey(walletApplyId);
 		if (walletApply == null) {
-			throw new RfchinaResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST
-				, walletApplyId.toString());
+			throw new RfchinaResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST, walletApplyId.toString());
 		}
 
 		if (walletApply.getStatus().byteValue() != WalletApplyStatus.REDO.getValue()) {
@@ -197,26 +198,23 @@ public class WalletService {
 		List<String> batchNos = walletApplyExtDao.selectUnSendBatchNo(batchSize);
 		batchNos.forEach(batchNo -> {
 
-			int c = walletApplyExtDao.updateLock(batchNo, LockStatus.UNLOCK.getValue(),
-				LockStatus.LOCKED.getValue());
+			int c = walletApplyExtDao.updateLock(batchNo, LockStatus.UNLOCK.getValue(), LockStatus.LOCKED.getValue());
 			if (c <= 0) {
 				log.error("锁定记录失败, batchNo = {}", batchNo);
 			} else {
 				log.info("开始更新批次号 [{}]", batchNo);
 				try {
-					List<WalletApply> walletApplies = walletApplyExtDao.selectByBatchNo(batchNo
-						, WalletApplyStatus.SENDING.getValue());
+					List<WalletApply> walletApplies = walletApplyExtDao.selectByBatchNo(batchNo,
+							WalletApplyStatus.SENDING.getValue());
 					if (StringUtils.isEmpty(batchNo) || walletApplies.isEmpty()) {
 						return;
 					}
 
 					for (WalletApply walletApply : walletApplies) {
 
-						WalletCard walletCard = walletCardDao
-							.selectByDef(walletApply.getWalletId());
+						WalletCard walletCard = walletCardDao.selectByDef(walletApply.getWalletId());
 						if (walletCard == null) {
-							log.warn("钱包[{}]没有绑定银行卡，跳过申请单[{}]", walletApply.getWalletId(),
-								walletApply.getId());
+							log.warn("钱包[{}]没有绑定银行卡，跳过申请单[{}]", walletApply.getWalletId(), walletApply.getId());
 							return;
 						}
 						fillCardInfo(walletApply, walletCard);
@@ -238,13 +236,11 @@ public class WalletService {
 							walletApplyExtDao.updateByPrimaryKeySelective(walletApply);
 
 							// 更新交易记录
-							GatewayTrans gatewayTrans = gatewayTransService
-								.selOrCrtTrans(walletApply);
+							GatewayTrans gatewayTrans = gatewayTransService.selOrCrtTrans(walletApply);
 							gatewayTrans.setAcceptNo(payInResp.getAcceptNo());
 							gatewayTrans.setPacketId(payInResp.getPacketId());
 							gatewayTrans.setElecChequeNo(
-								payInResp.getElecMap()
-									.get(gatewayTrans.getWalletApplyId().toString()));
+									payInResp.getElecMap().get(gatewayTrans.getWalletApplyId().toString()));
 							gatewayTrans.setRefMethod(method.getValue());
 							gatewayTrans.setLanchTime(new Date());
 							gatewayTransService.updateTrans(gatewayTrans);
@@ -261,21 +257,19 @@ public class WalletService {
 								}
 							}
 						}
-//						if (err instanceof UnknownError) {
+						//						if (err instanceof UnknownError) {
 						log.error("银行网关支付错误", e);
-//						}
+						//						}
 					}
 				} catch (Exception e) {
 					log.error("", e);
 				} finally {
-					walletApplyExtDao.updateLock(batchNo, LockStatus.LOCKED.getValue(),
-						LockStatus.UNLOCK.getValue());
+					walletApplyExtDao.updateLock(batchNo, LockStatus.LOCKED.getValue(), LockStatus.UNLOCK.getValue());
 				}
 			}
 		});
 
 	}
-
 
 	/**
 	 * 卡信息填入钱包申请
@@ -290,7 +284,6 @@ public class WalletService {
 		walletApplyDao.updateByPrimaryKeySelective(walletApply);
 	}
 
-
 	/**
 	 * 定时更新支付状态
 	 */
@@ -303,8 +296,8 @@ public class WalletService {
 
 		List<Tuple<WalletApply, GatewayTrans>> result = new ArrayList<>();
 		for (String batchNo : batchNos) {
-			List<WalletApply> walletApplies = walletApplyDao.selectByBatchNo(batchNo
-				, WalletApplyStatus.PROCESSING.getValue());
+			List<WalletApply> walletApplies = walletApplyDao.selectByBatchNo(batchNo,
+					WalletApplyStatus.PROCESSING.getValue());
 			// 如果没有处理中，则结束
 			if (walletApplies.isEmpty()) {
 				continue;
@@ -316,13 +309,11 @@ public class WalletService {
 			}).collect(Collectors.toList());
 
 			// 选择处理器
-			Byte level = walletApplies.stream().map(WalletApply::getWalletLevel).distinct().findFirst()
-				.orElse(null);
+			Byte level = walletApplies.stream().map(WalletApply::getWalletLevel).distinct().findFirst().orElse(null);
 			EBankHandler handler = handlerHelper.selectByWalletLevel(level);
 			try {
 				log.info("开始更新批次号 [{}]", batchNo);
-				walletApplyDao.incTryTimes(batchNo, DateUtil.addSecs(new Date(),
-					configService.getNextRoundSec()));
+				walletApplyDao.incTryTimes(batchNo, DateUtil.addSecs(new Date(), configService.getNextRoundSec()));
 				List<Tuple<WalletApply, GatewayTrans>> tuples = handler.updatePayStatus(applyTuples);
 				result.addAll(tuples);
 			} catch (Exception e) {
@@ -330,26 +321,23 @@ public class WalletService {
 			}
 		}
 
-		log.info("更新批次状态，批次数量= {}，更新笔数= {}，批次号={}", batchNos.size(), result.size(),
-			JSON.toJSONString(batchNos));
+		log.info("更新批次状态，批次数量= {}，更新笔数= {}，批次号={}", batchNos.size(), result.size(), JSON.toJSONString(batchNos));
 		log.info("scheduler: 结束更新支付状态[银企直连]");
 
 		if (result == null || result.size() == 0) {
 			return new ArrayList<>();
 		}
 
-		return result.stream()
-			.map(rs -> {
-				WalletApply apply = rs.left;
-				GatewayTrans trans = rs.right;
-				PayStatusResp resp = BeanUtil.newInstance(apply, PayStatusResp.class);
-				resp.setErrCode(trans.getErrCode());
-				resp.setUserErrMsg(trans.getUserErrMsg());
-				resp.setSysErrMsg(trans.getSysErrMsg());
-				resp.setEndTime(trans.getEndTime());
-				return resp;
-			})
-			.collect(Collectors.toList());
+		return result.stream().map(rs -> {
+			WalletApply apply = rs.left;
+			GatewayTrans trans = rs.right;
+			PayStatusResp resp = BeanUtil.newInstance(apply, PayStatusResp.class);
+			resp.setErrCode(trans.getErrCode());
+			resp.setUserErrMsg(trans.getUserErrMsg());
+			resp.setSysErrMsg(trans.getSysErrMsg());
+			resp.setEndTime(trans.getEndTime());
+			return resp;
+		}).collect(Collectors.toList());
 	}
 
 	/**
@@ -363,27 +351,50 @@ public class WalletService {
 
 		StringBuilder builder = new StringBuilder();
 		builder.append("<table border='1'>")
-			.append("<tr>")
-			.append("<td>").append("流水").append("</td>")
-			.append("<td>").append("业务号").append("</td>")
-			.append("<td>").append("金额").append("</td>")
-			.append("<td>").append("错误原因").append("</td>")
-			.append("<td>").append("下单时间").append("</td>")
-			.append("<td>").append("备注").append("</td>")
-			.append("</tr>");
+				.append("<tr>")
+				.append("<td>")
+				.append("流水")
+				.append("</td>")
+				.append("<td>")
+				.append("业务号")
+				.append("</td>")
+				.append("<td>")
+				.append("金额")
+				.append("</td>")
+				.append("<td>")
+				.append("错误原因")
+				.append("</td>")
+				.append("<td>")
+				.append("下单时间")
+				.append("</td>")
+				.append("<td>")
+				.append("备注")
+				.append("</td>")
+				.append("</tr>");
 		for (WalletApply walletApply : walletApplies) {
 			GatewayTrans trans = gatewayTransService.selOrCrtTrans(walletApply);
 			BigDecimal amount = new BigDecimal(walletApply.getAmount());
 			amount = amount.divide(new BigDecimal("100"), 2, RoundingMode.DOWN);
 			builder.append("<tr>")
-				.append("<td>").append(walletApply.getId()).append("</td>")
-				.append("<td>").append(walletApply.getBizNo()).append("</td>")
-				.append("<td>").append(amount).append("</td>")
-				.append("<td>").append(trans.getSysErrMsg()).append("</td>")
-				.append("<td>").append(DateUtil.formatDate(walletApply.getCreateTime()))
-				.append("</td>").append("<td>").append(JSON.toJSONString(walletApply))
-				.append("</td>")
-				.append("</tr>");
+					.append("<td>")
+					.append(walletApply.getId())
+					.append("</td>")
+					.append("<td>")
+					.append(walletApply.getBizNo())
+					.append("</td>")
+					.append("<td>")
+					.append(amount)
+					.append("</td>")
+					.append("<td>")
+					.append(trans.getSysErrMsg())
+					.append("</td>")
+					.append("<td>")
+					.append(DateUtil.formatDate(walletApply.getCreateTime()))
+					.append("</td>")
+					.append("<td>")
+					.append(JSON.toJSONString(walletApply))
+					.append("</td>")
+					.append("</tr>");
 		}
 		builder.append("</table>");
 
@@ -391,8 +402,7 @@ public class WalletService {
 		String msg = builder.toString();
 		sendEmail(title, msg, configService.getNotifyDevEmail());
 
-		List<Long> ids = walletApplies.stream().map(walletApply -> walletApply.getId())
-			.collect(Collectors.toList());
+		List<Long> ids = walletApplies.stream().map(walletApply -> walletApply.getId()).collect(Collectors.toList());
 		if (!ids.isEmpty()) {
 			walletApplyExtDao.updateNotified(ids, NotifyType.DEVELOPER.getValue());
 		}
@@ -410,38 +420,59 @@ public class WalletService {
 		StringBuilder builder = new StringBuilder();
 		builder.append("注意：先确定问题单的失败原因，属于不可能成功的终态，再重新发起").append("</br>");
 		builder.append("<table border='1'>")
-			.append("<tr>")
-			.append("<td>").append("流水").append("</td>")
-			.append("<td>").append("业务号").append("</td>")
-			.append("<td>").append("金额").append("</td>")
-			.append("<td>").append("错误原因").append("</td>")
-			.append("<td>").append("下单时间").append("</td>")
-			.append("<td>").append("备注").append("</td>")
-			.append("</tr>");
+				.append("<tr>")
+				.append("<td>")
+				.append("流水")
+				.append("</td>")
+				.append("<td>")
+				.append("业务号")
+				.append("</td>")
+				.append("<td>")
+				.append("金额")
+				.append("</td>")
+				.append("<td>")
+				.append("错误原因")
+				.append("</td>")
+				.append("<td>")
+				.append("下单时间")
+				.append("</td>")
+				.append("<td>")
+				.append("备注")
+				.append("</td>")
+				.append("</tr>");
 
 		for (WalletApply walletApply : walletApplies) {
 			GatewayTrans trans = gatewayTransService.selOrCrtTrans(walletApply);
 			BigDecimal amount = new BigDecimal(walletApply.getAmount());
 			amount = amount.divide(new BigDecimal("100"), 2, RoundingMode.DOWN);
 			builder.append("<tr>")
-				.append("<td>").append(walletApply.getId()).append("</td>")
-				.append("<td>").append(walletApply.getBizNo()).append("</td>")
-				.append("<td>").append(amount).append("</td>")
-				.append("<td>").append(trans.getSysErrMsg()).append("</td>")
-				.append("<td>").append(DateUtil.formatDate(walletApply.getCreateTime()))
-				.append("</td>")
-				.append("<td>").append("常见失败进入重新发起通道").append("</td>")
-				.append("</tr>");
+					.append("<td>")
+					.append(walletApply.getId())
+					.append("</td>")
+					.append("<td>")
+					.append(walletApply.getBizNo())
+					.append("</td>")
+					.append("<td>")
+					.append(amount)
+					.append("</td>")
+					.append("<td>")
+					.append(trans.getSysErrMsg())
+					.append("</td>")
+					.append("<td>")
+					.append(DateUtil.formatDate(walletApply.getCreateTime()))
+					.append("</td>")
+					.append("<td>")
+					.append("常见失败进入重新发起通道")
+					.append("</td>")
+					.append("</tr>");
 		}
 		builder.append("</table>");
 
-		String title = String
-			.format("*******[业务邮件][银企直连][%s]转账失败，处理主账户/客户问题后，手动重新发起", configService.getEnv());
+		String title = String.format("*******[业务邮件][银企直连][%s]转账失败，处理主账户/客户问题后，手动重新发起", configService.getEnv());
 		String msg = builder.toString();
 		sendEmail(title, msg, configService.getNotifyBizEmail());
 
-		List<Long> ids = walletApplies.stream().map(walletApply -> walletApply.getId())
-			.collect(Collectors.toList());
+		List<Long> ids = walletApplies.stream().map(walletApply -> walletApply.getId()).collect(Collectors.toList());
 		if (!ids.isEmpty()) {
 			walletApplyExtDao.updateNotified(ids, NotifyType.BUSINESS.getValue());
 		}
@@ -481,8 +512,7 @@ public class WalletService {
 
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		if (wallet == null) {
-			throw new RfchinaResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST
-				, String.valueOf(walletId));
+			throw new RfchinaResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST, String.valueOf(walletId));
 		}
 
 		if (WalletType.COMPANY.getValue().byteValue() == wallet.getType()) {
@@ -495,16 +525,14 @@ public class WalletService {
 
 		WalletCard walletCard = walletCardDao.selectByDef(walletId);
 
-		return builder.wallet(wallet).defWalletCard(walletCard)
-			.bankCardCount(walletCardDao.count(walletId)).build();
+		return builder.wallet(wallet).defWalletCard(walletCard).bankCardCount(walletCardDao.count(walletId)).build();
 	}
 
 	public WalletInfoResp queryWalletInfoByUserId(Long userId) {
 		WalletUser walletUser = walletUserDao.selectByPrimaryKey(userId);
 
 		if (walletUser == null) {
-			throw new RfchinaResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST,
-				"user_id");
+			throw new RfchinaResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST, "user_id");
 		}
 
 		return queryWalletInfo(walletUser.getWalletId());
@@ -516,17 +544,18 @@ public class WalletService {
 	public Wallet createWallet(Byte type, String title, Byte source) {
 
 		Wallet wallet = Wallet.builder()
-			.type(type)
-			.title(title)
-			.walletBalance(0L)
-			.rechargeAmount(0L)
-			.rechargeCount(0)
-			.payAmount(0L)
-			.payCount(0)
-			.source(source)
-			.status(WalletStatus.WAIT_AUDIT.getValue())
-			.createTime(new Date())
-			.build();
+				.type(type)
+				.title(title)
+				.walletBalance(0L)
+				.rechargeAmount(0L)
+				.rechargeCount(0)
+				.payAmount(0L)
+				.payCount(0)
+				.source(source)
+				.status(WalletStatus.WAIT_AUDIT.getValue())
+				.createTime(new Date())
+				.level(EnumDef.EnumWalletLevel.SENIOR.getValue())
+				.build();
 		walletDao.insertSelective(wallet);
 
 		return wallet;
@@ -535,14 +564,13 @@ public class WalletService {
 	/**
 	 * 查詢钱包流水
 	 *
-	 * @param walletId 钱包ID
+	 * @param walletId  钱包ID
 	 * @param startTime 开始时间
-	 * @param endTime 结束时间
+	 * @param endTime   结束时间
 	 */
-	public Pagination<WalletApply> walletApplyList(@ParamValid(nullable = false) Long walletId,
-		Date startTime, Date endTime,
-		@ParamValid(min = 1, max = SymbolConstant.QUERY_LIMIT) int limit,
-		@ParamValid(min = 0) long offset, Boolean stat) {
+	public Pagination<WalletApply> walletApplyList(@ParamValid(nullable = false) Long walletId, Date startTime,
+			Date endTime, @ParamValid(min = 1, max = SymbolConstant.QUERY_LIMIT) int limit,
+			@ParamValid(min = 0) long offset, Boolean stat) {
 		Date queryStartTime = null;
 
 		if (null != startTime) {
@@ -555,14 +583,16 @@ public class WalletService {
 			queryEndTime = DateUtil.getDate(endTime);
 		}
 
-		List<WalletApply> data = walletApplyDao.selectList(walletId, queryStartTime, queryEndTime,
-			null, limit, offset);
-		long total = Optional.ofNullable(stat).orElse(false) ? walletApplyDao.selectCount(
-			walletId, queryStartTime, queryEndTime, null) : 0L;
+		List<WalletApply> data = walletApplyDao.selectList(walletId, queryStartTime, queryEndTime, null, limit,
+				offset);
+		long total = Optional.ofNullable(stat).orElse(false) ? walletApplyDao.selectCount(walletId, queryStartTime,
+				queryEndTime, null) : 0L;
 
-		return new Pagination.PaginationBuilder<WalletApply>().offset(offset).pageLimit(limit)
-			.data(data)
-			.total(total).build();
+		return new Pagination.PaginationBuilder<WalletApply>().offset(offset)
+				.pageLimit(limit)
+				.data(data)
+				.total(total)
+				.build();
 	}
 
 	/**
@@ -577,19 +607,19 @@ public class WalletService {
 	/**
 	 * 绑定对工银行卡
 	 *
-	 * @param walletId 钱包id
-	 * @param bankCode 银行代码
+	 * @param walletId    钱包id
+	 * @param bankCode    银行代码
 	 * @param bankAccount 银行帐号
 	 * @param depositName 开户名
-	 * @param isDef 是否默认银行卡: 1:是，2：否
-	 * @param telephone 预留手机号
+	 * @param isDef       是否默认银行卡: 1:是，2：否
+	 * @param telephone   预留手机号
 	 */
 	public WalletCardExt bindBankCard(@ParamValid(nullable = false) Long walletId,
-		@ParamValid(nullable = false, min = 12, max = 12) String bankCode,
-		@ParamValid(nullable = false, min = 20, max = 32) String bankAccount,
-		@ParamValid(nullable = false, min = 1, max = 256) String depositName,
-		@EnumParamValid(valuableEnumClass = EnumDef.EnumDefBankCard.class) Integer isDef,
-		@ParamValid(pattern = RegexUtil.REGEX_MOBILE) String telephone) {
+			@ParamValid(nullable = false, min = 12, max = 12) String bankCode,
+			@ParamValid(nullable = false, min = 20, max = 32) String bankAccount,
+			@ParamValid(nullable = false, min = 1, max = 256) String depositName,
+			@EnumParamValid(valuableEnumClass = EnumDef.EnumDefBankCard.class) Integer isDef,
+			@ParamValid(pattern = RegexUtil.REGEX_MOBILE) String telephone) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		if (null == wallet) {
 			throw new WalletResponseException(EnumWalletResponseCode.WALLET_ACCOUNT_NOT_EXIST);
@@ -597,37 +627,35 @@ public class WalletService {
 
 		BankCode bankCodeResult = bankCodeDao.selectByBankCode(bankCode);
 		if (null == bankCodeResult) {
-			throw new RfchinaResponseException(EnumResponseCode.COMMON_INVALID_PARAMS,
-				"bank_code");
+			throw new RfchinaResponseException(EnumResponseCode.COMMON_INVALID_PARAMS, "bank_code");
 		}
 
 		//更新已绑定的银行卡状态为已解绑
-		int effectRows = walletCardDao
-			.updateWalletCard(walletId, EnumDef.EnumCardBindStatus.UNBIND.getValue(),
-				EnumDef.EnumCardBindStatus.BIND.getValue(), null,
-				EnumDef.EnumDefBankCard.NO.getValue());
+		int effectRows = walletCardDao.updateWalletCard(walletId, EnumDef.EnumCardBindStatus.UNBIND.getValue(),
+				EnumDef.EnumCardBindStatus.BIND.getValue(), null, EnumDef.EnumDefBankCard.NO.getValue());
 
 		//首次绑定银行卡
-		int firstBind = (0 == effectRows) ? EnumDef.FirstBindBankCard.YES.getValue()
-			: EnumDef.FirstBindBankCard.NO.getValue();
+		int firstBind =
+				(0 == effectRows) ? EnumDef.FirstBindBankCard.YES.getValue() : EnumDef.FirstBindBankCard.NO.getValue();
 
 		Date now = new Date();
 
-		WalletCard walletCard = WalletCard.builder().walletId(walletId).bankAccount(bankAccount)
-			.bankCode(bankCode)
-			.bankName(bankCodeResult.getClassName())
-			.depositName(depositName)
-			.depositBank(bankCodeResult.getBankName())
-			.isDef(isDef.byteValue())
-			.isPublic(EnumDef.EnumPublicAccount.YES.getValue().byteValue())
-			.telephone(telephone)
-			.lastUpdTime(now)
-			.build();
+		WalletCard walletCard = WalletCard.builder()
+				.walletId(walletId)
+				.bankAccount(bankAccount)
+				.bankCode(bankCode)
+				.bankName(bankCodeResult.getClassName())
+				.depositName(depositName)
+				.depositBank(bankCodeResult.getBankName())
+				.isDef(isDef.byteValue())
+				.isPublic(EnumDef.EnumPublicAccount.YES.getValue().byteValue())
+				.telephone(telephone)
+				.lastUpdTime(now)
+				.build();
 
 		effectRows = walletCardDao.insertSelective(walletCard);
 		if (effectRows < 1) {
-			log.error("绑定银行卡失败, wallet: {}, effectRows: {}", JsonUtil.toJSON(wallet),
-				effectRows);
+			log.error("绑定银行卡失败, wallet: {}, effectRows: {}", JsonUtil.toJSON(wallet), effectRows);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 		}
 
@@ -656,7 +684,7 @@ public class WalletService {
 	 * 查询银行支行列表
 	 *
 	 * @param classCode 类别编码
-	 * @param areaCode 地区编码
+	 * @param areaCode  地区编码
 	 */
 	public List<Bank> bankList(String classCode, String areaCode) {
 		return bankCodeDao.selectBankList(classCode, areaCode);
@@ -675,8 +703,7 @@ public class WalletService {
 	/**
 	 * 富慧通审核通过个人商家钱包
 	 */
-	public void activeWalletPerson(Long walletId, String name, Byte idType, String idNo,
-		Long auditType) {
+	public void activeWalletPerson(Long walletId, String name, Byte idType, String idNo, Long auditType) {
 
 		WalletPerson walletPerson = walletPersonDao.selectByWalletId(walletId);
 
@@ -717,5 +744,31 @@ public class WalletService {
 		walletDao.updateActiveStatus(walletId, auditType);
 	}
 
-
+	/**
+	 * 开通高级钱包
+	 */
+	public WalletChannel createSeniorWallet(Integer channelType, String bizUserId, Integer bizUserType,
+			Long walletId) {
+		WalletChannel.WalletChannelBuilder builder = WalletChannel.builder()
+				.channelType(channelType.byteValue())
+				.status((byte) 1)
+				.walletId(walletId)
+				.createTime(new Date());
+		if (channelType == 2) {
+			Tuple<YunstCreateMemberResult, YunstBaseHandler.YunstMemberType> member = null;
+			try {
+				member = yunstUserHandler.createMember(bizUserId, bizUserType);
+			} catch (Exception e) {
+				log.error("开通高级钱包失败, channelType: {}, bizUserId: {},bizUserType: {}, walletId: {}", channelType,
+						bizUserId, bizUserType, walletId);
+				throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+			}
+			builder.bizUserId(member.left.getBizUserId())
+					.channelUserId(member.left.getUserId())
+					.memberType(member.right.getValue().byteValue());
+		}
+		WalletChannel walletChannel = builder.build();
+		walletChannelDao.insertSelective(walletChannel);
+		return walletChannel;
+	}
 }

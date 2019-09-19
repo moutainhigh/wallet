@@ -29,6 +29,7 @@ import com.rfchina.wallet.server.api.WalletApi;
 import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
+import com.rfchina.wallet.server.msic.EnumWallet;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyStatus;
 import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.JuniorWalletService;
@@ -68,21 +69,19 @@ public class WalletApiImpl implements WalletApi {
 	private WalletApplyExtDao walletApplyExtDao;
 
 	@Log
-	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
 	@SignVerify
 	@Override
-	public List<PayStatusResp> queryWalletApply(String accessToken,
-		@ParamValid(nullable = true) String bizNo,
-		@ParamValid(nullable = true) String batchNo) {
+	public List<PayStatusResp> queryWalletApply(String accessToken, @ParamValid(nullable = true) String bizNo,
+			@ParamValid(nullable = true) String batchNo) {
 		return walletService.queryWalletApply(bizNo, batchNo);
 	}
 
 	@Log
-	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
 	@SignVerify
 	@Override
-	public void redoWalletApply(String accessToken,
-		@ParamValid(nullable = false) Long walletLogId) {
+	public void redoWalletApply(String accessToken, @ParamValid(nullable = false) Long walletLogId) {
 
 		String lockName = "redoWalletApply：" + walletLogId;
 		boolean succ = lock.acquireLock(lockName, 60, 0, 1);
@@ -93,8 +92,7 @@ public class WalletApiImpl implements WalletApi {
 				lock.unLock(lockName);
 			}
 		} else {
-			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_REDO_DUPLICATE,
-				walletLogId.toString());
+			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_REDO_DUPLICATE, walletLogId.toString());
 		}
 	}
 
@@ -138,12 +136,11 @@ public class WalletApiImpl implements WalletApi {
 		boolean succ = lock.acquireLock(lockName, 600, 0, 1);
 		if (succ) {
 			try {
-				List<WalletApply> walletApplys = walletApplyExtDao
-					.selectByStatusNotNotified(WalletApplyStatus.WAIT_DEAL.getValue(), 200);
+				List<WalletApply> walletApplys = walletApplyExtDao.selectByStatusNotNotified(
+						WalletApplyStatus.WAIT_DEAL.getValue(), 200);
 				walletService.notifyDeveloper(walletApplys);
 
-				walletApplys = walletApplyExtDao
-					.selectByStatusNotNotified(WalletApplyStatus.REDO.getValue(), 200);
+				walletApplys = walletApplyExtDao.selectByStatusNotNotified(WalletApplyStatus.REDO.getValue(), 200);
 				walletService.notifyBusiness(walletApplys);
 			} finally {
 				lock.unLock(lockName);
@@ -153,18 +150,16 @@ public class WalletApiImpl implements WalletApi {
 		}
 	}
 
-
 	@Log
-	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
 	@SignVerify
 	@Override
-	public WalletInfoResp queryWalletInfo(String accessToken,
-		@ParamValid(nullable = false) Long walletId) {
+	public WalletInfoResp queryWalletInfo(String accessToken, @ParamValid(nullable = false) Long walletId) {
 		return walletService.queryWalletInfo(walletId);
 	}
 
 	@Log
-	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
 	@SignVerify
 	@Override
 	public WalletInfoResp queryWalletInfoByUserId(String accessToken, Long userId) {
@@ -173,29 +168,25 @@ public class WalletApiImpl implements WalletApi {
 
 	@Log
 	@PostMq(routingKey = MqConstant.WALLET_CREATE)
-	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
 	@SignVerify
 	@Override
-	public Wallet createWallet(String accessToken,
-		@ParamValid(nullable = false) Byte type,
-		@ParamValid(nullable = false) String title,
-		@ParamValid(nullable = false) Byte source) {
+	public Wallet createWallet(String accessToken, @ParamValid(nullable = false) Byte type,
+			@ParamValid(nullable = false) String title, @ParamValid(nullable = false) Byte source) {
 		return walletService.createWallet(type, title, source);
 	}
 
 	@Log
-	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
 	@SignVerify
 	@Override
-	public Pagination<WalletApply> walletApplyList(String accessToken, Long walletId,
-		Date startTime,
-		Date endTime, int limit, long offset, Boolean stat) {
-		return walletService.walletApplyList(walletId, startTime, endTime,
-			limit, offset, stat);
+	public Pagination<WalletApply> walletApplyList(String accessToken, Long walletId, Date startTime, Date endTime,
+			int limit, long offset, Boolean stat) {
+		return walletService.walletApplyList(walletId, startTime, endTime, limit, offset, stat);
 	}
 
 	@Log
-	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
 	@SignVerify
 	@Override
 	public List<WalletCard> bankCardList(String accessToken, Long walletId) {
@@ -203,15 +194,13 @@ public class WalletApiImpl implements WalletApi {
 	}
 
 	@Log
-	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
 	@SignVerify
 	@Override
 	@PostMq(routingKey = MqConstant.WALLET_BANKCARD_BIND)
-	public WalletCardExt bindBankCard(String accessToken, Long walletId, String bankCode,
-		String bankAccount, String depositName, Integer isDef,
-		String telephone) {
-		return walletService.bindBankCard(walletId, bankCode, bankAccount, depositName,
-			isDef, telephone);
+	public WalletCardExt bindBankCard(String accessToken, Long walletId, String bankCode, String bankAccount,
+			String depositName, Integer isDef, String telephone) {
+		return walletService.bindBankCard(walletId, bankCode, bankAccount, depositName, isDef, telephone);
 	}
 
 	@Override
@@ -226,7 +215,7 @@ public class WalletApiImpl implements WalletApi {
 
 	@Override
 	public List<Bank> bankList(@ParamValid(nullable = false) String classCode,
-		@ParamValid(nullable = false) String areaCode) {
+			@ParamValid(nullable = false) String areaCode) {
 		return walletService.bankList(classCode, areaCode);
 	}
 
@@ -236,16 +225,15 @@ public class WalletApiImpl implements WalletApi {
 	}
 
 	@Log
-	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
 	@SignVerify
 	@Override
-	public void activeWalletPerson(Long walletId, String name, Byte idType, String idNo,
-		Long auditType) {
+	public void activeWalletPerson(Long walletId, String name, Byte idType, String idNo, Long auditType) {
 		walletService.activeWalletPerson(walletId, name, idType, idNo, auditType);
 	}
 
 	@Log
-	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
 	@SignVerify
 	@Override
 	public void activeWalletCompany(Long walletId, String companyName, Long auditType) {
@@ -253,45 +241,41 @@ public class WalletApiImpl implements WalletApi {
 	}
 
 	@Log
-	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
 	@SignVerify
 	@Override
-	public ResponseValue sendVerifyCode(String accessToken,
-		Long userId, @ParamValid(pattern = RegexUtil.REGEX_MOBILE) String mobile,
-		@EnumParamValid(valuableEnumClass = com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType.class) Integer type,
-		@ParamValid(nullable = false) String verifyToken, String redirectUrl, String ip) {
+	public ResponseValue sendVerifyCode(String accessToken, Long userId,
+			@ParamValid(pattern = RegexUtil.REGEX_MOBILE) String mobile,
+			@EnumParamValid(valuableEnumClass = com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType.class)
+					Integer type, @ParamValid(nullable = false) String verifyToken, String redirectUrl, String ip) {
 
-		com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType enumSendSmsType = EnumUtil
-			.parse(com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType.class, type);
+		com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType enumSendSmsType = EnumUtil.parse(
+				com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType.class, type);
 
-		if (enumSendSmsType
-			== com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType.VERIFY_BINDING_ACCOUNT) {
+		if (enumSendSmsType == com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType.VERIFY_BINDING_ACCOUNT) {
 			//检查已绑定钱包的手机号
 			WalletUser walletUser = Optional.ofNullable(walletUserDao.selectByMobile(mobile))
-				.orElseThrow(() -> new WalletResponseException(
-					WalletResponseCode.EnumWalletResponseCode.WALLET_NOT_BINDING));
+					.orElseThrow(() -> new WalletResponseException(
+							WalletResponseCode.EnumWalletResponseCode.WALLET_NOT_BINDING));
 
-			if (walletUser.getStatus()
-				== com.rfchina.wallet.domain.misc.EnumDef.EnumWalletStatus.DISABLE.getValue()
-				.byteValue()) {
-				throw new WalletResponseException(
-					WalletResponseCode.EnumWalletResponseCode.WALLET_DISABLE);
+			if (walletUser.getStatus() == com.rfchina.wallet.domain.misc.EnumDef.EnumWalletStatus.DISABLE.getValue()
+					.byteValue()) {
+				throw new WalletResponseException(WalletResponseCode.EnumWalletResponseCode.WALLET_DISABLE);
 			}
 		}
 		//直接发送短信
-		return userService
-			.sendSmsVerifyCode(com.rfchina.wallet.domain.misc.EnumDef.EnumVerifyCodeType.LOGIN,
-				mobile, verifyToken, redirectUrl, enumSendSmsType.msg(), ip);
+		return userService.sendSmsVerifyCode(com.rfchina.wallet.domain.misc.EnumDef.EnumVerifyCodeType.LOGIN, mobile,
+				verifyToken, redirectUrl, enumSendSmsType.msg(), ip);
 	}
 
 	@Log
-	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
 	@SignVerify
 	@Override
 	public WalletUser loginWithVerifyCode(String accessToken,
-		@ParamValid(pattern = RegexUtil.REGEX_MOBILE) String mobile,
-		@ParamValid(nullable = false, min = 1, max = 6) String verifyCode,
-		@EnumParamValid(valuableEnumClass = EnumDef.EnumVerifyType.class) Integer type, String ip) {
+			@ParamValid(pattern = RegexUtil.REGEX_MOBILE) String mobile,
+			@ParamValid(nullable = false, min = 1, max = 6) String verifyCode,
+			@EnumParamValid(valuableEnumClass = EnumDef.EnumVerifyType.class) Integer type, String ip) {
 		//通过短信验证码登录
 		userService.userLoginWithVerifyCode(mobile, verifyCode, ip);
 
@@ -303,4 +287,15 @@ public class WalletApiImpl implements WalletApi {
 
 		return walletUser;
 	}
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
+	@SignVerify
+	@Override
+	public WalletChannel createSeniorWallet(String accessToken,
+			@EnumParamValid(valuableEnumClass = EnumWallet.ChannelType.class) Integer channelType, String bizUserId,
+			@EnumParamValid(valuableEnumClass = EnumDef.BizUserType.class)Integer bizUserType, Long walletId) {
+		return walletService.createSeniorWallet(channelType, bizUserId, bizUserType, walletId);
+	}
+
 }

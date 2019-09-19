@@ -1,6 +1,7 @@
 package com.rfchina.wallet.server.service.handler.yunst;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.server.bank.yunst.request.YunstBindPhoneReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstChangeBindPhoneReq;
@@ -29,7 +30,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 创建会员
 	 */
-	public YunstCreateMemberResult createMember(String bizUserId, Integer type) throws Exception {
+	public Tuple<YunstCreateMemberResult,YunstMemberType> createMember(String bizUserId, Integer type) throws Exception {
 		YunstMemberType memberType = YunstMemberType.COMPANY;
 		if (type == 2) {
 			memberType = YunstMemberType.PERSON;
@@ -41,7 +42,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 				.source(TERMINAL_TYPE)
 				.build();
 
-		return yunstTpl.execute(req, YunstCreateMemberResult.class);
+		return new Tuple<>(yunstTpl.execute(req, YunstCreateMemberResult.class),memberType);
 	}
 
 	/**

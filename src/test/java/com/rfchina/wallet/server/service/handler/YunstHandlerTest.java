@@ -6,6 +6,7 @@ import com.rfchina.platform.common.utils.FileUtil;
 import com.rfchina.wallet.server.SpringBaseTest;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
 import com.rfchina.wallet.server.bank.yunst.response.result.*;
+import com.rfchina.wallet.server.service.handler.yunst.YunstBaseHandler;
 import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
 import com.rfchina.wallet.server.utils.IdCardGenerator;
 import com.rfchina.wallet.server.utils.RandomUtils;
@@ -28,7 +29,7 @@ public class YunstHandlerTest extends SpringBaseTest {
 	@Test
 	public void createMember() throws Exception {
 		Tuple<String, Integer> bizUserTuple = genBizUser(null);
-		YunstCreateMemberResult member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
+		Tuple<YunstCreateMemberResult, YunstBaseHandler.YunstMemberType> member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
 
 		assertNotNull(member);
 		logStack(member);
@@ -38,7 +39,7 @@ public class YunstHandlerTest extends SpringBaseTest {
 	@Test
 	public void sendSmsVerificationCode() throws Exception {
 		Tuple<String, Integer> bizUserTuple = genBizUser(2);
-		YunstCreateMemberResult member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
+		Tuple<YunstCreateMemberResult, YunstBaseHandler.YunstMemberType> member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
 		assertNotNull(member);
 		logStack(member);
 		int type = bizUserTuple.right;
@@ -51,7 +52,7 @@ public class YunstHandlerTest extends SpringBaseTest {
 	@Test
 	public void bindPhone() throws Exception {
 		Tuple<String, Integer> bizUserTuple = genBizUser(2);
-		YunstCreateMemberResult member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
+		Tuple<YunstCreateMemberResult, YunstBaseHandler.YunstMemberType> member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
 		assertNotNull(member);
 		logStack(member);
 		int type = bizUserTuple.right;
@@ -68,7 +69,7 @@ public class YunstHandlerTest extends SpringBaseTest {
 	@Test
 	public void modifyPhone() throws Exception {
 		Tuple<String, Integer> bizUserTuple = genBizUser(2);
-		YunstCreateMemberResult member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
+		Tuple<YunstCreateMemberResult, YunstBaseHandler.YunstMemberType> member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
 		assertNotNull(member);
 		logStack(member);
 		int type = bizUserTuple.right;
@@ -97,7 +98,7 @@ public class YunstHandlerTest extends SpringBaseTest {
 	@Test
 	public void getPersonCertification() throws Exception {
 		Tuple<String, Integer> bizUserTuple = genBizUser(2);
-		YunstCreateMemberResult member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
+		Tuple<YunstCreateMemberResult, YunstBaseHandler.YunstMemberType> member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
 		assertNotNull(member);
 		logStack(member);
 		int type = bizUserTuple.right;
@@ -112,7 +113,7 @@ public class YunstHandlerTest extends SpringBaseTest {
 	@Test
 	public void setCompanyInfo() throws Exception {
 		Tuple<String, Integer> bizUserTuple = genBizUser(1);
-		YunstCreateMemberResult member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
+		Tuple<YunstCreateMemberResult, YunstBaseHandler.YunstMemberType> member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
 		assertNotNull(member);
 		logStack(member);
 		int type = bizUserTuple.right;
@@ -170,7 +171,7 @@ public class YunstHandlerTest extends SpringBaseTest {
 	@Test
 	public void genSignContractUrl() throws Exception {
 		Tuple<String, Integer> bizUserTuple = genBizUser(2);
-		YunstCreateMemberResult member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
+		Tuple<YunstCreateMemberResult, YunstBaseHandler.YunstMemberType> member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
 		assertNotNull(member);
 		logStack(member);
 		int type = bizUserTuple.right;
@@ -182,7 +183,7 @@ public class YunstHandlerTest extends SpringBaseTest {
 	@Test
 	public void applyBindBankCard() throws Exception {
 		Tuple<String, Integer> bizUserTuple = genBizUser(2);
-		YunstCreateMemberResult member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
+		Tuple<YunstCreateMemberResult, YunstBaseHandler.YunstMemberType> member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
 		assertNotNull(member);
 		logStack(member);
 		int type = bizUserTuple.right;
@@ -203,7 +204,7 @@ public class YunstHandlerTest extends SpringBaseTest {
 	@Test
 	public void bindBankCard() throws Exception {
 		Tuple<String, Integer> bizUserTuple = genBizUser(2);
-		YunstCreateMemberResult member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
+		Tuple<YunstCreateMemberResult, YunstBaseHandler.YunstMemberType> member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
 		assertNotNull(member);
 		logStack(member);
 		int type = bizUserTuple.right;

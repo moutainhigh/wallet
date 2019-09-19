@@ -15,7 +15,6 @@ import java.util.List;
 
 public interface WalletApi {
 
-
 	/**
 	 * 查询出佣结果
 	 */
@@ -59,12 +58,12 @@ public interface WalletApi {
 	/**
 	 * 查詢钱包流水
 	 *
-	 * @param walletId 钱包ID
+	 * @param walletId  钱包ID
 	 * @param startTime 开始时间
-	 * @param endTime 结束时间
+	 * @param endTime   结束时间
 	 */
-	Pagination<WalletApply> walletApplyList(String accessToekn, Long walletId, Date startTime,
-		Date endTime, int limit, long offset, Boolean stat);
+	Pagination<WalletApply> walletApplyList(String accessToekn, Long walletId, Date startTime, Date endTime, int limit,
+			long offset, Boolean stat);
 
 	/**
 	 * 查询绑定的银行卡列表
@@ -77,7 +76,7 @@ public interface WalletApi {
 	 * 绑定银行卡
 	 */
 	WalletCardExt bindBankCard(String accessToken, Long walletId, String bankCode, String bankAccount,
-							   String depositName, Integer isDef, String telephone);
+			String depositName, Integer isDef, String telephone);
 
 	/**
 	 * 银行类别列表
@@ -95,12 +94,13 @@ public interface WalletApi {
 	 * 银行支行列表
 	 *
 	 * @param classCode 必填，银行类别编码
-	 * @param areaCode 必填，地区编码
+	 * @param areaCode  必填，地区编码
 	 */
 	List<Bank> bankList(String classCode, String areaCode);
 
 	/**
 	 * 银行支行信息
+	 *
 	 * @param bankCode
 	 * @return
 	 */
@@ -119,23 +119,34 @@ public interface WalletApi {
 	/**
 	 * 发送手机验证码
 	 *
-	 * @param mobile		非必填，手机号码
-	 * @param type			必填，验证码类型, 1:登录, 2:身份验证
-	 * @param verifyToken	必填，反作弊结果查询token
-	 * @param redirectUrl 	非必填，触发图形验证码并验证成功后重定向地址
+	 * @param mobile      非必填，手机号码
+	 * @param type        必填，验证码类型, 1:登录, 2:身份验证
+	 * @param verifyToken 必填，反作弊结果查询token
+	 * @param redirectUrl 非必填，触发图形验证码并验证成功后重定向地址
 	 * @return
 	 */
-	ResponseValue sendVerifyCode(String accessToken, Long userId, String mobile, Integer type, String verifyToken, String redirectUrl, String ip);
+	ResponseValue sendVerifyCode(String accessToken, Long userId, String mobile, Integer type, String verifyToken,
+			String redirectUrl, String ip);
 
 	/**
 	 * 通过手机验证码登录
 	 *
-	 * @param mobile		必填, 手机号码
-	 * @param verifyCode	必填, 验证码
-	 * @param type			必填, 短信类型, 1:登录当前钱包, 2:登录已开通钱包
+	 * @param mobile     必填, 手机号码
+	 * @param verifyCode 必填, 验证码
+	 * @param type       必填, 短信类型, 1:登录当前钱包, 2:登录已开通钱包
 	 * @return
 	 */
-	WalletUser loginWithVerifyCode(String accessToken, String mobile,String verifyCode,Integer type, String ip);
+	WalletUser loginWithVerifyCode(String accessToken, String mobile, String verifyCode, Integer type, String ip);
 
-
+	/**
+	 * 开通高级钱包
+	 *
+	 * @param channelType 必填, 渠道类型.1: 浦发银企直连，2：通联云商通
+	 * @param bizUserId   必填, 业务系统用户id
+	 * @param bizUserType 必填, 业务系统用户类型 1-商家 2-个人
+	 * @param walletId    必填, 钱包id
+	 * @return
+	 */
+	WalletChannel createSeniorWallet(String accessToken, Integer channelType, String bizUserId, Integer bizUserType,
+			Long walletId);
 }
