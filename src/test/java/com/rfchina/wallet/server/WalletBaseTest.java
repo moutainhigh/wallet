@@ -170,4 +170,17 @@ public abstract class WalletBaseTest extends BaseTest {
         params.put("sign", sign);
         return postAndValidateSpecCode(BASE_URL, UrlConstant.M_WALLET_LOGIN_WITH_VERIFY_CODE, params, 2033);
     }
+
+    protected Map<String, Object> setStatusFailWithApplyBill(String applyId, String auditUserId, String auditUser, String auditComment){
+        Map<String, String> params = new HashMap<>();
+        params.put("access_token", getAccessToken(appId, appSecret));
+        params.put("apply_id", applyId);
+        params.put("audit_user_id", auditUserId);
+        params.put("audit_user", auditUser);
+        params.put("audit_comment", auditComment);
+        params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+        String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+        params.put("sign", sign);
+        return postAndValidateSuccessCode(BASE_URL, UrlConstant.M_APPLY_BILL_SET_STATUS_FAIL, params);
+    }
 }

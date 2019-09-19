@@ -44,7 +44,7 @@ public class MqService {
 	@Builder
 	@AllArgsConstructor
 	@NoArgsConstructor
-	public class MqApplyStatusChange {
+	public static class MqApplyStatusChange {
 		private Long applyId;
 		private Integer oldStatus;
 		private Integer newStatus;
