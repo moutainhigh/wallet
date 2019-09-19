@@ -9,22 +9,19 @@ import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.WalletApply;
 import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
-import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.model.ext.PayInReq;
 import com.rfchina.wallet.server.model.ext.PayInResp;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletLogType;
-import com.rfchina.wallet.server.service.handler.HandlerHelper;
-
-import java.util.Date;
-import java.util.List;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Date;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -35,12 +32,6 @@ public class JuniorWalletService {
 
 	@Autowired
 	private WalletApplyExtDao walletApplyDao;
-
-	@Autowired
-	private WalletExtDao walletDao;
-
-	@Autowired
-	private HandlerHelper handlerHelper;
 
 	@Autowired
 	private ConfigService configService;
@@ -64,44 +55,38 @@ public class JuniorWalletService {
 
 			// 金额大于零
 			if (payInReq.getAmount() <= 0) {
-				throw new WalletResponseException(
-					EnumWalletResponseCode.PAY_IN_AMOUNT_ERROR);
+				throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_AMOUNT_ERROR);
 			}
 			// 用户必须已经绑卡
 			WalletCard walletCard = getWalletCard(payInReq.getWalletId());
 			if (walletCard == null) {
-				throw new WalletResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST
-					, String.valueOf(payInReq.getWalletId()));
+				throw new WalletResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST,
+						String.valueOf(payInReq.getWalletId()));
 			}
 			payInReq.setBatchNo(batchNo);
 
 			WalletApply walletApply = WalletApply.builder()
-				.walletId(payInReq.getWalletId())
-				.type(WalletLogType.TRANSFER.getValue())
-				.amount(payInReq.getAmount())
-				.payerAccount(cmpAcctNo)
-				.batchNo(payInReq.getBatchNo())
-				.bizNo(payInReq.getBizNo())
-				.payPurpose(payInReq.getPayPurpose() != null ?
-					String.valueOf(payInReq.getPayPurpose()) : null)
-				.note(payInReq.getNote())
-				.status(WalletApplyStatus.SENDING.getValue())
-				.queryTime(DateUtil.addSecs(new Date(), configService.getNextRoundSec()))
-				.createTime(new Date())
-				.build();
+					.walletId(payInReq.getWalletId())
+					.type(WalletLogType.TRANSFER.getValue())
+					.amount(payInReq.getAmount())
+					.payerAccount(cmpAcctNo)
+					.batchNo(payInReq.getBatchNo())
+					.bizNo(payInReq.getBizNo())
+					.payPurpose(payInReq.getPayPurpose() != null ? String.valueOf(payInReq.getPayPurpose()) : null)
+					.note(payInReq.getNote())
+					.status(WalletApplyStatus.SENDING.getValue())
+					.queryTime(DateUtil.addSecs(new Date(), configService.getNextRoundSec()))
+					.createTime(new Date())
+					.build();
 
 			walletApplyDao.insertSelective(walletApply);
 		});
 
-		return PayInResp.builder()
-			.batchNo(batchNo)
-			.build();
+		return PayInResp.builder().batchNo(batchNo).build();
 	}
-
 
 	private WalletCard getWalletCard(Long walletId) {
 		return walletCardDao.selectByDef(walletId);
 	}
-
 
 }

@@ -69,4 +69,7 @@ public class PayStatusResp {
 
 	@ApiModelProperty(value = "钱包收单日期")
 	private String transDate;
+
+	@ApiModelProperty(name="elec_cheque_no", value = "电子凭证号")
+	private String elecChequeNo;
 }

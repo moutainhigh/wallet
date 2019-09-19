@@ -7,7 +7,6 @@ import com.rfchina.wallet.server.api.JuniorWalletApi;
 import com.rfchina.wallet.server.model.ext.PayInResp;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import com.rfchina.wallet.server.model.ext.PayInReq;
-import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -26,7 +25,7 @@ public class JuniorWalletController {
 	private JuniorWalletApi juniorWalletApi;
 
 	@ApiOperation("初级钱包-思力出钱")
-	@PostMapping(UrlConstant.JUNIOR_WALLET_PAY_IN)
+	@PostMapping(UrlConstant.M_JUNIOR_WALLET_PAY_IN)
 	public ResponseValue<PayInResp> payIn(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包ID", required = true, example = "1") @RequestParam("wallet_id") Long walletId,
@@ -50,7 +49,7 @@ public class JuniorWalletController {
 	}
 
 	@ApiOperation("初级钱包-思力批量出钱（最多20笔）")
-	@PostMapping(UrlConstant.JUNIOR_WALLET_BATCH_PAY_IN)
+	@PostMapping(UrlConstant.M_JUNIOR_WALLET_BATCH_PAY_IN)
 	public ResponseValue<PayInResp> batchPayIn(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "json数组，参考思力出钱单笔接口，拼装成数组即可( 钱包类型必须统一为企业或个人 )", required = true) String jsonArry

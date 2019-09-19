@@ -98,4 +98,12 @@ public interface WalletApplyExtDao extends WalletApplyMapper {
 		@Param("transId") Long transId);
 
 
+	/**
+	 * 更新尝试次数
+	 */
+	@Update({"update rf_wallet_apply"
+			, "set status = 4"
+			, "where id = #{applyId} and status = 3"
+	})
+	int setApplyStatusFail(@Param("applyId") Long applyId);
 }
