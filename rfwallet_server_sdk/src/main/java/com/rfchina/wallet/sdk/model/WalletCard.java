@@ -49,6 +49,12 @@ public class WalletCard  {
     @ApiModelProperty("预留手机号")
     private String telephone ;
 
+    @ApiModelProperty("验证渠道。1:安全验证服务，2：通联快捷支付")
+    private Integer verifyChannel ;
+
+    @ApiModelProperty("验证时间")
+    private String verifyTime ;
+
     @ApiModelProperty("钱包ID")
     private Long walletId ;
 

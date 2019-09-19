@@ -28,6 +28,9 @@ public class PayStatusResp  {
     @ApiModelProperty("创建日期")
     private String createTime ;
 
+    @ApiModelProperty("电子凭证号")
+    private String elecChequeNo ;
+
     @ApiModelProperty("交易结束时间（浦发只有时分秒，查询成功定为交易结束时间）")
     private String endTime ;
 

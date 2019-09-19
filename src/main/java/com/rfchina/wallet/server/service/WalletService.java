@@ -539,7 +539,7 @@ public class WalletService {
 	}
 
 	/**
-	 * 开通未审核的钱包
+	 * 开通未审核的高级钱包
 	 */
 	public Wallet createWallet(Byte type, String title, Byte source) {
 

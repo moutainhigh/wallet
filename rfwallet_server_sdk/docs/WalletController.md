@@ -206,6 +206,8 @@
         last_upd_time: "" , //钱包信息最后更新日期
         status: "" , //绑定状态: 1:已绑定，2：已解绑
         telephone: "" , //预留手机号
+        verify_channel: "" , //验证渠道。1:安全验证服务，2：通联快捷支付
+        verify_time: "" , //验证时间
         wallet_id: ""  //钱包ID
 
   }
@@ -244,10 +246,55 @@
         last_upd_time: "" , //钱包信息最后更新日期
         status: "" , //绑定状态: 1:已绑定，2：已解绑
         telephone: "" , //预留手机号
+        verify_channel: "" , //验证渠道。1:安全验证服务，2：通联快捷支付
+        verify_time: "" , //验证时间
         wallet_id: ""  //钱包ID
 
       
   }]
+}
+```
+
+###  开通高级钱包
+
+请求地址: /wallet_server/v1/m/yunst/create_member
+
+请求类型: POST
+
+请求参数:
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|biz_user_id|是|业务用户id|
+|type|是|渠道类型 1:浦发银企直连,2:通联云商通|
+|type|是|业务用户类型 1:企业,2:个人|
+|wallet_id|是|钱包id|
+
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": "", //消息
+"data": {
+              balance: "" , //银行余额
+        biz_user_id: "" , //业务用户标识
+        channel_type: "" , //渠道类型。1: 浦发银企直连，2：通联云商通
+        channel_user_id: "" , //银行用户标识
+        check_time: "" , //审核时间
+        create_time: "" , //创建日期
+        fail_reason: "" , //失败原因
+        id: "" , //id
+        is_sign_contact: "" , //是否已签订协议
+        member_type: "" , //银行用户类型。2：企业会员 3：个人会员
+        pic_url: "" , //审核图片地址
+        remark: "" , //备注
+        security_tel: "" , //安全手机
+        status: "" , //资料审核状态。1：待审核 ，2：审核成功，3：审核失败
+        wallet_id: ""  //钱包id
+
+  }
 }
 ```
 
@@ -273,9 +320,10 @@
   "code": 1001,//状态码
   "msg": "", //消息
 "data": {
-              audit_type: "" , //审核方式，1：运营，3：银企直连，5：通联
+              audit_type: "" , //审核方式，1：运营，2：银企直连，4：通联
         balance_upd_time: "" , //钱包余额最后更新日期
         create_time: "" , //创建日期
+        freeze_amount: "" , //冻结金额
         id: "" , //钱包ID
         last_upd_time: "" , //钱包信息最后更新日期
         level: "" , //钱包等级，1： 初级钱包，2： 高级钱包
@@ -284,7 +332,7 @@
         recharge_amount: "" , //累计充值金额
         recharge_count: "" , //累计充值次数
         source: "" , //钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户
-        status: "" , //钱包状态: 1:待审核，2：激活,3：禁用
+        status: "" , //钱包状态: 1:待激活，2：激活,3：禁用
         title: "" , //钱包标题，通常是姓名或公司名
         type: "" , //钱包类型， 1：企业钱包，2：个人钱包
         wallet_balance: ""  //钱包余额
@@ -320,7 +368,7 @@
         create_time: "" , //创建日期
         last_upd_time: "" , //钱包信息最后更新日期
         mobile: "" , //登录手机号
-        register_progress: "" , //注册进度,二进制形式 0:初始化帐号 1:已通过身份验证 2:已创建钱包 4:已绑定银行
+        register_progress: "" , //注册进度,二进制形式 0:初始化帐号 1:已通过身份验证 2:已创建钱包 4:已绑定银行 8:已签订协议
         status: "" , //帐号状态: 1:正常，2：禁用
         user_id: "" , //用户ID
         wallet_id: ""  //关联的钱包ID
@@ -355,6 +403,7 @@
         biz_no: "" , //业务凭证号
         biz_time: "" , //银行交易终态日期
         create_time: "" , //创建日期
+        elec_cheque_no: "" , //电子凭证号
         end_time: "" , //交易结束时间（浦发只有时分秒，查询成功定为交易结束时间）
         err_code: "" , //错误码
         lanch_time: "" , //银行发起时间
@@ -430,6 +479,8 @@
         last_upd_time: "" , //钱包信息最后更新日期
         status: "" , //绑定状态: 1:已绑定，2：已解绑
         telephone: "" , //预留手机号
+        verify_channel: "" , //验证渠道。1:安全验证服务，2：通联快捷支付
+        verify_time: "" , //验证时间
         wallet_id: ""  //钱包ID
 
             },
@@ -447,9 +498,10 @@
 
             },
         wallet: {
-                        audit_type: "" , //审核方式，1：运营，3：银企直连，5：通联
+                        audit_type: "" , //审核方式，1：运营，2：银企直连，4：通联
         balance_upd_time: "" , //钱包余额最后更新日期
         create_time: "" , //创建日期
+        freeze_amount: "" , //冻结金额
         id: "" , //钱包ID
         last_upd_time: "" , //钱包信息最后更新日期
         level: "" , //钱包等级，1： 初级钱包，2： 高级钱包
@@ -458,7 +510,7 @@
         recharge_amount: "" , //累计充值金额
         recharge_count: "" , //累计充值次数
         source: "" , //钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户
-        status: "" , //钱包状态: 1:待审核，2：激活,3：禁用
+        status: "" , //钱包状态: 1:待激活，2：激活,3：禁用
         title: "" , //钱包标题，通常是姓名或公司名
         type: "" , //钱包类型， 1：企业钱包，2：个人钱包
         wallet_balance: ""  //钱包余额
@@ -513,6 +565,8 @@
         last_upd_time: "" , //钱包信息最后更新日期
         status: "" , //绑定状态: 1:已绑定，2：已解绑
         telephone: "" , //预留手机号
+        verify_channel: "" , //验证渠道。1:安全验证服务，2：通联快捷支付
+        verify_time: "" , //验证时间
         wallet_id: ""  //钱包ID
 
             },
@@ -530,9 +584,10 @@
 
             },
         wallet: {
-                        audit_type: "" , //审核方式，1：运营，3：银企直连，5：通联
+                        audit_type: "" , //审核方式，1：运营，2：银企直连，4：通联
         balance_upd_time: "" , //钱包余额最后更新日期
         create_time: "" , //创建日期
+        freeze_amount: "" , //冻结金额
         id: "" , //钱包ID
         last_upd_time: "" , //钱包信息最后更新日期
         level: "" , //钱包等级，1： 初级钱包，2： 高级钱包
@@ -541,7 +596,7 @@
         recharge_amount: "" , //累计充值金额
         recharge_count: "" , //累计充值次数
         source: "" , //钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户
-        status: "" , //钱包状态: 1:待审核，2：激活,3：禁用
+        status: "" , //钱包状态: 1:待激活，2：激活,3：禁用
         title: "" , //钱包标题，通常是姓名或公司名
         type: "" , //钱包类型， 1：企业钱包，2：个人钱包
         wallet_balance: ""  //钱包余额
@@ -634,6 +689,7 @@
         batch_no: "" , //钱包批次号
         biz_no: "" , //业务凭证号
         biz_time: "" , //银行交易终态时间
+        channel_type: "" , //渠道类型。 1：浦发银企直连，2：通联云商通
         create_time: "" , //创建日期
         curr_trans_id: "" , //当前交易ID
         curr_try_times: "" , //当前尝试次数
@@ -652,8 +708,10 @@
         query_time: "" , //计划查询时间
         remark: "" , //备注
         status: "" , //交易状态。 1: 待发送银行网关，2：银行受理中，3：交易成功，4：交易失败(确切失败)，5：撤销，6：待处理，7：等待重试(用户或系统)
-        type: "" , //类型，1：财务结算，2：收入，3：支出
-        wallet_id: ""  //钱包ID
+        type: "" , //类型，1：财务结算，2：收入，3：支出，4：充值，5：提现，6：退款，7：扣款
+        wallet_id: "" , //钱包ID
+        wallet_level: "" , //钱包等级，1： 初级钱包，2： 高级钱包
+        wallet_type: ""  //钱包类型， 1：企业钱包，2：个人钱包
 
             },]
         page_limit: "" , //

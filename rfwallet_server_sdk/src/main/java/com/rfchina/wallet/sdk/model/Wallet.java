@@ -13,7 +13,7 @@ import java.util.ArrayList;
 */
 @Data
 public class Wallet  {
-    @ApiModelProperty("审核方式，1：运营，3：银企直连，5：通联")
+    @ApiModelProperty("审核方式，1：运营，2：银企直连，4：通联")
     private Integer auditType ;
 
     @ApiModelProperty("钱包余额最后更新日期")
@@ -21,6 +21,9 @@ public class Wallet  {
 
     @ApiModelProperty("创建日期")
     private String createTime ;
+
+    @ApiModelProperty("冻结金额")
+    private Long freezeAmount ;
 
     @ApiModelProperty("钱包ID")
     private Long id ;
@@ -46,7 +49,7 @@ public class Wallet  {
     @ApiModelProperty("钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户")
     private Integer source ;
 
-    @ApiModelProperty("钱包状态: 1:待审核，2：激活,3：禁用")
+    @ApiModelProperty("钱包状态: 1:待激活，2：激活,3：禁用")
     private Integer status ;
 
     @ApiModelProperty("钱包标题，通常是姓名或公司名")
