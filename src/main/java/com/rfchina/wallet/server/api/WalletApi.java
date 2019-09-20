@@ -141,14 +141,14 @@ public interface WalletApi {
 	WalletUser loginWithVerifyCode(String accessToken, String mobile, String verifyCode, Integer type, String ip);
 
 	/**
-	 * 开通高级钱包
+	 * 升级高级钱包
 	 *
 	 * @param channelType 必填, 渠道类型.1: 浦发银企直连，2：通联云商通
 	 * @param bizUserId   必填, 业务系统用户id
-	 * @param bizUserType 必填, 业务系统用户类型 1-商家 2-个人
+	 * @param source      必填, 钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户
 	 * @param walletId    必填, 钱包id
 	 * @return
 	 */
-	WalletChannel createSeniorWallet(String accessToken, Integer channelType, String bizUserId, Integer bizUserType,
+	WalletChannel upgradeSeniorWallet(String accessToken, Byte source, Integer channelType, String bizUserId,
 			Long walletId);
 }

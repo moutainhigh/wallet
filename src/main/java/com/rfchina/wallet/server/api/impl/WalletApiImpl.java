@@ -15,6 +15,7 @@ import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.platform.common.utils.EnumUtil;
 import com.rfchina.platform.common.utils.RegexUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
+import com.rfchina.wallet.domain.mapper.ext.WalletDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletUserDao;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.MqConstant;
@@ -58,6 +59,9 @@ public class WalletApiImpl implements WalletApi {
 
 	@Autowired
 	private WalletUserDao walletUserDao;
+
+	@Autowired
+	private WalletDao walletDao;
 
 	@Autowired
 	private UserService userService;
@@ -302,10 +306,14 @@ public class WalletApiImpl implements WalletApi {
 	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
 	@SignVerify
 	@Override
-	public WalletChannel createSeniorWallet(String accessToken,
-			@EnumParamValid(valuableEnumClass = EnumDef.ChannelType.class) Integer channelType, String bizUserId,
-			@EnumParamValid(valuableEnumClass = EnumDef.BizUserType.class) Integer bizUserType, Long walletId) {
-		return walletService.createSeniorWallet(channelType, bizUserId, bizUserType, walletId);
+	public WalletChannel upgradeSeniorWallet(String accessToken, @ParamValid(nullable = false) Byte source,
+			Integer channelType, String bizUserId, Long walletId) {
+		Wallet wallet = walletService.upgradeWalletLevel(walletId);
+		Integer bizUserType = EnumDef.BizUserType.PERSON.getValue();
+		if (source.byteValue() == EnumWallet.WalletSource.FHT_CORP.getValue()) {
+			bizUserType = EnumDef.BizUserType.COMPANY.getValue();
+		}
+		return walletService.createSeniorWallet(channelType, bizUserId, bizUserType, wallet.getId());
 	}
 
 }

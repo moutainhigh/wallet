@@ -492,4 +492,23 @@ public class EnumWallet {
 				return WalletApplyStatus.PROCESSING;
 			}
 		}}
+
+	/**
+	 * 资料审核状态。1：待审核 ，2：审核成功，3：审核失败
+	 */
+	public enum WalletChannelStatus implements Valuable<Byte> {WAIT_AUDIT((byte) 1, "待审核"), AUDIT_SUCCESS((byte) 2,
+			"审核成功"), AUDIT_FAIL((byte) 3, "审核失败");
+
+		private Byte value;
+		private String valueName;
+
+		WalletChannelStatus(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}}
 }

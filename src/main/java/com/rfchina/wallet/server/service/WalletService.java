@@ -35,6 +35,7 @@ import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.PayTuple;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp.WalletInfoRespBuilder;
+import com.rfchina.wallet.server.msic.EnumWallet;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.LockStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.NotifyType;
@@ -745,13 +746,18 @@ public class WalletService {
 	}
 
 	/**
-	 * 开通高级钱包
+	 * 升级高级钱包
 	 */
 	public WalletChannel createSeniorWallet(Integer channelType, String bizUserId, Integer bizUserType,
 			Long walletId) {
+		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
+		if (wallet == null){
+			log.error("开通高级钱包失败, 查无此钱包, walletId: {}", walletId);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+		}
 		WalletChannel.WalletChannelBuilder builder = WalletChannel.builder()
 				.channelType(channelType.byteValue())
-				.status((byte) 1)
+				.status(EnumWallet.WalletChannelStatus.WAIT_AUDIT.getValue())
 				.walletId(walletId)
 				.createTime(new Date());
 		if (channelType == 2) {
@@ -770,5 +776,24 @@ public class WalletService {
 		WalletChannel walletChannel = builder.build();
 		walletChannelDao.insertSelective(walletChannel);
 		return walletChannel;
+	}
+
+	/**
+	 *
+	 * 更新钱包等级
+	 */
+	public Wallet upgradeWalletLevel(Long walletId){
+		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
+		if (wallet == null){
+			log.error("更新钱包等级失败, 查无此钱包, walletId: {}", walletId);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+		}
+		wallet.setLevel(EnumDef.EnumWalletLevel.SENIOR.getValue());
+		int effctRows = walletDao.updateByPrimaryKeySelective(wallet);
+		if (effctRows != 1){
+			log.error("更新钱包等级失败, walletId: {}", walletId);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+		}
+		return wallet;
 	}
 }
