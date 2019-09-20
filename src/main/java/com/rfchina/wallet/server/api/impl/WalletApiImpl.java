@@ -9,6 +9,7 @@ import com.rfchina.platform.common.annotation.Log;
 import com.rfchina.platform.common.annotation.ParamValid;
 import com.rfchina.platform.common.annotation.SignVerify;
 import com.rfchina.platform.common.exception.RfchinaResponseException;
+import com.rfchina.platform.common.misc.ResponseCode;
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.ResponseValue;
 import com.rfchina.platform.common.page.Pagination;
@@ -41,6 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -177,7 +179,7 @@ public class WalletApiImpl implements WalletApi {
 	@Override
 	public Wallet createWallet(String accessToken, @ParamValid(nullable = false) Byte type,
 			@ParamValid(nullable = false) String title, @ParamValid(nullable = false) Byte source, Integer channelType,
-			String bizUserId, @EnumParamValid(valuableEnumClass = EnumDef.EnumWalletLevel.class) Byte walletLevel) {
+			String bizUserId, Byte walletLevel) {
 		Wallet wallet = walletService.createWallet(type, title, source, walletLevel);
 		if (walletLevel.byteValue() == EnumDef.EnumWalletLevel.SENIOR.getValue()
 				&& channelType.intValue() == EnumDef.ChannelType.YUNST.getValue()) {
@@ -261,7 +263,8 @@ public class WalletApiImpl implements WalletApi {
 	public ResponseValue sendVerifyCode(String accessToken, Long userId,
 			@ParamValid(pattern = RegexUtil.REGEX_MOBILE) String mobile,
 			@EnumParamValid(valuableEnumClass = com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType.class)
-					Integer type, @ParamValid(nullable = false) String verifyToken, String redirectUrl, String ip) {
+					Integer type, @ParamValid(nullable = false) String verifyToken, String redirectUrl, String ip,
+			Byte source, Integer channelType) {
 
 		com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType enumSendSmsType = EnumUtil.parse(
 				com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType.class, type);
@@ -276,6 +279,15 @@ public class WalletApiImpl implements WalletApi {
 					.byteValue()) {
 				throw new WalletResponseException(WalletResponseCode.EnumWalletResponseCode.WALLET_DISABLE);
 			}
+		} else if (enumSendSmsType == EnumDef.EnumSendSmsType.SENIOR_WALLET_BIND_PHONE) {
+			//高级钱包申请绑手机
+			Integer bizUserType = EnumDef.BizUserType.PERSON.getValue();
+			if (source.byteValue() == EnumWallet.WalletSource.FHT_CORP.getValue()) {
+				bizUserType = EnumDef.BizUserType.COMPANY.getValue();
+			}
+			walletService.seniorWalletApplyBindPhone(channelType, String.valueOf(userId), bizUserType, mobile);
+			return new ResponseValue<>(ResponseCode.EnumResponseCode.COMMON_SUCCESS.getValue(), null,
+					new HashMap<String, Object>());
 		}
 		//直接发送短信
 		return userService.sendSmsVerifyCode(com.rfchina.wallet.domain.misc.EnumDef.EnumVerifyCodeType.LOGIN, mobile,
@@ -314,6 +326,16 @@ public class WalletApiImpl implements WalletApi {
 			bizUserType = EnumDef.BizUserType.COMPANY.getValue();
 		}
 		return walletService.createSeniorWallet(channelType, bizUserId, bizUserType, wallet.getId());
+	}
+
+	@Override
+	public WalletChannel seniorWalletAuthentication(String accessToken, Byte source, Integer channelType,
+			String bizUserId, Long walletId) {
+		Integer bizUserType = EnumDef.BizUserType.PERSON.getValue();
+		if (source.byteValue() == EnumWallet.WalletSource.FHT_CORP.getValue()) {
+			bizUserType = EnumDef.BizUserType.COMPANY.getValue();
+		}
+		return null;
 	}
 
 }

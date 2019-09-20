@@ -555,7 +555,7 @@ public class WalletService {
 				.source(source)
 				.status(WalletStatus.WAIT_AUDIT.getValue())
 				.createTime(new Date())
-				.level(walletLevel)
+				.level(walletLevel == null?EnumDef.EnumWalletLevel.JUNIOR.getValue():walletLevel)
 				.build();
 		walletDao.insertSelective(wallet);
 
@@ -795,5 +795,54 @@ public class WalletService {
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 		}
 		return wallet;
+	}
+
+
+	/**
+	 * 高级钱包认证
+	 */
+	public WalletChannel seniorWalletAuth(Integer channelType, String bizUserId, Integer bizUserType,
+			Long walletId) {
+		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
+		if (wallet == null){
+			log.error("开通高级钱包失败, 查无此钱包, walletId: {}", walletId);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+		}
+		WalletChannel.WalletChannelBuilder builder = WalletChannel.builder()
+				.channelType(channelType.byteValue())
+				.status(EnumWallet.WalletChannelStatus.WAIT_AUDIT.getValue())
+				.walletId(walletId)
+				.createTime(new Date());
+		if (channelType == 2) {
+			Tuple<YunstCreateMemberResult, YunstBaseHandler.YunstMemberType> member = null;
+			try {
+				member = yunstUserHandler.createMember(bizUserId, bizUserType);
+			} catch (Exception e) {
+				log.error("开通高级钱包失败, channelType: {}, bizUserId: {},bizUserType: {}, walletId: {}", channelType,
+						bizUserId, bizUserType, walletId);
+				throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+			}
+			builder.bizUserId(member.left.getBizUserId())
+					.channelUserId(member.left.getUserId())
+					.memberType(member.right.getValue().byteValue());
+		}
+		WalletChannel walletChannel = builder.build();
+		walletChannelDao.insertSelective(walletChannel);
+		return walletChannel;
+	}
+
+
+	/**
+	 * 高级钱包绑定申请绑定手机
+	 */
+	public void seniorWalletApplyBindPhone(Integer channelType,String bizUserId, Integer bizUserType,String telephone) {
+		try {
+			if (channelType.intValue() == EnumDef.ChannelType.YUNST.getValue().intValue()){
+				yunstUserHandler.sendVerificationCode(bizUserId, bizUserType, telephone, 9);
+			}
+		} catch (Exception e) {
+			log.error("高级钱包绑定申请绑定手机发送验证码失败, 查无此钱包, telephone: {}", telephone);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+		}
 	}
 }

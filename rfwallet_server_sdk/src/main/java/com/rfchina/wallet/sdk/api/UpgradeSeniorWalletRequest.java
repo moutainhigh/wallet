@@ -29,7 +29,7 @@ public class UpgradeSeniorWalletRequest extends  AbstractApiRequest {
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/yunst/create_member";
+    return "/wallet_server/v1/m/wallet/upgrade_wallet";
   }
 
   @Override

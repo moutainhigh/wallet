@@ -30,12 +30,12 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 创建会员
 	 */
-	public Tuple<YunstCreateMemberResult,YunstMemberType> createMember(String bizUserId, Integer type) throws Exception {
+	public Tuple<YunstCreateMemberResult,YunstMemberType> createMember(String bizUserId, Integer bizUserType) throws Exception {
 		YunstMemberType memberType = YunstMemberType.COMPANY;
-		if (type == 2) {
+		if (bizUserType == 2) {
 			memberType = YunstMemberType.PERSON;
 		}
-		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
+		bizUserId = transferToYunstBizUserFormat(bizUserId, bizUserType);
 		YunstCreateMemberReq req = YunstCreateMemberReq.builder$()
 				.bizUserId(bizUserId)
 				.memberType(memberType.getValue())
@@ -48,8 +48,8 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 会员电子协议签约(生成前端H5 url)
 	 */
-	public String generateSignContractUrl(String bizUserId, Integer type) throws Exception {
-		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
+	public String generateSignContractUrl(String bizUserId, Integer bizUserType) throws Exception {
+		bizUserId = transferToYunstBizUserFormat(bizUserId, bizUserType);
 		YunstSignContractReq req = YunstSignContractReq.builder$()
 				.bizUserId(bizUserId)
 				.jumpUrl(configService.getResultJumpUrl())
@@ -65,9 +65,9 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 发送短信验证码
 	 */
-	public boolean sendVerificationCode(String bizUserId, Integer type, String phone, Integer bizType)
+	public boolean sendVerificationCode(String bizUserId, Integer bizUserType, String phone, Integer bizType)
 			throws Exception {
-		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
+		bizUserId = transferToYunstBizUserFormat(bizUserId, bizUserType);
 		YunstSMSVerificationCodeReq req = YunstSMSVerificationCodeReq.builder$()
 				.bizUserId(bizUserId)
 				.phone(phone)
@@ -87,8 +87,8 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 绑定手机
 	 */
-	public boolean bindPhone(String bizUserId, Integer type, String phone, String verificationCode) throws Exception {
-		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
+	public boolean bindPhone(String bizUserId, Integer bizUserType, String phone, String verificationCode) throws Exception {
+		bizUserId = transferToYunstBizUserFormat(bizUserId, bizUserType);
 		YunstBindPhoneReq req = YunstBindPhoneReq.builder$()
 				.bizUserId(bizUserId)
 				.phone(phone)
@@ -108,9 +108,9 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 修改绑定手机
 	 */
-	public boolean modifyPhone(String bizUserId, Integer type, String oldPhone, String newPhone,
+	public boolean modifyPhone(String bizUserId, Integer bizUserType, String oldPhone, String newPhone,
 			String verificationCode) throws Exception {
-		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
+		bizUserId = transferToYunstBizUserFormat(bizUserId, bizUserType);
 		YunstChangeBindPhoneReq req = YunstChangeBindPhoneReq.builder$()
 				.bizUserId(bizUserId)
 				.oldPhone(oldPhone)
@@ -131,8 +131,8 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 获取会员信息
 	 */
-	public Object getMemberInfo(String bizUserId, Integer type) throws Exception {
-		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
+	public Object getMemberInfo(String bizUserId, Integer bizUserType) throws Exception {
+		bizUserId = transferToYunstBizUserFormat(bizUserId, bizUserType);
 		YunstGetMemberInfoReq req = YunstGetMemberInfoReq.builder$().bizUserId(bizUserId).build();
 
 		YunstMemberInfoResult memberInfoResult = null;
@@ -162,9 +162,9 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 个人实名认证
 	 */
-	public boolean personCertification(String bizUserId, Integer type, String realName, Long identityType,
+	public boolean personCertification(String bizUserId, Integer bizUserType, String realName, Long identityType,
 			String identityNo) throws Exception {
-		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
+		bizUserId = transferToYunstBizUserFormat(bizUserId, bizUserType);
 		YunstPersonSetRealNameReq req = YunstPersonSetRealNameReq.builder$()
 				.bizUserId(bizUserId)
 				.isAuth(true)
@@ -186,9 +186,9 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 设置企业信息
 	 */
-	public YunstSetCompanyInfoResult setCompanyInfo(String bizUserId, Integer type, Boolean isAuth,
+	public YunstSetCompanyInfoResult setCompanyInfo(String bizUserId, Integer bizUserType, Boolean isAuth,
 			YunstSetCompanyInfoReq.CompanyBasicInfo companyBasicInfo) throws Exception {
-		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
+		bizUserId = transferToYunstBizUserFormat(bizUserId, bizUserType);
 		YunstSetCompanyInfoReq req = YunstSetCompanyInfoReq.builder$()
 				.bizUserId(bizUserId)
 				.isAuth(isAuth)
@@ -202,9 +202,9 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 申请绑定银行卡
 	 */
-	public YunstApplyBindBankCardResult applyBindBankCard(String bizUserId, Integer type, String cardNo, String name,
+	public YunstApplyBindBankCardResult applyBindBankCard(String bizUserId, Integer bizUserType, String cardNo, String name,
 			String phone, Long identityType, String identityNo, String validate, String cvv2) throws Exception {
-		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
+		bizUserId = transferToYunstBizUserFormat(bizUserId, bizUserType);
 		YunstApplyBindBankCardReq.YunstApplyBindBankCardReqBuilder buider = YunstApplyBindBankCardReq.builder$()
 				.bizUserId(bizUserId)
 				.cardNo(cardNo)
@@ -226,9 +226,9 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 确认绑定银行卡
 	 */
-	public YunstBindBankCardResult bindBankCard(String bizUserId, Integer type, String tranceNum, String phone,
+	public YunstBindBankCardResult bindBankCard(String bizUserId, Integer bizUserType, String tranceNum, String phone,
 			String validate, String cvv2, String verificationCode) throws Exception {
-		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
+		bizUserId = transferToYunstBizUserFormat(bizUserId, bizUserType);
 		YunstBindBankCardReq.YunstBindBankCardReqBuilder buider = YunstBindBankCardReq.builder$()
 				.bizUserId(bizUserId)
 				.tranceNum(tranceNum)
@@ -245,8 +245,8 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 解除绑定银行卡
 	 */
-	public YunstUnBindBankCardResult unbindBankCard(String bizUserId, Integer type, String cardNo) throws Exception {
-		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
+	public YunstUnBindBankCardResult unbindBankCard(String bizUserId, Integer bizUserType, String cardNo) throws Exception {
+		bizUserId = transferToYunstBizUserFormat(bizUserId, bizUserType);
 		YunstUnBindBankCardReq req = YunstUnBindBankCardReq.builder$().bizUserId(bizUserId).cardNo(cardNo).build();
 
 		return yunstTpl.execute(req, YunstUnBindBankCardResult.class);

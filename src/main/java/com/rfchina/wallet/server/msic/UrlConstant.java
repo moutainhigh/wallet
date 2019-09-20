@@ -111,13 +111,13 @@ public class UrlConstant {
 	public static final String WALLET_LOGIN_WITH_VERIFY_CODE = VERSION + "/m/wallet/login_with_verify_code";
 
 	/**
-	 * 创建云商通会员
+	 * 升级高级钱包
 	 */
-	public static final String YUNST_CREATE_MEMBER = VERSION + "/m/yunst/create_member";
+	public static final String WALLET_UPGRADE = VERSION + "/m/wallet/upgrade_wallet";
 	/**
-	 * 云商通发送短信验证码
+	 * 高级钱包认证
 	 */
-	public static final String YUNST_SMS_VERIFY_CODE = VERSION + "/m/yunst/sms_verify_code";
+	public static final String WALLET_SENIOR_AUTHENTICATION = VERSION + "/m/wallet/senior_authentication";
 	/**
 	 * 云商通绑定手机
 	 */

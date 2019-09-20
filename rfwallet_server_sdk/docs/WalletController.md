@@ -604,9 +604,12 @@
 |access_token|是|access_token|
 |ip|是|来源IP|
 |mobile|是|手机号码|
-|type|是|验证码类型, 1:登录, 2:验证已开通钱包帐号|
+|type|是|验证码类型, 1:登录, 2:验证已开通钱包帐号, 3:验证高级钱包|
 |verify_token|是|反作弊结果查询token|
+|biz_user_id|否|业务用户id|
+|channel_type|否|渠道类型 1:浦发银企直连,2:通联云商通|
 |redirect_url|否|触发图形验证码并验证成功后重定向地址|
+|source|否|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
 
 
 返回数据
@@ -619,9 +622,52 @@
 }
 ```
 
+###  高级钱包认证
+
+请求地址: /wallet_server/v1/m/wallet/senior_authentication
+
+请求类型: POST
+
+请求参数:
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|biz_user_id|是|业务用户id|
+|channel_type|是|渠道类型 1:浦发银企直连,2:通联云商通|
+|source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
+|wallet_id|是|钱包id|
+
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": "", //消息
+"data": {
+              balance: "" , //银行余额
+        biz_user_id: "" , //业务用户标识
+        channel_type: "" , //渠道类型。1: 浦发银企直连，2：通联云商通
+        channel_user_id: "" , //银行用户标识
+        check_time: "" , //审核时间
+        create_time: "" , //创建日期
+        fail_reason: "" , //失败原因
+        id: "" , //id
+        is_sign_contact: "" , //是否已签订协议
+        member_type: "" , //银行用户类型。2：企业会员 3：个人会员
+        pic_url: "" , //审核图片地址
+        remark: "" , //备注
+        security_tel: "" , //安全手机
+        status: "" , //资料审核状态。1：待审核 ，2：审核成功，3：审核失败
+        wallet_id: ""  //钱包id
+
+  }
+}
+```
+
 ###  升级高级钱包
 
-请求地址: /wallet_server/v1/m/yunst/create_member
+请求地址: /wallet_server/v1/m/wallet/upgrade_wallet
 
 请求类型: POST
 
