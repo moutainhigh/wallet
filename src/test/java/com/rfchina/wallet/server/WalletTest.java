@@ -5,6 +5,7 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.retry.backoff.Sleeper;
 
 @Slf4j
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -69,7 +70,8 @@ public class WalletTest extends WalletBaseTest {
 	}
 
 	@Test
-	public void testSetStatusFailWithApplyBill(){
-		setStatusFailWithApplyBill("71", "1", "rfchina", "fail");
+	public void testSetStatusFailWithApplyBill() throws Exception {
+		setStatusFailWithApplyBill("67", "1", "rfchina", "fail");
+		Thread.sleep(3000);
 	}
 }

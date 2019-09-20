@@ -38,7 +38,7 @@ public class MqService {
 					StringUtils.isBlank(msg.getExchageName()) ? exchangeName : msg.getExchageName(),
 					msg.getRoutingKey(), msg.getMessage(null));
 		} catch (Exception e) {
-			log.error("发送MQ消息失败, error: {}", e.getMessage());
+			log.error("发送MQ消息失败, error: ", e);
 		}
 
 	}
