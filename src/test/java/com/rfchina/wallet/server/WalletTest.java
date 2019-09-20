@@ -68,7 +68,8 @@ public class WalletTest extends WalletBaseTest {
 		loginWithVerify("13560166318", "12345", 1, "127.0.0.1");
 	}
 
+	@Test
 	public void testSetStatusFailWithApplyBill(){
-		setStatusFailWithApplyBill("75", "1", "rfchina", "fail");
+		setStatusFailWithApplyBill("71", "1", "rfchina", "fail");
 	}
 }

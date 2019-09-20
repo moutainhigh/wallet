@@ -1,7 +1,7 @@
 package com.rfchina.wallet.server.service;
 
-import com.alibaba.fastjson.JSON;
 import com.rfchina.biztools.mq.SimpleMqMsg;
+import com.rfchina.platform.common.utils.JsonUtil;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -22,9 +22,6 @@ public class MqService {
 	@NonNull
 	private RabbitTemplate rabbitTemplate;
 
-	@NonNull
-	private ConfigService configService;
-
 	@Value("${mq.exchange_name}")
 	private String exchangeName;
 
@@ -35,15 +32,22 @@ public class MqService {
 	 */
 	public void publish(Object obj, String routingKey) {
 		SimpleMqMsg msg = SimpleMqMsg.builder().routingKey(routingKey).msgObj(obj).build();
-		log.info("发送MQ {}", JSON.toJSONString(msg));
-		rabbitTemplate.convertAndSend(StringUtils.isBlank(msg.getExchageName()) ? exchangeName : msg.getExchageName(),
-				msg.getRoutingKey(), msg.getMessage(null));
+		log.info("发送MQ {}", JsonUtil.toJSON(msg));
+		try {
+			rabbitTemplate.convertAndSend(
+					StringUtils.isBlank(msg.getExchageName()) ? exchangeName : msg.getExchageName(),
+					msg.getRoutingKey(), msg.getMessage(null));
+		} catch (Exception e) {
+			log.error("发送MQ消息失败, error: {}", e.getMessage());
+		}
 
 	}
 
 	@Builder
 	@AllArgsConstructor
 	@NoArgsConstructor
+	@Setter
+	@Getter
 	public static class MqApplyStatusChange {
 		private Long applyId;
 		private Integer oldStatus;

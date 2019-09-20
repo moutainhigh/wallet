@@ -41,6 +41,7 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 
 @Slf4j
 @Component
@@ -69,6 +70,9 @@ public class WalletApiImpl implements WalletApi {
 
 	@Autowired
 	private MqService mqService;
+
+	@Autowired
+	private ExecutorService walletApiExecutor;
 
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
@@ -314,11 +318,12 @@ public class WalletApiImpl implements WalletApi {
 
 		walletService.setWalletApplyStatus(applyId, auditUserId, auditUser, auditComment);
 
-		mqService.publish(MqService.MqApplyStatusChange.builder()
+		walletApiExecutor.execute(() -> mqService.publish(MqService.MqApplyStatusChange.builder()
 				.applyId(applyId)
 				.newStatus(WalletApplyStatus.FAIL.getValue().intValue())
 				.oldStatus(WalletApplyStatus.SUCC.getValue().intValue())
 				.changeTime(new Date())
-				.build(), MqConstant.WALLET_APPLY_BILL_STATUS_CHANGE);
+				.build(), MqConstant.WALLET_APPLY_BILL_STATUS_CHANGE));
+
 	}
 }
