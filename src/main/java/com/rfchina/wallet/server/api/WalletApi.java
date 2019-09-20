@@ -53,7 +53,9 @@ public interface WalletApi {
 	/**
 	 * 开通未审核的钱包
 	 */
-	Wallet createWallet(String accessToken, Byte type, String title, Byte source);
+	Wallet createWallet(String accessToken, Byte type, String title, Byte source, Integer channelType,
+			String bizUserId,
+			Byte walletLevel);
 
 	/**
 	 * 查詢钱包流水

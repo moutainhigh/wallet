@@ -17,11 +17,11 @@ public class CreateSeniorWalletRequest extends  AbstractApiRequest {
   @ApiModelProperty("业务用户id")
   private String bizUserId ;
 
-  @ApiModelProperty("渠道类型 1:浦发银企直连,2:通联云商通")
-  private Integer type ;
-
   @ApiModelProperty("业务用户类型 1:企业,2:个人")
-  private Integer type2 ;
+  private Integer bizUserType ;
+
+  @ApiModelProperty("渠道类型 1:浦发银企直连,2:通联云商通")
+  private Integer channelType ;
 
   @ApiModelProperty("钱包id")
   private Long walletId ;
@@ -46,11 +46,11 @@ public class CreateSeniorWalletRequest extends  AbstractApiRequest {
       if(bizUserId != null){
         parameters.put("biz_user_id", bizUserId.toString());
       }
-      if(type != null){
-        parameters.put("type", type.toString());
+      if(bizUserType != null){
+        parameters.put("biz_user_type", bizUserType.toString());
       }
-      if(type2 != null){
-        parameters.put("type", type2.toString());
+      if(channelType != null){
+        parameters.put("channel_type", channelType.toString());
       }
       if(walletId != null){
         parameters.put("wallet_id", walletId.toString());

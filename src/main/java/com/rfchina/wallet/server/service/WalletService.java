@@ -541,7 +541,7 @@ public class WalletService {
 	/**
 	 * 开通未审核的高级钱包
 	 */
-	public Wallet createWallet(Byte type, String title, Byte source) {
+	public Wallet createWallet(Byte type, String title, Byte source, Byte walletLevel) {
 
 		Wallet wallet = Wallet.builder()
 				.type(type)
@@ -554,7 +554,7 @@ public class WalletService {
 				.source(source)
 				.status(WalletStatus.WAIT_AUDIT.getValue())
 				.createTime(new Date())
-				.level(EnumDef.EnumWalletLevel.SENIOR.getValue())
+				.level(walletLevel)
 				.build();
 		walletDao.insertSelective(wallet);
 

@@ -172,8 +172,18 @@ public class WalletApiImpl implements WalletApi {
 	@SignVerify
 	@Override
 	public Wallet createWallet(String accessToken, @ParamValid(nullable = false) Byte type,
-			@ParamValid(nullable = false) String title, @ParamValid(nullable = false) Byte source) {
-		return walletService.createWallet(type, title, source);
+			@ParamValid(nullable = false) String title, @ParamValid(nullable = false) Byte source, Integer channelType,
+			String bizUserId, @EnumParamValid(valuableEnumClass = EnumDef.EnumWalletLevel.class) Byte walletLevel) {
+		Wallet wallet = walletService.createWallet(type, title, source, walletLevel);
+		if (walletLevel.byteValue() == EnumDef.EnumWalletLevel.SENIOR.getValue()
+				&& channelType.intValue() == EnumDef.ChannelType.YUNST.getValue()) {
+			Integer bizUserType = EnumDef.BizUserType.PERSON.getValue();
+			if (source.byteValue() == EnumWallet.WalletSource.FHT_CORP.getValue()) {
+				bizUserType = EnumDef.BizUserType.COMPANY.getValue();
+			}
+			walletService.createSeniorWallet(channelType, bizUserId, bizUserType, wallet.getId());
+		}
+		return wallet;
 	}
 
 	@Log
@@ -293,8 +303,8 @@ public class WalletApiImpl implements WalletApi {
 	@SignVerify
 	@Override
 	public WalletChannel createSeniorWallet(String accessToken,
-			@EnumParamValid(valuableEnumClass = EnumWallet.ChannelType.class) Integer channelType, String bizUserId,
-			@EnumParamValid(valuableEnumClass = EnumDef.BizUserType.class)Integer bizUserType, Long walletId) {
+			@EnumParamValid(valuableEnumClass = EnumDef.ChannelType.class) Integer channelType, String bizUserId,
+			@EnumParamValid(valuableEnumClass = EnumDef.BizUserType.class) Integer bizUserType, Long walletId) {
 		return walletService.createSeniorWallet(channelType, bizUserId, bizUserType, walletId);
 	}
 

@@ -71,15 +71,20 @@ public class WalletController {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, resp);
 	}
 
-	@ApiOperation("开通未审核的钱包")
+	@ApiOperation("开通未审核的高级钱包")
 	@PostMapping(UrlConstant.CREATE_WALLET)
 	public ResponseValue<Wallet> createWallet(@RequestParam("access_token") String accessToken,
 			@ApiParam(value = "钱包类型， 1：企业钱包，2：个人钱包", required = true, example = "2") @RequestParam("type") Byte type,
 			@ApiParam(value = "钱包标题，通常是姓名或公司名", required = true, example = "测试个人钱包") @RequestParam("title")
 					String title,
 			@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2")
-			@RequestParam("source") Byte source) {
-		Wallet wallet = walletApi.createWallet(accessToken, type, title, source);
+			@RequestParam("source") Byte source,
+			@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = false, example = "1") @RequestParam("channel_type")
+					Integer channelType,
+			@ApiParam(value = "业务用户id", required = false) @RequestParam("biz_user_id") String bizUserId,
+			@ApiParam(value = "钱包等级 1:初级钱包,2:高级钱包", required = true, example = "1") @RequestParam("wallet_level")
+					Byte walletLevel) {
+		Wallet wallet = walletApi.createWallet(accessToken, type, title, source,channelType,bizUserId,walletLevel);
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, wallet);
 	}
@@ -203,10 +208,10 @@ public class WalletController {
 	@ApiOperation("开通高级钱包")
 	@PostMapping(UrlConstant.YUNST_CREATE_MEMBER)
 	public ResponseValue<WalletChannel> createSeniorWallet(@RequestParam("access_token") String accessToken,
-			@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = true, example = "1") @RequestParam("type")
+			@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = true, example = "1") @RequestParam("channel_type")
 					Integer channelType,
 			@ApiParam(value = "业务用户id", required = true) @RequestParam("biz_user_id") String bizUserId,
-			@ApiParam(value = "业务用户类型 1:企业,2:个人", required = true, example = "1") @RequestParam("type")
+			@ApiParam(value = "业务用户类型 1:企业,2:个人", required = true, example = "1") @RequestParam("biz_user_type")
 					Integer bizUserType,
 			@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId) throws Exception {
 

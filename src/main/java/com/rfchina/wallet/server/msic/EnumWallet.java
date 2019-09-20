@@ -8,10 +8,8 @@ public class EnumWallet {
 	/**
 	 * 钱包状态: 1:待审核，2：激活,3：禁用
 	 */
-	public enum WalletStatus implements Valuable<Byte> {
-		WAIT_AUDIT((byte) 1, "待审核"),
-		ACTIVE((byte) 2, "激活"),
-		UNVALID((byte) 3, "禁用");
+	public enum WalletStatus implements Valuable<Byte> {WAIT_AUDIT((byte) 1, "待审核"), ACTIVE((byte) 2, "激活"), UNVALID(
+			(byte) 3, "禁用");
 
 		private Byte value;
 		private String valueName;
@@ -24,16 +22,14 @@ public class EnumWallet {
 		@Override
 		public Byte getValue() {
 			return value;
-		}
-	}
+		}}
 
 	/**
 	 * 收款人账户类型
 	 */
 	public enum PayeeType implements Valuable<String> {
 
-		PUBLIC_ACCOUNT("0", "对公账号"),
-		BANKCARD("1", "卡");
+		PUBLIC_ACCOUNT("0", "对公账号"), BANKCARD("1", "卡");
 
 		private String value;
 		private String valueName;
@@ -46,17 +42,14 @@ public class EnumWallet {
 		@Override
 		public String getValue() {
 			return value;
-		}
-	}
-
+		}}
 
 	/**
 	 * 本行/他行标志
 	 */
 	public enum SysFlag implements Valuable<String> {
 
-		SELF("0", "本行"),
-		OTHER("1", "他行");
+		SELF("0", "本行"), OTHER("1", "他行");
 
 		private String value;
 		private String valueName;
@@ -69,16 +62,14 @@ public class EnumWallet {
 		@Override
 		public String getValue() {
 			return value;
-		}
-	}
+		}}
 
 	/**
 	 * 同城异地标志
 	 */
 	public enum RemitLocation implements Valuable<String> {
 
-		SELF("0", "同城"),
-		OTHER("1", "异地");
+		SELF("0", "同城"), OTHER("1", "异地");
 
 		private String value;
 		private String valueName;
@@ -91,22 +82,16 @@ public class EnumWallet {
 		@Override
 		public String getValue() {
 			return value;
-		}
-	}
-
+		}}
 
 	/**
 	 * 交易状态
 	 */
-	public enum TransStatus8804 implements Valuable<String> {
-		WAIT_FILLING("0", "待补录", "该笔支付需要柜员手工补录必要支付信息"),
-		WAIT_RECORD("1", "待记帐", "该笔支付已经处在等待柜员处理记账"),
-		WAIT_AUDIT("2", "待复核", "该笔支付处于等待柜员处理复核阶段"),
-		WAIT_AUTHORIZE_("3", "待授权", "该笔支付处于等待客户进行网银授权阶段"),
-		FINISH("4", "完成", "该笔支付处理成功，客户记账成功"),
-		REJECT("8", "拒绝", "该笔支付处理失败，被拒绝"),
-		REVOKE("9", "撤销", "该笔支付已被撤销"),
-		UNKNOWN("A", "未知状态", "接口文档未记录的状态");
+	public enum TransStatus8804 implements Valuable<String> {WAIT_FILLING("0", "待补录",
+			"该笔支付需要柜员手工补录必要支付信息"), WAIT_RECORD("1", "待记帐", "该笔支付已经处在等待柜员处理记账"), WAIT_AUDIT("2", "待复核",
+			"该笔支付处于等待柜员处理复核阶段"), WAIT_AUTHORIZE_("3", "待授权", "该笔支付处于等待客户进行网银授权阶段"), FINISH("4", "完成",
+			"该笔支付处理成功，客户记账成功"), REJECT("8", "拒绝", "该笔支付处理失败，被拒绝"), REVOKE("9", "撤销", "该笔支付已被撤销"), UNKNOWN("A", "未知状态",
+			"接口文档未记录的状态");
 
 		private String value;
 		private String valueName;
@@ -132,9 +117,8 @@ public class EnumWallet {
 		}
 
 		public boolean isEndStatus() {
-			return FINISH.getValue().equals(this.getValue())
-				|| REJECT.getValue().equals(this.getValue())
-				|| REVOKE.getValue().equals(this.getValue());
+			return FINISH.getValue().equals(this.getValue()) || REJECT.getValue().equals(this.getValue())
+					|| REVOKE.getValue().equals(this.getValue());
 		}
 
 	}
@@ -142,16 +126,9 @@ public class EnumWallet {
 	/**
 	 * 包授权状态
 	 */
-	public enum TransStatusDO48 implements Valuable<String> {
-		SUCC("0", "交易成功"),
-		COMMU_ERROR("1", "通讯失败"),
-		HOST_REFUSE("2", "主机拒绝"),
-		EBANK_REFUSE("3", "网银拒绝"),
-		AUDIT_REFUSE("4", "授权拒绝"),
-		WAIT_AUDIT("5", "交易录入，待授权"),
-		WAIT_DUIL("9", "待处理"),
-		COMMITED("Z", "交易提交成功"),
-		COMMIT_ERROR("Y", "交易提交不成功");
+	public enum TransStatusDO48 implements Valuable<String> {SUCC("0", "交易成功"), COMMU_ERROR("1", "通讯失败"), HOST_REFUSE(
+			"2", "主机拒绝"), EBANK_REFUSE("3", "网银拒绝"), AUDIT_REFUSE("4", "授权拒绝"), WAIT_AUDIT("5", "交易录入，待授权"), WAIT_DUIL(
+			"9", "待处理"), COMMITED("Z", "交易提交成功"), COMMIT_ERROR("Y", "交易提交不成功");
 
 		private String value;
 		private String valueName;
@@ -171,21 +148,15 @@ public class EnumWallet {
 		}
 
 		public boolean isEndStatus() {
-			return SUCC.getValue().equals(value)
-				|| HOST_REFUSE.getValue().equals(value)
-				|| EBANK_REFUSE.getValue().equals(value)
-				|| AUDIT_REFUSE.getValue().equals(value)
-				|| COMMIT_ERROR.getValue().equals(value);
-		}
-	}
+			return SUCC.getValue().equals(value) || HOST_REFUSE.getValue().equals(value) || EBANK_REFUSE.getValue()
+					.equals(value) || AUDIT_REFUSE.getValue().equals(value) || COMMIT_ERROR.getValue().equals(value);
+		}}
 
 	/**
 	 * 明细授权状态
 	 */
-	public enum TransStatusDO49 implements Valuable<String> {
-		WAIT_AUDIT("0", "待授权"),
-		HAS_AUDIT("1", "已授权"),
-		REFUSE("5", "授权拒绝");
+	public enum TransStatusDO49 implements Valuable<String> {WAIT_AUDIT("0", "待授权"), HAS_AUDIT("1", "已授权"), REFUSE("5",
+			"授权拒绝");
 
 		private String value;
 		private String valueName;
@@ -209,10 +180,8 @@ public class EnumWallet {
 	/**
 	 * 流水类型
 	 */
-	public enum WalletLogType implements Valuable<Byte> {
-		TRANSFER((byte) 1, "直接转帐"),
-		PAY_IN((byte) 2, "收入"),
-		PAY_OUT((byte) 3, "支出");
+	public enum WalletLogType implements Valuable<Byte> {TRANSFER((byte) 1, "直接转帐"), PAY_IN((byte) 2, "收入"), PAY_OUT(
+			(byte) 3, "支出");
 
 		private Byte value;
 		private String valueName;
@@ -225,20 +194,14 @@ public class EnumWallet {
 		@Override
 		public Byte getValue() {
 			return value;
-		}
-	}
+		}}
 
 	/**
 	 * 交易状态。 1: 待发送银行网关，2：银行受理中，3：交易成功，4：交易失败，5：撤销
 	 */
-	public enum WalletApplyStatus implements Valuable<Byte> {
-		SENDING((byte) 1, "待发送银行网关"),
-		PROCESSING((byte) 2, "银行受理中"),
-		SUCC((byte) 3, "交易成功"),
-		FAIL((byte) 4, "交易失败(确切失败)"),
-		REVOKE((byte) 5, "撤销"),
-		WAIT_DEAL((byte) 6, "待处理"),
-		REDO((byte) 7, "等待重新发起");
+	public enum WalletApplyStatus implements Valuable<Byte> {SENDING((byte) 1, "待发送银行网关"), PROCESSING((byte) 2,
+			"银行受理中"), SUCC((byte) 3, "交易成功"), FAIL((byte) 4, "交易失败(确切失败)"), REVOKE((byte) 5, "撤销"), WAIT_DEAL((byte) 6,
+			"待处理"), REDO((byte) 7, "等待重新发起");
 
 		private Byte value;
 		private String valueName;
@@ -264,12 +227,12 @@ public class EnumWallet {
 		 */
 		public static WalletApplyStatus parsePuDong8804(String tranStatus) {
 			switch (tranStatus) {
-				case "4":
-					return SUCC;
-				case "9":
-					return REVOKE;
-				default:
-					return PROCESSING;
+			case "4":
+				return SUCC;
+			case "9":
+				return REVOKE;
+			default:
+				return PROCESSING;
 			}
 		}
 
@@ -278,24 +241,21 @@ public class EnumWallet {
 		 */
 		public static WalletApplyStatus parsePuDongAQ54(String tranStatus) {
 			switch (tranStatus) {
-				case "0":
-					return SUCC;
-				case "1":
-					return FAIL;
-				case "2":
-					return PROCESSING;
-				default:
-					return null;
+			case "0":
+				return SUCC;
+			case "1":
+				return FAIL;
+			case "2":
+				return PROCESSING;
+			default:
+				return null;
 			}
-		}
-	}
+		}}
 
 	/**
 	 * 钱包类型， 1：企业钱包，2：个人钱包
 	 */
-	public enum WalletType implements Valuable<Byte> {
-		COMPANY((byte) 1, "企业钱包"),
-		PERSON((byte) 2, "个人钱包");
+	public enum WalletType implements Valuable<Byte> {COMPANY((byte) 1, "企业钱包"), PERSON((byte) 2, "个人钱包");
 
 		private Byte value;
 		private String valueName;
@@ -308,16 +268,13 @@ public class EnumWallet {
 		@Override
 		public Byte getValue() {
 			return value;
-		}
-	}
+		}}
 
 	/**
 	 * 钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 个人用户
 	 */
-	public enum WalletSource implements Valuable<Byte> {
-		FHT_CORP((byte) 1, "富慧通-企业商家"),
-		FHT_PERSON((byte) 2, "富慧通-个人商家"),
-		USER((byte) 3, "个人用户");
+	public enum WalletSource implements Valuable<Byte> {FHT_CORP((byte) 1, "富慧通-企业商家"), FHT_PERSON((byte) 2,
+			"富慧通-个人商家"), USER((byte) 3, "个人用户");
 
 		private Byte value;
 		private String valueName;
@@ -330,15 +287,12 @@ public class EnumWallet {
 		@Override
 		public Byte getValue() {
 			return value;
-		}
-	}
+		}}
 
 	/**
 	 * 交易类型.1:代收 2:代付
 	 */
-	public enum AQTransType implements Valuable<Byte> {
-		COLLECT((byte) 1, "代收"),
-		TO_PAY((byte) 2, "代付");
+	public enum AQTransType implements Valuable<Byte> {COLLECT((byte) 1, "代收"), TO_PAY((byte) 2, "代付");
 
 		private Byte value;
 		private String valueName;
@@ -351,15 +305,12 @@ public class EnumWallet {
 		@Override
 		public Byte getValue() {
 			return value;
-		}
-	}
+		}}
 
 	/**
 	 * 收付款人对公对私标志 0:对公 1:对私
 	 */
-	public enum AQPayeeType implements Valuable<String> {
-		PUBLIC("0", "对公"),
-		PRIVATE("1", "对私");
+	public enum AQPayeeType implements Valuable<String> {PUBLIC("0", "对公"), PRIVATE("1", "对私");
 
 		private String value;
 		private String valueName;
@@ -372,18 +323,14 @@ public class EnumWallet {
 		@Override
 		public String getValue() {
 			return value;
-		}
-	}
-
+		}}
 
 	/**
 	 * 批次处理状态 0:成功； 1:失败； 2:处理中； 3:异常（需管理端处理）
 	 */
-	public enum TransStatusAQ53 implements Valuable<Byte> {
-		SUCC((byte) 0, "成功"),
-		FAIL((byte) 1, "失败"),
-		DEALING((byte) 2, "处理中"),
-		EXEPTION((byte) 3, "异常");
+	public enum TransStatusAQ53 implements Valuable<Byte> {SUCC((byte) 0, "成功"), FAIL((byte) 1, "失败"),
+		DEALING((byte) 2,
+			"处理中"), EXEPTION((byte) 3, "异常");
 
 		private Byte value;
 		private String valueName;
@@ -400,16 +347,14 @@ public class EnumWallet {
 
 		public String getValueName() {
 			return valueName;
-		}
-	}
+		}}
 
 	/**
 	 * 明细状态 0：成功 1：失败 2：处理中
 	 */
-	public enum TransStatusAQ54 implements Valuable<Byte> {
-		SUCC((byte) 0, "成功"),
-		FAIL((byte) 1, "失败"),
-		DEALING((byte) 2, "处理中");
+	public enum TransStatusAQ54 implements Valuable<Byte> {SUCC((byte) 0, "成功"), FAIL((byte) 1, "失败"),
+		DEALING((byte) 2,
+			"处理中");
 
 		private Byte value;
 		private String valueName;
@@ -426,16 +371,12 @@ public class EnumWallet {
 
 		public String getValueName() {
 			return valueName;
-		}
-	}
-
+		}}
 
 	/**
 	 * 银行卡卡类型 0：对公帐号 1：卡 2：活期一本通 8：活期存折 9：内部帐/表外帐
 	 */
-	public enum AQCardType implements Valuable<String> {
-		PUBLIC("0", "对公帐号"),
-		BANKCARD("1", "卡");
+	public enum AQCardType implements Valuable<String> {PUBLIC("0", "对公帐号"), BANKCARD("1", "卡");
 
 		private String value;
 		private String valueName;
@@ -448,15 +389,13 @@ public class EnumWallet {
 		@Override
 		public String getValue() {
 			return value;
-		}
-	}
+		}}
 
 	/**
 	 * 关联接口方法，2：银企直连AQ52，1：银企直连8800
 	 */
-	public enum GatewayMethod implements Valuable<Byte> {
-		PUDONG_8800((byte) 1, "银企直连8800"),
-		PUDONG_AQ52((byte) 2, "银企直连AQ52");
+	public enum GatewayMethod implements Valuable<Byte> {PUDONG_8800((byte) 1, "银企直连8800"), PUDONG_AQ52((byte) 2,
+			"银企直连AQ52");
 
 		private Byte value;
 		private String valueName;
@@ -469,12 +408,10 @@ public class EnumWallet {
 		@Override
 		public Byte getValue() {
 			return value;
-		}
-	}
+		}}
 
 	public enum LockStatus implements Valuable<Byte> {
-		UNLOCK((byte) 1, "未锁"),
-		LOCKED((byte) 2, "锁定");
+		UNLOCK((byte) 1, "未锁"), LOCKED((byte) 2, "锁定");
 
 		private Byte value;
 		private String valueName;
@@ -491,8 +428,7 @@ public class EnumWallet {
 	}
 
 	public enum NotifyType implements Valuable<Byte> {
-		DEVELOPER((byte) 1),
-		BUSINESS((byte) 2);
+		DEVELOPER((byte) 1), BUSINESS((byte) 2);
 
 		private Byte value;
 
@@ -507,8 +443,7 @@ public class EnumWallet {
 	}
 
 	public enum LancherType implements Valuable<Byte> {
-		SYS((byte) 1, "系统发起"),
-		USER((byte) 2, "用户发起");
+		SYS((byte) 1, "系统发起"), USER((byte) 2, "用户发起");
 
 		private Byte value;
 		private String valueName;
@@ -524,35 +459,11 @@ public class EnumWallet {
 		}
 	}
 
-	public enum ChannelType implements Valuable<Byte> {
-		PUDONG((byte) 1, "浦发银企直连"),
-		YUNST((byte) 2, "通联云商通");
-
-		private Byte value;
-		private String valueName;
-
-		ChannelType(Byte value, String valueName) {
-			this.value = value;
-			this.valueName = valueName;
-		}
-
-		@Override
-		public Byte getValue() {
-			return value;
-		}
-	}
-
-
 	/**
 	 * 交易状态
 	 */
-	public enum YunstOrderStatus implements Valuable<Long> {
-		WAITING_PAY(1L, "未支付"),
-		FAIL(3L, "交易失败"),
-		SUCC(4L, "交易成功"),
-		SUCC_AND_REFUND(5L, "交易成功-发生退款"),
-		CLOSE(6L, "关闭"),
-		HANDLING(99L, "进行中");
+	public enum YunstOrderStatus implements Valuable<Long> {WAITING_PAY(1L, "未支付"), FAIL(3L, "交易失败"), SUCC(4L,
+			"交易成功"), SUCC_AND_REFUND(5L, "交易成功-发生退款"), CLOSE(6L, "关闭"), HANDLING(99L, "进行中");
 
 		private Long value;
 		private String valueName;
@@ -567,20 +478,18 @@ public class EnumWallet {
 			return value;
 		}
 
-
 		public WalletApplyStatus toApplyStatus() {
 			switch (this) {
-				case SUCC:
-					return WalletApplyStatus.SUCC;
-				case SUCC_AND_REFUND:
-					return WalletApplyStatus.SUCC;
-				case FAIL:
-					return WalletApplyStatus.FAIL;
-				case CLOSE:
-					return WalletApplyStatus.FAIL;
-				default:
-					return WalletApplyStatus.PROCESSING;
+			case SUCC:
+				return WalletApplyStatus.SUCC;
+			case SUCC_AND_REFUND:
+				return WalletApplyStatus.SUCC;
+			case FAIL:
+				return WalletApplyStatus.FAIL;
+			case CLOSE:
+				return WalletApplyStatus.FAIL;
+			default:
+				return WalletApplyStatus.PROCESSING;
 			}
-		}
-	}
+		}}
 }
