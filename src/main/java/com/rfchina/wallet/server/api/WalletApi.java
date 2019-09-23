@@ -54,7 +54,6 @@ public interface WalletApi {
 	 * 开通未审核的钱包
 	 */
 	Wallet createWallet(String accessToken, Byte type, String title, Byte source, Integer channelType,
-			String bizUserId,
 			Byte walletLevel);
 
 	/**
@@ -125,12 +124,10 @@ public interface WalletApi {
 	 * @param type        必填，验证码类型, 1:登录, 2:身份验证
 	 * @param verifyToken 必填，反作弊结果查询token
 	 * @param redirectUrl 非必填，触发图形验证码并验证成功后重定向地址
-	 * @param source      非必填, 钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户
-	 * @param channelType 非必填, 渠道类型.1: 浦发银企直连，2：通联云商通
 	 * @return
 	 */
 	ResponseValue sendVerifyCode(String accessToken, Long userId, String mobile, Integer type, String verifyToken,
-			String redirectUrl, String ip,Byte source, Integer channelType);
+			String redirectUrl, String ip);
 
 	/**
 	 * 通过手机验证码登录
@@ -146,23 +143,37 @@ public interface WalletApi {
 	 * 升级高级钱包
 	 *
 	 * @param channelType 必填, 渠道类型.1: 浦发银企直连，2：通联云商通
-	 * @param bizUserId   必填, 业务系统用户id
 	 * @param source      必填, 钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户
 	 * @param walletId    必填, 钱包id
 	 * @return
 	 */
-	WalletChannel upgradeSeniorWallet(String accessToken, Byte source, Integer channelType, String bizUserId,
-			Long walletId);
+	WalletChannel upgradeSeniorWallet(String accessToken, Byte source, Integer channelType, Long walletId);
 
+	/**
+	 * 高级钱包认证验证码
+	 *
+	 * @param source      必填, 钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户
+	 * @param channelType 必填, 渠道类型.1: 浦发银企直连，2：通联云商通
+	 * @param walletId    必填, 钱包id
+	 * @param mobile      必填, 电话
+	 * @param walletId    必填, 短信验证码类型
+	 * @return
+	 */
+	WalletChannel seniorWalletSmsCodeVerification(String accessToken, Byte source, Integer channelType, Long walletId,
+			String mobile, Integer smsCodeType);
 
 	/**
 	 * 高级钱包认证
+	 *
 	 * @param source      必填, 钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户
 	 * @param channelType 必填, 渠道类型.1: 浦发银企直连，2：通联云商通
-	 * @param bizUserId   必填, 业务系统用户id
 	 * @param walletId    必填, 钱包id
+	 * @param realName    必填, 真实姓名
+	 * @param idNo        必填, 身份证
+	 * @param mobile      必填, 电话
+	 * @param verifyCode  必填, 短信验证码
 	 * @return
 	 */
-	WalletChannel seniorWalletAuthentication(String accessToken, Byte source, Integer channelType, String bizUserId,
-			Long walletId);
+	String seniorWalletAuthentication(String accessToken, Byte source, Integer channelType, Long walletId,
+			String realName, String idNo, String mobile, String verifyCode);
 }

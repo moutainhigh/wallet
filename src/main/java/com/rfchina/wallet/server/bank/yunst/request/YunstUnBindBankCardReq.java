@@ -12,7 +12,7 @@ import lombok.ToString;
 @ApiModel(description = "4.1.15 解绑绑定银行卡")
 public class YunstUnBindBankCardReq implements YunstBaseReq {
 	private static final long serialVersionUID = 4565276229987182645L;
-	@ApiModelProperty(value = "商户系统用户标识(个人用户:U+userId,企业用户:M+mchId)", required = true)
+	@ApiModelProperty(value = "商户系统用户标识(个人用户:WU+walletId,个人商户:WM+walletId,企业用户:WC+walletId)", required = true)
 	private String bizUserId;
 	@ApiModelProperty(value = "银行卡号,(RSA加密)", required = true )
 	private String cardNo;

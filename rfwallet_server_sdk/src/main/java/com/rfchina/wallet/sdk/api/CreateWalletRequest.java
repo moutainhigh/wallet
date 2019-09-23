@@ -26,9 +26,6 @@ public class CreateWalletRequest extends  AbstractApiRequest {
   @ApiModelProperty("钱包等级 1:初级钱包,2:高级钱包")
   private Integer walletLevel ;
 
-  @ApiModelProperty("业务用户id")
-  private String bizUserId ;
-
   @ApiModelProperty("渠道类型 1:浦发银企直连,2:通联云商通")
   private Integer channelType ;
 
@@ -60,9 +57,6 @@ public class CreateWalletRequest extends  AbstractApiRequest {
       }
       if(walletLevel != null){
         parameters.put("wallet_level", walletLevel.toString());
-      }
-      if(bizUserId != null){
-        parameters.put("biz_user_id", bizUserId.toString());
       }
       if(channelType != null){
         parameters.put("channel_type", channelType.toString());

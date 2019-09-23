@@ -79,12 +79,11 @@ public class WalletController {
 					String title,
 			@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2")
 			@RequestParam("source") Byte source,
-			@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = false, example = "1") @RequestParam(value = "channel_type",required = false)
-					Integer channelType,
-			@ApiParam(value = "业务用户id", required = false) @RequestParam(value = "biz_user_id",required = false) String bizUserId,
-			@ApiParam(value = "钱包等级 1:初级钱包,2:高级钱包", required = true, example = "1") @RequestParam(value = "wallet_level",required = false)
-					Byte walletLevel) {
-		Wallet wallet = walletApi.createWallet(accessToken, type, title, source, channelType, bizUserId, walletLevel);
+			@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = false, example = "1")
+			@RequestParam(value = "channel_type", required = false) Integer channelType,
+			@ApiParam(value = "钱包等级 1:初级钱包,2:高级钱包", required = true, example = "1")
+			@RequestParam(value = "wallet_level", required = false) Byte walletLevel) {
+		Wallet wallet = walletApi.createWallet(accessToken, type, title, source, channelType, walletLevel);
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, wallet);
 	}
@@ -186,17 +185,18 @@ public class WalletController {
 	@PostMapping(UrlConstant.WALLET_SEND_VERIFY_CODE)
 	public ResponseValue<Map<String, Object>> sendVerifyCode(@RequestParam("access_token") String accessToken,
 			@ApiParam(value = "手机号码", required = true) @RequestParam(value = "mobile") String mobile,
-			@ApiParam(value = "验证码类型, 1:登录, 2:验证已开通钱包帐号, 3:验证高级钱包", required = true) @RequestParam("type") Integer type,
+			@ApiParam(value = "验证码类型, 1:登录, 2:验证已开通钱包帐号", required = true) @RequestParam("type") Integer type,
 			@ApiParam(value = "反作弊结果查询token", required = true) @RequestParam("verify_token") String verifyToken,
 			@ApiParam(value = "触发图形验证码并验证成功后重定向地址") @RequestParam(value = "redirect_url", required = false)
 					String redirectUrl,
 			@ApiParam(value = "来源IP", required = true) @RequestParam(value = "ip") String ip,
-			@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = false, example = "1") @RequestParam(value = "channel_type",required = false)
-					Integer channelType,
+			@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = false, example = "1")
+			@RequestParam(value = "channel_type", required = false) Integer channelType,
 			@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = false, example = "2")
-			@RequestParam(value = "source",required = false) Byte source,
-			@ApiParam(value = "业务用户id", required = false) @RequestParam(value = "biz_user_id",required = false) Long bizUserId) {
-		return walletApi.sendVerifyCode(accessToken, bizUserId, mobile, type, verifyToken, redirectUrl, ip,source,channelType);
+			@RequestParam(value = "source", required = false) Byte source,
+			@ApiParam(value = "业务用户id", required = false) @RequestParam(value = "biz_user_id", required = false)
+					Long bizUserId) {
+		return walletApi.sendVerifyCode(accessToken, bizUserId, mobile, type, verifyToken, redirectUrl, ip);
 	}
 
 	@ApiOperation("通过短信验证码登录")
@@ -217,24 +217,46 @@ public class WalletController {
 					Integer channelType,
 			@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2")
 			@RequestParam("source") Byte source,
-			@ApiParam(value = "业务用户id", required = true) @RequestParam("biz_user_id") String bizUserId,
 			@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId) throws Exception {
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
-				walletApi.upgradeSeniorWallet(accessToken, source, channelType, bizUserId, walletId));
+				walletApi.upgradeSeniorWallet(accessToken, source, channelType, walletId));
 	}
 
-	@ApiOperation("高级钱包认证")
-	@PostMapping(UrlConstant.WALLET_SENIOR_AUTHENTICATION)
-	public ResponseValue<WalletChannel> seniorWalletAuthentication(@RequestParam("access_token") String accessToken,
+	@ApiOperation("高级钱包认证验证码")
+	@PostMapping(UrlConstant.WALLET_SENIOR_SMS_VERIFY_CODE)
+	public ResponseValue<WalletChannel> seniorWalletSmsCodeVerification(
+			@RequestParam("access_token") String accessToken,
 			@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = true, example = "1") @RequestParam("channel_type")
 					Integer channelType,
 			@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2")
 			@RequestParam("source") Byte source,
-			@ApiParam(value = "业务用户id", required = true) @RequestParam("biz_user_id") String bizUserId,
-			@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId) throws Exception {
+			@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+			@ApiParam(value = "手机号码", required = true) @RequestParam("mobile") String mobile,
+			@ApiParam(value = "短信类型", required = true) @RequestParam("sms_type") Integer smsCodeType) throws Exception {
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
-				walletApi.seniorWalletAuthentication(accessToken, source, channelType, bizUserId, walletId));
+				walletApi.seniorWalletSmsCodeVerification(accessToken, source, channelType, walletId, mobile,
+						smsCodeType));
+	}
+
+	@ApiOperation("高级钱包认证")
+	@PostMapping(UrlConstant.WALLET_SENIOR_AUTHENTICATION)
+	public ResponseValue<String> seniorWalletAuthentication(@RequestParam("access_token") String accessToken,
+			@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = true, example = "1") @RequestParam("channel_type")
+					Integer channelType,
+			@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2")
+			@RequestParam("source") Byte source,
+			@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+			@ApiParam(value = "姓名", required = true) @RequestParam("real_name") String realName,
+			@ApiParam(value = "身份证号", required = true) @RequestParam("id_no") String idNo,
+			@ApiParam(value = "手机号码", required = true) @RequestParam("mobile") String mobile,
+			@ApiParam(value = "短信验证码", required = true) @RequestParam("verify_code") String verifyCode)
+			throws Exception {
+
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
+				walletApi.seniorWalletAuthentication(accessToken, source, channelType, walletId, realName, idNo,
+						mobile,
+						verifyCode));
 	}
 }

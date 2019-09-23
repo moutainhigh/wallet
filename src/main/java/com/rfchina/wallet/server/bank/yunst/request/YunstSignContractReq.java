@@ -12,7 +12,7 @@ import lombok.ToString;
 @ApiModel(description = "4.1.4 会员电子协议签约")
 public class YunstSignContractReq implements YunstBaseReq {
 	private static final long serialVersionUID = 118332437377003408L;
-	@ApiModelProperty(value = "商户系统用户标识(个人用户:U+userId,企业用户:M+mchId)", required = true)
+	@ApiModelProperty(value = "商户系统用户标识(个人用户:WU+walletId,个人商户:WM+walletId,企业用户:WC+walletId)", required = true)
 	private String bizUserId;
 	@ApiModelProperty(value = "签订之后，跳转返回的页面地址", required = true)
 	private String jumpUrl;

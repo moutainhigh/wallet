@@ -13,7 +13,7 @@ import lombok.ToString;
 public class YunstSMSVerificationCodeReq implements YunstBaseReq {
 
 	private static final long serialVersionUID = 1076123197140587252L;
-	@ApiModelProperty(value = "商户系统用户标识(个人用户:U+userId,企业用户:M+mchId)", required = true)
+	@ApiModelProperty(value = "商户系统用户标识(个人用户:WU+walletId,个人商户:WM+walletId,企业用户:WC+walletId)", required = true)
 	private String bizUserId;
 	@ApiModelProperty(value = "电话号码", required = true)
 	private String phone;

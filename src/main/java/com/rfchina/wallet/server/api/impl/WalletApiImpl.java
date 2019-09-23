@@ -29,6 +29,7 @@ import com.rfchina.wallet.domain.model.ext.BankClass;
 import com.rfchina.wallet.domain.model.ext.WalletCardExt;
 import com.rfchina.wallet.server.api.WalletApi;
 import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletChannelExtDao;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import com.rfchina.wallet.server.msic.EnumWallet;
@@ -37,7 +38,9 @@ import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.JuniorWalletService;
 import com.rfchina.wallet.server.service.UserService;
 import com.rfchina.wallet.server.service.WalletService;
+import com.rfchina.wallet.server.service.handler.yunst.YunstBaseHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -73,6 +76,9 @@ public class WalletApiImpl implements WalletApi {
 
 	@Autowired
 	private WalletApplyExtDao walletApplyExtDao;
+
+	@Autowired
+	private WalletChannelExtDao walletChannelExtDao;
 
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
@@ -179,15 +185,11 @@ public class WalletApiImpl implements WalletApi {
 	@Override
 	public Wallet createWallet(String accessToken, @ParamValid(nullable = false) Byte type,
 			@ParamValid(nullable = false) String title, @ParamValid(nullable = false) Byte source, Integer channelType,
-			String bizUserId, Byte walletLevel) {
+			Byte walletLevel) {
 		Wallet wallet = walletService.createWallet(type, title, source, walletLevel);
 		if (walletLevel.byteValue() == EnumDef.EnumWalletLevel.SENIOR.getValue()
 				&& channelType.intValue() == EnumDef.ChannelType.YUNST.getValue()) {
-			Integer bizUserType = EnumDef.BizUserType.PERSON.getValue();
-			if (source.byteValue() == EnumWallet.WalletSource.FHT_CORP.getValue()) {
-				bizUserType = EnumDef.BizUserType.COMPANY.getValue();
-			}
-			walletService.createSeniorWallet(channelType, bizUserId, bizUserType, wallet.getId());
+			walletService.createSeniorWallet(channelType, wallet.getId(), source);
 		}
 		return wallet;
 	}
@@ -263,8 +265,7 @@ public class WalletApiImpl implements WalletApi {
 	public ResponseValue sendVerifyCode(String accessToken, Long userId,
 			@ParamValid(pattern = RegexUtil.REGEX_MOBILE) String mobile,
 			@EnumParamValid(valuableEnumClass = com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType.class)
-					Integer type, @ParamValid(nullable = false) String verifyToken, String redirectUrl, String ip,
-			Byte source, Integer channelType) {
+					Integer type, @ParamValid(nullable = false) String verifyToken, String redirectUrl, String ip) {
 
 		com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType enumSendSmsType = EnumUtil.parse(
 				com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType.class, type);
@@ -279,15 +280,6 @@ public class WalletApiImpl implements WalletApi {
 					.byteValue()) {
 				throw new WalletResponseException(WalletResponseCode.EnumWalletResponseCode.WALLET_DISABLE);
 			}
-		} else if (enumSendSmsType == EnumDef.EnumSendSmsType.SENIOR_WALLET_BIND_PHONE) {
-			//高级钱包申请绑手机
-			Integer bizUserType = EnumDef.BizUserType.PERSON.getValue();
-			if (source.byteValue() == EnumWallet.WalletSource.FHT_CORP.getValue()) {
-				bizUserType = EnumDef.BizUserType.COMPANY.getValue();
-			}
-			walletService.seniorWalletApplyBindPhone(channelType, String.valueOf(userId), bizUserType, mobile);
-			return new ResponseValue<>(ResponseCode.EnumResponseCode.COMMON_SUCCESS.getValue(), null,
-					new HashMap<String, Object>());
 		}
 		//直接发送短信
 		return userService.sendSmsVerifyCode(com.rfchina.wallet.domain.misc.EnumDef.EnumVerifyCodeType.LOGIN, mobile,
@@ -319,23 +311,42 @@ public class WalletApiImpl implements WalletApi {
 	@SignVerify
 	@Override
 	public WalletChannel upgradeSeniorWallet(String accessToken, @ParamValid(nullable = false) Byte source,
-			Integer channelType, String bizUserId, Long walletId) {
+			Integer channelType, Long walletId) {
 		Wallet wallet = walletService.upgradeWalletLevel(walletId);
-		Integer bizUserType = EnumDef.BizUserType.PERSON.getValue();
-		if (source.byteValue() == EnumWallet.WalletSource.FHT_CORP.getValue()) {
-			bizUserType = EnumDef.BizUserType.COMPANY.getValue();
-		}
-		return walletService.createSeniorWallet(channelType, bizUserId, bizUserType, wallet.getId());
+		return walletService.createSeniorWallet(channelType, wallet.getId(), source);
 	}
 
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
+	@SignVerify
 	@Override
-	public WalletChannel seniorWalletAuthentication(String accessToken, Byte source, Integer channelType,
-			String bizUserId, Long walletId) {
+	public WalletChannel seniorWalletSmsCodeVerification(String accessToken, Byte source, Integer channelType,
+			Long walletId, String mobile, Integer smsCodeType) {
 		Integer bizUserType = EnumDef.BizUserType.PERSON.getValue();
 		if (source.byteValue() == EnumWallet.WalletSource.FHT_CORP.getValue()) {
 			bizUserType = EnumDef.BizUserType.COMPANY.getValue();
 		}
-		return null;
+		WalletChannel walletChannel = null;
+		if (smsCodeType == EnumDef.EnumVerifyCodeType.YUNST_BIND_PHONE.getValue().intValue()) {
+			String transformBizUserId = YunstBaseHandler.transferToYunstBizUserFormat(walletId, source);
+			String result = walletService.seniorWalletApplyBindPhone(channelType, walletId, source, mobile);
+			if (StringUtils.isBlank(result) || !result.equals(transformBizUserId)) {
+				log.error("短信验证码用户不一致: curBizUserId:{},yunstBizUserId:{}", transformBizUserId, result);
+				throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_GATEWAY_RESPONSE_ERROR);
+			}
+		}
+		return walletChannel;
+	}
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
+	@SignVerify
+	@Override
+	public String seniorWalletAuthentication(String accessToken, Byte source, Integer channelType, Long walletId,
+			String realName, String idNo, @ParamValid(pattern = RegexUtil.REGEX_MOBILE) String mobile,
+			String verifyCode) {
+		return walletService.seniorWalletAuth(channelType, walletId, source,realName, idNo, mobile,
+				verifyCode);
 	}
 
 }

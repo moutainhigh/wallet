@@ -28,7 +28,7 @@ public class YunstHandlerTest extends SpringBaseTest {
 
 	@Test
 	public void createMember() throws Exception {
-		Tuple<String, Integer> bizUserTuple = genBizUser(null);
+		Tuple<Long, Byte> bizUserTuple = genBizUser(null);
 		Tuple<YunstCreateMemberResult, YunstBaseHandler.YunstMemberType> member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
 
 		assertNotNull(member);
@@ -38,86 +38,86 @@ public class YunstHandlerTest extends SpringBaseTest {
 
 	@Test
 	public void sendSmsVerificationCode() throws Exception {
-		Tuple<String, Integer> bizUserTuple = genBizUser(2);
+		Tuple<Long, Byte> bizUserTuple = genBizUser(3);
 		Tuple<YunstCreateMemberResult, YunstBaseHandler.YunstMemberType> member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
 		assertNotNull(member);
 		logStack(member);
-		int type = bizUserTuple.right;
-		String bizUserId = bizUserTuple.left;
+		Byte source = bizUserTuple.right;
+		Long walletId = bizUserTuple.left;
 		String tel = genRamdomTelphone(null);
-		boolean result = yunstUserHandler.sendVerificationCode(bizUserId, type, tel, 9);
+		String result = yunstUserHandler.sendVerificationCode(walletId, source, tel, 9);
 		logStack(result);
 	}
 
 	@Test
 	public void bindPhone() throws Exception {
-		Tuple<String, Integer> bizUserTuple = genBizUser(2);
+		Tuple<Long, Byte> bizUserTuple = genBizUser(3);
 		Tuple<YunstCreateMemberResult, YunstBaseHandler.YunstMemberType> member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
 		assertNotNull(member);
 		logStack(member);
-		int type = bizUserTuple.right;
-		String bizUserId = bizUserTuple.left;
+		Byte source = bizUserTuple.right;
+		Long walletId = bizUserTuple.left;
 		String tel = genRamdomTelphone(null);
-		boolean result = yunstUserHandler.sendVerificationCode(bizUserId, type, tel, 9);
-		assertTrue(result);
+		String result = yunstUserHandler.sendVerificationCode(walletId, source, tel, 9);
+		assertNotNull(result);
 		logStack(result);
-		result = yunstUserHandler.bindPhone(bizUserId, type, tel, "11111");
-		assertTrue(result);
+		boolean result2 = yunstUserHandler.bindPhone(walletId, source, tel, "11111");
+		assertTrue(result2);
 		logStack(result);
 	}
 
 	@Test
 	public void modifyPhone() throws Exception {
-		Tuple<String, Integer> bizUserTuple = genBizUser(2);
+		Tuple<Long, Byte> bizUserTuple = genBizUser(3);
 		Tuple<YunstCreateMemberResult, YunstBaseHandler.YunstMemberType> member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
 		assertNotNull(member);
 		logStack(member);
-		int type = bizUserTuple.right;
-		String bizUserId = bizUserTuple.left;
+		Byte source = bizUserTuple.right;
+		Long walletId = bizUserTuple.left;
 		String tel = genRamdomTelphone(null);
-		boolean result = yunstUserHandler.sendVerificationCode(bizUserId, type, tel, 9);
-		assertTrue(result);
+		String result = yunstUserHandler.sendVerificationCode(walletId, source, tel, 9);
+		assertNotNull(result);
 		logStack(result);
-		result = yunstUserHandler.bindPhone(bizUserId, type, tel, "11111");
-		assertTrue(result);
+		boolean result2 = yunstUserHandler.bindPhone(walletId, source, tel, "11111");
+		assertTrue(result2);
 		logStack(result);
 		String newTel = genRamdomTelphone(null);
-		result = yunstUserHandler.modifyPhone(bizUserId, type, tel, newTel, "11111");
-		logStack(result);
-		assertTrue(result);
+		result2 = yunstUserHandler.modifyPhone(walletId, source, tel, newTel, "11111");
+		logStack(result2);
+		assertTrue(result2);
 	}
 
 	@Test
 	public void getMemberInfo() throws Exception {
-		int type = "M".equals(randomPersonCompany(null)) ? 1 : 2;
-		String bizUserId = "Test" + randomPersonCompany(null) + System.currentTimeMillis();
-		Object result = yunstUserHandler.getMemberInfo(bizUserId, type);
+		Byte source = randomSource(3);
+		Long walletId = randomWalletId(12345L);
+		Object result = yunstUserHandler.getMemberInfo(walletId, source);
 		logStack(result);
 	}
 
 	@Test
 	public void getPersonCertification() throws Exception {
-		Tuple<String, Integer> bizUserTuple = genBizUser(2);
+		Tuple<Long, Byte> bizUserTuple = genBizUser(3);
 		Tuple<YunstCreateMemberResult, YunstBaseHandler.YunstMemberType> member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
 		assertNotNull(member);
 		logStack(member);
-		int type = bizUserTuple.right;
-		String bizUserId = bizUserTuple.left;
+		Byte source = bizUserTuple.right;
+		Long walletId = bizUserTuple.left;
 		String realName = RandomUtils.getChineseName();
 		Long identityType = 1L;
 		String identityNo = RSAUtil.encrypt(new IdCardGenerator().generate());
-		boolean result = yunstUserHandler.personCertification(bizUserId, type, realName, identityType, identityNo);
+		boolean result = yunstUserHandler.personCertification(walletId, source, realName, identityType, identityNo);
 		logStack(result);
 	}
 
 	@Test
 	public void setCompanyInfo() throws Exception {
-		Tuple<String, Integer> bizUserTuple = genBizUser(1);
+		Tuple<Long, Byte> bizUserTuple = genBizUser(1);
 		Tuple<YunstCreateMemberResult, YunstBaseHandler.YunstMemberType> member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
 		assertNotNull(member);
 		logStack(member);
-		int type = bizUserTuple.right;
-		String bizUserId = bizUserTuple.left;
+		Byte source = bizUserTuple.right;
+		Long walletId = bizUserTuple.left;
 		/**
 		 * 	companyBasicInfo.put("companyName", "通联支付网络服务有限公司");
 		 * 			companyBasicInfo.put("companyAddress", "浙江省宁波市");
@@ -141,7 +141,7 @@ public class YunstHandlerTest extends SpringBaseTest {
 		 * 			companyBasicInfo.put("province", "上海");
 		 * 			companyBasicInfo.put("city", "上海");
 		 */
-		YunstSetCompanyInfoResult result = yunstUserHandler.setCompanyInfo(bizUserId, type, false,
+		YunstSetCompanyInfoResult result = yunstUserHandler.setCompanyInfo(walletId, source, false,
 				YunstSetCompanyInfoReq.CompanyBasicInfo.builder()
 						.companyName("通联支付网络服务有限公司")
 						.companyAddress("浙江省宁波市")
@@ -170,32 +170,32 @@ public class YunstHandlerTest extends SpringBaseTest {
 
 	@Test
 	public void genSignContractUrl() throws Exception {
-		Tuple<String, Integer> bizUserTuple = genBizUser(2);
+		Tuple<Long, Byte> bizUserTuple = genBizUser(3);
 		Tuple<YunstCreateMemberResult, YunstBaseHandler.YunstMemberType> member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
 		assertNotNull(member);
 		logStack(member);
-		int type = bizUserTuple.right;
-		String bizUserId = bizUserTuple.left;
-		String result = yunstUserHandler.generateSignContractUrl(bizUserId, type);
+		Byte source = bizUserTuple.right;
+		Long walletId = bizUserTuple.left;
+		String result = yunstUserHandler.generateSignContractUrl(walletId, source);
 		logStack(result);
 	}
 
 	@Test
 	public void applyBindBankCard() throws Exception {
-		Tuple<String, Integer> bizUserTuple = genBizUser(2);
+		Tuple<Long, Byte> bizUserTuple = genBizUser(3);
 		Tuple<YunstCreateMemberResult, YunstBaseHandler.YunstMemberType> member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
 		assertNotNull(member);
 		logStack(member);
-		int type = bizUserTuple.right;
-		String bizUserId = bizUserTuple.left;
+		Byte source = bizUserTuple.right;
+		Long walletId = bizUserTuple.left;
 		String realName = RandomUtils.getChineseName();
 		Long identityType = 1L;
 		String identityNo = RSAUtil.encrypt(new IdCardGenerator().generate());
-		boolean result = yunstUserHandler.personCertification(bizUserId, type, realName, identityType, identityNo);
+		boolean result = yunstUserHandler.personCertification(walletId, source, realName, identityType, identityNo);
 		logStack(result);
 //		String tel = RandomUtils.getTelephone();
 		String tel = "18928847212";
-		YunstApplyBindBankCardResult yunstApplyBindBankCardResult = yunstUserHandler.applyBindBankCard(bizUserId, type,
+		YunstApplyBindBankCardResult yunstApplyBindBankCardResult = yunstUserHandler.applyBindBankCard(walletId, source,
 				RSAUtil.encrypt("4581240118157727"), realName, tel, identityType, identityNo,
 				RSAUtil.encrypt("1119"), RSAUtil.encrypt("102"));
 		logStack(yunstApplyBindBankCardResult);
@@ -203,21 +203,21 @@ public class YunstHandlerTest extends SpringBaseTest {
 
 	@Test
 	public void bindBankCard() throws Exception {
-		Tuple<String, Integer> bizUserTuple = genBizUser(2);
+		Tuple<Long, Byte> bizUserTuple = genBizUser(3);
 		Tuple<YunstCreateMemberResult, YunstBaseHandler.YunstMemberType> member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
 		assertNotNull(member);
 		logStack(member);
-		int type = bizUserTuple.right;
-		String bizUserId = bizUserTuple.left;
+		Byte source = bizUserTuple.right;
+		Long walletId = bizUserTuple.left;
 		String realName = RandomUtils.getChineseName();
 		Long identityType = 1L;
 		String identityNo = RSAUtil.encrypt(new IdCardGenerator().generate());
-		boolean result = yunstUserHandler.personCertification(bizUserId, type, realName, identityType, identityNo);
+		boolean result = yunstUserHandler.personCertification(walletId, source, realName, identityType, identityNo);
 		logStack(result);
 
 //		String tel = RandomUtils.getTelephone();
 		String tel = "18928847212";
-		YunstApplyBindBankCardResult yunstApplyBindBankCardResult = yunstUserHandler.applyBindBankCard(bizUserId, type,
+		YunstApplyBindBankCardResult yunstApplyBindBankCardResult = yunstUserHandler.applyBindBankCard(walletId, source,
 				RSAUtil.encrypt("4581240118157727"), realName, tel, identityType, identityNo,
 				RSAUtil.encrypt("1119"), RSAUtil.encrypt("102"));
 		assertNotNull(yunstApplyBindBankCardResult);
@@ -238,7 +238,7 @@ public class YunstHandlerTest extends SpringBaseTest {
 		}
 
 		System.out.println("验证码为:" + verificationCode);
-		YunstBindBankCardResult yunstBindBankCardResult = yunstUserHandler.bindBankCard(bizUserId, type,
+		YunstBindBankCardResult yunstBindBankCardResult = yunstUserHandler.bindBankCard(walletId, source,
 				yunstApplyBindBankCardResult.getTranceNum(), tel, RSAUtil.encrypt("1119"), RSAUtil.encrypt("102"),
 				verificationCode);
 		logStack(yunstBindBankCardResult);
@@ -252,13 +252,23 @@ public class YunstHandlerTest extends SpringBaseTest {
 		}
 	}
 
-	private Tuple<String, Integer> genBizUser(Integer type) {
-		String mark = randomPersonCompany(type);
-		if (type == null) {
-			type = "M".equals(mark) ? 1 : 2;
+	private Tuple<Long, Byte> genBizUser(Integer type) {
+		return new Tuple<>(randomWalletId(null), randomSource(type));
+	}
+
+
+	private Long randomWalletId(Long walletId){
+		if (walletId != null){
+			walletId = (long) new Random().nextInt(10000) + 1;
 		}
-		String bizUserId = "Test" + mark + System.currentTimeMillis();
-		return new Tuple<>(bizUserId, type);
+		return walletId;
+	}
+
+	private Byte randomSource(Integer source){
+		if (source != null){
+			source = new Random().nextInt(3) + 1;
+		}
+		return source.byteValue();
 	}
 
 	private String genRamdomTelphone(String tel) {

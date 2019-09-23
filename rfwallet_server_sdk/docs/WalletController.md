@@ -270,7 +270,6 @@
 |title|是|钱包标题，通常是姓名或公司名|
 |type|是|钱包类型， 1：企业钱包，2：个人钱包|
 |wallet_level|是|钱包等级 1:初级钱包,2:高级钱包|
-|biz_user_id|否|业务用户id|
 |channel_type|否|渠道类型 1:浦发银企直连,2:通联云商通|
 
 
@@ -604,7 +603,7 @@
 |access_token|是|access_token|
 |ip|是|来源IP|
 |mobile|是|手机号码|
-|type|是|验证码类型, 1:登录, 2:验证已开通钱包帐号, 3:验证高级钱包|
+|type|是|验证码类型, 1:登录, 2:验证已开通钱包帐号|
 |verify_token|是|反作弊结果查询token|
 |biz_user_id|否|业务用户id|
 |channel_type|否|渠道类型 1:浦发银企直连,2:通联云商通|
@@ -633,8 +632,39 @@
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
 |access_token|是|access_token|
-|biz_user_id|是|业务用户id|
 |channel_type|是|渠道类型 1:浦发银企直连,2:通联云商通|
+|id_no|是|身份证号|
+|mobile|是|手机号码|
+|real_name|是|姓名|
+|source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
+|verify_code|是|短信验证码|
+|wallet_id|是|钱包id|
+
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": "", //消息
+"data": {
+  }
+}
+```
+
+###  高级钱包认证验证码
+
+请求地址: /wallet_server/v1/m/wallet/senior_sms_verify_code
+
+请求类型: POST
+
+请求参数:
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|channel_type|是|渠道类型 1:浦发银企直连,2:通联云商通|
+|mobile|是|手机号码|
+|sms_type|是|短信类型|
 |source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
 |wallet_id|是|钱包id|
 
@@ -676,7 +706,6 @@
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
 |access_token|是|access_token|
-|biz_user_id|是|业务用户id|
 |channel_type|是|渠道类型 1:浦发银企直连,2:通联云商通|
 |source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
 |wallet_id|是|钱包id|

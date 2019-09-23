@@ -68,4 +68,9 @@ public class WalletTest extends WalletBaseTest{
     public void testLoginWithVerify(){
         loginWithVerify("13560166318", "12345",1, "127.0.0.1");
     }
+
+    @Test
+    public void testWalletUpgrade(){
+        upgradeWallet(2, (byte)2, 5L);
+    }
 }

@@ -20,7 +20,7 @@ public class SendVerifyCodeRequest extends  AbstractApiRequest {
   @ApiModelProperty("手机号码")
   private String mobile ;
 
-  @ApiModelProperty("验证码类型, 1:登录, 2:验证已开通钱包帐号, 3:验证高级钱包")
+  @ApiModelProperty("验证码类型, 1:登录, 2:验证已开通钱包帐号")
   private Integer type ;
 
   @ApiModelProperty("反作弊结果查询token")

@@ -113,8 +113,8 @@ public class YunstBizHandler  extends YunstBaseHandler implements EBankHandler  
 	/**
 	 * 查询余额
 	 */
-	public YunstQueryBalanceResult queryBalance(String bizUserId, Integer type, String accountSetNo) throws Exception {
-		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
+	public YunstQueryBalanceResult queryBalance(Long walletId, Byte source, String accountSetNo) throws Exception {
+		String bizUserId = transferToYunstBizUserFormat(walletId, source);
 		YunstQueryBalanceReq req = YunstQueryBalanceReq.builder$()
 			.bizUserId(bizUserId)
 			.accountSetNo(accountSetNo)

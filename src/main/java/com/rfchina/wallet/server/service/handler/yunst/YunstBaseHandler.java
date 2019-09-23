@@ -15,8 +15,9 @@ import javax.annotation.PostConstruct;
 public abstract class YunstBaseHandler {
 	public static final Long TERMINAL_TYPE = 2L; // 终端类型 2-PC
 	public static final Long BIND_CARD_TYPE = 7L; // 绑卡方式 收银宝快捷支付签约（有银行范围） —支持收银宝快捷支付 —支持提现
-	public static final String MEMBER_TYPE_PREFIX_PERSON = "U";
-	public static final String MEMBER_TYPE_PREFIX_COMPANY = "C";
+	public static final String MEMBER_TYPE_PREFIX_PERSON = "WU";//个人
+	public static final String MEMBER_TYPE_PREFIX_MCH = "WM";//个人商户
+	public static final String MEMBER_TYPE_PREFIX_COMPANY = "WC";//企业商户
 
 	@Autowired
 	ConfigService configService;
@@ -28,15 +29,16 @@ public abstract class YunstBaseHandler {
 				configService.getYstPfxPath(), configService.getYstTlCertPath()));
 	}
 
-	protected String transferToYunstBizUserFormat(String bizUserId, Integer type) {
-		if (type != 1 && type != 2) {
-			throw new WalletResponseException(ResponseCode.EnumResponseCode.COMMON_INVALID_PARAMS, "type");
+	public static String transferToYunstBizUserFormat(Long walletId, Byte type) {
+		switch (type){
+		case 1:
+			return MEMBER_TYPE_PREFIX_COMPANY + walletId;
+		case 2:
+			return MEMBER_TYPE_PREFIX_MCH + walletId;
+		case 3:
+			return MEMBER_TYPE_PREFIX_PERSON + walletId;
 		}
-		if (type == 2) {
-			return MEMBER_TYPE_PREFIX_PERSON + bizUserId;
-		} else {
-			return MEMBER_TYPE_PREFIX_COMPANY + bizUserId;
-		}
+		throw new WalletResponseException(ResponseCode.EnumResponseCode.COMMON_INVALID_PARAMS, "type");
 	}
 
 	public enum YunstBaseRespStatus implements Valuable<String> {

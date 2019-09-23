@@ -171,4 +171,16 @@ public abstract class WalletBaseTest extends BaseTest {
         params.put("sign", sign);
         return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_LOGIN_WITH_VERIFY_CODE, params, 2033);
     }
+
+    protected Map<String, Object> upgradeWallet(Integer channelType,Byte source,  Long walletId){
+        Map<String, String> params = new HashMap<>();
+        params.put("access_token", getAccessToken(appId, appSecret));
+        params.put("channel_type", String.valueOf(channelType));
+        params.put("source", String.valueOf(source));
+        params.put("wallet_id", String.valueOf(walletId));
+        params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+        String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+        params.put("sign", sign);
+        return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_UPGRADE, params, 2033);
+    }
 }

@@ -115,6 +115,10 @@ public class UrlConstant {
 	 */
 	public static final String WALLET_UPGRADE = VERSION + "/m/wallet/upgrade_wallet";
 	/**
+	 * 高级钱包认证验证码
+	 */
+	public static final String WALLET_SENIOR_SMS_VERIFY_CODE = VERSION + "/m/wallet/senior_sms_verify_code";
+	/**
 	 * 高级钱包认证
 	 */
 	public static final String WALLET_SENIOR_AUTHENTICATION = VERSION + "/m/wallet/senior_authentication";
