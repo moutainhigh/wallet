@@ -123,6 +123,14 @@ public class UrlConstant {
 	 */
 	public static final String WALLET_SENIOR_AUTHENTICATION = VERSION + "/m/wallet/senior_authentication";
 	/**
+	 * 高级钱包商家资料审核
+	 */
+	public static final String WALLET_SENIOR_COMPANY_INFO_AUDIT = VERSION + "/m/wallet/senior_company_info_audit";
+	/**
+	 * 高级钱包代扣协议（企业,个人商家）
+	 */
+	public static final String WALLET_SENIOR_BANLACE_PROTOCOL = VERSION + "/m/wallet/senior_balance_protocol";
+	/**
 	 * 云商通绑定手机
 	 */
 	public static final String YUNST_BIND_PHONE = VERSION + "/m/yunst/bind_phone";

@@ -110,7 +110,13 @@ public class ConfigService {
 	@Value("${yunst.notify.backUrl}")
 	private String yunstNotifybackUrl;
 	@Value("${yunst.signContract.gateway.url}")
-	private String signContractUrl;
+	private String yunstSignContractUrl;
+	@Value("${yunst.balanceProtocol.name}")
+	private String yunstBalanceProtocolName;
+	@Value("${yunst.receiverId}")
+	private String yunstReceiverId;
+	@Value("${yunst.signBalaceProtocol.gateway.url}")
+	private String yunstSignBalanceProtocolUrl;
 // yunst end
 
 }

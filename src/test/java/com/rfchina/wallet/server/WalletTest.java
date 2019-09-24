@@ -72,16 +72,16 @@ public class WalletTest extends WalletBaseTest {
 
 	@Test
 	public void testWalletUpgrade() {
-		upgradeWallet(2, (byte) 3, 10L);
+		upgradeWallet(2, (byte) 3, 11L);
 	}
 
 	@Test
 	public void testSeniorWalletAuthBindPhone() {
-		seniroWalletApplyBindPhone(2, (byte) 2, 8L, "13800138010", 9);
+		seniroWalletApplyBindPhone(2, (byte) 3, 11L, "13800138111", 9);
 	}
 
 	@Test
 	public void testSeniorWalletAuth() {
-		seniroWalletAuth(2, (byte) 3, 10L, "张三丰", "440104198802124487", "13800139510", "11111");
+		seniroWalletAuth(2, (byte) 3, 11L, "张二丰", "440104198803124487", "13800138111", "11111");
 	}
 }

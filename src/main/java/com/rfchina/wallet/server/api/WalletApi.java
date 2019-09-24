@@ -176,4 +176,14 @@ public interface WalletApi {
 	 */
 	String seniorWalletAuthentication(String accessToken, Byte source, Integer channelType, Long walletId,
 			String realName, String idNo, String mobile, String verifyCode);
+
+
+	/**
+	 * 高级钱包扣款协议地址
+	 *
+	 * @param source      必填, 钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户
+	 * @param walletId    必填, 钱包id
+	 * @return
+	 */
+	String signBalanceProtocol(String accessToken, Byte source, Long walletId);
 }

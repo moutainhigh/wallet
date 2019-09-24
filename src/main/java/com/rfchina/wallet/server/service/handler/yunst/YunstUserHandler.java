@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
 import java.util.TimeZone;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -57,7 +58,27 @@ public class YunstUserHandler extends YunstBaseHandler {
 				.source(TERMINAL_TYPE)
 				.build();
 		String res = yunstTpl.signRequest(req);
-		String webParamUrl = configService.getSignContractUrl() + "?" + res;
+		String webParamUrl = configService.getYunstSignContractUrl() + "?" + res;
+		log.info("webParamUrl: " + webParamUrl);
+		return webParamUrl;
+	}
+
+	/**
+	 * 委托扣款协议签约(生成前端H5 url)
+	 */
+	public String generateBalanceProtocolUrl(Long walletId, Byte source) throws Exception {
+		String bizUserId = transferToYunstBizUserFormat(walletId, source);
+		YunstBalanceProtocolReq req = YunstBalanceProtocolReq.builder$()
+				.protocolReqSn(UUID.randomUUID().toString().replaceAll("-",""))
+				.payerId(bizUserId)
+				.receiverId(configService.getYunstReceiverId())
+				.protocolName(configService.getYunstBalanceProtocolName())
+				.jumpUrl(configService.getResultJumpUrl())
+				.backUrl(configService.getYunstNotifybackUrl())
+				.source(TERMINAL_TYPE)
+				.build();
+		String res = yunstTpl.signRequest(req);
+		String webParamUrl = configService.getYunstSignBalanceProtocolUrl() + "?" + res;
 		log.info("webParamUrl: " + webParamUrl);
 		return webParamUrl;
 	}

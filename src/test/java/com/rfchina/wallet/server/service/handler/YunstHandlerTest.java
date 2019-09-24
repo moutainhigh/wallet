@@ -113,6 +113,23 @@ public class YunstHandlerTest extends SpringBaseTest {
 	}
 
 	@Test
+	public void signBalanceProtocol() throws Exception {
+		Tuple<Long, Byte> bizUserTuple = genBizUser(2);
+		Tuple<YunstCreateMemberResult, YunstBaseHandler.YunstMemberType> member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
+		assertNotNull(member);
+		logStack(member);
+		Byte source = bizUserTuple.right;
+		Long walletId = bizUserTuple.left;
+		String realName = RandomUtils.getChineseName();
+		Long identityType = 1L;
+		String identityNo = RSAUtil.encrypt(new IdCardGenerator().generate());
+		boolean result = yunstUserHandler.personCertification(walletId, source, realName, identityType, identityNo);
+		logStack(result);
+		String url = yunstUserHandler.generateBalanceProtocolUrl(walletId, source);
+		logStack(url);
+	}
+
+	@Test
 	public void setCompanyInfo() throws Exception {
 		Tuple<Long, Byte> bizUserTuple = genBizUser(1);
 		Tuple<YunstCreateMemberResult, YunstBaseHandler.YunstMemberType> member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);

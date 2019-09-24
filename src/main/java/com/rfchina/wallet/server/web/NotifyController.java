@@ -16,22 +16,19 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
-@Slf4j
+
 @RestController
 public class NotifyController {
 
 	@Autowired
 	private NotifyService notifyService;
 
-
-
 	@RequestMapping(value = UrlConstant.YUNST_NOTIFY)
 	@SuppressWarnings("unchecked")
 	public ResponseValue<String> receiveYunstNotify(HttpServletRequest request) {
 		Map<String, String> params = new HashMap<>();
 		request.getParameterMap().forEach((k, v) -> params.put(k, v[0]));
-		log.info("Yunst notify: {}", JsonUtil.toJSON(params));
 		notifyService.yunstNotify(params);
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS.getValue(), "Receive Yunst notify success");
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS.getValue(), "Receive Yunst notify finished");
 	}
 }

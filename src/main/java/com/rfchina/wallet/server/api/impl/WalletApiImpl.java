@@ -322,18 +322,9 @@ public class WalletApiImpl implements WalletApi {
 	@Override
 	public WalletChannel seniorWalletSmsCodeVerification(String accessToken, Byte source, Integer channelType,
 			Long walletId, String mobile, Integer smsCodeType) {
-		Integer bizUserType = EnumDef.BizUserType.PERSON.getValue();
-		if (source.byteValue() == EnumWallet.WalletSource.FHT_CORP.getValue()) {
-			bizUserType = EnumDef.BizUserType.COMPANY.getValue();
-		}
 		WalletChannel walletChannel = null;
 		if (smsCodeType == EnumDef.EnumVerifyCodeType.YUNST_BIND_PHONE.getValue().intValue()) {
-			String transformBizUserId = YunstBaseHandler.transferToYunstBizUserFormat(walletId, source);
-			String result = walletService.seniorWalletApplyBindPhone(channelType, walletId, source, mobile);
-			if (StringUtils.isBlank(result) || !result.equals(transformBizUserId)) {
-				log.error("短信验证码用户不一致: curBizUserId:{},yunstBizUserId:{}", transformBizUserId, result);
-				throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_GATEWAY_RESPONSE_ERROR);
-			}
+			walletChannel = walletService.seniorWalletApplyBindPhone(channelType, walletId, source, mobile);
 		}
 		return walletChannel;
 	}
@@ -345,8 +336,24 @@ public class WalletApiImpl implements WalletApi {
 	public String seniorWalletAuthentication(String accessToken, Byte source, Integer channelType, Long walletId,
 			String realName, String idNo, @ParamValid(pattern = RegexUtil.REGEX_MOBILE) String mobile,
 			String verifyCode) {
-		return walletService.seniorWalletAuth(channelType, walletId, source,realName, idNo, mobile,
-				verifyCode);
+		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
+		if (wallet == null) {
+			log.error("验证高级钱包失败, 查无此钱包, walletId: {}", walletId);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+		}
+		if (!walletService.seniorWalletBindPhone(channelType, walletId, source, mobile, verifyCode)){
+			log.error("验证高级钱包失败, 查钱包绑定手机失败, walletId: {}", walletId);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+		}
+		return walletService.seniorWalletAuth(channelType, walletId, source,realName, idNo, mobile);
+	}
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
+	@SignVerify
+	@Override
+	public String signBalanceProtocol(String accessToken, Byte source, Long walletId) {
+		return null;
 	}
 
 }
