@@ -108,6 +108,8 @@ public class YunstHandlerTest extends SpringBaseTest {
 		String identityNo = RSAUtil.encrypt(new IdCardGenerator().generate());
 		boolean result = yunstUserHandler.personCertification(walletId, source, realName, identityType, identityNo);
 		logStack(result);
+		String url = yunstUserHandler.generateSignContractUrl(walletId, source);
+		logStack(url);
 	}
 
 	@Test
@@ -258,14 +260,14 @@ public class YunstHandlerTest extends SpringBaseTest {
 
 
 	private Long randomWalletId(Long walletId){
-		if (walletId != null){
+		if (walletId == null){
 			walletId = (long) new Random().nextInt(10000) + 1;
 		}
 		return walletId;
 	}
 
 	private Byte randomSource(Integer source){
-		if (source != null){
+		if (source == null){
 			source = new Random().nextInt(3) + 1;
 		}
 		return source.byteValue();

@@ -7,8 +7,11 @@ import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.spring.exception.RfchinaExceptionResolver;
 import com.rfchina.wallet.server.interceptor.AllInterceptor;
 import com.rfchina.wallet.server.interceptor.BasicInterceptor;
+
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+
+import com.rfchina.wallet.server.msic.UrlConstant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,13 +49,15 @@ public class WebMvcConfig implements WebMvcConfigurer {
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 		registry.addInterceptor(allInterceptor)
-			.addPathPatterns("/**")
-			.excludePathPatterns("/index")
-			.excludePathPatterns("/error");
+				.addPathPatterns("/**")
+				.excludePathPatterns("/index")
+				.excludePathPatterns("/error")
+				.excludePathPatterns(UrlConstant.YUNST_NOTIFY);
 		registry.addInterceptor(basicInterceptor)
-			.addPathPatterns("/**")
-			.excludePathPatterns("/index")
-			.excludePathPatterns("/error");
+				.addPathPatterns("/**")
+				.excludePathPatterns("/index")
+				.excludePathPatterns("/error")
+				.excludePathPatterns(UrlConstant.YUNST_NOTIFY);
 	}
 
 	@Bean
@@ -74,7 +79,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 		objectMapper.setDateFormat(new SimpleDateFormat(DateUtil.STANDARD_DTAETIME_PATTERN));
 		objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
 		mappingJackson2HttpMessageConverter.setSupportedMediaTypes(
-			Lists.newArrayList(MediaType.APPLICATION_JSON, new MediaType("application", "*+json")));
+				Lists.newArrayList(MediaType.APPLICATION_JSON, new MediaType("application", "*+json")));
 
 		converters.add(mappingJackson2HttpMessageConverter);
 	}

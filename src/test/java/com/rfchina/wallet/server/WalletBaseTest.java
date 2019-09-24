@@ -23,164 +23,198 @@ import java.util.Optional;
 @SpringBootTest
 @AutoConfigureMockMvc
 public abstract class WalletBaseTest extends BaseTest {
-    @Value("${test.wallet.web.uri}")
-    protected String BASE_URL;
+	@Value("${test.wallet.web.uri}")
+	protected String BASE_URL;
 
-    static {
-        System.setProperty("spring.profiles.active", "test");
-    }
+	static {
+		System.setProperty("spring.profiles.active", "dev");
+	}
 
-    @Autowired
-    protected MockHttpSession session;
+	@Autowired
+	protected MockHttpSession session;
 
-    protected Map<String, Object> walletInfo(Long walletId){
-        Map<String, String> params = new HashMap<>();
+	protected Map<String, Object> walletInfo(Long walletId) {
+		Map<String, String> params = new HashMap<>();
 
-        params.put("access_token", getAccessToken(appId, appSecret));
-        params.put("wallet_id", String.valueOf(walletId));
+		params.put("access_token", getAccessToken(appId, appSecret));
+		params.put("wallet_id", String.valueOf(walletId));
 
-        params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
-        String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
-        params.put("sign", sign);
-        return postAndValidateSuccessCode(BASE_URL, UrlConstant.WALLET_QUERY_INFO, params);
-    }
+		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+		params.put("sign", sign);
+		return postAndValidateSuccessCode(BASE_URL, UrlConstant.WALLET_QUERY_INFO, params);
+	}
 
-    protected Map<String, Object> createWallet(Byte type, String title, Byte source){
-        Map<String, String> params = new HashMap<>();
+	protected Map<String, Object> createWallet(Byte type, String title, Byte source) {
+		Map<String, String> params = new HashMap<>();
 
-        params.put("access_token", getAccessToken(appId, appSecret));
-        params.put("type", String.valueOf(type));
-        params.put("title", title);
-        params.put("source", String.valueOf(source));
+		params.put("access_token", getAccessToken(appId, appSecret));
+		params.put("type", String.valueOf(type));
+		params.put("title", title);
+		params.put("source", String.valueOf(source));
 
-        params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
-        String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
-        params.put("sign", sign);
+		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+		params.put("sign", sign);
 
-        return postAndValidateSuccessCode(BASE_URL, UrlConstant.CREATE_WALLET, params);
-    }
+		return postAndValidateSuccessCode(BASE_URL, UrlConstant.CREATE_WALLET, params);
+	}
 
-    protected Map<String, Object> walletLogList(Long walletId, String startTime, String endTime, int limit, long offset, Boolean stat){
-        Map<String, String> params = new HashMap<>();
+	protected Map<String, Object> walletLogList(Long walletId, String startTime, String endTime, int limit,
+			long offset,
+			Boolean stat) {
+		Map<String, String> params = new HashMap<>();
 
-        params.put("access_token", getAccessToken(appId, appSecret));
-        params.put("wallet_id", String.valueOf(walletId));
-        params.put("limit", String.valueOf(limit));
-        params.put("offset", String.valueOf(offset));
-        params.put("stat", String.valueOf(stat));
+		params.put("access_token", getAccessToken(appId, appSecret));
+		params.put("wallet_id", String.valueOf(walletId));
+		params.put("limit", String.valueOf(limit));
+		params.put("offset", String.valueOf(offset));
+		params.put("stat", String.valueOf(stat));
 
-        params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
-        String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
-        params.put("sign", sign);
+		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+		params.put("sign", sign);
 
-        Optional.ofNullable(startTime).ifPresent( o -> params.put("start_time", startTime) );
-        Optional.ofNullable(endTime).ifPresent( o -> params.put("end_time", endTime) );
-        return postAndValidateSuccessCode(BASE_URL, UrlConstant.WALLET_LOG_LIST, params);
-    }
+		Optional.ofNullable(startTime).ifPresent(o -> params.put("start_time", startTime));
+		Optional.ofNullable(endTime).ifPresent(o -> params.put("end_time", endTime));
+		return postAndValidateSuccessCode(BASE_URL, UrlConstant.WALLET_LOG_LIST, params);
+	}
 
-    protected Map<String, Object> bindingBankCardList(Long walletId){
-        Map<String, String> params = new HashMap<>();
-        params.put("access_token", getAccessToken(appId, appSecret));
-        params.put("wallet_id", String.valueOf(walletId));
+	protected Map<String, Object> bindingBankCardList(Long walletId) {
+		Map<String, String> params = new HashMap<>();
+		params.put("access_token", getAccessToken(appId, appSecret));
+		params.put("wallet_id", String.valueOf(walletId));
 
-        params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
-        String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
-        params.put("sign", sign);
+		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+		params.put("sign", sign);
 
-        return postAndValidateSuccessCode(BASE_URL, UrlConstant.WALLET_BANK_CARD_LIST, params);
-    }
+		return postAndValidateSuccessCode(BASE_URL, UrlConstant.WALLET_BANK_CARD_LIST, params);
+	}
 
-    protected Map<String, Object> bindBankCard(Long walletId, String bankCode, String bankAccount, String depositName, Integer isDef,
-                                               String telephone){
-        Map<String, String> params = new HashMap<>();
-        params.put("access_token", getAccessToken(appId, appSecret));
-        params.put("wallet_id", String.valueOf(walletId));
-        params.put("bank_code", bankCode);
-        params.put("bank_account", bankAccount);
-        params.put("deposit_name", depositName);
-        params.put("is_def", String.valueOf(isDef));
-        params.put("telephone", telephone);
+	protected Map<String, Object> bindBankCard(Long walletId, String bankCode, String bankAccount, String depositName,
+			Integer isDef, String telephone) {
+		Map<String, String> params = new HashMap<>();
+		params.put("access_token", getAccessToken(appId, appSecret));
+		params.put("wallet_id", String.valueOf(walletId));
+		params.put("bank_code", bankCode);
+		params.put("bank_account", bankAccount);
+		params.put("deposit_name", depositName);
+		params.put("is_def", String.valueOf(isDef));
+		params.put("telephone", telephone);
 
-        params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
-        String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
-        params.put("sign", sign);
+		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+		params.put("sign", sign);
 
-        return postAndValidateSuccessCode(BASE_URL, UrlConstant.WALLET_BANK_CARD_BIND, params);
-    }
+		return postAndValidateSuccessCode(BASE_URL, UrlConstant.WALLET_BANK_CARD_BIND, params);
+	}
 
-    protected Map<String, Object> bankClassList(){
-        Map<String, String> params = new HashMap<>();
-        params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
-        String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
-        params.put("sign", sign);
-        return postAndValidateSuccessCode(BASE_URL, UrlConstant.WALLET_BANK_CLASS_LIST, params);
-    }
+	protected Map<String, Object> bankClassList() {
+		Map<String, String> params = new HashMap<>();
+		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+		params.put("sign", sign);
+		return postAndValidateSuccessCode(BASE_URL, UrlConstant.WALLET_BANK_CLASS_LIST, params);
+	}
 
-    protected Map<String, Object> bankAreaList(String classCode){
-        Map<String, String> params = new HashMap<>();
-        params.put("class_code", classCode);
-        params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
-        String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
-        params.put("sign", sign);
-        return postAndValidateSuccessCode(BASE_URL, UrlConstant.WALLET_BANK_AREA_LIST, params);
-    }
+	protected Map<String, Object> bankAreaList(String classCode) {
+		Map<String, String> params = new HashMap<>();
+		params.put("class_code", classCode);
+		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+		params.put("sign", sign);
+		return postAndValidateSuccessCode(BASE_URL, UrlConstant.WALLET_BANK_AREA_LIST, params);
+	}
 
-    protected Map<String, Object> bankList(String classCode, String areaCode){
-        Map<String, String> params = new HashMap<>();
-        params.put("class_code", classCode);
-        params.put("area_code", areaCode);
-        params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
-        String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
-        params.put("sign", sign);
-        return postAndValidateSuccessCode(BASE_URL, UrlConstant.WALLET_BANK_LIST, params);
-    }
+	protected Map<String, Object> bankList(String classCode, String areaCode) {
+		Map<String, String> params = new HashMap<>();
+		params.put("class_code", classCode);
+		params.put("area_code", areaCode);
+		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+		params.put("sign", sign);
+		return postAndValidateSuccessCode(BASE_URL, UrlConstant.WALLET_BANK_LIST, params);
+	}
 
-    protected Map<String, Object> queryWalletByUserId(Long userId){
-        Map<String, String> params = new HashMap<>();
-        params.put("access_token", getAccessToken(appId, appSecret));
-        params.put("user_id", userId.toString());
-        params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
-        String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
-        params.put("sign", sign);
-        return postAndValidateSuccessCode(BASE_URL, UrlConstant.WALLET_QUERY_INFO_BY_UID, params);
-    }
+	protected Map<String, Object> queryWalletByUserId(Long userId) {
+		Map<String, String> params = new HashMap<>();
+		params.put("access_token", getAccessToken(appId, appSecret));
+		params.put("user_id", userId.toString());
+		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+		params.put("sign", sign);
+		return postAndValidateSuccessCode(BASE_URL, UrlConstant.WALLET_QUERY_INFO_BY_UID, params);
+	}
 
-    protected Map<String, Object> sendVerifyCode(String mobile, Integer type, String ip){
-        Map<String, String> params = new HashMap<>();
-        params.put("access_token", getAccessToken(appId, appSecret));
-        params.put("mobile", mobile);
-        params.put("type", String.valueOf(type));
-        params.put("ip", ip);
-        params.put("verify_token", "123");
-        params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
-        String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
-        params.put("sign", sign);
-        return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SEND_VERIFY_CODE, params, 2033);
-    }
+	protected Map<String, Object> sendVerifyCode(String mobile, Integer type, String ip) {
+		Map<String, String> params = new HashMap<>();
+		params.put("access_token", getAccessToken(appId, appSecret));
+		params.put("mobile", mobile);
+		params.put("type", String.valueOf(type));
+		params.put("ip", ip);
+		params.put("verify_token", "123");
+		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+		params.put("sign", sign);
+		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SEND_VERIFY_CODE, params, 2033);
+	}
 
-    protected Map<String, Object> loginWithVerify(String mobile, String verifyCode, Integer type, String ip){
-        Map<String, String> params = new HashMap<>();
-        params.put("access_token", getAccessToken(appId, appSecret));
-        params.put("mobile", mobile);
-        params.put("verify_code", verifyCode);
-        params.put("ip", ip);
-        params.put("type", String.valueOf(type));
-        params.put("verify_token", "123");
-        params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
-        String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
-        params.put("sign", sign);
-        return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_LOGIN_WITH_VERIFY_CODE, params, 2033);
-    }
+	protected Map<String, Object> loginWithVerify(String mobile, String verifyCode, Integer type, String ip) {
+		Map<String, String> params = new HashMap<>();
+		params.put("access_token", getAccessToken(appId, appSecret));
+		params.put("mobile", mobile);
+		params.put("verify_code", verifyCode);
+		params.put("ip", ip);
+		params.put("type", String.valueOf(type));
+		params.put("verify_token", "123");
+		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+		params.put("sign", sign);
+		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_LOGIN_WITH_VERIFY_CODE, params, 2033);
+	}
 
-    protected Map<String, Object> upgradeWallet(Integer channelType,Byte source,  Long walletId){
-        Map<String, String> params = new HashMap<>();
-        params.put("access_token", getAccessToken(appId, appSecret));
-        params.put("channel_type", String.valueOf(channelType));
-        params.put("source", String.valueOf(source));
-        params.put("wallet_id", String.valueOf(walletId));
-        params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
-        String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
-        params.put("sign", sign);
-        return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_UPGRADE, params, 2033);
-    }
+	protected Map<String, Object> upgradeWallet(Integer channelType, Byte source, Long walletId) {
+		Map<String, String> params = new HashMap<>();
+		params.put("access_token", getAccessToken(appId, appSecret));
+		params.put("channel_type", String.valueOf(channelType));
+		params.put("source", String.valueOf(source));
+		params.put("wallet_id", String.valueOf(walletId));
+		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+		params.put("sign", sign);
+		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_UPGRADE, params, 1001);
+	}
+
+	protected Map<String, Object> seniroWalletApplyBindPhone(Integer channelType, Byte source, Long walletId,
+			String mobile, Integer smsType) {
+		Map<String, String> params = new HashMap<>();
+		params.put("access_token", getAccessToken(appId, appSecret));
+		params.put("channel_type", String.valueOf(channelType));
+		params.put("source", String.valueOf(source));
+		params.put("wallet_id", String.valueOf(walletId));
+		params.put("mobile", String.valueOf(mobile));
+		params.put("sms_type", String.valueOf(smsType));
+		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+		params.put("sign", sign);
+		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_SMS_VERIFY_CODE, params, 1001);
+	}
+
+	protected Map<String, Object> seniroWalletAuth(Integer channelType, Byte source, Long walletId, String realName,
+			String idNo, String mobile, String smsVerifyCode) {
+		Map<String, String> params = new HashMap<>();
+		params.put("access_token", getAccessToken(appId, appSecret));
+		params.put("channel_type", String.valueOf(channelType));
+		params.put("source", String.valueOf(source));
+		params.put("wallet_id", String.valueOf(walletId));
+		params.put("real_name", realName);
+		params.put("id_no", idNo);
+		params.put("mobile", String.valueOf(mobile));
+		params.put("verify_code", smsVerifyCode);
+		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+		params.put("sign", sign);
+		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_AUTHENTICATION, params, 1001);
+	}
 }

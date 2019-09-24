@@ -10,28 +10,28 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
 @Slf4j
-@Api
 @RestController
-public class YunstController {
+public class NotifyController {
 
 	@Autowired
 	private NotifyService notifyService;
 
 
 
-	@PostMapping(value = UrlConstant.YUNST_NOTIFY, produces = MediaType.TEXT_PLAIN_VALUE)
+	@RequestMapping(value = UrlConstant.YUNST_NOTIFY)
 	@SuppressWarnings("unchecked")
-	public ResponseValue<String> alipayNotify(HttpServletRequest request) {
+	public ResponseValue<String> receiveYunstNotify(HttpServletRequest request) {
 		Map<String, String> params = new HashMap<>();
 		request.getParameterMap().forEach((k, v) -> params.put(k, v[0]));
 		log.info("Yunst notify: {}", JsonUtil.toJSON(params));
 		notifyService.yunstNotify(params);
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS.getValue(), "Receive notify success");
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS.getValue(), "Receive Yunst notify success");
 	}
 }

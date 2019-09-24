@@ -15,7 +15,7 @@ public class NotifyService {
         String service = params.get("service");
         String methodName = params.get("method");
 
-        if (StringUtils.isNotBlank(service) && StringUtils.isNotBlank(methodName)){
+        if (StringUtils.isBlank(service) && StringUtils.isBlank(methodName)){
             log.error("云商通回调参数有误,缺少service 或 method");
             return;
         }
