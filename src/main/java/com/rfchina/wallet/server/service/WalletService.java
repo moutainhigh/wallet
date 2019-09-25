@@ -907,35 +907,34 @@ public class WalletService {
 			}
 			try {
 				boolean isAuth = auditType == EnumDef.WalletChannelAuditType.AUTO.getValue().intValue();
-				YunstSetCompanyInfoResult yunstSetCompanyInfoResult = yunstUserHandler.setCompanyInfo(walletId, source,isAuth
-						, companyBasicInfo);
-				if (Objects.nonNull(yunstSetCompanyInfoResult) && yunstSetCompanyInfoResult.getBizUserId().equals(transformBizUserId)){
+				YunstSetCompanyInfoResult yunstSetCompanyInfoResult = yunstUserHandler.setCompanyInfo(walletId, source,
+						isAuth, companyBasicInfo);
+				if (Objects.nonNull(yunstSetCompanyInfoResult) && yunstSetCompanyInfoResult.getBizUserId()
+						.equals(transformBizUserId)) {
 					Long result = yunstSetCompanyInfoResult.getResult();
 					String failReason = yunstSetCompanyInfoResult.getFailReason();
-					String remark =yunstSetCompanyInfoResult.getRemark();
-					if (Objects.nonNull(result)){
-						if (2L == result.longValue()){
-							walletChannel.setStatus(EnumDef.WalletChannelAuditStatus.AUDIT_SUCCESS.getValue().byteValue());
-						}else if (3L == result.longValue()){
+					String remark = yunstSetCompanyInfoResult.getRemark();
+					if (Objects.nonNull(result)) {
+						if (2L == result.longValue()) {
+							walletChannel.setStatus(
+									EnumDef.WalletChannelAuditStatus.AUDIT_SUCCESS.getValue().byteValue());
+							walletChannel.setFailReason(null);
+						} else if (3L == result.longValue()) {
 							walletChannel.setStatus(EnumDef.WalletChannelAuditStatus.AUDIT_FAIL.getValue().byteValue());
+							walletChannel.setFailReason(failReason);
 						}
 						walletChannel.setCheckTime(new Date());
-					}else {
+					} else {
 						walletChannel.setStatus(EnumDef.WalletChannelAuditStatus.WAITING_AUDIT.getValue().byteValue());
 					}
-					if (!StringUtils.isEmpty(failReason)){
-						walletChannel.setFailReason(failReason);
-					}
-					if (!StringUtils.isEmpty(remark)){
-						walletChannel.setRemark(remark);
-					}
+					walletChannel.setRemark(remark);
 					int effectRows = walletChannelDao.updateByPrimaryKeySelective(walletChannel);
 					if (effectRows != 1) {
 						log.error("更新高级钱包企业信息审核状态失败:channelType: {}, walletId:{}", channelType, walletId);
 						throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 					}
 					return walletChannel.getStatus().intValue();
-				}else {
+				} else {
 					log.error("高级钱包企业信息审核失败:channelType: {}, walletId:{}", channelType, walletId);
 					throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 				}

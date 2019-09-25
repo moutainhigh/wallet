@@ -186,7 +186,7 @@ public abstract class WalletBaseTest extends BaseTest {
 		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_UPGRADE, params, 1001);
 	}
 
-	protected Map<String, Object> seniroWalletApplyBindPhone(Integer channelType, Byte source, Long walletId,
+	protected Map<String, Object> seniorWalletApplyBindPhone(Integer channelType, Byte source, Long walletId,
 			String mobile, Integer smsType) {
 		Map<String, String> params = new HashMap<>();
 		params.put("access_token", getAccessToken(appId, appSecret));
@@ -201,7 +201,7 @@ public abstract class WalletBaseTest extends BaseTest {
 		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_SMS_VERIFY_CODE, params, 1001);
 	}
 
-	protected Map<String, Object> seniroWalletAuth(Integer channelType, Byte source, Long walletId, String realName,
+	protected Map<String, Object> seniorWalletAuth(Integer channelType, Byte source, Long walletId, String realName,
 			String idNo, String mobile, String smsVerifyCode) {
 		Map<String, String> params = new HashMap<>();
 		params.put("access_token", getAccessToken(appId, appSecret));
@@ -215,6 +215,21 @@ public abstract class WalletBaseTest extends BaseTest {
 		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
 		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
 		params.put("sign", sign);
-		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_AUTHENTICATION, params, 1001);
+		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_PERSON_AUTHENTICATION, params, 1001);
+	}
+
+	protected Map<String, Object> seniorWalletCompanyInfoAudit(Integer channelType, Byte source, Long walletId,
+			Integer auditType, String companyBasicInfo) {
+		Map<String, String> params = new HashMap<>();
+		params.put("access_token", getAccessToken(appId, appSecret));
+		params.put("channel_type", String.valueOf(channelType));
+		params.put("source", String.valueOf(source));
+		params.put("wallet_id", String.valueOf(walletId));
+		params.put("audit_type", String.valueOf(auditType));
+		params.put("company_basic_info", companyBasicInfo);
+		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+		params.put("sign", sign);
+		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_COMPANY_INFO_AUDIT, params, 1001);
 	}
 }

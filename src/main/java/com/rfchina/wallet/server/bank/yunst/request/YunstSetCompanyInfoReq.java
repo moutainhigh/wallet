@@ -2,9 +2,7 @@ package com.rfchina.wallet.server.bank.yunst.request;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Builder;
-import lombok.Data;
-import lombok.ToString;
+import lombok.*;
 
 @Builder(toBuilder = true, builderMethodName = "builder$")
 @Data
@@ -35,6 +33,7 @@ public class YunstSetCompanyInfoReq implements YunstBaseReq {
 
 	@Data
 	@Builder
+	@AllArgsConstructor
 	public static class CompanyBasicInfo {
 		@ApiModelProperty(value = "企业名称", required = true)
 		private String companyName;

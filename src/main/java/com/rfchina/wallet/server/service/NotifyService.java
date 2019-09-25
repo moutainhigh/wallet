@@ -2,6 +2,7 @@ package com.rfchina.wallet.server.service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.platform.common.utils.Valuable;
 import com.rfchina.wallet.domain.misc.EnumDef;
@@ -64,6 +65,30 @@ public class NotifyService {
 
 	private void handleVerfiyResult(JSONObject rpsJsonObj) {
 		log.info("处理企业信息审核结果通知");
+		if (YUNST_NOTIFY_SUCCESS.equals(rpsJsonObj.getString("status"))) {
+			String bizUserId = rpsJsonObj.getJSONObject("returnValue").getString("bizUserId");
+			String checkTime = rpsJsonObj.getJSONObject("returnValue").getString("checkTime");
+			long result = rpsJsonObj.getJSONObject("returnValue").getLongValue("result");
+			String failReason = rpsJsonObj.getJSONObject("returnValue").getString("failReason");
+			String remark = rpsJsonObj.getJSONObject("returnValue").getString("remark");
+			WalletChannel walletChannel = walletChannelExtDao.selectByChannelTypeAndBizUserId(
+					EnumDef.ChannelType.YUNST.getValue().intValue(), bizUserId);
+
+			if (result == 2L){
+				walletChannel.setStatus(EnumDef.WalletChannelAuditStatus.AUDIT_SUCCESS.getValue().byteValue());
+				walletChannel.setFailReason(null);
+			}else if (result == 3L){
+				walletChannel.setStatus(EnumDef.WalletChannelAuditStatus.AUDIT_FAIL.getValue().byteValue());
+				walletChannel.setFailReason(failReason);
+			}
+			walletChannel.setRemark(remark);
+			walletChannel.setCheckTime(DateUtil.parse(checkTime,DateUtil.STANDARD_DTAETIME_PATTERN));
+
+			int effectRows = walletChannelExtDao.updateByPrimaryKeySelective(walletChannel);
+			if (effectRows != 1) {
+				log.error("处理企业信息审核结果通知-更新审核状态状态失败:bizUserId:{}", bizUserId);
+			}
+		}
 	}
 
 	private void handleSignContractResult(JSONObject rpsJsonObj) {
