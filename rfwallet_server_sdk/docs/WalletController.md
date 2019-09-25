@@ -621,9 +621,37 @@
 }
 ```
 
+###  高级钱包商家资料审核（通道）
+
+请求地址: /wallet_server/v1/m/wallet/senior_company_info_audit
+
+请求类型: POST
+
+请求参数:
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|audit_type|是|审核方式|
+|channel_type|是|渠道类型 1:浦发银企直连,2:通联云商通|
+|company_basic_info|是|企业信息(json)|
+|source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
+|wallet_id|是|钱包id|
+
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": "", //消息
+"data": {
+  }
+}
+```
+
 ###  高级钱包认证
 
-请求地址: /wallet_server/v1/m/wallet/senior_authentication
+请求地址: /wallet_server/v1/m/wallet/senior_person_authentication
 
 请求类型: POST
 
@@ -638,6 +666,31 @@
 |real_name|是|姓名|
 |source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
 |verify_code|是|短信验证码|
+|wallet_id|是|钱包id|
+
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": "", //消息
+"data": {
+  }
+}
+```
+
+###  高级钱包委托代扣协议
+
+请求地址: /wallet_server/v1/m/wallet/senior_balance_protocol
+
+请求类型: POST
+
+请求参数:
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
 |wallet_id|是|钱包id|
 
 

@@ -121,9 +121,9 @@ public class UrlConstant {
 	/**
 	 * 高级钱包认证
 	 */
-	public static final String WALLET_SENIOR_AUTHENTICATION = VERSION + "/m/wallet/senior_authentication";
+	public static final String WALLET_SENIOR_PERSON_AUTHENTICATION = VERSION + "/m/wallet/senior_person_authentication";
 	/**
-	 * 高级钱包商家资料审核
+	 * 高级钱包商家资料审核（通道）
 	 */
 	public static final String WALLET_SENIOR_COMPANY_INFO_AUDIT = VERSION + "/m/wallet/senior_company_info_audit";
 	/**

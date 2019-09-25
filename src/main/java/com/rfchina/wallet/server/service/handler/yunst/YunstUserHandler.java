@@ -210,14 +210,15 @@ public class YunstUserHandler extends YunstBaseHandler {
 	public YunstSetCompanyInfoResult setCompanyInfo(Long walletId, Byte source, Boolean isAuth,
 			YunstSetCompanyInfoReq.CompanyBasicInfo companyBasicInfo) throws Exception {
 		String bizUserId = transferToYunstBizUserFormat(walletId, source);
-		YunstSetCompanyInfoReq req = YunstSetCompanyInfoReq.builder$()
+		YunstSetCompanyInfoReq.YunstSetCompanyInfoReqBuilder builder = YunstSetCompanyInfoReq.builder$()
 				.bizUserId(bizUserId)
 				.isAuth(isAuth)
-				.backUrl(configService.getYunstNotifybackUrl())
-				.companyBasicInfo(companyBasicInfo)
-				.build();
+				.companyBasicInfo(companyBasicInfo);
+		if (!isAuth){
+			builder.backUrl(configService.getYunstNotifybackUrl());
+		}
 
-		return yunstTpl.execute(req, YunstSetCompanyInfoResult.class);
+		return yunstTpl.execute(builder.build(), YunstSetCompanyInfoResult.class);
 	}
 
 	/**

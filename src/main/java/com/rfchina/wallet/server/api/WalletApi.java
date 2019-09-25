@@ -7,6 +7,7 @@ import com.rfchina.wallet.domain.model.ext.Bank;
 import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
 import com.rfchina.wallet.domain.model.ext.WalletCardExt;
+import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 
@@ -163,7 +164,7 @@ public interface WalletApi {
 			String mobile, Integer smsCodeType);
 
 	/**
-	 * 高级钱包认证
+	 * 高级钱包个人认证
 	 *
 	 * @param source      必填, 钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户
 	 * @param channelType 必填, 渠道类型.1: 浦发银企直连，2：通联云商通
@@ -174,15 +175,27 @@ public interface WalletApi {
 	 * @param verifyCode  必填, 短信验证码
 	 * @return
 	 */
-	String seniorWalletAuthentication(String accessToken, Byte source, Integer channelType, Long walletId,
+	String seniorWalletPersonAuthentication(String accessToken, Byte source, Integer channelType, Long walletId,
 			String realName, String idNo, String mobile, String verifyCode);
 
+	/**
+	 * 高级钱包商家资料审核
+	 *
+	 * @param source           必填, 钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户
+	 * @param channelType      必填, 渠道类型.1: 浦发银企直连，2：通联云商通
+	 * @param auditType        必填, 审核方式.1: 线上，2：人工
+	 * @param walletId         必填, 钱包id
+	 * @param companyBasicInfo 必填, 企业基本信息
+	 * @return
+	 */
+	Integer seniorWalletCompanyAudit(String accessToken, Byte source, Integer channelType, Integer auditType,
+			Long walletId, YunstSetCompanyInfoReq.CompanyBasicInfo companyBasicInfo);
 
 	/**
 	 * 高级钱包扣款协议地址
 	 *
-	 * @param source      必填, 钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户
-	 * @param walletId    必填, 钱包id
+	 * @param source   必填, 钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户
+	 * @param walletId 必填, 钱包id
 	 * @return
 	 */
 	String signBalanceProtocol(String accessToken, Byte source, Long walletId);
