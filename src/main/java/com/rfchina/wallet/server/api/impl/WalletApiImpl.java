@@ -325,6 +325,7 @@ public class WalletApiImpl implements WalletApi {
 				.newStatus(WalletApplyStatus.FAIL.getValue().intValue())
 				.oldStatus(WalletApplyStatus.SUCC.getValue().intValue())
 				.changeTime(new Date())
+				.msg(auditComment)
 				.build(), MqConstant.WALLET_APPLY_BILL_STATUS_CHANGE));
 
 	}

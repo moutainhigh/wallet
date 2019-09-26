@@ -55,5 +55,6 @@ public class MqService {
 		private Integer oldStatus;
 		private Integer newStatus;
 		private Date changeTime;
+		private String msg;
 	}
 }
