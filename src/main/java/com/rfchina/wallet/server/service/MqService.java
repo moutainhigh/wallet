@@ -1,10 +1,10 @@
 package com.rfchina.wallet.server.service;
 
+import com.rfchina.api.util.StringUtils;
 import com.rfchina.biztools.mq.SimpleMqMsg;
 import com.rfchina.platform.common.utils.JsonUtil;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -35,7 +35,7 @@ public class MqService {
 		log.info("发送MQ {}", JsonUtil.toJSON(msg));
 		try {
 			rabbitTemplate.convertAndSend(
-					StringUtils.isBlank(msg.getExchageName()) ? exchangeName : msg.getExchageName(),
+					StringUtils.isEmpty(msg.getExchageName()) ? exchangeName : msg.getExchageName(),
 					msg.getRoutingKey(), msg.getMessage(null));
 		} catch (Exception e) {
 			log.error("发送MQ消息失败, error: ", e);
@@ -50,6 +50,8 @@ public class MqService {
 	@Getter
 	public static class MqApplyStatusChange {
 		private Long applyId;
+		private String tradeNo;
+		private String orderNo;
 		private Integer oldStatus;
 		private Integer newStatus;
 		private Date changeTime;

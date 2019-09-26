@@ -320,6 +320,8 @@ public class WalletApiImpl implements WalletApi {
 
 		walletApiExecutor.execute(() -> mqService.publish(MqService.MqApplyStatusChange.builder()
 				.applyId(applyId)
+				.tradeNo(apply.getBatchNo())
+				.orderNo(apply.getBizNo())
 				.newStatus(WalletApplyStatus.FAIL.getValue().intValue())
 				.oldStatus(WalletApplyStatus.SUCC.getValue().intValue())
 				.changeTime(new Date())
