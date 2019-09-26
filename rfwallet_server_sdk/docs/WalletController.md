@@ -679,6 +679,35 @@
 }
 ```
 
+###  高级钱包个人用户修改手机认证
+
+请求地址: /wallet_server/v1/m/wallet/senior_person_change_bind_phone
+
+请求类型: POST
+
+请求参数:
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|channel_type|是|渠道类型 1:浦发银企直连,2:通联云商通|
+|id_no|是|身份证号|
+|old_phone|是|手机号码|
+|real_name|是|姓名|
+|source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
+|wallet_id|是|钱包id|
+
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": "", //消息
+"data": {
+  }
+}
+```
+
 ###  高级钱包委托代扣协议
 
 请求地址: /wallet_server/v1/m/wallet/senior_balance_protocol

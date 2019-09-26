@@ -53,7 +53,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 		String bizUserId = transferToYunstBizUserFormat(walletId, source);
 		YunstSignContractReq req = YunstSignContractReq.builder$()
 				.bizUserId(bizUserId)
-				.jumpUrl(configService.getResultJumpUrl())
+				.jumpUrl(configService.getYunstResultJumpUrl())
 				.backUrl(configService.getYunstNotifybackUrl())
 				.source(TERMINAL_TYPE)
 				.build();
@@ -73,7 +73,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 				.payerId(bizUserId)
 				.receiverId(configService.getYunstReceiverId())
 				.protocolName(configService.getYunstBalanceProtocolName())
-				.jumpUrl(configService.getResultJumpUrl())
+				.jumpUrl(configService.getYunstResultJumpUrl())
 				.backUrl(configService.getYunstNotifybackUrl())
 				.source(TERMINAL_TYPE)
 				.build();
@@ -129,24 +129,23 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 修改绑定手机
 	 */
-	public boolean modifyPhone(Long walletId, Byte source, String oldPhone, String newPhone,
-			String verificationCode) throws Exception {
+	public String modifyPhone(Long walletId, Byte source, String realName, String oldPhone,Long identityType,
+			String identityNo) throws Exception {
 		String bizUserId = transferToYunstBizUserFormat(walletId, source);
 		YunstChangeBindPhoneReq req = YunstChangeBindPhoneReq.builder$()
 				.bizUserId(bizUserId)
+				.name(realName)
+				.identityType(identityType)
+				.identityNo(identityNo)
 				.oldPhone(oldPhone)
-				.newPhone(newPhone)
-				.newVerificationCode(verificationCode)
+				.jumpUrl(configService.getYunstResultJumpUrl())
+				.backUrl(configService.getYunstNotifybackUrl())
 				.build();
 
-		YunstModifyPhoneResult result = null;
-		try {
-			result = yunstTpl.execute(req, YunstModifyPhoneResult.class);
-		} catch (CommonGatewayException e) {
-			log.error("修改绑定手机失败,bizUserId:{},oldPhone:{},newPhone:{}", bizUserId, oldPhone, newPhone);
-			return false;
-		}
-		return true;
+		String res = yunstTpl.signRequest(req);
+		String webParamUrl = configService.getYunstSignContractUrl() + "?" + res;
+		log.info("webParamUrl: " + webParamUrl);
+		return webParamUrl;
 	}
 
 	/**

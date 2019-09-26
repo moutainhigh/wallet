@@ -106,7 +106,7 @@ public class ConfigService {
 	@Value("${yunst.tlCertPath}")
 	private String ystTlCertPath;
 	@Value("${yunst.jumpUrl}")
-	private String resultJumpUrl;
+	private String yunstResultJumpUrl;
 	@Value("${yunst.notify.backUrl}")
 	private String yunstNotifybackUrl;
 	@Value("${yunst.signContract.gateway.url}")
@@ -117,6 +117,8 @@ public class ConfigService {
 	private String yunstReceiverId;
 	@Value("${yunst.signBalaceProtocol.gateway.url}")
 	private String yunstSignBalanceProtocolUrl;
+	@Value("${yunst.personChangeBindPhone.gateway.url}")
+	private String yunstPersonChangeBindPhoneUrl;
 // yunst end
 
 }

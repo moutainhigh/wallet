@@ -832,6 +832,34 @@ public class WalletService {
 	}
 
 	/**
+	 * 高级钱包个人修改绑定手机
+	 */
+	public String seniorWalletPersonChangeBindPhone(Integer channelType, Long walletId, Byte source, String realName,
+			String idNo, String mobile) {
+		if (channelType == EnumDef.ChannelType.YUNST.getValue().intValue()) {
+			String transformBizUserId = YunstBaseHandler.transferToYunstBizUserFormat(walletId, source);
+			WalletChannel walletChannel = walletChannelDao.selectByChannelTypeAndBizUserId(channelType,
+					transformBizUserId);
+			if (walletChannel == null) {
+				log.error("未创建云商通用户: bizUserId:{}", transformBizUserId);
+				throw new WalletResponseException(EnumWalletResponseCode.WALLET_ACCOUNT_NOT_EXIST);
+			}
+			try {
+				if (!mobile.equals(walletChannel.getSecurityTel())) {
+					log.error("旧手机与已绑定高级钱包手机不符 oldPhone:{},current binded phone:{}", mobile,
+							walletChannel.getSecurityTel());
+					throw new WalletResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+				}
+				return yunstUserHandler.modifyPhone(walletId, source, realName, mobile,
+						EnumDef.EnumIdType.ID_CARD.getValue().longValue(), RSAUtil.encrypt(idNo));
+			} catch (Exception e) {
+				log.error("更新高级钱包手机信息失败 msg:{}", e);
+			}
+		}
+		return "";
+	}
+
+	/**
 	 * 高级钱包个人认证
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
@@ -850,8 +878,8 @@ public class WalletService {
 					log.error("高级钱包未绑定手机: walletId:{}", walletId);
 					throw new WalletResponseException(EnumWalletResponseCode.WALLET_ACCOUNT_NOT_EXIST);
 				}
-				boolean result = yunstUserHandler.personCertification(walletId, source, realName, 1L,
-						RSAUtil.encrypt(idNo));
+				boolean result = yunstUserHandler.personCertification(walletId, source, realName,
+						EnumDef.EnumIdType.ID_CARD.getValue().longValue(), RSAUtil.encrypt(idNo));
 				if (!result) {
 					log.error("个人实名认证失败, channelType: {}, walletId: {},source: {}", channelType, walletId, source);
 					throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);

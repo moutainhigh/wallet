@@ -244,6 +244,24 @@ public class WalletController {
 						smsCodeType));
 	}
 
+	@ApiOperation("高级钱包个人用户修改手机认证")
+	@PostMapping(UrlConstant.WALLET_SENIOR_PERSON_CHANGE_BIND_PHONE)
+	public ResponseValue<String> seniorWalletPersonChangeBindPhone(@RequestParam("access_token") String accessToken,
+			@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = true, example = "1") @RequestParam("channel_type")
+					Integer channelType,
+			@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2")
+			@RequestParam("source") Byte source,
+			@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+			@ApiParam(value = "姓名", required = true) @RequestParam("real_name") String realName,
+			@ApiParam(value = "身份证号", required = true) @RequestParam("id_no") String idNo,
+			@ApiParam(value = "手机号码", required = true) @RequestParam("old_phone") String oldPhone
+		) {
+
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
+				walletApi.seniorWalletPersonChangeBindPhone(accessToken, source, channelType, walletId, realName, idNo,
+						oldPhone));
+	}
+
 	@ApiOperation("高级钱包认证")
 	@PostMapping(UrlConstant.WALLET_SENIOR_PERSON_AUTHENTICATION)
 	public ResponseValue<String> seniorWalletPersonAuthentication(@RequestParam("access_token") String accessToken,

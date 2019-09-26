@@ -32,11 +32,16 @@ public class NotifyService {
 		String json = JsonUtil.toJSON(params);
 		log.info("Yunst notify: {}", json);
 
-		channelNotifyDao.insertSelective(ChannelNotify.builder()
+		ChannelNotify.ChannelNotifyBuilder builder = ChannelNotify.builder()
+				.channelType(EnumDef.ChannelType.YUNST.getValue().intValue())
+				.content(json)
+				.createTime(new Date());
+		ChannelNotify channelNotify = ChannelNotify.builder()
 				.channelType(EnumDef.ChannelType.YUNST.getValue().intValue())
 				.content(json)
 				.createTime(new Date())
-				.build());
+				.build();
+		channelNotifyDao.insertSelective(channelNotify);
 
 		JSONObject rpsJsonObj = JSON.parseObject(params.get("rps"));
 		String service = rpsJsonObj.getString("service");
@@ -46,24 +51,30 @@ public class NotifyService {
 			log.error("云商通回调参数有误,缺少service 或 method");
 			return;
 		}
+		channelNotify.setYunstServiceName(service);
+		channelNotify.setYunstMethodName(methodName);
 		if (YunstServiceName.MEMBER.getValue().equals(service)) {
 			if (YunstMethodName.VERIFY_RESULT.getValue().equals(methodName)) {
-				this.handleVerfiyResult(rpsJsonObj);
+				this.handleVerfiyResult(channelNotify,rpsJsonObj);
 			} else if (YunstMethodName.SIGN_CONTRACT.getValue().equals(methodName)) {
-				this.handleSignContractResult(rpsJsonObj);
+				this.handleSignContractResult(channelNotify,rpsJsonObj);
 			} else {
 				log.error("云商通回调,未知method参数:{}", methodName);
 			}
 		} else if (YunstServiceName.ORDER.getValue().equals(service)) {
 
-		} else {
+		} else if (YunstServiceName.MEMBER_PWD.getValue().equals(service)){
+			if (YunstMethodName.CHANGE_BIND_PHONE.getValue().equals(methodName)) {
+				this.handleChangeBindPhoneResult(channelNotify,rpsJsonObj);
+			}
+		}else {
 			log.error("云商通回调,service:{}", service);
 		}
-
+		channelNotifyDao.updateByPrimaryKeySelective(channelNotify);
 		return;
 	}
 
-	private void handleVerfiyResult(JSONObject rpsJsonObj) {
+	private void handleVerfiyResult(ChannelNotify channelNotify,JSONObject rpsJsonObj) {
 		log.info("处理企业信息审核结果通知");
 		if (YUNST_NOTIFY_SUCCESS.equals(rpsJsonObj.getString("status"))) {
 			String bizUserId = rpsJsonObj.getJSONObject("returnValue").getString("bizUserId");
@@ -71,18 +82,21 @@ public class NotifyService {
 			long result = rpsJsonObj.getJSONObject("returnValue").getLongValue("result");
 			String failReason = rpsJsonObj.getJSONObject("returnValue").getString("failReason");
 			String remark = rpsJsonObj.getJSONObject("returnValue").getString("remark");
+
+			channelNotify.setBizUserId(bizUserId);
+
 			WalletChannel walletChannel = walletChannelExtDao.selectByChannelTypeAndBizUserId(
 					EnumDef.ChannelType.YUNST.getValue().intValue(), bizUserId);
 
-			if (result == 2L){
+			if (result == 2L) {
 				walletChannel.setStatus(EnumDef.WalletChannelAuditStatus.AUDIT_SUCCESS.getValue().byteValue());
 				walletChannel.setFailReason(null);
-			}else if (result == 3L){
+			} else if (result == 3L) {
 				walletChannel.setStatus(EnumDef.WalletChannelAuditStatus.AUDIT_FAIL.getValue().byteValue());
 				walletChannel.setFailReason(failReason);
 			}
 			walletChannel.setRemark(remark);
-			walletChannel.setCheckTime(DateUtil.parse(checkTime,DateUtil.STANDARD_DTAETIME_PATTERN));
+			walletChannel.setCheckTime(DateUtil.parse(checkTime, DateUtil.STANDARD_DTAETIME_PATTERN));
 
 			int effectRows = walletChannelExtDao.updateByPrimaryKeySelective(walletChannel);
 			if (effectRows != 1) {
@@ -91,11 +105,28 @@ public class NotifyService {
 		}
 	}
 
-	private void handleSignContractResult(JSONObject rpsJsonObj) {
+	private void handleSignContractResult(ChannelNotify channelNotify,JSONObject rpsJsonObj) {
 		log.info("处理会员电子签约通知");
 		if (rpsJsonObj.containsKey("ContractNo") && YUNST_NOTIFY_SUCCESS.equals(rpsJsonObj.getString("status"))) {
 			String bizUserId = rpsJsonObj.getJSONObject("returnValue").getString("bizUserId");
+			channelNotify.setBizUserId(bizUserId);
+			WalletChannel walletChannel = walletChannelExtDao.selectByChannelTypeAndBizUserId(
+					EnumDef.ChannelType.YUNST.getValue().intValue(), bizUserId);
 
+			walletChannel.setIsSignContact(YUNST_NOTIFY_SIGN_CONTRACT);
+
+			int effectRows = walletChannelExtDao.updateByPrimaryKeySelective(walletChannel);
+			if (effectRows != 1) {
+				log.error("更新电子签约状态失败:bizUserId:{},contractNo:{}", bizUserId, rpsJsonObj.getString("ContractNo"));
+			}
+		}
+	}
+
+	private void handleChangeBindPhoneResult(ChannelNotify channelNotify,JSONObject rpsJsonObj) {
+		log.info("处理个人会员修改绑定手机通知");
+		if (rpsJsonObj.containsKey("ContractNo") && YUNST_NOTIFY_SUCCESS.equals(rpsJsonObj.getString("status"))) {
+			String bizUserId = rpsJsonObj.getJSONObject("returnValue").getString("bizUserId");
+			channelNotify.setBizUserId(bizUserId);
 			WalletChannel walletChannel = walletChannelExtDao.selectByChannelTypeAndBizUserId(
 					EnumDef.ChannelType.YUNST.getValue().intValue(), bizUserId);
 
@@ -109,7 +140,7 @@ public class NotifyService {
 	}
 
 	public enum YunstServiceName implements Valuable<String> {
-		MEMBER("MemberService"), ORDER("OrderService");
+		MEMBER("MemberService"), ORDER("OrderService"), MEMBER_PWD("MemberPwdService");
 
 		private String value;
 
@@ -124,7 +155,7 @@ public class NotifyService {
 	}
 
 	public enum YunstMethodName implements Valuable<String> {
-		VERIFY_RESULT("verifyResult"), SIGN_CONTRACT("signContract");
+		VERIFY_RESULT("verifyResult"), SIGN_CONTRACT("signContract"), CHANGE_BIND_PHONE("updatePhoneByPayPwd");
 
 		private String value;
 

@@ -80,11 +80,15 @@ public class YunstHandlerTest extends SpringBaseTest {
 		logStack(result);
 		boolean result2 = yunstUserHandler.bindPhone(walletId, source, tel, "11111");
 		assertTrue(result2);
-		logStack(result);
-		String newTel = genRamdomTelphone(null);
-		result2 = yunstUserHandler.modifyPhone(walletId, source, tel, newTel, "11111");
 		logStack(result2);
-		assertTrue(result2);
+		String realName = RandomUtils.getChineseName();
+		Long identityType = 1L;
+		String identityNo = RSAUtil.encrypt(new IdCardGenerator().generate());
+		boolean result3 = yunstUserHandler.personCertification(walletId, source, realName, identityType, identityNo);
+		logStack(result3);
+		String url = yunstUserHandler.modifyPhone(walletId, source, realName,tel,identityType, identityNo);
+		logStack(url);
+		assertNotNull(url);
 	}
 
 	@Test

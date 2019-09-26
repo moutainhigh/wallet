@@ -328,17 +328,30 @@ public class WalletApiImpl implements WalletApi {
 				transformBizUserId);
 		if (walletChannel == null) {
 			log.info("未创建高级钱包用户: bizUserId:{}", transformBizUserId);
-			walletChannel = walletService.createSeniorWallet(channelType,walletId,source);
+			walletChannel = walletService.createSeniorWallet(channelType, walletId, source);
 			walletService.upgradeWalletLevel(walletId);
 		}
 		if (smsCodeType == EnumDef.EnumVerifyCodeType.YUNST_BIND_PHONE.getValue().intValue()) {
 			String rtn = walletService.seniorWalletApplyBindPhone(channelType, walletId, source, mobile);
-			if (!rtn.equals(walletChannel.getBizUserId())){
-				log.error("发送云商通账户绑定手机验证码失败, expect: {},actucal:{}", transformBizUserId,rtn);
+			if (!rtn.equals(walletChannel.getBizUserId())) {
+				log.error("发送云商通账户绑定手机验证码失败, expect: {},actucal:{}", transformBizUserId, rtn);
 				throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 			}
 		}
 		return walletChannel;
+	}
+
+	@Override
+	public String seniorWalletPersonChangeBindPhone(String accessToken, Byte source, Integer channelType,
+			Long walletId,
+			String realName, String idNo, String oldPhone) {
+		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
+		if (wallet == null) {
+			log.error("高级钱包企业信息审核失败, 查无此钱包, walletId: {}", walletId);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+		}
+		return walletService.seniorWalletPersonChangeBindPhone(channelType, walletId, source, realName, idNo,
+				oldPhone);
 	}
 
 	@Log
@@ -353,11 +366,11 @@ public class WalletApiImpl implements WalletApi {
 			log.error("高级钱包个人认证失败, 查无此钱包, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 		}
-		if (!walletService.seniorWalletBindPhone(channelType, walletId, source, mobile, verifyCode)){
+		if (!walletService.seniorWalletBindPhone(channelType, walletId, source, mobile, verifyCode)) {
 			log.error("高级钱包个人失败, 查钱包绑定手机失败, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 		}
-		return walletService.seniorWalletPersonAuth(channelType, walletId, source,realName, idNo, mobile);
+		return walletService.seniorWalletPersonAuth(channelType, walletId, source, realName, idNo, mobile);
 	}
 
 	@Override
@@ -373,8 +386,8 @@ public class WalletApiImpl implements WalletApi {
 				transformBizUserId);
 		if (walletChannel == null) {
 			log.info("未创建高级钱包用户: bizUserId:{}", transformBizUserId);
-			walletChannel = walletService.createSeniorWallet(channelType,walletId,source);
-			if (walletChannel == null){
+			walletChannel = walletService.createSeniorWallet(channelType, walletId, source);
+			if (walletChannel == null) {
 				log.error("高级钱包企业信息审核失败, 创建云商通用户失败, bizUserId:{}", transformBizUserId);
 				throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 			}
@@ -388,7 +401,7 @@ public class WalletApiImpl implements WalletApi {
 	@SignVerify
 	@Override
 	public String signBalanceProtocol(String accessToken, Byte source, Long walletId) {
-		return walletService.signBalanceProtocol(source,walletId);
+		return walletService.signBalanceProtocol(source, walletId);
 	}
 
 }

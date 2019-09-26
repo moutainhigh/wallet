@@ -163,6 +163,21 @@ public interface WalletApi {
 	WalletChannel seniorWalletSmsCodeVerification(String accessToken, Byte source, Integer channelType, Long walletId,
 			String mobile, Integer smsCodeType);
 
+
+	/**
+	 * 高级钱包个人修改绑定手机认证
+	 *
+	 * @param source      必填, 钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户
+	 * @param channelType 必填, 渠道类型.1: 浦发银企直连，2：通联云商通
+	 * @param walletId    必填, 钱包id
+	 * @param realName    必填, 真实姓名
+	 * @param idNo        必填, 身份证
+	 * @param oldPhone      必填, 电话
+	 * @return
+	 */
+	String seniorWalletPersonChangeBindPhone(String accessToken, Byte source, Integer channelType, Long walletId,
+			String realName, String idNo, String oldPhone);
+
 	/**
 	 * 高级钱包个人认证
 	 *
