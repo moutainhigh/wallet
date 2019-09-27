@@ -134,22 +134,16 @@ public class UrlConstant {
 	 * 高级钱包商家资料审核（通道）
 	 */
 	public static final String WALLET_SENIOR_COMPANY_INFO_AUDIT = VERSION + "/m/wallet/senior_company_info_audit";
+
+	/**
+	 * 高级钱包会员协议
+	 */
+	public static final String WALLET_SENIOR_MEMBER_PROTOCOL = VERSION + "/m/wallet/senior_member_protocol";
 	/**
 	 * 高级钱包代扣协议（企业,个人商家）
 	 */
 	public static final String WALLET_SENIOR_BANLACE_PROTOCOL = VERSION + "/m/wallet/senior_balance_protocol";
-	/**
-	 * 云商通绑定手机
-	 */
-	public static final String YUNST_BIND_PHONE = VERSION + "/m/yunst/bind_phone";
-	/**
-	 * 云商通修改手机
-	 */
-	public static final String YUNST_MODIFY_PHONE = VERSION + "/m/yunst/modify_phone";
-	/**
-	 * 云商通查询会员信息
-	 */
-	public static final String YUNST_MEMBER_INFO = VERSION + "/m/yunst/member_info";
+
 	/**
 	 * 云商通统一回调
 	 */

@@ -220,6 +220,15 @@ public interface WalletApi {
 			Long walletId, YunstSetCompanyInfoReq.CompanyBasicInfo companyBasicInfo);
 
 	/**
+	 * 高级钱包会员协议地址
+	 *
+	 * @param source   必填, 钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户
+	 * @param walletId 必填, 钱包id
+	 * @return
+	 */
+	String signMemberProtocol(String accessToken, Byte source, Long walletId);
+
+	/**
 	 * 高级钱包扣款协议地址
 	 *
 	 * @param source   必填, 钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户

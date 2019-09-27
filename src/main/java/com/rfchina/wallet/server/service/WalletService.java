@@ -775,7 +775,7 @@ public class WalletService {
 		}
 		WalletChannel walletChannel = builder.build();
 		int effectRows = walletChannelDao.insertSelective(walletChannel);
-		if (effectRows != 1){
+		if (effectRows != 1) {
 			log.error("开通高级钱包失败, channelType: {}, walletId: {}, source:{}", channelType, walletId, source);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 		}
@@ -922,7 +922,7 @@ public class WalletService {
 					}
 				}
 
-				return yunstUserHandler.generateSignContractUrl(walletId, source);
+				return this.signMemberProtocol(source, walletId);
 			} catch (Exception e) {
 				log.error("高级钱包个人认证失败 msg:{}", e);
 				throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
@@ -1008,6 +1008,18 @@ public class WalletService {
 			return yunstUserHandler.generateBalanceProtocolUrl(walletId, source);
 		} catch (Exception e) {
 			log.error("高级钱包生成扣款协议连接失败, walletId: {}", walletId);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+		}
+	}
+
+	/**
+	 * 高级钱包会员协议地址
+	 */
+	public String signMemberProtocol(Byte source, Long walletId) {
+		try {
+			return yunstUserHandler.generateSignContractUrl(walletId, source);
+		} catch (Exception e) {
+			log.error("高级钱包生成会员协议连接失败, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 		}
 	}

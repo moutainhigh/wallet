@@ -355,7 +355,7 @@ public class WalletApiImpl implements WalletApi {
 			log.error("高级钱包绑定手机, 查无此钱包, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 		}
-		if ( !walletService.seniorWalletBindPhone(channelType,walletId,source,mobile,verifyCode)){
+		if (!walletService.seniorWalletBindPhone(channelType, walletId, source, mobile, verifyCode)) {
 			log.error("高级钱包绑定手机失败, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 		}
@@ -402,6 +402,14 @@ public class WalletApiImpl implements WalletApi {
 			walletService.upgradeWalletLevel(walletId);
 		}
 		return walletService.seniorWalletCompanyAudit(channelType, walletId, source, auditType, companyBasicInfo);
+	}
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
+	@SignVerify
+	@Override
+	public String signMemberProtocol(String accessToken, Byte source, Long walletId) {
+		return walletService.signMemberProtocol(source, walletId);
 	}
 
 	@Log

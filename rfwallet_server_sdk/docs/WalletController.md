@@ -759,6 +759,31 @@
 }
 ```
 
+###  高级钱包会员协议
+
+请求地址: /wallet_server/v1/m/wallet/senior_member_protocol
+
+请求类型: POST
+
+请求参数:
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
+|wallet_id|是|钱包id|
+
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": "", //消息
+"data": {
+  }
+}
+```
+
 ###  高级钱包认证验证码
 
 请求地址: /wallet_server/v1/m/wallet/senior_sms_verify_code
