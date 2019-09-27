@@ -52,7 +52,7 @@ public class WalletChannel  {
     @ApiModelProperty("安全手机")
     private String securityTel ;
 
-    @ApiModelProperty("资料审核状态。1：待审核 ，2：审核成功，3：审核失败")
+    @ApiModelProperty("资料审核状态。1: 未提交审核, 2：待审核 ，3：审核成功，4：审核失败")
     private Integer status ;
 
     @ApiModelProperty("钱包id")

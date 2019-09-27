@@ -123,6 +123,10 @@ public class UrlConstant {
 	 */
 	public static final String WALLET_SENIOR_PERSON_AUTHENTICATION = VERSION + "/m/wallet/senior_person_authentication";
 	/**
+	 * 高级钱包绑定手机
+	 */
+	public static final String WALLET_SENIOR_BIND_PHONE = VERSION + "/m/wallet/senior_bind_phone";
+	/**
 	 * 高级钱包个人修改绑定手机
 	 */
 	public static final String WALLET_SENIOR_PERSON_CHANGE_BIND_PHONE = VERSION + "/m/wallet/senior_person_change_bind_phone";

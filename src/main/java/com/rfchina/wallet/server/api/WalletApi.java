@@ -54,8 +54,8 @@ public interface WalletApi {
 	/**
 	 * 开通未审核的钱包
 	 */
-	Wallet createWallet(String accessToken, Byte type, String title, Byte source, Integer channelType,
-			Byte walletLevel);
+	Wallet createWallet(String accessToken, Byte type, String title, Byte source);
+
 
 	/**
 	 * 查詢钱包流水
@@ -177,6 +177,19 @@ public interface WalletApi {
 	 */
 	String seniorWalletPersonChangeBindPhone(String accessToken, Byte source, Integer channelType, Long walletId,
 			String realName, String idNo, String oldPhone);
+
+	/**
+	 * 高级钱包绑定手机
+	 *
+	 * @param source      必填, 钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户
+	 * @param channelType 必填, 渠道类型.1: 浦发银企直连，2：通联云商通
+	 * @param walletId    必填, 钱包id
+	 * @param mobile      必填, 电话
+	 * @param verifyCode  必填, 短信验证码
+	 * @return
+	 */
+	Long seniorWalletBindPhone(String accessToken, Byte source, Integer channelType, Long walletId,
+			String mobile, String verifyCode);
 
 	/**
 	 * 高级钱包个人认证

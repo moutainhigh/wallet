@@ -543,7 +543,7 @@ public class WalletService {
 	/**
 	 * 开通未审核的高级钱包
 	 */
-	public Wallet createWallet(Byte type, String title, Byte source, Byte walletLevel) {
+	public Wallet createWallet(Byte type, String title, Byte source) {
 
 		Wallet wallet = Wallet.builder()
 				.type(type)
@@ -556,7 +556,7 @@ public class WalletService {
 				.source(source)
 				.status(WalletStatus.WAIT_AUDIT.getValue())
 				.createTime(new Date())
-				.level(walletLevel == null ? EnumDef.EnumWalletLevel.JUNIOR.getValue() : walletLevel)
+				.level(EnumDef.EnumWalletLevel.JUNIOR.getValue())
 				.build();
 		walletDao.insertSelective(wallet);
 
@@ -749,6 +749,7 @@ public class WalletService {
 	/**
 	 * 升级高级钱包
 	 */
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 	public WalletChannel createSeniorWallet(Integer channelType, Long walletId, Byte source) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		if (wallet == null) {
@@ -757,7 +758,7 @@ public class WalletService {
 		}
 		WalletChannel.WalletChannelBuilder builder = WalletChannel.builder()
 				.channelType(channelType.byteValue())
-				.status(EnumWallet.WalletChannelStatus.WAIT_AUDIT.getValue())
+				.status(EnumDef.WalletChannelAuditStatus.NOT_COMMIT.getValue().byteValue())
 				.walletId(walletId)
 				.createTime(new Date());
 		if (channelType == EnumDef.ChannelType.YUNST.getValue().intValue()) {
@@ -773,7 +774,17 @@ public class WalletService {
 					.memberType(member.right.getValue().byteValue());
 		}
 		WalletChannel walletChannel = builder.build();
-		walletChannelDao.insertSelective(walletChannel);
+		int effectRows = walletChannelDao.insertSelective(walletChannel);
+		if (effectRows != 1){
+			log.error("开通高级钱包失败, channelType: {}, walletId: {}, source:{}", channelType, walletId, source);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+		}
+		wallet.setLevel(EnumDef.EnumWalletLevel.SENIOR.getValue());
+		effectRows = walletDao.updateByPrimaryKeySelective(wallet);
+		if (effectRows != 1) {
+			log.error("更新钱包等级失败, walletId: {}", walletId);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+		}
 		return walletChannel;
 	}
 

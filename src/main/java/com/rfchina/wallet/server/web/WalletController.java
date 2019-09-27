@@ -75,19 +75,15 @@ public class WalletController {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, resp);
 	}
 
-	@ApiOperation("开通未审核的高级钱包")
+	@ApiOperation("开通未审核的钱包")
 	@PostMapping(UrlConstant.CREATE_WALLET)
-	public ResponseValue<Wallet> createWallet(@RequestParam("access_token") String accessToken,
+	public ResponseValue<Wallet> createWallet(
+			@RequestParam("access_token") String accessToken,
 			@ApiParam(value = "钱包类型， 1：企业钱包，2：个人钱包", required = true, example = "2") @RequestParam("type") Byte type,
-			@ApiParam(value = "钱包标题，通常是姓名或公司名", required = true, example = "测试个人钱包") @RequestParam("title")
-					String title,
-			@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2")
-			@RequestParam("source") Byte source,
-			@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = false, example = "1")
-			@RequestParam(value = "channel_type", required = false) Integer channelType,
-			@ApiParam(value = "钱包等级 1:初级钱包,2:高级钱包", required = true, example = "1")
-			@RequestParam(value = "wallet_level", required = false) Byte walletLevel) {
-		Wallet wallet = walletApi.createWallet(accessToken, type, title, source, channelType, walletLevel);
+			@ApiParam(value = "钱包标题，通常是姓名或公司名", required = true, example = "测试个人钱包") @RequestParam("title") String title,
+			@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2") @RequestParam("source") Byte source
+	) {
+		Wallet wallet = walletApi.createWallet(accessToken, type, title, source);
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, wallet);
 	}
@@ -244,7 +240,7 @@ public class WalletController {
 						smsCodeType));
 	}
 
-	@ApiOperation("高级钱包个人用户修改手机认证")
+	@ApiOperation("高级钱包用户修改手机认证")
 	@PostMapping(UrlConstant.WALLET_SENIOR_PERSON_CHANGE_BIND_PHONE)
 	public ResponseValue<String> seniorWalletPersonChangeBindPhone(@RequestParam("access_token") String accessToken,
 			@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = true, example = "1") @RequestParam("channel_type")
@@ -255,11 +251,27 @@ public class WalletController {
 			@ApiParam(value = "姓名", required = true) @RequestParam("real_name") String realName,
 			@ApiParam(value = "身份证号", required = true) @RequestParam("id_no") String idNo,
 			@ApiParam(value = "手机号码", required = true) @RequestParam("old_phone") String oldPhone
-		) {
+	) {
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
 				walletApi.seniorWalletPersonChangeBindPhone(accessToken, source, channelType, walletId, realName, idNo,
 						oldPhone));
+	}
+
+	@ApiOperation("高级钱包企业用户绑定手机")
+	@PostMapping(UrlConstant.WALLET_SENIOR_BIND_PHONE)
+	public ResponseValue<Long> seniorWalletBindPhone(@RequestParam("access_token") String accessToken,
+			@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = true, example = "1") @RequestParam("channel_type")
+					Integer channelType,
+			@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2")
+			@RequestParam("source") Byte source,
+			@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+			@ApiParam(value = "手机号码", required = true) @RequestParam("mobile") String mobile,
+			@ApiParam(value = "短信验证码", required = true) @RequestParam("verify_code") String verifyCode
+		) {
+
+		return new ResponseValue<Long>(EnumResponseCode.COMMON_SUCCESS,
+				walletApi.seniorWalletBindPhone(accessToken, source, channelType, walletId, mobile,verifyCode));
 	}
 
 	@ApiOperation("高级钱包认证")

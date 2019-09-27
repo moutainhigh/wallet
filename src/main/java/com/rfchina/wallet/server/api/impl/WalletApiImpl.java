@@ -185,14 +185,8 @@ public class WalletApiImpl implements WalletApi {
 	@SignVerify
 	@Override
 	public Wallet createWallet(String accessToken, @ParamValid(nullable = false) Byte type,
-			@ParamValid(nullable = false) String title, @ParamValid(nullable = false) Byte source, Integer channelType,
-			Byte walletLevel) {
-		Wallet wallet = walletService.createWallet(type, title, source, walletLevel);
-		if (walletLevel.byteValue() == EnumDef.EnumWalletLevel.SENIOR.getValue()
-				&& channelType.intValue() == EnumDef.ChannelType.YUNST.getValue()) {
-			walletService.createSeniorWallet(channelType, wallet.getId(), source);
-		}
-		return wallet;
+			@ParamValid(nullable = false) String title, @ParamValid(nullable = false) Byte source) {
+		return walletService.createWallet(type, title, source);
 	}
 
 	@Log
@@ -313,8 +307,7 @@ public class WalletApiImpl implements WalletApi {
 	@Override
 	public WalletChannel upgradeSeniorWallet(String accessToken, @ParamValid(nullable = false) Byte source,
 			Integer channelType, Long walletId) {
-		Wallet wallet = walletService.upgradeWalletLevel(walletId);
-		return walletService.createSeniorWallet(channelType, wallet.getId(), source);
+		return walletService.createSeniorWallet(channelType, walletId, source);
 	}
 
 	@Log
@@ -352,6 +345,21 @@ public class WalletApiImpl implements WalletApi {
 		}
 		return walletService.seniorWalletPersonChangeBindPhone(channelType, walletId, source, realName, idNo,
 				oldPhone);
+	}
+
+	@Override
+	public Long seniorWalletBindPhone(String accessToken, Byte source, Integer channelType, Long walletId,
+			String mobile, String verifyCode) {
+		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
+		if (wallet == null) {
+			log.error("高级钱包绑定手机, 查无此钱包, walletId: {}", walletId);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+		}
+		if ( !walletService.seniorWalletBindPhone(channelType,walletId,source,mobile,verifyCode)){
+			log.error("高级钱包绑定手机失败, walletId: {}", walletId);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+		}
+		return wallet.getId();
 	}
 
 	@Log

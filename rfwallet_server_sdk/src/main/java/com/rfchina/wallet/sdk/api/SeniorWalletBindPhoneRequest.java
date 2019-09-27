@@ -7,9 +7,9 @@ import com.rfchina.platform.sdk2.request.AbstractApiRequest;
 import lombok.Builder;
 import io.swagger.annotations.ApiModelProperty;
 
-/** 高级钱包用户修改手机认证 */
+/** 高级钱包企业用户绑定手机 */
 @Builder
-public class SeniorWalletPersonChangeBindPhoneRequest extends  AbstractApiRequest {
+public class SeniorWalletBindPhoneRequest extends  AbstractApiRequest {
 
   @ApiModelProperty("access_token")
   private String accessToken ;
@@ -17,17 +17,14 @@ public class SeniorWalletPersonChangeBindPhoneRequest extends  AbstractApiReques
   @ApiModelProperty("渠道类型 1:浦发银企直连,2:通联云商通")
   private Integer channelType ;
 
-  @ApiModelProperty("身份证号")
-  private String idNo ;
-
   @ApiModelProperty("手机号码")
-  private String oldPhone ;
-
-  @ApiModelProperty("姓名")
-  private String realName ;
+  private String mobile ;
 
   @ApiModelProperty("钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户")
   private Integer source ;
+
+  @ApiModelProperty("短信验证码")
+  private String verifyCode ;
 
   @ApiModelProperty("钱包id")
   private Long walletId ;
@@ -35,7 +32,7 @@ public class SeniorWalletPersonChangeBindPhoneRequest extends  AbstractApiReques
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/wallet/senior_person_change_bind_phone";
+    return "/wallet_server/v1/m/wallet/senior_bind_phone";
   }
 
   @Override
@@ -52,17 +49,14 @@ public class SeniorWalletPersonChangeBindPhoneRequest extends  AbstractApiReques
       if(channelType != null){
         parameters.put("channel_type", channelType.toString());
       }
-      if(idNo != null){
-        parameters.put("id_no", idNo.toString());
-      }
-      if(oldPhone != null){
-        parameters.put("old_phone", oldPhone.toString());
-      }
-      if(realName != null){
-        parameters.put("real_name", realName.toString());
+      if(mobile != null){
+        parameters.put("mobile", mobile.toString());
       }
       if(source != null){
         parameters.put("source", source.toString());
+      }
+      if(verifyCode != null){
+        parameters.put("verify_code", verifyCode.toString());
       }
       if(walletId != null){
         parameters.put("wallet_id", walletId.toString());

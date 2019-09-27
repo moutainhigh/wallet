@@ -7,7 +7,7 @@ import com.rfchina.platform.sdk2.request.AbstractApiRequest;
 import lombok.Builder;
 import io.swagger.annotations.ApiModelProperty;
 
-/** 开通未审核的高级钱包 */
+/** 开通未审核的钱包 */
 @Builder
 public class CreateWalletRequest extends  AbstractApiRequest {
 
@@ -22,12 +22,6 @@ public class CreateWalletRequest extends  AbstractApiRequest {
 
   @ApiModelProperty("钱包类型， 1：企业钱包，2：个人钱包")
   private Integer type ;
-
-  @ApiModelProperty("钱包等级 1:初级钱包,2:高级钱包")
-  private Integer walletLevel ;
-
-  @ApiModelProperty("渠道类型 1:浦发银企直连,2:通联云商通")
-  private Integer channelType ;
 
 
   @Override
@@ -54,12 +48,6 @@ public class CreateWalletRequest extends  AbstractApiRequest {
       }
       if(type != null){
         parameters.put("type", type.toString());
-      }
-      if(walletLevel != null){
-        parameters.put("wallet_level", walletLevel.toString());
-      }
-      if(channelType != null){
-        parameters.put("channel_type", channelType.toString());
       }
     return parameters;
   }

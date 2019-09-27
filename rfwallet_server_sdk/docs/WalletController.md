@@ -255,7 +255,7 @@
 }
 ```
 
-###  开通未审核的高级钱包
+###  开通未审核的钱包
 
 请求地址: /wallet_server/v1/m/wallet/create_wallet
 
@@ -269,8 +269,6 @@
 |source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
 |title|是|钱包标题，通常是姓名或公司名|
 |type|是|钱包类型， 1：企业钱包，2：个人钱包|
-|wallet_level|是|钱包等级 1:初级钱包,2:高级钱包|
-|channel_type|否|渠道类型 1:浦发银企直连,2:通联云商通|
 
 
 返回数据
@@ -621,6 +619,34 @@
 }
 ```
 
+###  高级钱包企业用户绑定手机
+
+请求地址: /wallet_server/v1/m/wallet/senior_bind_phone
+
+请求类型: POST
+
+请求参数:
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|channel_type|是|渠道类型 1:浦发银企直连,2:通联云商通|
+|mobile|是|手机号码|
+|source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
+|verify_code|是|短信验证码|
+|wallet_id|是|钱包id|
+
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": "", //消息
+"data": {
+  }
+}
+```
+
 ###  高级钱包商家资料审核（通道）
 
 请求地址: /wallet_server/v1/m/wallet/senior_company_info_audit
@@ -679,7 +705,7 @@
 }
 ```
 
-###  高级钱包个人用户修改手机认证
+###  高级钱包用户修改手机认证
 
 请求地址: /wallet_server/v1/m/wallet/senior_person_change_bind_phone
 
@@ -770,7 +796,7 @@
         pic_url: "" , //审核图片地址
         remark: "" , //备注
         security_tel: "" , //安全手机
-        status: "" , //资料审核状态。1：待审核 ，2：审核成功，3：审核失败
+        status: "" , //资料审核状态。1: 未提交审核, 2：待审核 ，3：审核成功，4：审核失败
         wallet_id: ""  //钱包id
 
   }
@@ -812,7 +838,7 @@
         pic_url: "" , //审核图片地址
         remark: "" , //备注
         security_tel: "" , //安全手机
-        status: "" , //资料审核状态。1：待审核 ，2：审核成功，3：审核失败
+        status: "" , //资料审核状态。1: 未提交审核, 2：待审核 ，3：审核成功，4：审核失败
         wallet_id: ""  //钱包id
 
   }
