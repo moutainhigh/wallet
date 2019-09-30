@@ -71,7 +71,7 @@ public class WalletTest extends WalletBaseTest {
 
 	@Test
 	public void testSetStatusFailWithApplyBill() throws Exception {
-		setStatusFailWithApplyBill("67", "1", "rfchina", "fail");
+		setStatusFailWithApplyBill("43", "1", "rfchina", "fail");
 		Thread.sleep(3000);
 	}
 }
