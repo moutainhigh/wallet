@@ -325,6 +325,12 @@ public class WalletApiImpl implements WalletApi {
 			walletService.upgradeWalletLevel(walletId);
 		}
 		if (smsCodeType == EnumDef.EnumVerifyCodeType.YUNST_BIND_PHONE.getValue().intValue()) {
+			if (EnumDef.WalletSource.FHT_CORP.getValue().intValue() == source
+					&& EnumDef.WalletChannelAuditStatus.AUDIT_SUCCESS.getValue().byteValue()
+					!= walletChannel.getStatus()) {
+				log.error("企业用户资料通道未审核通过");
+				return walletChannel;
+			}
 			String rtn = walletService.seniorWalletApplyBindPhone(channelType, walletId, source, mobile);
 			if (!rtn.equals(walletChannel.getBizUserId())) {
 				log.error("发送云商通账户绑定手机验证码失败, expect: {},actucal:{}", transformBizUserId, rtn);
