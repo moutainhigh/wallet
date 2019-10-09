@@ -87,13 +87,14 @@ public class WalletController {
 	@ApiOperation("设置出款申请单状态为失败")
 	@PostMapping(UrlConstant.M_APPLY_BILL_SET_STATUS_FAIL)
 	public ResponseValue<Wallet> setStatusFailWithApplyBill(@RequestParam("access_token") String accessToken,
-			@ApiParam(value = "申请单ID", required = true, example = "2") @RequestParam("apply_id") Long applyId,
+			@ApiParam(value = "批次号", required = true, example = "2") @RequestParam("batch_no") String batchNo,
+			@ApiParam(value = "业务单号", required = true, example = "2") @RequestParam("biz_no") String bizNo,
 			@ApiParam(value = "设置人ID", required = true, example = "1") @RequestParam("audit_user_id")
 					String auditUserId,
 			@ApiParam(value = "设置人", required = true, example = "rfchina") @RequestParam("audit_user") String auditUser,
 			@ApiParam(value = "备注", required = true, example = "出款失败") @RequestParam("audit_comment")
 					String auditComment) {
-		walletApi.setStatusFailWithApplyBill(accessToken, applyId, auditUserId, auditUser,auditComment);
+		walletApi.setStatusFailWithApplyBill(accessToken, batchNo, bizNo, auditUserId, auditUser, auditComment);
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}

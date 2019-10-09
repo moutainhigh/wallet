@@ -44,6 +44,14 @@ public interface WalletApplyExtDao extends WalletApplyMapper {
 	List<WalletApply> selectByBatchNo(@Param("batchNo") String batchNo,
 		@Param("status") Byte status);
 
+	@Select({
+			"select * from rf_wallet_apply",
+			"where batch_no = #{batchNo} and biz_no = #{bizNo}"
+	})
+	@ResultMap("com.rfchina.wallet.domain.mapper.WalletApplyMapper.BaseResultMap")
+	WalletApply selectByBatchNoAndBizNo(@Param("batchNo") String batchNo,
+			@Param("bizNo") String bizNo);
+
 	/**
 	 * 更新尝试次数
 	 */

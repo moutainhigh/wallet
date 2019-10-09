@@ -298,28 +298,28 @@ public class WalletApiImpl implements WalletApi {
 	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
 	@SignVerify
 	@Override
-	public void setStatusFailWithApplyBill(String accessToken, Long applyId, String auditUserId, String auditUser,
-			String auditComment) {
+	public void setStatusFailWithApplyBill(String accessToken, String batchNo, String bizNo, String auditUserId,
+			String auditUser, String auditComment) {
 
-		WalletApply apply = walletApplyExtDao.selectByPrimaryKey(applyId);
+		WalletApply apply = walletApplyExtDao.selectByBatchNoAndBizNo(batchNo, bizNo);
 		if (null == apply) {
 			throw new WalletResponseException(ResponseCode.EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST,
-					String.valueOf(applyId));
+					"batch_no: " + batchNo + ", biz_no: " + bizNo);
 		}
 
 		if (apply.getStatus().intValue() != WalletApplyStatus.SUCC.getValue().intValue()) {
 			throw new WalletResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE, "申请单状态为成功时才能进行重置为失败操作");
 		}
 
-		ApplyStatusChange statusChange = applyStatusChangeExtDao.selectByApplyId(applyId);
+		ApplyStatusChange statusChange = applyStatusChangeExtDao.selectByApplyId(apply.getId());
 		if (null != statusChange) {
 			throw new WalletResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE, "该申请单已进行过状态调整");
 		}
 
-		walletService.setWalletApplyStatus(applyId, auditUserId, auditUser, auditComment);
+		walletService.setWalletApplyStatus(apply.getId(), auditUserId, auditUser, auditComment);
 
 		walletApiExecutor.execute(() -> mqService.publish(MqService.MqApplyStatusChange.builder()
-				.applyId(applyId)
+				.applyId(apply.getId())
 				.tradeNo(apply.getBatchNo())
 				.orderNo(apply.getBizNo())
 				.newStatus(WalletApplyStatus.FAIL.getValue().intValue())

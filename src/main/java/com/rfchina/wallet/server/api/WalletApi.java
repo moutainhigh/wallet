@@ -141,12 +141,13 @@ public interface WalletApi {
 	/**
 	 * 设置出款申请单状态为失败
 	 *
-	 * @param applyId      必填, 申请单ID
+	 * @param batchNo      必填, 批次号
+	 * @param bizNo        必填, 业务单号
 	 * @param auditUserId  必填, 设置人ID
 	 * @param auditUser    必填, 设置人
 	 * @param auditComment 必填, 备注
 	 * @return
 	 */
-	void setStatusFailWithApplyBill(String accessToken, Long applyId, String auditUserId, String auditUser,
-			String auditComment);
+	void setStatusFailWithApplyBill(String accessToken, String batchNo, String bizNo, String auditUserId,
+			String auditUser, String auditComment);
 }
