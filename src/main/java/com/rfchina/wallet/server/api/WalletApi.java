@@ -56,7 +56,6 @@ public interface WalletApi {
 	 */
 	Wallet createWallet(String accessToken, Byte type, String title, Byte source);
 
-
 	/**
 	 * 查詢钱包流水
 	 *
@@ -163,7 +162,6 @@ public interface WalletApi {
 	WalletChannel seniorWalletSmsCodeVerification(String accessToken, Byte source, Integer channelType, Long walletId,
 			String mobile, Integer smsCodeType);
 
-
 	/**
 	 * 高级钱包个人修改绑定手机认证
 	 *
@@ -172,7 +170,7 @@ public interface WalletApi {
 	 * @param walletId    必填, 钱包id
 	 * @param realName    必填, 真实姓名
 	 * @param idNo        必填, 身份证
-	 * @param oldPhone      必填, 电话
+	 * @param oldPhone    必填, 电话
 	 * @return
 	 */
 	String seniorWalletPersonChangeBindPhone(String accessToken, Byte source, Integer channelType, Long walletId,
@@ -188,8 +186,8 @@ public interface WalletApi {
 	 * @param verifyCode  必填, 短信验证码
 	 * @return
 	 */
-	Long seniorWalletBindPhone(String accessToken, Byte source, Integer channelType, Long walletId,
-			String mobile, String verifyCode);
+	Long seniorWalletBindPhone(String accessToken, Byte source, Integer channelType, Long walletId, String mobile,
+			String verifyCode);
 
 	/**
 	 * 高级钱包个人认证
@@ -236,4 +234,34 @@ public interface WalletApi {
 	 * @return
 	 */
 	String signBalanceProtocol(String accessToken, Byte source, Long walletId);
+
+	/**
+	 * 高级钱包银行卡验证
+	 *
+	 * @param source     必填, 钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户
+	 * @param walletId   必填, 钱包id
+	 * @param realName   必填, 姓名
+	 * @param phone      必填, 电话
+	 * @param identityNo 必填, 身份证号
+	 * @param validate   非必填, 信用卡4位有效期
+	 * @param cvv2       非必填, 信用卡cvv2码
+	 * @return
+	 */
+	Long seniorWalletVerifyBankCard(String accessToken, Long walletId, Byte source, String cardNo, String realName,
+			String phone, String identityNo, String validate, String cvv2);
+
+	/**
+	 * 高级钱包确认绑定银行卡
+	 *
+	 * @param source     必填, 钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户
+	 * @param walletId   必填, 钱包id
+	 * @param transNum   必填, 验证流水号
+	 * @param phone      必填, 电话
+	 * @param validate   非必填, 信用卡4位有效期
+	 * @param cvv2       非必填, 信用卡cvv2码
+	 * @param verifyCode 必填, 验证码
+	 * @return
+	 */
+	Long seniorWalletConfirmBindBankCard(String accessToken, Long walletId, Byte source, String transNum, String phone,
+			String validate, String cvv2, String verifyCode);
 }

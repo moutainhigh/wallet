@@ -1,5 +1,6 @@
 package com.rfchina.wallet.server.service.handler.yunst;
 
+import com.allinpay.yunst.sdk.util.RSAUtil;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.JsonUtil;
@@ -136,7 +137,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 				.bizUserId(bizUserId)
 				.name(realName)
 				.identityType(identityType)
-				.identityNo(identityNo)
+				.identityNo(RSAUtil.encrypt(identityNo))
 				.oldPhone(oldPhone)
 				.jumpUrl(configService.getYunstResultJumpUrl())
 				.backUrl(configService.getYunstNotifybackUrl())
@@ -190,7 +191,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 				.isAuth(true)
 				.name(realName)
 				.identityType(identityType)
-				.identityNo(identityNo)
+				.identityNo(RSAUtil.encrypt(identityNo))
 				.build();
 
 		YunstPersonSetRealNameResult result = null;
@@ -209,6 +210,8 @@ public class YunstUserHandler extends YunstBaseHandler {
 	public YunstSetCompanyInfoResult setCompanyInfo(Long walletId, Byte source, Boolean isAuth,
 			YunstSetCompanyInfoReq.CompanyBasicInfo companyBasicInfo) throws Exception {
 		String bizUserId = transferToYunstBizUserFormat(walletId, source);
+		companyBasicInfo.setLegalIds(RSAUtil.encrypt(companyBasicInfo.getLegalIds()));
+		companyBasicInfo.setAccountNo(RSAUtil.encrypt(companyBasicInfo.getAccountNo()));
 		YunstSetCompanyInfoReq.YunstSetCompanyInfoReqBuilder builder = YunstSetCompanyInfoReq.builder$()
 				.bizUserId(bizUserId)
 				.isAuth(isAuth)
@@ -228,19 +231,15 @@ public class YunstUserHandler extends YunstBaseHandler {
 		String bizUserId = transferToYunstBizUserFormat(walletId, source);
 		YunstApplyBindBankCardReq.YunstApplyBindBankCardReqBuilder buider = YunstApplyBindBankCardReq.builder$()
 				.bizUserId(bizUserId)
-				.cardNo(cardNo)
+				.cardNo(RSAUtil.encrypt(cardNo))
 				.phone(phone)
 				.name(name)
 				.identityType(identityType)
-				.identityNo(identityNo)
-				.cardCheck(BIND_CARD_TYPE)
-				.validate(validate);
-		if (StringUtils.isNotBlank(cvv2)) {
-			buider.cvv2(cvv2);
-		} else {
-			buider.isSafeCard(false);
+				.identityNo(RSAUtil.encrypt(identityNo))
+				.cardCheck(BIND_CARD_TYPE);
+		if (StringUtils.isNoneBlank(validate,cvv2)) {
+			buider.cvv2(RSAUtil.encrypt(cvv2)).validate(RSAUtil.encrypt(validate));
 		}
-
 		return yunstTpl.execute(buider.build(), YunstApplyBindBankCardResult.class);
 	}
 
@@ -254,10 +253,9 @@ public class YunstUserHandler extends YunstBaseHandler {
 				.bizUserId(bizUserId)
 				.tranceNum(tranceNum)
 				.phone(phone)
-				.validate(validate)
 				.verificationCode(verificationCode);
-		if (StringUtils.isNotBlank(cvv2)) {
-			buider.cvv2(cvv2);
+		if (StringUtils.isNoneBlank(validate,cvv2)) {
+			buider.cvv2(RSAUtil.encrypt(cvv2)).validate(RSAUtil.encrypt(validate));
 		}
 
 		return yunstTpl.execute(buider.build(), YunstBindBankCardResult.class);
@@ -268,9 +266,10 @@ public class YunstUserHandler extends YunstBaseHandler {
 	 */
 	public YunstUnBindBankCardResult unbindBankCard(Long walletId, Byte source, String cardNo) throws Exception {
 		String bizUserId = transferToYunstBizUserFormat(walletId, source);
-		YunstUnBindBankCardReq req = YunstUnBindBankCardReq.builder$().bizUserId(bizUserId).cardNo(cardNo).build();
+		YunstUnBindBankCardReq req = YunstUnBindBankCardReq.builder$().bizUserId(bizUserId).cardNo(RSAUtil.encrypt(cardNo)).build();
 
 		return yunstTpl.execute(req, YunstUnBindBankCardResult.class);
 	}
+
 
 }

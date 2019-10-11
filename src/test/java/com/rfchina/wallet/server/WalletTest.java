@@ -106,9 +106,9 @@ public class WalletTest extends WalletBaseTest {
 		companyBasicInfo.put("telephone", "555555");
 		companyBasicInfo.put("legalName", "邬海艳");
 		companyBasicInfo.put("identityType", 1L);
-		companyBasicInfo.put("legalIds", RSAUtil.encrypt("666666"));
+		companyBasicInfo.put("legalIds", "666666");
 		companyBasicInfo.put("legalPhone", "777777");
-		companyBasicInfo.put("accountNo", RSAUtil.encrypt("6228481000000051211"));
+		companyBasicInfo.put("accountNo", "6228481000000051211");
 		companyBasicInfo.put("parentBankName", "农业银行");
 		companyBasicInfo.put("bankCityNo", "777777");
 		companyBasicInfo.put("bankName", "农业银行");

@@ -317,13 +317,13 @@ public class WalletApiImpl implements WalletApi {
 	public WalletChannel seniorWalletSmsCodeVerification(String accessToken, Byte source, Integer channelType,
 			Long walletId, String mobile, Integer smsCodeType) {
 		String transformBizUserId = YunstBaseHandler.transferToYunstBizUserFormat(walletId, source);
-		WalletChannel walletChannel = walletChannelDao.selectByChannelTypeAndBizUserId(channelType,
-				transformBizUserId);
-		if (walletChannel == null) {
-			log.info("未创建高级钱包用户: bizUserId:{}", transformBizUserId);
-			walletChannel = walletService.createSeniorWallet(channelType, walletId, source);
-			walletService.upgradeWalletLevel(walletId);
-		}
+		WalletChannel walletChannel = walletChannelDao.selectByChannelTypeAndWalletId(channelType,
+				walletId);
+//		if (walletChannel == null) {
+//			log.info("未创建高级钱包用户: bizUserId:{}", transformBizUserId);
+//			walletChannel = walletService.createSeniorWallet(channelType, walletId, source);
+//			walletService.upgradeWalletLevel(walletId);
+//		}
 		if (smsCodeType == EnumDef.EnumVerifyCodeType.YUNST_BIND_PHONE.getValue().intValue()) {
 			if (EnumDef.WalletSource.FHT_CORP.getValue().intValue() == source
 					&& EnumDef.WalletChannelAuditStatus.AUDIT_SUCCESS.getValue().byteValue()
@@ -396,9 +396,11 @@ public class WalletApiImpl implements WalletApi {
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 		}
 		String transformBizUserId = YunstBaseHandler.transferToYunstBizUserFormat(walletId, source);
-		WalletChannel walletChannel = walletChannelDao.selectByChannelTypeAndBizUserId(channelType,
-				transformBizUserId);
+		WalletChannel walletChannel = walletChannelDao.selectByChannelTypeAndWalletId(channelType,
+				walletId);
 		if (walletChannel == null) {
+//			log.error("高级钱包企业信息审核失败, 未创建云商通用户, bizUserId:{}", transformBizUserId);
+//			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 			log.info("未创建高级钱包用户: bizUserId:{}", transformBizUserId);
 			walletChannel = walletService.createSeniorWallet(channelType, walletId, source);
 			if (walletChannel == null) {
@@ -424,6 +426,46 @@ public class WalletApiImpl implements WalletApi {
 	@Override
 	public String signBalanceProtocol(String accessToken, Byte source, Long walletId) {
 		return walletService.signBalanceProtocol(source, walletId);
+	}
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
+	@SignVerify
+	@Override
+	public Long seniorWalletVerifyBankCard(String accessToken, Long walletId, Byte source, String cardNo,
+			String realName, String phone, String identityNo, String validate, String cvv2) {
+		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
+		if (wallet == null) {
+			log.error("高级钱包验证银行卡失败, 查无此钱包, walletId: {}", walletId);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+		}
+		if (wallet.getLevel() != EnumDef.EnumWalletLevel.SENIOR.getValue().byteValue()){
+			log.error("高级钱包验证银行卡失败, 钱包不是高级钱包, walletId: {}", walletId);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+		}
+		walletService.seniorWalletVerifyBankCard(walletId, source, cardNo,
+				realName, phone, identityNo, validate, cvv2);
+		return walletId;
+	}
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
+	@SignVerify
+	@Override
+	public Long seniorWalletConfirmBindBankCard(String accessToken, Long walletId, Byte source, String transNum,
+			String phone, String validate, String cvv2, String verifyCode) {
+		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
+		if (wallet == null) {
+			log.error("高级钱包绑定银行卡失败, 查无此钱包, walletId: {}", walletId);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+		}
+		if (wallet.getLevel() != EnumDef.EnumWalletLevel.SENIOR.getValue().byteValue()){
+			log.error("高级钱包绑定银行卡失败, 钱包不是高级钱包, walletId: {}", walletId);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+		}
+		walletService.seniorWalletConfirmBindBankCard(walletId, source, transNum,
+				phone, validate, cvv2, verifyCode);
+		return walletId;
 	}
 
 }

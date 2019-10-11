@@ -143,6 +143,14 @@ public class UrlConstant {
 	 * 高级钱包代扣协议（企业,个人商家）
 	 */
 	public static final String WALLET_SENIOR_BANLACE_PROTOCOL = VERSION + "/m/wallet/senior_balance_protocol";
+	/**
+	 * 高级钱包验证银行卡
+	 */
+	public static final String WALLET_SENIOR_VERIFY_BANK_CARD = VERSION + "/m/wallet/senior_verify_bank_card";
+	/**
+	 * 高级钱包确认绑定银行卡
+	 */
+	public static final String WALLET_SENIOR_CONFIRM_BIND_BANK_CARD = VERSION + "/m/wallet/senior_confirm_bind_bank_card";
 
 	/**
 	 * 云商通统一回调

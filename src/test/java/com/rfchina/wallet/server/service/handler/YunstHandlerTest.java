@@ -1,11 +1,11 @@
 package com.rfchina.wallet.server.service.handler;
 
-import com.allinpay.yunst.sdk.util.RSAUtil;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.FileUtil;
 import com.rfchina.wallet.server.SpringBaseTest;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
 import com.rfchina.wallet.server.bank.yunst.response.result.*;
+import com.rfchina.wallet.server.bank.yunst.util.CommonGatewayException;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBaseHandler;
 import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
 import com.rfchina.wallet.server.utils.IdCardGenerator;
@@ -14,7 +14,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
@@ -83,7 +82,7 @@ public class YunstHandlerTest extends SpringBaseTest {
 		logStack(result2);
 		String realName = RandomUtils.getChineseName();
 		Long identityType = 1L;
-		String identityNo = RSAUtil.encrypt(new IdCardGenerator().generate());
+		String identityNo = new IdCardGenerator().generate();
 		boolean result3 = yunstUserHandler.personCertification(walletId, source, realName, identityType, identityNo);
 		logStack(result3);
 		String url = yunstUserHandler.modifyPhone(walletId, source, realName,tel,identityType, identityNo);
@@ -109,7 +108,7 @@ public class YunstHandlerTest extends SpringBaseTest {
 		Long walletId = bizUserTuple.left;
 		String realName = RandomUtils.getChineseName();
 		Long identityType = 1L;
-		String identityNo = RSAUtil.encrypt(new IdCardGenerator().generate());
+		String identityNo = new IdCardGenerator().generate();
 		boolean result = yunstUserHandler.personCertification(walletId, source, realName, identityType, identityNo);
 		logStack(result);
 		String url = yunstUserHandler.generateSignContractUrl(walletId, source);
@@ -126,7 +125,7 @@ public class YunstHandlerTest extends SpringBaseTest {
 		Long walletId = bizUserTuple.left;
 		String realName = RandomUtils.getChineseName();
 		Long identityType = 1L;
-		String identityNo = RSAUtil.encrypt(new IdCardGenerator().generate());
+		String identityNo = new IdCardGenerator().generate();
 		boolean result = yunstUserHandler.personCertification(walletId, source, realName, identityType, identityNo);
 		logStack(result);
 		String url = yunstUserHandler.generateBalanceProtocolUrl(walletId, source);
@@ -177,9 +176,9 @@ public class YunstHandlerTest extends SpringBaseTest {
 						.telephone(genRamdomTelphone(null))
 						.legalName("邬海艳")
 						.identityType(1L)
-						.legalIds(RSAUtil.encrypt(new IdCardGenerator().generate()))
+						.legalIds(new IdCardGenerator().generate())
 						.legalPhone(genRamdomTelphone(null))
-						.accountNo(RSAUtil.encrypt("6228481000000051211"))
+						.accountNo("6228481000000051211")
 						.parentBankName("农业银行")
 						.bankCityNo("777777")
 						.bankName("农业银行xxx支行")
@@ -213,15 +212,28 @@ public class YunstHandlerTest extends SpringBaseTest {
 		Long walletId = bizUserTuple.left;
 		String realName = RandomUtils.getChineseName();
 		Long identityType = 1L;
-		String identityNo = RSAUtil.encrypt(new IdCardGenerator().generate());
+		String identityNo = new IdCardGenerator().generate();
 		boolean result = yunstUserHandler.personCertification(walletId, source, realName, identityType, identityNo);
 		logStack(result);
 //		String tel = RandomUtils.getTelephone();
 		String tel = "18928847212";
-		YunstApplyBindBankCardResult yunstApplyBindBankCardResult = yunstUserHandler.applyBindBankCard(walletId, source,
-				RSAUtil.encrypt("4581240118157727"), realName, tel, identityType, identityNo,
-				RSAUtil.encrypt("1119"), RSAUtil.encrypt("102"));
-		logStack(yunstApplyBindBankCardResult);
+		try {
+			//		YunstApplyBindBankCardResult yunstApplyBindBankCardResult = yunstUserHandler.applyBindBankCard(walletId, source,
+			//				RSAUtil.encrypt("4581240118157727"), realName, tel, identityType, identityNo,
+			//				RSAUtil.encrypt("1119"), RSAUtil.encrypt("102"));
+			YunstApplyBindBankCardResult yunstApplyBindBankCardResult = yunstUserHandler.applyBindBankCard(walletId, source,
+					"4581240118157727", realName, tel, identityType, identityNo,
+					null, null);
+			logStack(yunstApplyBindBankCardResult);
+		}catch (CommonGatewayException e){
+			YunstApplyBindBankCardResult yunstApplyBindBankCardResult = new YunstApplyBindBankCardResult();
+			String errMsg = e.getBankErrMsg();
+			if (errMsg.indexOf("参数validate为空") > -1){
+			}else {
+			}
+			logStack(result);
+		}
+
 	}
 
 	@Test
@@ -234,15 +246,15 @@ public class YunstHandlerTest extends SpringBaseTest {
 		Long walletId = bizUserTuple.left;
 		String realName = RandomUtils.getChineseName();
 		Long identityType = 1L;
-		String identityNo = RSAUtil.encrypt(new IdCardGenerator().generate());
+		String identityNo = new IdCardGenerator().generate();
 		boolean result = yunstUserHandler.personCertification(walletId, source, realName, identityType, identityNo);
 		logStack(result);
 
 //		String tel = RandomUtils.getTelephone();
 		String tel = "18928847212";
 		YunstApplyBindBankCardResult yunstApplyBindBankCardResult = yunstUserHandler.applyBindBankCard(walletId, source,
-				RSAUtil.encrypt("4581240118157727"), realName, tel, identityType, identityNo,
-				RSAUtil.encrypt("1119"), RSAUtil.encrypt("102"));
+				"4581240118157727", realName, tel, identityType, identityNo,
+				"1119", "102");
 		assertNotNull(yunstApplyBindBankCardResult);
 		assertNotNull(yunstApplyBindBankCardResult.getTranceNum());
 		logStack(yunstApplyBindBankCardResult);
@@ -262,7 +274,7 @@ public class YunstHandlerTest extends SpringBaseTest {
 
 		System.out.println("验证码为:" + verificationCode);
 		YunstBindBankCardResult yunstBindBankCardResult = yunstUserHandler.bindBankCard(walletId, source,
-				yunstApplyBindBankCardResult.getTranceNum(), tel, RSAUtil.encrypt("1119"), RSAUtil.encrypt("102"),
+				yunstApplyBindBankCardResult.getTranceNum(), tel, "1119", "102",
 				verificationCode);
 		logStack(yunstBindBankCardResult);
 	}

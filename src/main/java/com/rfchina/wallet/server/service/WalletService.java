@@ -1,7 +1,6 @@
 package com.rfchina.wallet.server.service;
 
 import com.alibaba.fastjson.JSON;
-import com.allinpay.yunst.sdk.util.RSAUtil;
 import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.platform.common.annotation.EnumParamValid;
 import com.rfchina.platform.common.annotation.ParamValid;
@@ -31,8 +30,10 @@ import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
 import com.rfchina.wallet.server.bank.pudong.domain.predicate.ExactErrPredicate;
 import com.rfchina.wallet.server.bank.pudong.domain.util.ExceptionUtil;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
+import com.rfchina.wallet.server.bank.yunst.response.result.YunstApplyBindBankCardResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstCreateMemberResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstSetCompanyInfoResult;
+import com.rfchina.wallet.server.bank.yunst.util.CommonGatewayException;
 import com.rfchina.wallet.server.mapper.ext.*;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.PayTuple;
@@ -813,8 +814,8 @@ public class WalletService {
 			String verifyCode) {
 		if (channelType == EnumDef.ChannelType.YUNST.getValue().intValue()) {
 			String transformBizUserId = YunstBaseHandler.transferToYunstBizUserFormat(walletId, source);
-			WalletChannel walletChannel = walletChannelDao.selectByChannelTypeAndBizUserId(channelType,
-					transformBizUserId);
+			WalletChannel walletChannel = walletChannelDao.selectByChannelTypeAndWalletId(channelType,
+					walletId);
 			if (walletChannel == null) {
 				log.error("未创建云商通用户: bizUserId:{}", transformBizUserId);
 				return false;
@@ -849,8 +850,8 @@ public class WalletService {
 			String idNo, String mobile) {
 		if (channelType == EnumDef.ChannelType.YUNST.getValue().intValue()) {
 			String transformBizUserId = YunstBaseHandler.transferToYunstBizUserFormat(walletId, source);
-			WalletChannel walletChannel = walletChannelDao.selectByChannelTypeAndBizUserId(channelType,
-					transformBizUserId);
+			WalletChannel walletChannel = walletChannelDao.selectByChannelTypeAndWalletId(channelType,
+					walletId);
 			if (walletChannel == null) {
 				log.error("未创建云商通用户: bizUserId:{}", transformBizUserId);
 				throw new WalletResponseException(EnumWalletResponseCode.WALLET_ACCOUNT_NOT_EXIST);
@@ -862,7 +863,7 @@ public class WalletService {
 					throw new WalletResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 				}
 				return yunstUserHandler.modifyPhone(walletId, source, realName, mobile,
-						EnumDef.EnumIdType.ID_CARD.getValue().longValue(), RSAUtil.encrypt(idNo));
+						EnumDef.EnumIdType.ID_CARD.getValue().longValue(), idNo);
 			} catch (Exception e) {
 				log.error("更新高级钱包手机信息失败 msg:{}", e);
 			}
@@ -878,8 +879,8 @@ public class WalletService {
 			String mobile) {
 		if (channelType == EnumDef.ChannelType.YUNST.getValue().intValue()) {
 			String transformBizUserId = YunstBaseHandler.transferToYunstBizUserFormat(walletId, source);
-			WalletChannel walletChannel = walletChannelDao.selectByChannelTypeAndBizUserId(channelType,
-					transformBizUserId);
+			WalletChannel walletChannel = walletChannelDao.selectByChannelTypeAndWalletId(channelType,
+					walletId);
 			if (walletChannel == null) {
 				log.error("未创建云商通用户: bizUserId:{}", transformBizUserId);
 				throw new WalletResponseException(EnumWalletResponseCode.WALLET_ACCOUNT_NOT_EXIST);
@@ -890,7 +891,7 @@ public class WalletService {
 					throw new WalletResponseException(EnumWalletResponseCode.WALLET_ACCOUNT_NOT_EXIST);
 				}
 				boolean result = yunstUserHandler.personCertification(walletId, source, realName,
-						EnumDef.EnumIdType.ID_CARD.getValue().longValue(), RSAUtil.encrypt(idNo));
+						EnumDef.EnumIdType.ID_CARD.getValue().longValue(), idNo);
 				if (!result) {
 					log.error("个人实名认证失败, channelType: {}, walletId: {},source: {}", channelType, walletId, source);
 					throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
@@ -938,8 +939,8 @@ public class WalletService {
 			YunstSetCompanyInfoReq.CompanyBasicInfo companyBasicInfo) {
 		if (channelType == EnumDef.ChannelType.YUNST.getValue().intValue()) {
 			String transformBizUserId = YunstBaseHandler.transferToYunstBizUserFormat(walletId, source);
-			WalletChannel walletChannel = walletChannelDao.selectByChannelTypeAndBizUserId(channelType,
-					transformBizUserId);
+			WalletChannel walletChannel = walletChannelDao.selectByChannelTypeAndWalletId(channelType,
+					walletId);
 			if (walletChannel == null) {
 				log.error("未创建云商通用户: bizUserId:{}", transformBizUserId);
 				throw new WalletResponseException(EnumWalletResponseCode.WALLET_ACCOUNT_NOT_EXIST);
@@ -1022,5 +1023,50 @@ public class WalletService {
 			log.error("高级钱包生成会员协议连接失败, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 		}
+	}
+
+	/**
+	 * 高级钱包绑定银行卡验证
+	 */
+	public boolean seniorWalletVerifyBankCard(Long walletId, Byte source, String cardNo, String realName, String phone,
+			String identityNo, String validate, String cvv2) {
+		try {
+			yunstUserHandler.applyBindBankCard(walletId, source, cardNo, realName, phone,
+					EnumDef.EnumIdType.ID_CARD.getValue().longValue(), identityNo, validate, cvv2);
+		} catch (CommonGatewayException e) {
+			String errMsg = e.getBankErrMsg();
+			if (errMsg.indexOf("参数validate为空") > -1) {
+				log.error("高级钱包银行卡 信用卡资料缺失, walletId: {}", walletId);
+				throw new WalletResponseException(EnumWalletResponseCode.SENIOR_BANK_CARD_CREDIT_INVALID);
+			}
+			log.error("高级钱包银行卡验证失败, walletId: {}", walletId);
+			throw new WalletResponseException(EnumWalletResponseCode.SENIOR_BANK_CARD_INFO_INVALID);
+		} catch (Exception e) {
+			log.error("高级钱包银行卡验证失败, walletId: {}", walletId);
+			throw new WalletResponseException(EnumWalletResponseCode.SENIOR_BANK_CARD_INFO_INVALID);
+		}
+		return true;
+	}
+
+	/**
+	 * 高级钱包确认绑定银行卡
+	 */
+	public boolean seniorWalletConfirmBindBankCard(Long walletId, Byte source, String transNum, String phone,
+			String validate, String cvv2, String verifyCode) {
+		try {
+			yunstUserHandler.bindBankCard(walletId, source, transNum, phone, validate, cvv2, verifyCode);
+		} catch (CommonGatewayException e) {
+			String errMsg = e.getBankErrMsg();
+			if (errMsg.indexOf("参数validate为空") > -1) {
+				log.error("高级钱包银行卡 信用卡资料缺失, walletId: {}", walletId);
+				throw new WalletResponseException(EnumWalletResponseCode.SENIOR_BANK_CARD_CREDIT_INVALID);
+			}
+			log.error("高级钱包银行卡确认绑定失败, walletId: {}", walletId);
+			throw new WalletResponseException(EnumWalletResponseCode.SENIOR_BANK_CARD_INFO_INVALID);
+		} catch (Exception e) {
+			log.error("高级钱包银行卡确认绑定失败, walletId: {}", walletId);
+			throw new WalletResponseException(EnumWalletResponseCode.SENIOR_BANK_CARD_INFO_INVALID);
+		}
+		return true;
 	}
 }

@@ -332,4 +332,43 @@ public class WalletController {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
 				walletApi.signBalanceProtocol(accessToken, source, walletId));
 	}
+
+	@ApiOperation("高级钱包验证银行卡")
+	@PostMapping(UrlConstant.WALLET_SENIOR_VERIFY_BANK_CARD)
+	public ResponseValue<Long> seniorWalletVerifyBankCard(@RequestParam("access_token") String accessToken,
+			@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+			@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2")
+			@RequestParam("source") Byte source,
+			@ApiParam(value = "银行卡号", required = true) @RequestParam("card_no") String cardNo,
+			@ApiParam(value = "姓名", required = true) @RequestParam("real_name") String realName,
+			@ApiParam(value = "银行预留手机号", required = true) @RequestParam("phone") String phone,
+			@ApiParam(value = "身份证", required = true) @RequestParam("identity_no") String identityNo,
+			@ApiParam(value = "信用卡到期4位日期", required = false) @RequestParam(value = "validate", required = false)
+					String validate,
+			@ApiParam(value = "信用卡cvv2码", required = false) @RequestParam(value = "cvv2", required = false)
+					String cvv2) {
+
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
+				walletApi.seniorWalletVerifyBankCard(accessToken, walletId, source, cardNo, realName, phone,
+						identityNo,
+						validate, cvv2));
+	}
+
+	@ApiOperation("高级钱包确认绑定银行卡")
+	@PostMapping(UrlConstant.WALLET_SENIOR_CONFIRM_BIND_BANK_CARD)
+	public ResponseValue<Long> seniorWalletConfirmBindBankCard(@RequestParam("access_token") String accessToken,
+			@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+			@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2")
+			@RequestParam("source") Byte source,
+			@ApiParam(value = "验证银行卡流水号", required = true) @RequestParam("trans_num") String transNum,
+			@ApiParam(value = "银行预留手机号", required = true) @RequestParam("phone") String phone,
+			@ApiParam(value = "信用卡到期4位日期", required = false) @RequestParam(value = "validate", required = false)
+					String validate,
+			@ApiParam(value = "信用卡cvv2码", required = false) @RequestParam(value = "cvv2", required = false) String cvv2,
+			@ApiParam(value = "短信验证码", required = true) @RequestParam("verify_code") String verifyCode) {
+
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
+				walletApi.seniorWalletConfirmBindBankCard(accessToken, walletId, source, transNum, phone, validate,
+						cvv2, verifyCode));
+	}
 }
