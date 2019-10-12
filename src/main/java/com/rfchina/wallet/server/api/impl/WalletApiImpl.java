@@ -29,6 +29,8 @@ import com.rfchina.wallet.domain.model.ext.BankClass;
 import com.rfchina.wallet.domain.model.ext.WalletCardExt;
 import com.rfchina.wallet.server.api.WalletApi;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
+import com.rfchina.wallet.server.bank.yunst.response.result.YunstApplyBindBankCardResult;
+import com.rfchina.wallet.server.bank.yunst.response.result.YunstBindBankCardResult;
 import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletChannelExtDao;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
@@ -432,7 +434,7 @@ public class WalletApiImpl implements WalletApi {
 	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
 	@SignVerify
 	@Override
-	public Long seniorWalletVerifyBankCard(String accessToken, Long walletId, Byte source, String cardNo,
+	public YunstApplyBindBankCardResult seniorWalletVerifyBankCard(String accessToken, Long walletId, Byte source, String cardNo,
 			String realName, String phone, String identityNo, String validate, String cvv2) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		if (wallet == null) {
@@ -443,16 +445,15 @@ public class WalletApiImpl implements WalletApi {
 			log.error("高级钱包验证银行卡失败, 钱包不是高级钱包, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 		}
-		walletService.seniorWalletVerifyBankCard(walletId, source, cardNo,
+		return walletService.seniorWalletVerifyBankCard(walletId, source, cardNo,
 				realName, phone, identityNo, validate, cvv2);
-		return walletId;
 	}
 
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
 	@SignVerify
 	@Override
-	public Long seniorWalletConfirmBindBankCard(String accessToken, Long walletId, Byte source, String transNum,
+	public Long seniorWalletConfirmBindBankCard(String accessToken, Long walletId, Byte source, String transNum,String transDate,
 			String phone, String validate, String cvv2, String verifyCode) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		if (wallet == null) {
@@ -463,9 +464,27 @@ public class WalletApiImpl implements WalletApi {
 			log.error("高级钱包绑定银行卡失败, 钱包不是高级钱包, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 		}
-		walletService.seniorWalletConfirmBindBankCard(walletId, source, transNum,
+		walletService.seniorWalletConfirmBindBankCard(walletId, source, transNum,transDate,
 				phone, validate, cvv2, verifyCode);
 		return walletId;
 	}
 
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
+	@SignVerify
+	@Override
+	public Long seniorWalletUnBindBankCard(String accessToken, Long walletId, Byte source, String cardNo) {
+		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
+		if (wallet == null) {
+			log.error("高级钱包绑定银行卡失败, 查无此钱包, walletId: {}", walletId);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+		}
+		if (wallet.getLevel() != EnumDef.EnumWalletLevel.SENIOR.getValue().byteValue()){
+			log.error("高级钱包绑定银行卡失败, 钱包不是高级钱包, walletId: {}", walletId);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+		}
+		walletService.seniorWalletUnBindBankCard(walletId, source, cardNo);
+		return walletId;
+	}
 }

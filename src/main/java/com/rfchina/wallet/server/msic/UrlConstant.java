@@ -151,6 +151,10 @@ public class UrlConstant {
 	 * 高级钱包确认绑定银行卡
 	 */
 	public static final String WALLET_SENIOR_CONFIRM_BIND_BANK_CARD = VERSION + "/m/wallet/senior_confirm_bind_bank_card";
+	/**
+	 * 高级钱包解除绑定银行卡
+	 */
+	public static final String WALLET_SENIOR_UN_BIND_BANK_CARD = VERSION + "/m/wallet/senior_un_bind_bank_card";
 
 	/**
 	 * 云商通统一回调

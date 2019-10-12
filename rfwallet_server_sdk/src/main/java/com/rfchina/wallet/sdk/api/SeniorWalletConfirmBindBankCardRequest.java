@@ -20,6 +20,9 @@ public class SeniorWalletConfirmBindBankCardRequest extends  AbstractApiRequest 
   @ApiModelProperty("钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户")
   private Integer source ;
 
+  @ApiModelProperty("验证银行卡申请时间")
+  private String transDate ;
+
   @ApiModelProperty("验证银行卡流水号")
   private String transNum ;
 
@@ -57,6 +60,9 @@ public class SeniorWalletConfirmBindBankCardRequest extends  AbstractApiRequest 
       }
       if(source != null){
         parameters.put("source", source.toString());
+      }
+      if(transDate != null){
+        parameters.put("trans_date", transDate.toString());
       }
       if(transNum != null){
         parameters.put("trans_num", transNum.toString());

@@ -32,7 +32,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 创建会员
 	 */
-	public Tuple<YunstCreateMemberResult,YunstMemberType> createMember(Long walletId, Byte source) throws Exception {
+	public Tuple<YunstCreateMemberResult, YunstMemberType> createMember(Long walletId, Byte source) throws Exception {
 		YunstMemberType memberType = YunstMemberType.PERSON;
 		if (source == 1) {
 			memberType = YunstMemberType.COMPANY;
@@ -44,7 +44,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 				.source(TERMINAL_TYPE)
 				.build();
 
-		return new Tuple<>(yunstTpl.execute(req, YunstCreateMemberResult.class),memberType);
+		return new Tuple<>(yunstTpl.execute(req, YunstCreateMemberResult.class), memberType);
 	}
 
 	/**
@@ -70,7 +70,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 	public String generateBalanceProtocolUrl(Long walletId, Byte source) throws Exception {
 		String bizUserId = transferToYunstBizUserFormat(walletId, source);
 		YunstBalanceProtocolReq req = YunstBalanceProtocolReq.builder$()
-				.protocolReqSn(UUID.randomUUID().toString().replaceAll("-",""))
+				.protocolReqSn(UUID.randomUUID().toString().replaceAll("-", ""))
 				.payerId(bizUserId)
 				.receiverId(configService.getYunstReceiverId())
 				.protocolName(configService.getYunstBalanceProtocolName())
@@ -87,8 +87,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 发送短信验证码
 	 */
-	public String sendVerificationCode(Long walletId, Byte source, String phone, Integer bizType)
-			throws Exception {
+	public String sendVerificationCode(Long walletId, Byte source, String phone, Integer bizType) throws Exception {
 		String bizUserId = transferToYunstBizUserFormat(walletId, source);
 		YunstSMSVerificationCodeReq req = YunstSMSVerificationCodeReq.builder$()
 				.bizUserId(bizUserId)
@@ -130,7 +129,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 修改绑定手机
 	 */
-	public String modifyPhone(Long walletId, Byte source, String realName, String oldPhone,Long identityType,
+	public String modifyPhone(Long walletId, Byte source, String realName, String oldPhone, Long identityType,
 			String identityNo) throws Exception {
 		String bizUserId = transferToYunstBizUserFormat(walletId, source);
 		YunstChangeBindPhoneReq req = YunstChangeBindPhoneReq.builder$()
@@ -216,7 +215,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 				.bizUserId(bizUserId)
 				.isAuth(isAuth)
 				.companyBasicInfo(companyBasicInfo);
-		if (!isAuth){
+		if (!isAuth) {
 			builder.backUrl(configService.getYunstNotifybackUrl());
 		}
 
@@ -237,7 +236,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 				.identityType(identityType)
 				.identityNo(RSAUtil.encrypt(identityNo))
 				.cardCheck(BIND_CARD_TYPE);
-		if (StringUtils.isNoneBlank(validate,cvv2)) {
+		if (StringUtils.isNoneBlank(validate, cvv2)) {
 			buider.cvv2(RSAUtil.encrypt(cvv2)).validate(RSAUtil.encrypt(validate));
 		}
 		return yunstTpl.execute(buider.build(), YunstApplyBindBankCardResult.class);
@@ -246,15 +245,16 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 确认绑定银行卡
 	 */
-	public YunstBindBankCardResult bindBankCard(Long walletId, Byte source, String tranceNum, String phone,
-			String validate, String cvv2, String verificationCode) throws Exception {
+	public YunstBindBankCardResult bindBankCard(Long walletId, Byte source, String transNum, String transDate,
+			String phone, String validate, String cvv2, String verificationCode) throws Exception {
 		String bizUserId = transferToYunstBizUserFormat(walletId, source);
 		YunstBindBankCardReq.YunstBindBankCardReqBuilder buider = YunstBindBankCardReq.builder$()
 				.bizUserId(bizUserId)
-				.tranceNum(tranceNum)
+				.tranceNum(transNum)
+				.transDate(transDate)
 				.phone(phone)
 				.verificationCode(verificationCode);
-		if (StringUtils.isNoneBlank(validate,cvv2)) {
+		if (StringUtils.isNoneBlank(validate, cvv2)) {
 			buider.cvv2(RSAUtil.encrypt(cvv2)).validate(RSAUtil.encrypt(validate));
 		}
 
@@ -266,10 +266,12 @@ public class YunstUserHandler extends YunstBaseHandler {
 	 */
 	public YunstUnBindBankCardResult unbindBankCard(Long walletId, Byte source, String cardNo) throws Exception {
 		String bizUserId = transferToYunstBizUserFormat(walletId, source);
-		YunstUnBindBankCardReq req = YunstUnBindBankCardReq.builder$().bizUserId(bizUserId).cardNo(RSAUtil.encrypt(cardNo)).build();
+		YunstUnBindBankCardReq req = YunstUnBindBankCardReq.builder$()
+				.bizUserId(bizUserId)
+				.cardNo(RSAUtil.encrypt(cardNo))
+				.build();
 
 		return yunstTpl.execute(req, YunstUnBindBankCardResult.class);
 	}
-
 
 }

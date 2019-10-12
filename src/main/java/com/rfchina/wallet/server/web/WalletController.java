@@ -11,6 +11,7 @@ import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
 import com.rfchina.wallet.server.api.WalletApi;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
+import com.rfchina.wallet.server.bank.yunst.response.result.YunstApplyBindBankCardResult;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import com.rfchina.wallet.server.msic.UrlConstant;
@@ -335,7 +336,7 @@ public class WalletController {
 
 	@ApiOperation("高级钱包验证银行卡")
 	@PostMapping(UrlConstant.WALLET_SENIOR_VERIFY_BANK_CARD)
-	public ResponseValue<Long> seniorWalletVerifyBankCard(@RequestParam("access_token") String accessToken,
+	public ResponseValue<YunstApplyBindBankCardResult> seniorWalletVerifyBankCard(@RequestParam("access_token") String accessToken,
 			@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
 			@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2")
 			@RequestParam("source") Byte source,
@@ -361,6 +362,7 @@ public class WalletController {
 			@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2")
 			@RequestParam("source") Byte source,
 			@ApiParam(value = "验证银行卡流水号", required = true) @RequestParam("trans_num") String transNum,
+			@ApiParam(value = "验证银行卡申请时间", required = true) @RequestParam("trans_date") String transDate,
 			@ApiParam(value = "银行预留手机号", required = true) @RequestParam("phone") String phone,
 			@ApiParam(value = "信用卡到期4位日期", required = false) @RequestParam(value = "validate", required = false)
 					String validate,
@@ -368,7 +370,20 @@ public class WalletController {
 			@ApiParam(value = "短信验证码", required = true) @RequestParam("verify_code") String verifyCode) {
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
-				walletApi.seniorWalletConfirmBindBankCard(accessToken, walletId, source, transNum, phone, validate,
+				walletApi.seniorWalletConfirmBindBankCard(accessToken, walletId, source, transNum, transDate,phone, validate,
 						cvv2, verifyCode));
+	}
+
+
+	@ApiOperation("高级钱包解除绑定银行卡")
+	@PostMapping(UrlConstant.WALLET_SENIOR_UN_BIND_BANK_CARD)
+	public ResponseValue<Long> seniorWalletUnBindBankCard(@RequestParam("access_token") String accessToken,
+			@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+			@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2")
+			@RequestParam("source") Byte source,
+			@ApiParam(value = "银行卡号", required = true) @RequestParam("card_no") String cardNo) {
+
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
+				walletApi.seniorWalletUnBindBankCard(accessToken, walletId, source, cardNo));
 	}
 }
