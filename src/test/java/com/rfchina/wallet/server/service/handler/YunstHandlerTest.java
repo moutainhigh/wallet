@@ -274,7 +274,7 @@ public class YunstHandlerTest extends SpringBaseTest {
 
 		System.out.println("验证码为:" + verificationCode);
 		YunstBindBankCardResult yunstBindBankCardResult = yunstUserHandler.bindBankCard(walletId, source,
-				yunstApplyBindBankCardResult.getTranceNum(), tel, "1119", "102",
+				yunstApplyBindBankCardResult.getTranceNum(),yunstApplyBindBankCardResult.getTransDate(), tel, "1119", "102",
 				verificationCode);
 		logStack(yunstBindBankCardResult);
 	}

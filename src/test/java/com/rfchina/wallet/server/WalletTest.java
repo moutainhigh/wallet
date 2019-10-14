@@ -84,7 +84,7 @@ public class WalletTest extends WalletBaseTest {
 
 	@Test
 	public void testSeniorWalletAuthBindPhone() {
-		seniorWalletApplyBindPhone(2, (byte) 3, 11L, "13800138111", 9);
+		seniorWalletApplyBindPhone(2, (byte) 3, 21L, "13800138111", 9);
 	}
 
 	@Test

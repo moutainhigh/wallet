@@ -23,7 +23,7 @@ import java.util.Optional;
 @SpringBootTest
 @AutoConfigureMockMvc
 public abstract class WalletBaseTest extends BaseTest {
-	@Value("${test.wallet.web.uri}")
+	@Value("${app.base.url}")
 	protected String BASE_URL;
 
 	static {
