@@ -215,7 +215,7 @@ public class WalletService {
 
 					for (WalletApply walletApply : walletApplies) {
 
-						WalletCard walletCard = walletCardDao.selectByDef(walletApply.getWalletId());
+						WalletCard walletCard = walletCardDao.selectByWalletId(walletApply.getWalletId(),1,0).get(0);
 						if (walletCard == null) {
 							log.warn("钱包[{}]没有绑定银行卡，跳过申请单[{}]", walletApply.getWalletId(), walletApply.getId());
 							return;
@@ -526,7 +526,7 @@ public class WalletService {
 			builder.personInfo(walletPerson);
 		}
 
-		WalletCard walletCard = walletCardDao.selectByDef(walletId);
+		WalletCard walletCard = walletCardDao.selectByWalletId(walletId,1,0).get(0);
 
 		return builder.wallet(wallet).defWalletCard(walletCard).bankCardCount(walletCardDao.count(walletId)).build();
 	}
@@ -604,7 +604,7 @@ public class WalletService {
 	 * @param walletId 钱包ID
 	 */
 	public List<WalletCard> bankCardList(@ParamValid(nullable = false) Long walletId) {
-		return walletCardDao.selectByWalletId(walletId);
+		return walletCardDao.selectByWalletId(walletId,0,0);
 	}
 
 	/**

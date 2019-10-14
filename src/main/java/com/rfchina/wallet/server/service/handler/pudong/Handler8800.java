@@ -520,7 +520,7 @@ public class Handler8800 implements EBankHandler {
 	}
 
 	private WalletCard getWalletCard(Long walletId) {
-		return walletCardDao.selectByDef(walletId);
+		return walletCardDao.selectByWalletId(walletId,1,0).get(0);
 	}
 
 
