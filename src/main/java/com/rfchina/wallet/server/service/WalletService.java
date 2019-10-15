@@ -852,10 +852,13 @@ public class WalletService {
 	public String seniorWalletPersonChangeBindPhone(Integer channelType, Long walletId, Byte source, String realName,
 			String idNo, String mobile) {
 		if (channelType == EnumDef.ChannelType.YUNST.getValue().intValue()) {
-			String transformBizUserId = YunstBaseHandler.transferToYunstBizUserFormat(walletId, source);
+			if (source == EnumDef.WalletSource.FHT_CORP.getValue().byteValue()){
+				log.error("企业商户不支持调用此修改绑定手机接口 walletId:{}",walletId);
+				throw new WalletResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+			}
 			WalletChannel walletChannel = walletChannelDao.selectByChannelTypeAndWalletId(channelType, walletId);
 			if (walletChannel == null) {
-				log.error("未创建云商通用户: bizUserId:{}", transformBizUserId);
+				log.error("未创建云商通用户: walletId:{}", walletId);
 				throw new WalletResponseException(EnumWalletResponseCode.WALLET_ACCOUNT_NOT_EXIST);
 			}
 			try {

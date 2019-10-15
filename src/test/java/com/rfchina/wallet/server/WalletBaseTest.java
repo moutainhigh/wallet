@@ -201,6 +201,22 @@ public abstract class WalletBaseTest extends BaseTest {
 		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_SMS_VERIFY_CODE, params, 1001);
 	}
 
+	protected Map<String, Object> seniorWalletChangeBindPhone(Integer channelType, Byte source, Long walletId,
+			String realName, String idNo,String oldPhone) {
+		Map<String, String> params = new HashMap<>();
+		params.put("access_token", getAccessToken(appId, appSecret));
+		params.put("channel_type", String.valueOf(channelType));
+		params.put("source", String.valueOf(source));
+		params.put("wallet_id", String.valueOf(walletId));
+		params.put("real_name", realName);
+		params.put("id_no",idNo);
+		params.put("old_phone", oldPhone);
+		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+		params.put("sign", sign);
+		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_SMS_VERIFY_CODE, params, 1001);
+	}
+
 	protected Map<String, Object> seniorWalletAuth(Integer channelType, Byte source, Long walletId, String realName,
 			String idNo, String mobile, String smsVerifyCode) {
 		Map<String, String> params = new HashMap<>();

@@ -241,7 +241,7 @@ public class WalletController {
 						smsCodeType));
 	}
 
-	@ApiOperation("高级钱包用户修改手机认证")
+	@ApiOperation("高级钱包个人用户修改手机")
 	@PostMapping(UrlConstant.WALLET_SENIOR_PERSON_CHANGE_BIND_PHONE)
 	public ResponseValue<String> seniorWalletPersonChangeBindPhone(@RequestParam("access_token") String accessToken,
 			@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = true, example = "1") @RequestParam("channel_type")
