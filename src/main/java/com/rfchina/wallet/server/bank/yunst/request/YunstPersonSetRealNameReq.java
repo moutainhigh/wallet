@@ -12,7 +12,7 @@ import lombok.ToString;
 @ApiModel(description = "4.1.6 个人实名认证")
 public class YunstPersonSetRealNameReq implements YunstBaseReq {
 	private static final long serialVersionUID = -705594183961767592L;
-	@ApiModelProperty(value = "商户系统用户标识(个人用户:U+userId,企业用户:M+mchId)", required = true)
+	@ApiModelProperty(value = "商户系统用户标识(个人用户:WU+walletId,个人商户:WM+walletId,企业用户:WC+walletId)", required = true)
 	private String bizUserId;
 	@ApiModelProperty(value = "是否由云商通进行认证", required = false)
 	private Boolean isAuth = true;

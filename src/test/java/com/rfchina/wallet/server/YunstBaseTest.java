@@ -32,18 +32,6 @@ public abstract class YunstBaseTest extends BaseTest {
     @Autowired
     protected MockHttpSession session;
 
-    protected Map<String, Object> createMember(String bizUserId,Integer type){
-        Map<String, String> params = new HashMap<>();
-
-        params.put("access_token", getAccessToken(appId, appSecret));
-        params.put("biz_user_id", bizUserId);
-        params.put("type", String.valueOf(type));
-
-        params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
-        String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
-        params.put("sign", sign);
-        return postAndValidateSuccessCode(BASE_URL, UrlConstant.YUNST_CREATE_MEMBER, params);
-    }
 
     protected Map<String, Object> createWallet(Byte type, String title, Byte source){
         Map<String, String> params = new HashMap<>();

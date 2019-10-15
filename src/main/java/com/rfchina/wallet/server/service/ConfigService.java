@@ -113,13 +113,25 @@ public class ConfigService {
 	private String ystTlCertPath;
 
 	@Value("${yunst.jumpUrl}")
-	private String resultJumpUrl;
+	private String yunstResultJumpUrl;
 
 	@Value("${yunst.notify.backUrl}")
 	private String yunstNotifybackUrl;
 
 	@Value("${yunst.signContract.gateway.url}")
-	private String signContractUrl;
+	private String yunstSignContractUrl;
+
+	@Value("${yunst.balanceProtocol.name}")
+	private String yunstBalanceProtocolName;
+
+	@Value("${yunst.receiverId}")
+	private String yunstReceiverId;
+
+	@Value("${yunst.signBalaceProtocol.gateway.url}")
+	private String yunstSignBalanceProtocolUrl;
+
+	@Value("${yunst.personChangeBindPhone.gateway.url}")
+	private String yunstPersonChangeBindPhoneUrl;
 
 	@Value("${yunst.userAccSet:200126}")
 	private String userAccSet;

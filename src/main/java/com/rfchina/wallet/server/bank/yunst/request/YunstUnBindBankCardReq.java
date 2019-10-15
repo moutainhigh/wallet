@@ -9,16 +9,13 @@ import lombok.ToString;
 @Builder(toBuilder = true, builderMethodName = "builder$")
 @Data
 @ToString(callSuper = true)
-@ApiModel(description = "4.1.3 绑定手机")
-public class YunstBindPhoneReq implements YunstBaseReq {
-
-	private static final long serialVersionUID = -7879283375342118045L;
+@ApiModel(description = "4.1.15 解绑绑定银行卡")
+public class YunstUnBindBankCardReq implements YunstBaseReq {
+	private static final long serialVersionUID = 4565276229987182645L;
 	@ApiModelProperty(value = "商户系统用户标识(个人用户:WU+walletId,个人商户:WM+walletId,企业用户:WC+walletId)", required = true)
 	private String bizUserId;
-	@ApiModelProperty(value = "电话号码", required = true)
-	private String phone;
-	@ApiModelProperty(value = "验证码", required = true)
-	private String verificationCode;
+	@ApiModelProperty(value = "银行卡号,(RSA加密)", required = true )
+	private String cardNo;
 
 	@Override
 	public String getServcieName() {
@@ -27,6 +24,6 @@ public class YunstBindPhoneReq implements YunstBaseReq {
 
 	@Override
 	public String getMethodName() {
-		return "bindPhone";
+		return "unbindBankCard";
 	}
 }

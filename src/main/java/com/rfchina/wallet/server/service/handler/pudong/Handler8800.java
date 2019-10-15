@@ -518,7 +518,7 @@ public class Handler8800 extends EBankHandler {
 	}
 
 	private WalletCard getWalletCard(Long walletId) {
-		return walletCardDao.selectByDef(walletId);
+		return walletCardDao.selectByWalletId(walletId,1,0).get(0);
 	}
 
 

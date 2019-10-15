@@ -12,7 +12,7 @@ import lombok.ToString;
 @ApiModel(description = "4.1.12 确认绑定银行卡")
 public class YunstBindBankCardReq implements YunstBaseReq {
 	private static final long serialVersionUID = -2043910859082331267L;
-	@ApiModelProperty(value = "商户系统用户标识(个人用户:U+userId,企业用户:M+mchId)", required = true)
+	@ApiModelProperty(value = "商户系统用户标识(个人用户:WU+walletId,个人商户:WM+walletId,企业用户:WC+walletId)", required = true)
 	private String bizUserId;
 	@ApiModelProperty(value = "流水号",required = true)
 	private String tranceNum;

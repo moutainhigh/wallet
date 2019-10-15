@@ -2,9 +2,7 @@ package com.rfchina.wallet.server.bank.yunst.request;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Builder;
-import lombok.Data;
-import lombok.ToString;
+import lombok.*;
 
 @Builder(toBuilder = true, builderMethodName = "builder$")
 @Data
@@ -12,7 +10,7 @@ import lombok.ToString;
 @ApiModel(description = "4.1.7 设置企业信息")
 public class YunstSetCompanyInfoReq implements YunstBaseReq {
 	private static final long serialVersionUID = -6990184494075116217L;
-	@ApiModelProperty(value = "商户系统用户标识(个人用户:U+userId,企业用户:M+mchId)", required = true)
+	@ApiModelProperty(value = "商户系统用户标识(个人用户:WU+walletId,个人商户:WM+walletId,企业用户:WC+walletId)", required = true)
 	private String bizUserId;
 	@ApiModelProperty(value = "是否进行线上认证 true:系统自动审核 false:人工审核", required = true)
 	private Boolean isAuth = true;
@@ -35,6 +33,7 @@ public class YunstSetCompanyInfoReq implements YunstBaseReq {
 
 	@Data
 	@Builder
+	@AllArgsConstructor
 	public static class CompanyBasicInfo {
 		@ApiModelProperty(value = "企业名称", required = true)
 		private String companyName;

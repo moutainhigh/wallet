@@ -44,4 +44,8 @@ dependencies {
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 }
 
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
 apply from: 'deploy.gradle'

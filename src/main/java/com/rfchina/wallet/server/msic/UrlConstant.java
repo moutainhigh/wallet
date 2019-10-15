@@ -144,25 +144,51 @@ public class UrlConstant {
 	public static final String WALLET_LOGIN_WITH_VERIFY_CODE = VERSION + "/m/wallet/login_with_verify_code";
 
 	/**
-	 * 创建云商通会员
+	 * 升级高级钱包
 	 */
-	public static final String YUNST_CREATE_MEMBER = VERSION + "/m/yunst/create_member";
+	public static final String WALLET_UPGRADE = VERSION + "/m/wallet/upgrade_wallet";
 	/**
-	 * 云商通发送短信验证码
+	 * 高级钱包认证验证码
 	 */
-	public static final String YUNST_SMS_VERIFY_CODE = VERSION + "/m/yunst/sms_verify_code";
+	public static final String WALLET_SENIOR_SMS_VERIFY_CODE = VERSION + "/m/wallet/senior_sms_verify_code";
 	/**
-	 * 云商通绑定手机
+	 * 高级钱包个人认证
 	 */
-	public static final String YUNST_BIND_PHONE = VERSION + "/m/yunst/bind_phone";
+	public static final String WALLET_SENIOR_PERSON_AUTHENTICATION = VERSION + "/m/wallet/senior_person_authentication";
 	/**
-	 * 云商通修改手机
+	 * 高级钱包绑定手机
 	 */
-	public static final String YUNST_MODIFY_PHONE = VERSION + "/m/yunst/modify_phone";
+	public static final String WALLET_SENIOR_BIND_PHONE = VERSION + "/m/wallet/senior_bind_phone";
 	/**
-	 * 云商通查询会员信息
+	 * 高级钱包个人修改绑定手机
 	 */
-	public static final String YUNST_MEMBER_INFO = VERSION + "/m/yunst/member_info";
+	public static final String WALLET_SENIOR_PERSON_CHANGE_BIND_PHONE = VERSION + "/m/wallet/senior_person_change_bind_phone";
+	/**
+	 * 高级钱包商家资料审核（通道）
+	 */
+	public static final String WALLET_SENIOR_COMPANY_INFO_AUDIT = VERSION + "/m/wallet/senior_company_info_audit";
+
+	/**
+	 * 高级钱包会员协议
+	 */
+	public static final String WALLET_SENIOR_MEMBER_PROTOCOL = VERSION + "/m/wallet/senior_member_protocol";
+	/**
+	 * 高级钱包代扣协议（企业,个人商家）
+	 */
+	public static final String WALLET_SENIOR_BANLACE_PROTOCOL = VERSION + "/m/wallet/senior_balance_protocol";
+	/**
+	 * 高级钱包验证银行卡
+	 */
+	public static final String WALLET_SENIOR_VERIFY_BANK_CARD = VERSION + "/m/wallet/senior_verify_bank_card";
+	/**
+	 * 高级钱包确认绑定银行卡
+	 */
+	public static final String WALLET_SENIOR_CONFIRM_BIND_BANK_CARD = VERSION + "/m/wallet/senior_confirm_bind_bank_card";
+	/**
+	 * 高级钱包解除绑定银行卡
+	 */
+	public static final String WALLET_SENIOR_UN_BIND_BANK_CARD = VERSION + "/m/wallet/senior_un_bind_bank_card";
+
 	/**
 	 * 云商通统一回调
 	 */
