@@ -31,6 +31,10 @@ import com.rfchina.wallet.server.bank.pudong.domain.predicate.ExactErrPredicate;
 import com.rfchina.wallet.server.bank.pudong.domain.util.ExceptionUtil;
 import com.rfchina.wallet.server.mapper.ext.GatewayTransExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletClearInfoExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletClearingExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletCollectExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletCollectMethodExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCompanyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
@@ -40,9 +44,9 @@ import com.rfchina.wallet.server.model.ext.PayTuple;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp.WalletInfoRespBuilder;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
-import com.rfchina.wallet.server.msic.EnumWallet.LockStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.NotifyType;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyStatus;
+import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyType;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletType;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
@@ -117,6 +121,18 @@ public class WalletService {
 	@Autowired
 	private GatewayTransExtDao gatewayTransDao;
 
+	@Autowired
+	private WalletCollectExtDao walletCollectDao;
+
+	@Autowired
+	private WalletClearingExtDao walletClearingDao;
+
+	@Autowired
+	private WalletCollectMethodExtDao walletCollectMethodDao;
+
+	@Autowired
+	private WalletClearInfoExtDao walletClearInfoDao;
+
 
 	/**
 	 * 查询出佣结果
@@ -185,97 +201,95 @@ public class WalletService {
 
 		GatewayTrans trans = gatewayTransService.createTrans(walletApply);
 		walletApply.setCurrTransId(trans.getId());
-		walletApply.setStatus(WalletApplyStatus.SENDING.getValue());
+		walletApply.setStatus(WalletApplyStatus.WAIT_SEND.getValue());
 		walletApplyExtDao.updateByPrimaryKey(walletApply);
 	}
 
 	/**
-	 * 定时支付
+	 * 通道转账
 	 */
-	public void quartzPay(Integer batchSize) {
+	public void doTunnelTransfer(WalletApply walletApply) {
 
-		List<String> batchNos = walletApplyExtDao.selectUnSendBatchNo(batchSize);
-		batchNos.forEach(batchNo -> {
+		WalletCard walletCard = walletCardDao.selectByDef(walletApply.getWalletId());
+		if (walletCard == null) {
+			log.warn("钱包[{}]没有绑定银行卡，跳过申请单[{}]", walletApply.getWalletId(),
+				walletApply.getId());
+			return;
+		}
+		fillCardInfo(walletApply, walletCard);
+		// 请求网关
+		EBankHandler handler = null;
+		try {
 
-			int c = walletApplyExtDao.updateLock(batchNo, LockStatus.UNLOCK.getValue(),
-				LockStatus.LOCKED.getValue());
-			if (c <= 0) {
-				log.error("锁定记录失败, batchNo = {}", batchNo);
-			} else {
-				log.info("开始更新批次号 [{}]", batchNo);
+			handler = handlerHelper.selectByWalletLevel(null);
+			Tuple<GatewayMethod, PayTuple> rs = handler.transfer(walletApply.getId());
+
+			// 记录结果
+			GatewayMethod method = rs.left;
+			PayTuple payInResp = rs.right;
+
+			// 更新申请单
+			walletApply.setStatus(WalletApplyStatus.PROCESSING.getValue());
+			walletApply.setLanchTime(new Date());
+			walletApplyExtDao.updateByPrimaryKeySelective(walletApply);
+
+			// 更新交易记录
+			GatewayTrans gatewayTrans = gatewayTransService
+				.selOrCrtTrans(walletApply);
+			gatewayTrans.setAcceptNo(payInResp.getAcceptNo());
+			gatewayTrans.setPacketId(payInResp.getPacketId());
+			gatewayTrans.setElecChequeNo(
+				payInResp.getElecMap()
+					.get(gatewayTrans.getWalletApplyId().toString()));
+			gatewayTrans.setRefMethod(method.getValue());
+			gatewayTrans.setLanchTime(new Date());
+			gatewayTransService.updateTrans(gatewayTrans);
+
+		} catch (Exception e) {
+
+			IGatewayError err = ExceptionUtil.explain(e);
+			if (handler != null) {
 				try {
-					List<WalletApply> walletApplies = walletApplyExtDao.selectByBatchNo(batchNo
-						, WalletApplyStatus.SENDING.getValue());
-					if (StringUtils.isEmpty(batchNo) || walletApplies.isEmpty()) {
-						return;
-					}
-
-					for (WalletApply walletApply : walletApplies) {
-
-						WalletCard walletCard = walletCardDao
-							.selectByDef(walletApply.getWalletId());
-						if (walletCard == null) {
-							log.warn("钱包[{}]没有绑定银行卡，跳过申请单[{}]", walletApply.getWalletId(),
-								walletApply.getId());
-							return;
-						}
-						fillCardInfo(walletApply, walletCard);
-					}
-					// 请求网关
-					EBankHandler handler = null;
-					try {
-
-						handler = handlerHelper.selectByWalletLevel(null);
-						Tuple<GatewayMethod, PayTuple> rs = handler.pay(walletApplies);
-
-						// 记录结果
-						GatewayMethod method = rs.left;
-						PayTuple payInResp = rs.right;
-						for (WalletApply walletApply : walletApplies) {
-							// 更新申请单
-							walletApply.setStatus(WalletApplyStatus.PROCESSING.getValue());
-							walletApply.setLanchTime(new Date());
-							walletApplyExtDao.updateByPrimaryKeySelective(walletApply);
-
-							// 更新交易记录
-							GatewayTrans gatewayTrans = gatewayTransService
-								.selOrCrtTrans(walletApply);
-							gatewayTrans.setAcceptNo(payInResp.getAcceptNo());
-							gatewayTrans.setPacketId(payInResp.getPacketId());
-							gatewayTrans.setElecChequeNo(
-								payInResp.getElecMap()
-									.get(gatewayTrans.getWalletApplyId().toString()));
-							gatewayTrans.setRefMethod(method.getValue());
-							gatewayTrans.setLanchTime(new Date());
-							gatewayTransService.updateTrans(gatewayTrans);
-						}
-					} catch (Exception e) {
-
-						IGatewayError err = ExceptionUtil.explain(e);
-						if (handler != null) {
-							for (WalletApply walletApply : walletApplies) {
-								try {
-									handler.onAskErr(walletApply, err);
-								} catch (Exception ex) {
-									log.error("", ex);
-								}
-							}
-						}
-//						if (err instanceof UnknownError) {
-						log.error("银行网关支付错误", e);
-//						}
-					}
-				} catch (Exception e) {
-					log.error("", e);
-				} finally {
-					walletApplyExtDao.updateLock(batchNo, LockStatus.LOCKED.getValue(),
-						LockStatus.UNLOCK.getValue());
+					handler.onAskErr(walletApply, err);
+				} catch (Exception ex) {
+					log.error("", ex);
 				}
 			}
-		});
-
+			log.error("银行网关支付错误", e);
+		}
 	}
 
+	/**
+	 * 通道支付
+	 */
+	public void doTunnelAsyncJob(Long applyId) {
+		WalletApply walletApply = walletApplyExtDao.selectByPrimaryKey(applyId);
+		if (walletApply == null || walletApply.getStatus() != WalletApplyStatus.WAIT_SEND
+			.getValue()) {
+			return;
+		}
+
+		Byte walletLevel = walletApply.getWalletLevel();
+		Byte applyType = walletApply.getType();
+
+		if (WalletApplyType.TRANSFER.getValue().byteValue() == applyType.byteValue()) {
+			doTunnelTransfer(walletApply);
+			return;
+		}
+
+		EBankHandler handler = handlerHelper.selectByWalletLevel(walletLevel);
+
+		if (WalletApplyType.COLLECT.getValue().byteValue() == applyType.byteValue()) {
+			handler.collect(applyId);
+		} else if (WalletApplyType.AGENT_PAY.getValue().byteValue() == applyType.byteValue()) {
+			handler.agentPay(applyId);
+		} else if (WalletApplyType.REFUND.getValue().byteValue() == applyType.byteValue()) {
+			handler.refund(applyId);
+		} else if (WalletApplyType.TRANSFER.getValue().byteValue() == applyType.byteValue()) {
+			handler.transfer(applyId);
+		}
+
+	}
 
 	/**
 	 * 卡信息填入钱包申请
@@ -299,45 +313,42 @@ public class WalletService {
 
 		log.info("scheduler: 开始更新支付状态[银企直连]");
 
-		List<String> batchNos = walletApplyExtDao.selectUnFinishBatchNo(batchSize);
+		List<Long> ids = walletApplyExtDao.selectUnFinishApply(batchSize);
 
 		List<Tuple<WalletApply, GatewayTrans>> result = new ArrayList<>();
-		for (String batchNo : batchNos) {
-			List<WalletApply> walletApplies = walletApplyDao.selectByBatchNo(batchNo
-				, WalletApplyStatus.PROCESSING.getValue());
+		for (Long id : ids) {
+			WalletApply walletApply = walletApplyDao.selectByPrimaryKey(id);
 			// 如果没有处理中，则结束
-			if (walletApplies.isEmpty()) {
+			if (walletApply == null || walletApply.getStatus() != WalletApplyStatus.PROCESSING
+				.getValue().byteValue()) {
 				continue;
 			}
 
-			List<Tuple<WalletApply, GatewayTrans>> applyTuples = walletApplies.stream().map(apply -> {
-				GatewayTrans trans = gatewayTransService.selOrCrtTrans(apply);
-				return new Tuple<>(apply, trans);
-			}).collect(Collectors.toList());
+			GatewayTrans trans = gatewayTransService.selOrCrtTrans(walletApply);
+			Tuple<WalletApply, GatewayTrans> applyTuple = new Tuple<>(walletApply, trans);
 
 			// 选择处理器
-			Byte level = walletApplies.stream().map(WalletApply::getWalletLevel).distinct().findFirst()
-				.orElse(null);
-			EBankHandler handler = handlerHelper.selectByWalletLevel(level);
+			EBankHandler handler = handlerHelper.selectByWalletLevel(walletApply.getWalletLevel());
 			try {
-				log.info("开始更新批次号 [{}]", batchNo);
-				walletApplyDao.incTryTimes(batchNo, DateUtil.addSecs(new Date(),
+				log.info("开始更新apply [{}]", walletApply.getId());
+				walletApplyDao.incTryTimes(walletApply.getBatchNo(), DateUtil.addSecs(new Date(),
 					configService.getNextRoundSec()));
-				List<Tuple<WalletApply, GatewayTrans>> tuples = handler.updatePayStatus(applyTuples);
-				result.addAll(tuples);
+				Tuple<WalletApply, GatewayTrans> tuple = handler.updatePayStatus(applyTuple);
+				result.add(tuple);
 			} catch (Exception e) {
 				log.error("定时更新支付状态, 异常！", e);
 			}
 		}
 
-		log.info("更新批次状态，批次数量= {}，更新笔数= {}，批次号={}", batchNos.size(), result.size(),
-			JSON.toJSONString(batchNos));
 		log.info("scheduler: 结束更新支付状态[银企直连]");
+		log.info("更新批次状态，批次数量= {}，更新笔数= {}，applyId={}", ids.size(), result.size(),
+			JSON.toJSONString(ids));
 
 		if (result == null || result.size() == 0) {
 			return new ArrayList<>();
 		}
 
+		// 发送MQ
 		return result.stream()
 			.map(rs -> {
 				WalletApply apply = rs.left;

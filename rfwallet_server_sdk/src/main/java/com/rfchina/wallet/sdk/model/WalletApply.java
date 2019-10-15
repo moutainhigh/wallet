@@ -25,6 +25,9 @@ public class WalletApply  {
     @ApiModelProperty("银行交易终态时间")
     private String bizTime ;
 
+    @ApiModelProperty("渠道类型。 1：浦发银企直连，2：通联云商通")
+    private Integer channelType ;
+
     @ApiModelProperty("创建日期")
     private String createTime ;
 
@@ -79,11 +82,17 @@ public class WalletApply  {
     @ApiModelProperty("交易状态。 1: 待发送银行网关，2：银行受理中，3：交易成功，4：交易失败(确切失败)，5：撤销，6：待处理，7：等待重试(用户或系统)")
     private Integer status ;
 
-    @ApiModelProperty("类型，1：财务结算，2：收入，3：支出")
+    @ApiModelProperty("类型，1：财务结算，2：收入，3：支出，4：充值，5：提现，6：退款，7：扣款")
     private Integer type ;
 
     @ApiModelProperty("钱包ID")
     private Long walletId ;
+
+    @ApiModelProperty("钱包等级，1： 初级钱包，2： 高级钱包")
+    private Integer walletLevel ;
+
+    @ApiModelProperty("钱包类型， 1：企业钱包，2：个人钱包")
+    private Integer walletType ;
 
 
 }

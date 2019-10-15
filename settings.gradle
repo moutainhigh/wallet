@@ -1,2 +1,1 @@
 rootProject.name = 'rfwallet_server'
-include 'rfwallet-domain'

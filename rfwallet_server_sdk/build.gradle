@@ -1,6 +1,6 @@
 buildscript {
     ext {
-        projectVersion = '1.0.2'
+        projectVersion = '1.1.0-SNAPSHOT'
         projectGroup = 'com.rfchina'
         artifactId = 'platform-sdk2-wallet-server'
         lombokVersion = '1.16.10'
@@ -13,7 +13,7 @@ buildscript {
         }
     }
     dependencies {
-        classpath "com.rfchina.tools:sdk-gradle-builder:1.0.0-SNAPSHOT"
+        classpath "com.rfchina.tools:sdk-gradle-builder:1.0.1-SNAPSHOT"
     }
 }
 
@@ -29,6 +29,7 @@ allprojects {
 apply plugin: 'java'
 apply plugin: 'maven'
 apply plugin: "sdk-builder"
+
 
 group = "${projectGroup}"
 version = "${projectVersion}"

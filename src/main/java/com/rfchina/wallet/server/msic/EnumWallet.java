@@ -207,17 +207,24 @@ public class EnumWallet {
 	}
 
 	/**
-	 * 流水类型
+	 * 工单类型，1：财务结算，2：收入，3：支出， 4：充值，5：提现，6：退款，7：扣款，8：代收，9：代付
 	 */
-	public enum WalletLogType implements Valuable<Byte> {
-		TRANSFER((byte) 1, "直接转帐"),
-		PAY_IN((byte) 2, "收入"),
-		PAY_OUT((byte) 3, "支出");
+	public enum WalletApplyType implements Valuable<Byte> {
+		TRANSFER((byte) 1, "转帐"),
+		INCOME((byte) 2, "收入"),
+		PAY((byte) 3, "支出"),
+		RECHARGE((byte) 4, "充值"),
+		WITHDRAWAL((byte) 5, "提现"),
+		REFUND((byte) 6, "退款"),
+		DEDUCTION((byte) 7, "扣款"),
+		COLLECT((byte) 8, "代收"),
+		AGENT_PAY((byte) 9, "代付"),
+		;
 
 		private Byte value;
 		private String valueName;
 
-		WalletLogType(Byte value, String valueName) {
+		WalletApplyType(Byte value, String valueName) {
 			this.value = value;
 			this.valueName = valueName;
 		}
@@ -232,7 +239,7 @@ public class EnumWallet {
 	 * 交易状态。 1: 待发送银行网关，2：银行受理中，3：交易成功，4：交易失败，5：撤销
 	 */
 	public enum WalletApplyStatus implements Valuable<Byte> {
-		SENDING((byte) 1, "待发送银行网关"),
+		WAIT_SEND((byte) 1, "待发送银行网关"),
 		PROCESSING((byte) 2, "银行受理中"),
 		SUCC((byte) 3, "交易成功"),
 		FAIL((byte) 4, "交易失败(确切失败)"),
@@ -524,9 +531,33 @@ public class EnumWallet {
 		}
 	}
 
-	public enum ChannelType implements Valuable<Byte> {
+	public enum TunnelType implements Valuable<Byte> {
 		PUDONG((byte) 1, "浦发银企直连"),
 		YUNST((byte) 2, "通联云商通");
+
+		private Byte value;
+		private String valueName;
+
+		TunnelType(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}
+	}
+
+	/**
+	 * 支付渠道 1：钱包余额 2：微信 4：支付宝 8：银行卡
+	 */
+	public enum ChannelType implements Valuable<Byte> {
+		WALLET((byte) 1, "钱包余额"),
+		WECHAT((byte) 2, "微信"),
+		ALIPAY((byte) 4, "支付宝"),
+		CODEPAY((byte) 8, "统一刷卡"),
+		BANKCARD((byte) 16, "银行卡");
 
 		private Byte value;
 		private String valueName;
@@ -583,4 +614,167 @@ public class EnumWallet {
 			}
 		}
 	}
+
+
+	public enum GwProgress implements Valuable<Byte> {
+		WAIT_SEND((byte) 1, "待发送"),
+		HAS_SEND((byte) 2, "已发送"),
+		HAS_RESP((byte) 3, "已接收结果");
+
+		private Byte value;
+		private String valueName;
+
+		GwProgress(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}
+	}
+
+	/**
+	 * 代收状态。1：待支付 2：已支付 3：交易失败 \n4：交易关闭（超时或其他）
+	 */
+	public enum CollectStatus implements Valuable<Byte> {
+		WAIT_PAY((byte) 1, "待支付"),
+		HAS_PAY((byte) 2, "已支付"),
+		FAIL((byte) 3, "交易失败"),
+		CLOSE((byte) 4, "交易关闭（超时或其他）");
+
+		private Byte value;
+		private String valueName;
+
+		CollectStatus(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}
+	}
+
+	/**
+	 * 钱包余额 21：微信小程序 22：微信原生APP 23：微信原生H5 24：微信JS支付(公众号) 25：微信扫码支付(正扫) 31：支付宝扫码支付(正扫)
+	 * 32：支付宝JS支付(生活号) 33：支付宝原生
+	 */
+	public enum CollectPayType implements Valuable<Byte> {
+		BALANCE((byte) 11, "余额"),
+		WECHAT_MINIPROGROGRAM((byte) 21, "微信小程序支付（收银宝）"),
+		WECHAT_APPOPEN((byte) 22, "微信原生APP支付"),
+		WECHAT_H5OPEN((byte) 23, "微信原生H5支付"),
+		WECHAT_WechatPublic((byte) 24, "微信JS支付(公众号)"),
+		WECHAT_ScanWeixin((byte) 25, "微信扫码支付(正扫)"),
+		ALIPAY_ScanAlipay((byte) 31, "支付宝扫码支付(正扫)"),
+		ALIPAY_Service((byte) 32, "支付宝JS支付(生活号)"),
+		ALIPAY_AppOpen((byte) 33, "支付宝原生"),
+		CODEPAY((byte) 41, "扫码支付"),
+		;
+
+		private Byte value;
+		private String valueName;
+
+		CollectPayType(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}
+	}
+
+	/**
+	 * 清算业务状态。1：待清算 2：已清算
+	 */
+	public enum ClearingStatus implements Valuable<Byte> {
+		WAITING((byte) 1, "未清算"),
+		CLEARED((byte) 2, "已清算"),
+		FAIL((byte) 3, "交易失败"),
+		;
+
+		private Byte value;
+		private String valueName;
+
+		ClearingStatus(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}
+	}
+
+	/**
+	 * 分帐状态。1：未清算 2：部分清算 3：已清算
+	 */
+	public enum ClearInfoStatus implements Valuable<Byte> {
+		WAITING((byte) 1, "未清算"),
+		PARTAL((byte) 2, "部分清算"),
+		FINISH((byte) 3, "已清算");
+
+		private Byte value;
+		private String valueName;
+
+		ClearInfoStatus(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}
+	}
+
+	/**
+	 *  退款状态。1：未退款 2：已退款 3:交易失败
+	 */
+	public enum RefundStatus implements Valuable<Byte> {
+		WAITING((byte) 1, "未退款"),
+		REFUNDED((byte) 2, "已退款"),
+		FAIL((byte) 3, "交易失败");
+
+		private Byte value;
+		private String valueName;
+
+		RefundStatus(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}
+	}
+
+	/**
+	 *  退款方式
+	 */
+	public enum RefundType implements Valuable<String> {
+		D1("D1", "D+1 14:30 向渠道发起退款"),
+		D0("D0", "D+0 实时向渠道发起退款");
+
+		private String value;
+		private String valueName;
+
+		RefundType(String value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public String getValue() {
+			return this.value;
+		}
+	}
+
 }

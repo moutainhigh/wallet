@@ -16,34 +16,34 @@ public interface WalletApplyExtDao extends WalletApplyDao {
 	 * 查询未提交到银行的
 	 */
 	@Select({
-		"select distinct batch_no ",
+		"select id ",
 		"from rf_wallet_apply",
-		"where status = 1 and batch_no is not null",
+		"where status = 1",
 		"limit #{batchSize}"
 	})
-	List<String> selectUnSendBatchNo(@Param("batchSize") Integer batchSize);
+	List<Long> selectUnSendApply(@Param("batchSize") Integer batchSize);
 
 	/**
 	 * 查询已提交未结束的
 	 */
 	@Select({
-		"select distinct batch_no as batchNo",
+		"select id ",
 		"from rf_wallet_apply",
 		"where status = 2 and query_time < CURRENT_TIMESTAMP and curr_try_times < max_try_times",
 		"order by batch_no asc limit #{batchSize}"
 	})
-	List<String> selectUnFinishBatchNo(@Param("batchSize") Integer batchSize);
+	List<Long> selectUnFinishApply(@Param("batchSize") Integer batchSize);
 
 	/**
 	 * 查询指定状态的批次申请单
 	 */
 	@Select({
 		"select * from rf_wallet_apply",
-		"where batch_no = #{batchNo} and status = #{status}"
+		"where batch_no = #{batchNo} ",
+		"limit 1"
 	})
 	@ResultMap("com.rfchina.wallet.domain.mapper.WalletApplyMapper.BaseResultMap")
-	List<WalletApply> selectByBatchNo(@Param("batchNo") String batchNo,
-		@Param("status") Byte status);
+	WalletApply selectByBatchNo(@Param("batchNo") String batchNo);
 
 	/**
 	 * 更新尝试次数
@@ -59,9 +59,9 @@ public interface WalletApplyExtDao extends WalletApplyDao {
 	 */
 	@Update({"update rf_wallet_apply"
 		, "set locked = #{destLocked}"
-		, "where batch_no = #{batchNo} and locked = #{orgLocked}"
+		, "where id = #{applyId} and locked = #{orgLocked}"
 	})
-	int updateLock(@Param("batchNo") String batchNo, @Param("orgLocked") Byte orgLocked,
+	int updateLock(@Param("applyId") Long applyId, @Param("orgLocked") Byte orgLocked,
 		@Param("destLocked") Byte destLocked);
 
 	/**

@@ -34,7 +34,7 @@ public interface WalletApi {
 	/**
 	 * 定时支付
 	 */
-	void quartzPay();
+	void quartzDealApply();
 
 	/**
 	 * 定时通知

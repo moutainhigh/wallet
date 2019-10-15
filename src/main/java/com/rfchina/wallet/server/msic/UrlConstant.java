@@ -17,6 +17,39 @@ public class UrlConstant {
 	public static final String JUNIOR_WALLET_BATCH_PAY_IN = VERSION + "/m/junior/sl_batch_pay_in";
 
 	/**
+	 * 高级钱包-代收
+	 */
+	public static final String SENIOR_WALLET_COLLECT_ASYNC = VERSION + "/m/senior/collect_async";
+	/**
+	 * 高级钱包-代收
+	 */
+	public static final String SENIOR_WALLET_COLLECT_SYNC = VERSION + "/m/senior/collect_sync";
+	/**
+	 * 高级钱包-代收查询
+	 */
+	public static final String SENIOR_WALLET_COLLECT_QUERY = VERSION + "/m/senior/collect_query";
+
+	/**
+	 * 高级钱包-清算
+	 */
+	public static final String SENIOR_WALLET_SETTLE = VERSION + "/m/senior/settle";
+
+	/**
+	 * 高级钱包-清算结果查询
+	 */
+	public static final String SENIOR_WALLET_SETTLE_QUERY = VERSION + "/m/senior/settle_query";
+
+	/**
+	 * 高级钱包-退款
+	 */
+	public static final String SENIOR_WALLET_REFUND = VERSION + "/m/senior/refund";
+
+	/**
+	 * 高级钱包-充值
+	 */
+	public static final String SENIOR_WALLET_RECHARGE = VERSION + "/m/senior/recharge";
+
+	/**
 	 * 查询支付状态
 	 */
 	public static final String WALLET_APPLY_QUERY = VERSION + "/m/wallet/query_wallet_apply";

@@ -3,6 +3,8 @@ package com.rfchina.wallet.server.service.handler.common;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.wallet.domain.model.GatewayTrans;
 import com.rfchina.wallet.domain.model.WalletApply;
+import com.rfchina.wallet.domain.model.WalletCollect;
+import com.rfchina.wallet.domain.model.WalletRecharge;
 import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.PayTuple;
@@ -15,24 +17,54 @@ import java.util.List;
  *
  * @author nzm
  */
-public interface EBankHandler {
+public abstract class EBankHandler {
 
-	boolean isSupportWalletLevel(Byte walletType);
+	public abstract boolean isSupportWalletLevel(Byte walletLevel);
 
-	boolean isSupportMethod(Byte method);
+	public abstract GatewayMethod getGatewayMethod();
 
-	GatewayMethod getGatewayMethod();
+	public abstract PayStatusResp onAskErr(WalletApply walletLog, IGatewayError err);
 
-	Tuple<GatewayMethod, PayTuple> pay(List<WalletApply> payInReqs) throws Exception;
+	private EBankHandler next;
 
-	List<Tuple<WalletApply, GatewayTrans>> updatePayStatus(
-		List<Tuple<WalletApply, GatewayTrans>> applyTuples);
-
-	PayStatusResp onAskErr(WalletApply walletLog, IGatewayError err);
-
-	EBankHandler next = null;
-
-	default EBankHandler getNext() {
+	public EBankHandler getNext() {
 		return next;
 	}
+
+	public void setNext(EBankHandler handler) {
+		this.next = handler;
+	}
+
+	/**
+	 * 查询订单结果
+	 */
+	public abstract Tuple<WalletApply, GatewayTrans> updatePayStatus(
+		Tuple<WalletApply, GatewayTrans> applyTuple);
+
+	/**
+	 * 转账
+	 */
+	public abstract Tuple<GatewayMethod, PayTuple> transfer(Long applyId);
+
+	/**
+	 * 代收
+	 */
+	public abstract List<WalletCollect> collect(Long applyId);
+
+	/**
+	 * 代付
+	 */
+	public abstract void agentPay(Long applyId);
+
+	/**
+	 * 退款
+	 */
+	public abstract void refund(Long collectId);
+
+	/**
+	 * 充值
+	 * @return
+	 */
+	public abstract List<WalletRecharge> recharge(Long applyId);
+
 }

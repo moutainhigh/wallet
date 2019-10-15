@@ -72,4 +72,7 @@ public class PayStatusResp {
 
 	@ApiModelProperty(value = "钱包收单日期")
 	private String transDate;
+
+	@ApiModelProperty(value = "钱包ID")
+	private Long walletId;
 }

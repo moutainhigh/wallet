@@ -42,7 +42,7 @@ public class ScheduleController {
 
 		log.info("scheduler: 开始执行任务[{}]", "quartzPay");
 
-		walletApi.quartzPay();
+		walletApi.quartzDealApply();
 
 		log.info("scheduler: 完成任务[{}]", "quartzPay");
 

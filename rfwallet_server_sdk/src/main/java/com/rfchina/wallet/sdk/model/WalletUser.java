@@ -25,7 +25,7 @@ public class WalletUser  {
     @ApiModelProperty("登录手机号")
     private String mobile ;
 
-    @ApiModelProperty("注册进度,二进制形式 0:初始化帐号 1:已通过身份验证 2:已创建钱包 4:已绑定银行")
+    @ApiModelProperty("注册进度,二进制形式 0:初始化帐号 1:已通过身份验证 2:已创建钱包 4:已绑定银行 8:已签订协议")
     private Integer registerProgress ;
 
     @ApiModelProperty("帐号状态: 1:正常，2：禁用")

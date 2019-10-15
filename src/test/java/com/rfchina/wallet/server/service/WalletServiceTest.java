@@ -25,7 +25,7 @@ public class WalletServiceTest extends SpringBaseTest {
 
 	@Test
 	public void quartzPay() {
-		walletService.quartzPay(100);
+//		walletService.quartzPay(100);
 	}
 
 

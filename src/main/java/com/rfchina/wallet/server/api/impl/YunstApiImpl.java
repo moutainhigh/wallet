@@ -10,7 +10,7 @@ import com.rfchina.wallet.domain.mapper.WalletChannelMapper;
 import com.rfchina.wallet.domain.model.WalletChannel;
 import com.rfchina.wallet.server.api.YunstApi;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstCreateMemberResult;
-import com.rfchina.wallet.server.msic.EnumWallet;
+import com.rfchina.wallet.server.msic.EnumWallet.TunnelType;
 import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +36,7 @@ public class YunstApiImpl implements YunstApi {
 		if (result != null) {
 			log.info("云商通创建会员成功: 云商通会员id:{},业务用户id:{}", result.getUserId(), result.getBizUserId());
 			int effectRows = walletChannelMapper.insertSelective(WalletChannel.builder()
-					.channelType(EnumWallet.ChannelType.YUNST.getValue())
+					.channelType(TunnelType.YUNST.getValue())
 					.channelUserId(result.getUserId())
 					.channelType(type == 1 ? YunstUserHandler.YunstMemberType.COMPANY.getValue().byteValue():YunstUserHandler.YunstMemberType.PERSON.getValue().byteValue())
 					.bizUserId(result.getBizUserId())

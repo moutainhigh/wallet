@@ -6,6 +6,8 @@ import com.rfchina.wallet.sdk.model.*;
 import com.rfchina.platform.sdk2.request.AbstractApiRequest;
 import lombok.Builder;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.List;
+
 
 /** 钱包绑定的银行卡列表 */
 @Builder

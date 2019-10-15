@@ -13,8 +13,8 @@ import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.model.ext.PayInReq;
 import com.rfchina.wallet.server.model.ext.PayInResp;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyStatus;
-import com.rfchina.wallet.server.msic.EnumWallet.WalletLogType;
-import com.rfchina.wallet.server.service.handler.pudong.HandlerHelper;
+import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyType;
+import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
 
 import java.util.Date;
 import java.util.List;
@@ -77,7 +77,7 @@ public class JuniorWalletService {
 
 			WalletApply walletApply = WalletApply.builder()
 				.walletId(payInReq.getWalletId())
-				.type(WalletLogType.TRANSFER.getValue())
+				.type(WalletApplyType.TRANSFER.getValue())
 				.amount(payInReq.getAmount())
 				.payerAccount(cmpAcctNo)
 				.batchNo(payInReq.getBatchNo())
@@ -85,7 +85,7 @@ public class JuniorWalletService {
 				.payPurpose(payInReq.getPayPurpose() != null ?
 					String.valueOf(payInReq.getPayPurpose()) : null)
 				.note(payInReq.getNote())
-				.status(WalletApplyStatus.SENDING.getValue())
+				.status(WalletApplyStatus.WAIT_SEND.getValue())
 				.queryTime(DateUtil.addSecs(new Date(), configService.getNextRoundSec()))
 				.createTime(new Date())
 				.build();

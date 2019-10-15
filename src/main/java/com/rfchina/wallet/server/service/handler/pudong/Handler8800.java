@@ -16,6 +16,8 @@ import com.rfchina.wallet.domain.model.BankCode;
 import com.rfchina.wallet.domain.model.GatewayTrans;
 import com.rfchina.wallet.domain.model.WalletApply;
 import com.rfchina.wallet.domain.model.WalletCard;
+import com.rfchina.wallet.domain.model.WalletCollect;
+import com.rfchina.wallet.domain.model.WalletRecharge;
 import com.rfchina.wallet.server.bank.pudong.builder.EBankQuery48Builder;
 import com.rfchina.wallet.server.bank.pudong.builder.EBankQuery49Builder;
 import com.rfchina.wallet.server.bank.pudong.builder.PubPayQueryBuilder;
@@ -40,6 +42,8 @@ import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.PayTuple;
+import com.rfchina.wallet.server.model.ext.SettleReq.Reciever;
+import com.rfchina.wallet.server.model.ext.WalletApplyVo;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.LancherType;
 import com.rfchina.wallet.server.msic.EnumWallet.RemitLocation;
@@ -78,7 +82,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 @Data
-public class Handler8800 implements EBankHandler {
+public class Handler8800 extends EBankHandler {
 
 	@Autowired
 	private ConfigService configService;
@@ -119,18 +123,12 @@ public class Handler8800 implements EBankHandler {
 	}
 
 	@Override
-	public boolean isSupportMethod(Byte method) {
-		return GatewayMethod.PUDONG_8800.getValue().byteValue() == method;
-	}
-
-	@Override
 	public GatewayMethod getGatewayMethod() {
 		return GatewayMethod.PUDONG_8800;
 	}
 
-
-	@Override
-	public Tuple<GatewayMethod, PayTuple> pay(List<WalletApply> payInReqs) throws Exception {
+	//	@Override
+	public Tuple<GatewayMethod, PayTuple> transfer(List<WalletApply> payInReqs) throws Exception {
 
 		if (payInReqs == null || payInReqs.isEmpty() || payInReqs.size() > 20) {
 			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_BATCH_LIMIT);
@@ -205,7 +203,6 @@ public class Handler8800 implements EBankHandler {
 		return new Tuple<>(getGatewayMethod(), payTuple);
 	}
 
-	@Override
 	public List<Tuple<WalletApply, GatewayTrans>> updatePayStatus(
 		List<Tuple<WalletApply, GatewayTrans>> applyTuples) {
 
@@ -369,6 +366,7 @@ public class Handler8800 implements EBankHandler {
 		resp.setEndTime(gatewayTrans.getEndTime());
 		return resp;
 	}
+
 
 	/**
 	 * 查询网银包受理状态
@@ -535,5 +533,37 @@ public class Handler8800 implements EBankHandler {
 		StringBuilder builder = new StringBuilder("SLP");
 		builder.append(idx.toString());
 		return builder.toString();
+	}
+
+
+	@Override
+	public Tuple<WalletApply, GatewayTrans> updatePayStatus(
+		Tuple<WalletApply, GatewayTrans> applyTuple) {
+		return null;
+	}
+
+	@Override
+	public Tuple<GatewayMethod, PayTuple> transfer(Long applyId) {
+		throw new RuntimeException();
+	}
+
+	@Override
+	public List<WalletCollect> collect(Long applyId) {
+		throw new RuntimeException();
+	}
+
+	@Override
+	public void agentPay(Long applyId) {
+		throw new RuntimeException();
+	}
+
+	@Override
+	public void refund(Long collectId) {
+		throw new RuntimeException();
+	}
+
+	@Override
+	public List<WalletRecharge> recharge(Long applyId) {
+		throw new RuntimeException();
 	}
 }

@@ -6,6 +6,8 @@ import com.rfchina.wallet.sdk.model.*;
 import com.rfchina.platform.sdk2.request.AbstractApiRequest;
 import lombok.Builder;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.List;
+
 
 /** 富慧通审核个人商家钱包 */
 @Builder

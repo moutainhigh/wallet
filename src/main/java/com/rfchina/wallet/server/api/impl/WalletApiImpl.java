@@ -8,8 +8,6 @@ import com.rfchina.platform.common.annotation.EnumParamValid;
 import com.rfchina.platform.common.annotation.Log;
 import com.rfchina.platform.common.annotation.ParamValid;
 import com.rfchina.platform.common.annotation.SignVerify;
-import com.rfchina.platform.common.exception.RfchinaResponseException;
-import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.ResponseValue;
 import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.platform.common.utils.EnumUtil;
@@ -29,6 +27,7 @@ import com.rfchina.wallet.server.api.WalletApi;
 import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
+import com.rfchina.wallet.server.msic.EnumWallet.LockStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyStatus;
 import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.JuniorWalletService;
@@ -117,18 +116,39 @@ public class WalletApiImpl implements WalletApi {
 
 	@Log
 	@Override
-	public void quartzPay() {
+	public void quartzDealApply() {
 
-		String lockName = "quartzPay";
+		String lockName = "quartzDealApply";
 		boolean succ = lock.acquireLock(lockName, 1800, 0, 1);
 		if (succ) {
 			try {
-				walletService.quartzPay(configService.getBatchPaySize());
+				List<Long> ids = walletApplyExtDao
+					.selectUnSendApply(configService.getBatchPaySize());
+				ids.forEach(id -> {
+
+					int c = walletApplyExtDao.updateLock(id, LockStatus.UNLOCK.getValue(),
+						LockStatus.LOCKED.getValue());
+					if (c <= 0) {
+						log.error("锁定记录失败, applyId = {}", id);
+						return;
+					}
+
+					log.info("开始更新批次号 [{}]", id);
+					try {
+						walletService.doTunnelAsyncJob(id);
+					} catch (Exception e) {
+						log.error("", e);
+					} finally {
+						log.info("结束更新批次号 [{}]", id);
+						walletApplyExtDao.updateLock(id, LockStatus.LOCKED.getValue(),
+							LockStatus.UNLOCK.getValue());
+					}
+				});
 			} finally {
 				lock.unLock(lockName);
 			}
 		} else {
-			log.warn("获取分布式锁失败， 跳过执行的quartzPay任务");
+			log.warn("获取分布式锁失败， 跳过执行的quartzDealApply任务");
 		}
 	}
 

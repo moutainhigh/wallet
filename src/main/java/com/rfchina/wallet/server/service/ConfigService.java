@@ -90,27 +90,51 @@ public class ConfigService {
 	private String env;
 	// 钱包支付 END
 
-// yunst start
+	// yunst start
 	@Value("${yunst.serverUrl}")
 	private String ystServerUrl;
+
 	@Value("${yunst.sysId}")
 	private String ystSysId;
+
 	@Value("${yunst.pfxPath}")
 	private String ystPfxPath;
+
 	@Value("${yunst.password}")
 	private String ystPassword;
+
 	@Value("${yunst.alias}")
 	private String ystAlias;
+
 	@Value("${yunst.version}")
 	private String ystVersion;
+
 	@Value("${yunst.tlCertPath}")
 	private String ystTlCertPath;
+
 	@Value("${yunst.jumpUrl}")
 	private String resultJumpUrl;
+
 	@Value("${yunst.notify.backUrl}")
 	private String yunstNotifybackUrl;
+
 	@Value("${yunst.signContract.gateway.url}")
 	private String signContractUrl;
+
+	@Value("${yunst.userAccSet:200126}")
+	private String userAccSet;
+
+	@Value("${yunst.entAccSet:100001}")
+	private String entAccSet;
+
+	@Value("${yunst.tradeCodeBuy:3001}")
+	private String tradeCodeCollect;
+
+	@Value("${yunst.tradeCodeBuy:4001}")
+	private String tradeCodePay;
+
+	@Value("${yunst.notify.backUrl}")
+	private String backUrl;
 // yunst end
 
 }
