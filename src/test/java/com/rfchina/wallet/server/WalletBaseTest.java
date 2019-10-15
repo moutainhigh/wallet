@@ -214,7 +214,7 @@ public abstract class WalletBaseTest extends BaseTest {
 		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
 		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
 		params.put("sign", sign);
-		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_SMS_VERIFY_CODE, params, 1001);
+		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_PERSON_CHANGE_BIND_PHONE, params, 1001);
 	}
 
 	protected Map<String, Object> seniorWalletAuth(Integer channelType, Byte source, Long walletId, String realName,

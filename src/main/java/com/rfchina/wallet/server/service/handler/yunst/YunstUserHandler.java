@@ -143,7 +143,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 				.build();
 
 		String res = yunstTpl.signRequest(req);
-		String webParamUrl = configService.getYunstSignContractUrl() + "?" + res;
+		String webParamUrl = configService.getYunstPersonChangeBindPhoneUrl() + "?" + res;
 		log.info("webParamUrl: " + webParamUrl);
 		return webParamUrl;
 	}
