@@ -757,6 +757,10 @@ public class WalletService {
 			log.error("开通高级钱包失败, 查无此钱包, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 		}
+		WalletChannel walletChannel = walletChannelDao.selectByChannelTypeAndWalletId(channelType, walletId);
+		if (walletChannel != null) {
+			return walletChannel;
+		}
 		WalletChannel.WalletChannelBuilder builder = WalletChannel.builder()
 				.channelType(channelType.byteValue())
 				.status(EnumDef.WalletChannelAuditStatus.NOT_COMMIT.getValue().byteValue())
@@ -774,7 +778,7 @@ public class WalletService {
 					.channelUserId(member.left.getUserId())
 					.memberType(member.right.getValue().byteValue());
 		}
-		WalletChannel walletChannel = builder.build();
+		walletChannel = builder.build();
 		int effectRows = walletChannelDao.insertSelective(walletChannel);
 		if (effectRows != 1) {
 			log.error("开通高级钱包失败, channelType: {}, walletId: {}, source:{}", channelType, walletId, source);

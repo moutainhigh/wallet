@@ -307,7 +307,7 @@ public class WalletApiImpl implements WalletApi {
 	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
 	@SignVerify
 	@Override
-	public WalletChannel upgradeSeniorWallet(String accessToken, @ParamValid(nullable = false) Byte source,
+	public WalletChannel seniorWalletUpgrade(String accessToken, @ParamValid(nullable = false) Byte source,
 			Integer channelType, Long walletId) {
 		return walletService.createSeniorWallet(channelType, walletId, source);
 	}

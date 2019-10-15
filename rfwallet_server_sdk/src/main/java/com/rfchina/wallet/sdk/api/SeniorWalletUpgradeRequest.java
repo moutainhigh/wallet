@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 /** 升级高级钱包 */
 @Builder
-public class UpgradeSeniorWalletRequest extends  AbstractApiRequest {
+public class SeniorWalletUpgradeRequest extends  AbstractApiRequest {
 
   @ApiModelProperty("access_token")
   private String accessToken ;

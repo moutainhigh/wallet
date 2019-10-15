@@ -148,7 +148,7 @@ public interface WalletApi {
 	 * @param walletId    必填, 钱包id
 	 * @return
 	 */
-	WalletChannel upgradeSeniorWallet(String accessToken, Byte source, Integer channelType, Long walletId);
+	WalletChannel seniorWalletUpgrade(String accessToken, Byte source, Integer channelType, Long walletId);
 
 	/**
 	 * 高级钱包认证验证码
