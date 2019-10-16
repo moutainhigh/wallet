@@ -220,7 +220,7 @@ public class WalletService {
 	 */
 	public void doTunnelTransfer(WalletApply walletApply) {
 
-		WalletCard walletCard = walletCardDao.selectByDef(walletApply.getWalletId());
+		WalletCard walletCard = walletCardDao.selectByWalletId(walletApply.getWalletId(),1,0).get(0);
 		if (walletCard == null) {
 			log.warn("钱包[{}]没有绑定银行卡，跳过申请单[{}]", walletApply.getWalletId(),
 				walletApply.getId());
@@ -514,7 +514,7 @@ public class WalletService {
 			builder.personInfo(walletPerson);
 		}
 
-		WalletCard walletCard = walletCardDao.selectByDef(walletId);
+		WalletCard walletCard = walletCardDao.selectByWalletId(walletId,1,0).get(0);
 
 		return builder.wallet(wallet).defWalletCard(walletCard)
 			.bankCardCount(walletCardDao.count(walletId)).build();
