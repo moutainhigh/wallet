@@ -525,7 +525,10 @@
 |mobile|是|手机号码|
 |type|是|验证码类型, 1:登录, 2:验证已开通钱包帐号|
 |verify_token|是|反作弊结果查询token|
+|biz_user_id|否|业务用户id|
+|channel_type|否|渠道类型 1:浦发银企直连,2:通联云商通|
 |redirect_url|否|触发图形验证码并验证成功后重定向地址|
+|source|否|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
 
 返回数据
 ```
@@ -533,6 +536,382 @@
   "code": 1001,//状态码
   "msg": ""//消息
   
+}
+```
+
+###  高级钱包企业用户绑定手机
+
+请求地址: /wallet_server/v1/m/wallet/senior_bind_phone
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|channel_type|是|渠道类型 1:浦发银企直连,2:通联云商通|
+|mobile|是|手机号码|
+|source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
+|verify_code|是|短信验证码|
+|wallet_id|是|钱包id|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+  
+}
+```
+
+###  高级钱包渠道信息
+
+请求地址: /wallet_server/v1/m/wallet/channel_info
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|channel_type|是|渠道类型 1:浦发银企直连,2:通联云商通|
+|source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
+|wallet_id|是|钱包id|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+   , "data":  {
+    balance:""  , //银行余额
+    biz_user_id:""  , //业务用户标识
+    channel_type:""  , //渠道类型。1: 浦发银企直连，2：通联云商通
+    channel_user_id:""  , //银行用户标识
+    check_time:""  , //审核时间
+    create_time:""  , //创建日期
+    fail_reason:""  , //失败原因
+    id:""  , //id
+    is_sign_contact:""  , //是否已签订通联会员协议
+    member_type:""  , //银行用户类型。2：企业会员 3：个人会员
+    pic_url:""  , //审核图片地址
+    remark:""  , //备注
+    security_tel:""  , //安全手机
+    status:""  , //资料审核状态。1: 未提交审核, 2：待审核 ，3：审核成功，4：审核失败
+    wallet_id:""   //钱包id
+}  
+}
+```
+
+###  高级钱包商家资料审核（通道）
+
+请求地址: /wallet_server/v1/m/wallet/senior_company_info_audit
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|audit_type|是|审核方式|
+|channel_type|是|渠道类型 1:浦发银企直连,2:通联云商通|
+|company_basic_info|是|企业信息(json)|
+|source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
+|wallet_id|是|钱包id|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+  
+}
+```
+
+###  高级钱包确认绑定银行卡
+
+请求地址: /wallet_server/v1/m/wallet/senior_confirm_bind_bank_card
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|phone|是|银行预留手机号|
+|source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
+|trans_date|是|验证银行卡申请时间|
+|trans_num|是|验证银行卡流水号|
+|verify_code|是|短信验证码|
+|wallet_id|是|钱包id|
+|cvv2|否|信用卡cvv2码|
+|validate|否|信用卡到期4位日期|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+  
+}
+```
+
+###  高级钱包认证
+
+请求地址: /wallet_server/v1/m/wallet/senior_person_authentication
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|channel_type|是|渠道类型 1:浦发银企直连,2:通联云商通|
+|id_no|是|身份证号|
+|mobile|是|手机号码|
+|real_name|是|姓名|
+|source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
+|verify_code|是|短信验证码|
+|wallet_id|是|钱包id|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+  
+}
+```
+
+###  高级钱包个人用户修改手机
+
+请求地址: /wallet_server/v1/m/wallet/senior_person_change_bind_phone
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|channel_type|是|渠道类型 1:浦发银企直连,2:通联云商通|
+|id_no|是|身份证号|
+|old_phone|是|手机号码|
+|real_name|是|姓名|
+|source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
+|wallet_id|是|钱包id|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+  
+}
+```
+
+###  高级钱包委托代扣协议
+
+请求地址: /wallet_server/v1/m/wallet/senior_balance_protocol
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
+|wallet_id|是|钱包id|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+  
+}
+```
+
+###  高级钱包会员协议
+
+请求地址: /wallet_server/v1/m/wallet/senior_member_protocol
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
+|wallet_id|是|钱包id|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+  
+}
+```
+
+###  高级钱包认证验证码
+
+请求地址: /wallet_server/v1/m/wallet/senior_sms_verify_code
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|channel_type|是|渠道类型 1:浦发银企直连,2:通联云商通|
+|mobile|是|手机号码|
+|sms_type|是|短信类型|
+|source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
+|wallet_id|是|钱包id|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+   , "data":  {
+    balance:""  , //银行余额
+    biz_user_id:""  , //业务用户标识
+    channel_type:""  , //渠道类型。1: 浦发银企直连，2：通联云商通
+    channel_user_id:""  , //银行用户标识
+    check_time:""  , //审核时间
+    create_time:""  , //创建日期
+    fail_reason:""  , //失败原因
+    id:""  , //id
+    is_sign_contact:""  , //是否已签订通联会员协议
+    member_type:""  , //银行用户类型。2：企业会员 3：个人会员
+    pic_url:""  , //审核图片地址
+    remark:""  , //备注
+    security_tel:""  , //安全手机
+    status:""  , //资料审核状态。1: 未提交审核, 2：待审核 ，3：审核成功，4：审核失败
+    wallet_id:""   //钱包id
+}  
+}
+```
+
+###  高级钱包解除绑定银行卡
+
+请求地址: /wallet_server/v1/m/wallet/senior_un_bind_bank_card
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|card_no|是|银行卡号|
+|source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
+|wallet_id|是|钱包id|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+  
+}
+```
+
+###  升级高级钱包
+
+请求地址: /wallet_server/v1/m/wallet/upgrade_wallet
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|channel_type|是|渠道类型 1:浦发银企直连,2:通联云商通|
+|source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
+|wallet_id|是|钱包id|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+   , "data":  {
+    balance:""  , //银行余额
+    biz_user_id:""  , //业务用户标识
+    channel_type:""  , //渠道类型。1: 浦发银企直连，2：通联云商通
+    channel_user_id:""  , //银行用户标识
+    check_time:""  , //审核时间
+    create_time:""  , //创建日期
+    fail_reason:""  , //失败原因
+    id:""  , //id
+    is_sign_contact:""  , //是否已签订通联会员协议
+    member_type:""  , //银行用户类型。2：企业会员 3：个人会员
+    pic_url:""  , //审核图片地址
+    remark:""  , //备注
+    security_tel:""  , //安全手机
+    status:""  , //资料审核状态。1: 未提交审核, 2：待审核 ，3：审核成功，4：审核失败
+    wallet_id:""   //钱包id
+}  
+}
+```
+
+###  高级钱包验证银行卡
+
+请求地址: /wallet_server/v1/m/wallet/senior_verify_bank_card
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|card_no|是|银行卡号|
+|identity_no|是|身份证|
+|phone|是|银行预留手机号|
+|real_name|是|姓名|
+|source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
+|wallet_id|是|钱包id|
+|cvv2|否|信用卡cvv2码|
+|validate|否|信用卡到期4位日期|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+   , "data":  {
+    bank_code:""  , //银行代码
+    bank_name:""  , //银行名称
+    biz_user_id:""  , //商户系统用户标识(个人用户:WU+walletId,个人商户:WM+walletId,企业用户:WC+walletId)
+    card_type:""  , //银行卡类型 1-储蓄卡 2-信用卡
+    trance_num:""  , //流水号
+    trans_date:""   //申请时间 YYYYMMDD
+}  
 }
 ```
 

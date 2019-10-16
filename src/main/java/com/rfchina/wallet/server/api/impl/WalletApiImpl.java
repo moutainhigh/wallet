@@ -343,6 +343,15 @@ public class WalletApiImpl implements WalletApi {
 	}
 
 	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
+	@Override
+	public WalletChannel seniorWalletChannelInfo(String accessToken, Byte source,
+		Integer channelType, Long walletId) {
+		return walletChannelDao.selectByChannelTypeAndWalletId(channelType,walletId);
+	}
+
+	@Log
 	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
 	@SignVerify
 	@Override

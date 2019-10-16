@@ -142,7 +142,10 @@ public class UrlConstant {
 	 * 短信验证码登录
 	 */
 	public static final String WALLET_LOGIN_WITH_VERIFY_CODE = VERSION + "/m/wallet/login_with_verify_code";
-
+	/**
+	 * 升级高级钱包渠道信息
+	 */
+	public static final String WALLET_CHANNEL_INFO = VERSION + "/m/wallet/channel_info";
 	/**
 	 * 升级高级钱包
 	 */

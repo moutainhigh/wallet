@@ -9,12 +9,15 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 
 
-/** 高级钱包委托代扣协议 */
+/** 高级钱包渠道信息 */
 @Builder
-public class SeniorWalletSignBalanceProtocolRequest extends  AbstractApiRequest {
+public class SeniorWalletChannelInfoRequest extends  AbstractApiRequest {
 
   @ApiModelProperty("access_token")
   private String accessToken ;
+
+  @ApiModelProperty("渠道类型 1:浦发银企直连,2:通联云商通")
+  private Integer channelType ;
 
   @ApiModelProperty("钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户")
   private Integer source ;
@@ -25,12 +28,12 @@ public class SeniorWalletSignBalanceProtocolRequest extends  AbstractApiRequest 
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/wallet/senior_balance_protocol";
+    return "/wallet_server/v1/m/wallet/channel_info";
   }
 
   @Override
   public Class<?> getResponseModelClass() {
-    return Map.class;
+    return WalletChannel.class;
   }
 
   @Override
@@ -38,6 +41,9 @@ public class SeniorWalletSignBalanceProtocolRequest extends  AbstractApiRequest 
     Map<String, String> parameters = new HashMap<>(2);
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
+      }
+      if(channelType != null){
+        parameters.put("channel_type", channelType.toString());
       }
       if(source != null){
         parameters.put("source", source.toString());

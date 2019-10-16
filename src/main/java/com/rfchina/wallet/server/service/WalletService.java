@@ -19,6 +19,7 @@ import com.rfchina.wallet.domain.mapper.ext.*;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumDefBankCard;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletCardSenior;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletChannelSignContract;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.*;

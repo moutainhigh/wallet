@@ -777,4 +777,38 @@ public class EnumWallet {
 		}
 	}
 
+
+	public enum YunstServiceName implements Valuable<String> {
+		MEMBER("MemberService"),
+		ORDER("OrderService"),
+		MEMBER_PWD("MemberPwdService");
+
+		private String value;
+
+		YunstServiceName(String value) {
+			this.value = value;
+		}
+
+		@Override
+		public String getValue() {
+			return value;
+		}
+	}
+
+	public enum YunstMethodName implements Valuable<String> {
+		VERIFY_RESULT("verifyResult"),
+		SIGN_CONTRACT("signContract"),
+		CHANGE_BIND_PHONE("updatePhoneByPayPwd");
+
+		private String value;
+
+		YunstMethodName(String value) {
+			this.value = value;
+		}
+
+		@Override
+		public String getValue() {
+			return value;
+		}
+	}
 }
