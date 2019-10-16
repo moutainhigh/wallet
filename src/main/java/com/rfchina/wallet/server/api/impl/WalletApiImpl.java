@@ -346,28 +346,31 @@ public class WalletApiImpl implements WalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public WalletChannel seniorWalletChannelInfo(String accessToken, Byte source,
-		Integer channelType, Long walletId) {
-		return walletChannelDao.selectByChannelTypeAndWalletId(channelType,walletId);
+	public WalletChannel seniorWalletChannelInfo(String accessToken, Integer channelType,
+		Long walletId) {
+		return walletChannelDao.selectByChannelTypeAndWalletId(channelType, walletId);
 	}
 
 	@Log
-	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public WalletChannel seniorWalletUpgrade(String accessToken, @ParamValid(nullable = false) Byte source,
-			Integer channelType, Long walletId) {
+	public WalletChannel seniorWalletUpgrade(String accessToken,
+		@ParamValid(nullable = false) Byte source,
+		Integer channelType, Long walletId) {
 		return walletService.createSeniorWallet(channelType, walletId, source);
 	}
 
 	@Log
-	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public WalletChannel seniorWalletSmsCodeVerification(String accessToken, Byte source, Integer channelType,
-			Long walletId, String mobile, Integer smsCodeType) {
+	public WalletChannel seniorWalletSmsCodeVerification(String accessToken, Byte source,
+		Integer channelType,
+		Long walletId, String mobile, Integer smsCodeType) {
 		String transformBizUserId = YunstBaseHandler.transferToYunstBizUserFormat(walletId, source);
-		WalletChannel walletChannel = walletChannelDao.selectByChannelTypeAndWalletId(channelType, walletId);
+		WalletChannel walletChannel = walletChannelDao
+			.selectByChannelTypeAndWalletId(channelType, walletId);
 		if (walletChannel == null) {
 			log.error("发送云商通账户绑定手机验证码失败,未创建高级钱包用户, 查无此钱包, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
@@ -375,14 +378,15 @@ public class WalletApiImpl implements WalletApi {
 
 		if (smsCodeType == EnumDef.EnumVerifyCodeType.YUNST_BIND_PHONE.getValue().intValue()) {
 			if (EnumDef.WalletSource.FHT_CORP.getValue().intValue() == source
-					&& EnumDef.WalletChannelAuditStatus.AUDIT_SUCCESS.getValue().byteValue()
-					!= walletChannel.getStatus()) {
+				&& EnumDef.WalletChannelAuditStatus.AUDIT_SUCCESS.getValue().byteValue()
+				!= walletChannel.getStatus()) {
 				log.error("企业用户资料通道未审核通过");
 				return walletChannel;
 			}
-			String rtn = walletService.seniorWalletApplyBindPhone(channelType, walletId, source, mobile);
+			String rtn = walletService
+				.seniorWalletApplyBindPhone(channelType, walletId, source, mobile);
 			if (StringUtils.isBlank(rtn) || (StringUtils.isNotBlank(rtn) && !rtn.equals(
-					walletChannel.getBizUserId()))) {
+				walletChannel.getBizUserId()))) {
 				log.error("发送云商通账户绑定手机验证码失败, expect: {},actucal:{}", transformBizUserId, rtn);
 				throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 			}
@@ -391,27 +395,31 @@ public class WalletApiImpl implements WalletApi {
 	}
 
 	@Override
-	public String seniorWalletPersonChangeBindPhone(String accessToken, Byte source, Integer channelType,
-			Long walletId,
-			String realName, String idNo, String oldPhone) {
+	public String seniorWalletPersonChangeBindPhone(String accessToken, Byte source,
+		Integer channelType,
+		Long walletId,
+		String realName, String idNo, String oldPhone) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		if (wallet == null) {
 			log.error("高级钱包企业信息审核失败, 查无此钱包, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 		}
-		return walletService.seniorWalletPersonChangeBindPhone(channelType, walletId, source, realName, idNo,
+		return walletService
+			.seniorWalletPersonChangeBindPhone(channelType, walletId, source, realName, idNo,
 				oldPhone);
 	}
 
 	@Override
-	public Long seniorWalletBindPhone(String accessToken, Byte source, Integer channelType, Long walletId,
-			String mobile, String verifyCode) {
+	public Long seniorWalletBindPhone(String accessToken, Byte source, Integer channelType,
+		Long walletId,
+		String mobile, String verifyCode) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		if (wallet == null) {
 			log.error("高级钱包绑定手机, 查无此钱包, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 		}
-		if (!walletService.seniorWalletBindPhone(channelType, walletId, source, mobile, verifyCode)) {
+		if (!walletService
+			.seniorWalletBindPhone(channelType, walletId, source, mobile, verifyCode)) {
 			log.error("高级钱包绑定手机失败, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 		}
@@ -419,34 +427,39 @@ public class WalletApiImpl implements WalletApi {
 	}
 
 	@Log
-	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public String seniorWalletPersonAuthentication(String accessToken, Byte source, Integer channelType, Long walletId,
-			String realName, String idNo, @ParamValid(pattern = RegexUtil.REGEX_MOBILE) String mobile,
-			String verifyCode) {
+	public String seniorWalletPersonAuthentication(String accessToken, Byte source,
+		Integer channelType, Long walletId,
+		String realName, String idNo, @ParamValid(pattern = RegexUtil.REGEX_MOBILE) String mobile,
+		String verifyCode) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		if (wallet == null) {
 			log.error("高级钱包个人认证失败, 查无此钱包, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 		}
-		if (!walletService.seniorWalletBindPhone(channelType, walletId, source, mobile, verifyCode)) {
+		if (!walletService
+			.seniorWalletBindPhone(channelType, walletId, source, mobile, verifyCode)) {
 			log.error("高级钱包个人失败, 查钱包绑定手机失败, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 		}
-		return walletService.seniorWalletPersonAuth(channelType, walletId, source, realName, idNo, mobile);
+		return walletService
+			.seniorWalletPersonAuth(channelType, walletId, source, realName, idNo, mobile);
 	}
 
 	@Override
-	public Integer seniorWalletCompanyAudit(String accessToken, Byte source, Integer channelType, Integer auditType,
-			Long walletId, YunstSetCompanyInfoReq.CompanyBasicInfo companyBasicInfo) {
+	public Integer seniorWalletCompanyAudit(String accessToken, Byte source, Integer channelType,
+		Integer auditType,
+		Long walletId, YunstSetCompanyInfoReq.CompanyBasicInfo companyBasicInfo) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		if (wallet == null) {
 			log.error("高级钱包企业信息审核失败, 查无此钱包, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 		}
 		String transformBizUserId = YunstBaseHandler.transferToYunstBizUserFormat(walletId, source);
-		WalletChannel walletChannel = walletChannelDao.selectByChannelTypeAndWalletId(channelType, walletId);
+		WalletChannel walletChannel = walletChannelDao
+			.selectByChannelTypeAndWalletId(channelType, walletId);
 		if (walletChannel == null) {
 			//			log.error("高级钱包企业信息审核失败, 未创建云商通用户, bizUserId:{}", transformBizUserId);
 			//			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
@@ -458,11 +471,12 @@ public class WalletApiImpl implements WalletApi {
 			}
 			walletService.upgradeWalletLevel(walletId);
 		}
-		return walletService.seniorWalletCompanyAudit(channelType, walletId, source, auditType, companyBasicInfo);
+		return walletService
+			.seniorWalletCompanyAudit(channelType, walletId, source, auditType, companyBasicInfo);
 	}
 
 	@Log
-	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
 	public String signMemberProtocol(String accessToken, Byte source, Long walletId) {
@@ -470,7 +484,7 @@ public class WalletApiImpl implements WalletApi {
 	}
 
 	@Log
-	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
 	public String signBalanceProtocol(String accessToken, Byte source, Long walletId) {
@@ -478,11 +492,13 @@ public class WalletApiImpl implements WalletApi {
 	}
 
 	@Log
-	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public YunstApplyBindBankCardResult seniorWalletVerifyBankCard(String accessToken, Long walletId, Byte source,
-			String cardNo, String realName, String phone, String identityNo, String validate, String cvv2) {
+	public YunstApplyBindBankCardResult seniorWalletVerifyBankCard(String accessToken,
+		Long walletId, Byte source,
+		String cardNo, String realName, String phone, String identityNo, String validate,
+		String cvv2) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		if (wallet == null) {
 			log.error("高级钱包验证银行卡失败, 查无此钱包, walletId: {}", walletId);
@@ -492,17 +508,19 @@ public class WalletApiImpl implements WalletApi {
 			log.error("高级钱包验证银行卡失败, 钱包不是高级钱包, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 		}
-		return walletService.seniorWalletVerifyBankCard(walletId, source, cardNo, realName, phone, identityNo,
+		return walletService
+			.seniorWalletVerifyBankCard(walletId, source, cardNo, realName, phone, identityNo,
 				validate,
 				cvv2);
 	}
 
 	@Log
-	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public Long seniorWalletConfirmBindBankCard(String accessToken, Long walletId, Byte source, String transNum,
-			String transDate, String phone, String validate, String cvv2, String verifyCode) {
+	public Long seniorWalletConfirmBindBankCard(String accessToken, Long walletId, Byte source,
+		String transNum,
+		String transDate, String phone, String validate, String cvv2, String verifyCode) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		if (wallet == null) {
 			log.error("高级钱包绑定银行卡失败, 查无此钱包, walletId: {}", walletId);
@@ -512,16 +530,19 @@ public class WalletApiImpl implements WalletApi {
 			log.error("高级钱包绑定银行卡失败, 钱包不是高级钱包, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 		}
-		walletService.seniorWalletConfirmBindBankCard(walletId, source, transNum, transDate, phone, validate, cvv2,
+		walletService
+			.seniorWalletConfirmBindBankCard(walletId, source, transNum, transDate, phone, validate,
+				cvv2,
 				verifyCode);
 		return walletId;
 	}
 
 	@Log
-	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public Long seniorWalletUnBindBankCard(String accessToken, Long walletId, Byte source, String cardNo) {
+	public Long seniorWalletUnBindBankCard(String accessToken, Long walletId, Byte source,
+		String cardNo) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		if (wallet == null) {
 			log.error("高级钱包绑定银行卡失败, 查无此钱包, walletId: {}", walletId);

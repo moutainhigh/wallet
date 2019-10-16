@@ -19,9 +19,6 @@ public class SeniorWalletChannelInfoRequest extends  AbstractApiRequest {
   @ApiModelProperty("渠道类型 1:浦发银企直连,2:通联云商通")
   private Integer channelType ;
 
-  @ApiModelProperty("钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户")
-  private Integer source ;
-
   @ApiModelProperty("钱包id")
   private Long walletId ;
 
@@ -44,9 +41,6 @@ public class SeniorWalletChannelInfoRequest extends  AbstractApiRequest {
       }
       if(channelType != null){
         parameters.put("channel_type", channelType.toString());
-      }
-      if(source != null){
-        parameters.put("source", source.toString());
       }
       if(walletId != null){
         parameters.put("wallet_id", walletId.toString());

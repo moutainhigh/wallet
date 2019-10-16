@@ -579,7 +579,6 @@
 |:-- |:-- |:--   |
 |access_token|是|access_token|
 |channel_type|是|渠道类型 1:浦发银企直连,2:通联云商通|
-|source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
 |wallet_id|是|钱包id|
 
 返回数据
