@@ -5,6 +5,8 @@ import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
+import com.rfchina.wallet.domain.misc.EnumDef.EnumDefBankCard;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletCardSenior;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.WalletApply;
 import com.rfchina.wallet.domain.model.WalletCard;
@@ -100,7 +102,8 @@ public class JuniorWalletService {
 
 
 	private WalletCard getWalletCard(Long walletId) {
-		return walletCardDao.selectByWalletId(walletId,1,0).get(0);
+		return walletCardDao.selectByWalletId(walletId, EnumDefBankCard.YES.getValue(),
+			WalletCardSenior.NO.getValue()).get(0);
 	}
 
 

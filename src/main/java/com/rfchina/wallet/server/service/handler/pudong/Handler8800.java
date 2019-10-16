@@ -9,7 +9,9 @@ import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EnumUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
+import com.rfchina.wallet.domain.misc.EnumDef.EnumDefBankCard;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletLevel;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletCardSenior;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.BankCode;
@@ -518,7 +520,8 @@ public class Handler8800 extends EBankHandler {
 	}
 
 	private WalletCard getWalletCard(Long walletId) {
-		return walletCardDao.selectByWalletId(walletId,1,0).get(0);
+		return walletCardDao.selectByWalletId(walletId, EnumDefBankCard.YES.getValue(),
+			WalletCardSenior.NO.getValue()).get(0);
 	}
 
 
