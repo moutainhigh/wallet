@@ -255,6 +255,12 @@ public class EnumWallet {
 			this.valueName = valueName;
 		}
 
+		public boolean isEndStatus() {
+			return this.value.byteValue() == SUCC.getValue().byteValue()
+				|| this.value.byteValue() == FAIL.getValue().byteValue()
+				|| this.value.byteValue() == REVOKE.getValue().byteValue();
+		}
+
 		@Override
 		public Byte getValue() {
 			return value;
@@ -573,49 +579,6 @@ public class EnumWallet {
 		}
 	}
 
-
-	/**
-	 * 交易状态
-	 */
-	public enum YunstOrderStatus implements Valuable<Long> {
-		WAITING_PAY(1L, "未支付"),
-		FAIL(3L, "交易失败"),
-		SUCC(4L, "交易成功"),
-		SUCC_AND_REFUND(5L, "交易成功-发生退款"),
-		CLOSE(6L, "关闭"),
-		HANDLING(99L, "进行中");
-
-		private Long value;
-		private String valueName;
-
-		YunstOrderStatus(Long value, String valueName) {
-			this.value = value;
-			this.valueName = valueName;
-		}
-
-		@Override
-		public Long getValue() {
-			return value;
-		}
-
-
-		public WalletApplyStatus toApplyStatus() {
-			switch (this) {
-				case SUCC:
-					return WalletApplyStatus.SUCC;
-				case SUCC_AND_REFUND:
-					return WalletApplyStatus.SUCC;
-				case FAIL:
-					return WalletApplyStatus.FAIL;
-				case CLOSE:
-					return WalletApplyStatus.FAIL;
-				default:
-					return WalletApplyStatus.PROCESSING;
-			}
-		}
-	}
-
-
 	public enum GwProgress implements Valuable<Byte> {
 		WAIT_SEND((byte) 1, "待发送"),
 		HAS_SEND((byte) 2, "已发送"),
@@ -640,9 +603,9 @@ public class EnumWallet {
 	 */
 	public enum CollectStatus implements Valuable<Byte> {
 		WAIT_PAY((byte) 1, "待支付"),
-		HAS_PAY((byte) 2, "已支付"),
+		SUCC((byte) 2, "已支付"),
 		FAIL((byte) 3, "交易失败"),
-		CLOSE((byte) 4, "交易关闭（超时或其他）");
+		CLOSED((byte) 4, "交易关闭（超时或其他）");
 
 		private Byte value;
 		private String valueName;
@@ -655,6 +618,12 @@ public class EnumWallet {
 		@Override
 		public Byte getValue() {
 			return value;
+		}
+
+		public boolean isEndStatus() {
+			return this.value.byteValue() == SUCC.getValue().byteValue()
+				|| this.value.byteValue() == FAIL.getValue().byteValue()
+				|| this.value.byteValue() == CLOSED.getValue().byteValue();
 		}
 	}
 
@@ -735,7 +704,7 @@ public class EnumWallet {
 	}
 
 	/**
-	 *  退款状态。1：未退款 2：已退款 3:交易失败
+	 * 退款状态。1：未退款 2：已退款 3:交易失败
 	 */
 	public enum RefundStatus implements Valuable<Byte> {
 		WAITING((byte) 1, "未退款"),
@@ -757,7 +726,7 @@ public class EnumWallet {
 	}
 
 	/**
-	 *  退款方式
+	 * 退款方式
 	 */
 	public enum RefundType implements Valuable<String> {
 		D1("D1", "D+1 14:30 向渠道发起退款"),
@@ -781,7 +750,9 @@ public class EnumWallet {
 	public enum YunstServiceName implements Valuable<String> {
 		MEMBER("MemberService"),
 		ORDER("OrderService"),
-		MEMBER_PWD("MemberPwdService");
+		MEMBER_PWD("MemberPwdService"),
+		ORDER_SERVICE(" OrderService "),
+		;
 
 		private String value;
 
@@ -798,7 +769,9 @@ public class EnumWallet {
 	public enum YunstMethodName implements Valuable<String> {
 		VERIFY_RESULT("verifyResult"),
 		SIGN_CONTRACT("signContract"),
-		CHANGE_BIND_PHONE("updatePhoneByPayPwd");
+		CHANGE_BIND_PHONE("updatePhoneByPayPwd"),
+		PAY("pay"),
+		;
 
 		private String value;
 
@@ -811,4 +784,101 @@ public class EnumWallet {
 			return value;
 		}
 	}
+
+	/**
+	 * 订单状态 1:未支付 3:交易失败 4:交易成功 5:交易成功-发生退款 6:关闭 99:进行中
+	 */
+	public enum YunstOrderStatus implements Valuable<Long> {
+		NO_PAY(1L, "未支付"),
+		FAIL(3L, "交易失败"),
+		SUCC(4L, "交易成功"),
+		SUCC_REFUND(5L, "交易成功-发生退款"),
+		CLOSED(6L, "关闭"),
+		RUNNING(99L, "进行中"),
+		;
+
+		private Long value;
+		private String valueName;
+
+		YunstOrderStatus(Long value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Long getValue() {
+			return this.value;
+		}
+
+		public CollectStatus toUniStatus() {
+			switch (this) {
+				case SUCC:
+					return CollectStatus.SUCC;
+				case SUCC_REFUND:
+					return CollectStatus.SUCC;
+				case FAIL:
+					return CollectStatus.FAIL;
+				case CLOSED:
+					return CollectStatus.CLOSED;
+				default:
+					return CollectStatus.WAIT_PAY;
+			}
+		}
+	}
+
+	/**
+	 * 进度。1：待发送 2：已发送 3：已接收结果',
+	 */
+	public enum UniProgress implements Valuable<Byte> {
+		WAIT_SEND((byte) 1, "待发送"),
+		SENDED((byte) 2, "已发送"),
+		RECEIVED((byte) 3, "已接收结果"),
+		;
+
+		private Byte value;
+		private String valueName;
+
+		UniProgress(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return this.value;
+		}
+
+	}
+
+//	/**
+//	 * 代收状态。1：待支付 2：支付成功 3：交易失败 4：交易关闭（超时或其他）
+//	 */
+//	public enum UniBizStatus implements Valuable<Byte> {
+//		WAIT((byte) 1, "待支付"),
+//		SUCC((byte) 2, "支付成功"),
+//		FAIL((byte) 3, "交易失败"),
+//		CLOSED((byte) 4, "交易关闭（超时或其他）"),
+//		;
+//
+//		private Byte value;
+//		private String valueName;
+//
+//		UniBizStatus(Byte value, String valueName) {
+//			this.value = value;
+//			this.valueName = valueName;
+//		}
+//
+//		@Override
+//		public Byte getValue() {
+//			return this.value;
+//		}
+//
+//		public boolean isEndStatus() {
+//			return this.value.byteValue() == SUCC.getValue().byteValue()
+//				|| this.value.byteValue() == FAIL.getValue().byteValue()
+//				|| this.value.byteValue() == CLOSED.getValue().byteValue();
+//		}
+//
+//	}
+
 }

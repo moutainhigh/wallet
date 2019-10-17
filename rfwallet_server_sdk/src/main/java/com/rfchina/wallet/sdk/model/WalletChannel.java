@@ -37,7 +37,7 @@ public class WalletChannel  {
     @ApiModelProperty("id")
     private Long id ;
 
-    @ApiModelProperty("是否已签订通联会员协议")
+    @ApiModelProperty("签订通联会员协议 0-未签订 1-签订电子会员协议 2-签订扣款协议")
     private Integer isSignContact ;
 
     @ApiModelProperty("银行用户类型。2：企业会员 3：个人会员")

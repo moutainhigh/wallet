@@ -93,7 +93,7 @@ public class CollectApplyReq implements YunstBaseReq {
 	private String industryName;
 
 	@ApiModelProperty(required = true, value = "访问终端类型")
-	private String source;
+	private Long source;
 
 	@ApiModelProperty(value = "摘要")
 	private String summary;

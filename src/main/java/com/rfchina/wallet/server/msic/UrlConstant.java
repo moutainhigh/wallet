@@ -32,17 +32,21 @@ public class UrlConstant {
 	/**
 	 * 高级钱包-清算
 	 */
-	public static final String SENIOR_WALLET_SETTLE = VERSION + "/m/senior/settle";
+	public static final String SENIOR_WALLET_AGENT_PAY = VERSION + "/m/senior/agent_pay";
 
 	/**
 	 * 高级钱包-清算结果查询
 	 */
-	public static final String SENIOR_WALLET_SETTLE_QUERY = VERSION + "/m/senior/settle_query";
+	public static final String SENIOR_WALLET_AGENT_PAY_QUERY = VERSION + "/m/senior/agent_pay_query";
 
 	/**
 	 * 高级钱包-退款
 	 */
 	public static final String SENIOR_WALLET_REFUND = VERSION + "/m/senior/refund";
+	/**
+	 * 高级钱包-退款结果查询
+	 */
+	public static final String SENIOR_WALLET_REFUND_QUERY = VERSION + "/m/senior/refund_query";
 
 	/**
 	 * 高级钱包-充值
@@ -196,4 +200,19 @@ public class UrlConstant {
 	 * 云商通统一回调
 	 */
 	public static final String YUNST_NOTIFY = VERSION + "/yunst/notify";
+
+	/**
+	 * 云商通充值回调
+	 */
+	public static final String YUNST_RECHARGE_RECALL = VERSION + "/yunst/recharge_recall";
+
+	/**
+	 * 云商通代收回调
+	 */
+	public static final String YUNST_COLLECT_RECALL = VERSION + "/yunst/collect_recall";
+
+	/**
+	 * 云商通代付回调
+	 */
+	public static final String YUNST_AGENT_PAY_RECALL = VERSION + "/yunst/agent_pay_recall";
 }

@@ -145,8 +145,8 @@ public class ConfigService {
 	@Value("${yunst.tradeCodeBuy:4001}")
 	private String tradeCodePay;
 
-	@Value("${yunst.notify.backUrl}")
-	private String backUrl;
+	@Value("${yunst.recall.recharge}")
+	private String rechargeRecallUrl;
 // yunst end
 
 }

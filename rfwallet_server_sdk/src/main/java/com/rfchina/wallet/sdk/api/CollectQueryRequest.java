@@ -13,8 +13,8 @@ import java.util.List;
 @Builder
 public class CollectQueryRequest extends  AbstractApiRequest {
 
-  @ApiModelProperty("batch_no")
-  private String batchNo ;
+  @ApiModelProperty("代收单号")
+  private String collectOrderNo ;
 
   @ApiModelProperty("应用令牌")
   private String accessToken ;
@@ -27,14 +27,14 @@ public class CollectQueryRequest extends  AbstractApiRequest {
 
   @Override
   public Class<?> getResponseModelClass() {
-    return ListWalletCollect.class;
+    return WalletCollect.class;
   }
 
   @Override
   public Map<String, String> getTextParmas() {
     Map<String, String> parameters = new HashMap<>(2);
-      if(batchNo != null){
-        parameters.put("batch_no", batchNo.toString());
+      if(collectOrderNo != null){
+        parameters.put("collect_order_no", collectOrderNo.toString());
       }
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());

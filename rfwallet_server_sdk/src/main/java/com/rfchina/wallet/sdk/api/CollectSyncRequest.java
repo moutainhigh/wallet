@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 
 
-/** 高级钱包-异步代收 */
+/** 高级钱包-即刻代收 */
 @Builder
 public class CollectSyncRequest extends  AbstractApiRequest {
 

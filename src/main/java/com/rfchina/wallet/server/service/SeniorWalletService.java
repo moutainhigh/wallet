@@ -94,23 +94,20 @@ public class SeniorWalletService {
 	private Long defPayerWalletId = 10001L;
 	private Long defEntWalletId = 10000L;
 
-
 	/**
-	 * 预代收
+	 * 充值
 	 */
-	public WalletCollect preCollect(String accessToken, CollectReq collectReq) {
-
+	public void recharge(String accessToken, RechargeReq rechargeReq) {
 		// 工单记录
 		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> {
 			WalletApply walletApply = walletApplyDao.selectByBatchNo(id);
 			return walletApply == null;
 		});
 		WalletApply walletApply = WalletApply.builder()
-			.walletId(null)
 			.batchNo(batchNo)
-			.bizNo(collectReq.getBizNo())
-			.type(WalletApplyType.COLLECT.getValue())
-			.amount(collectReq.getAmount())
+			.bizNo(rechargeReq.getBizNo())
+			.type(WalletApplyType.RECHARGE.getValue())
+			.amount(rechargeReq.getAmount())
 			.status(WalletApplyStatus.WAIT_SEND.getValue())
 			.walletLevel(EnumWalletLevel.SENIOR.getValue())
 			.walletType(WalletType.COMPANY.getValue())
@@ -120,29 +117,94 @@ public class SeniorWalletService {
 			.build();
 		walletApplyDao.insertSelective(walletApply);
 
-		Long payerWalletId = (collectReq.getPayerWalletId() != null) ? collectReq.getPayerWalletId()
-			: defPayerWalletId;
-		WalletPayMethod payMethod = collectReq.getWalletPayMethod();
+		Long payerWalletId =
+			(rechargeReq.getPayerWalletId() != null) ? rechargeReq.getPayerWalletId()
+				: defPayerWalletId;
+		WalletPayMethod payMethod = rechargeReq.getWalletPayMethod();
 		Wallet payerWallet = walletDao.selectByPrimaryKey(payerWalletId);
 		if (payerWallet == null || payerWallet.getStatus() != WalletStatus.ACTIVE.getValue()
 			.byteValue()) {
 			throw new RuntimeException();
 		}
-		// 代收记录
+		// 充值记录
+		String orderNo = IdGenerator.createBizId("WR", 19, id -> {
+			return walletRechargeDao.selectCountByOrderNo(id) == 0;
+		});
+		WalletRecharge recharge = WalletRecharge.builder()
+			.applyId(walletApply.getId())
+			.orderNo(orderNo)
+			.payerWalletId(payerWallet.getId())
+			.payeeWalletId(defEntWalletId)
+			.amount(rechargeReq.getAmount())
+			.tunnelType(TunnelType.YUNST.getValue())
+			.payMethod(payMethod.getMethods())
+			.progress(GwProgress.WAIT_SEND.getValue())
+			.status(CollectStatus.WAIT_PAY.getValue())
+			.expireTime(rechargeReq.getExpireTime())
+			.build();
+		walletRechargeDao.insertSelective(recharge);
+		savePayMethod(recharge.getId(), WalletApplyType.RECHARGE.getValue(), payMethod);
+
+		// 银行充值
+		EBankHandler handler = handlerHelper.selectByWalletLevel(walletApply.getWalletLevel());
+		handler.recharge(walletApply.getId());
+
+	}
+
+	/**
+	 * 预代收
+	 */
+	public WalletCollect preCollect(String accessToken, CollectReq collectReq) {
+
+		// 定义付款人
+		Long payerWalletId = (collectReq.getPayerWalletId() != null) ? collectReq.getPayerWalletId()
+			: defPayerWalletId;
+		Wallet payerWallet = walletDao.selectByPrimaryKey(payerWalletId);
+		if (payerWallet == null || payerWallet.getStatus() != WalletStatus.ACTIVE.getValue()
+			.byteValue()) {
+			throw new RuntimeException();
+		}
+
+		// 工单记录
+		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> {
+			WalletApply walletApply = walletApplyDao.selectByBatchNo(id);
+			return walletApply == null;
+		});
+		WalletApply walletApply = WalletApply.builder()
+			.batchNo(batchNo)
+			.bizNo(collectReq.getBizNo())
+			.type(WalletApplyType.COLLECT.getValue())
+			.amount(collectReq.getAmount())
+			.status(WalletApplyStatus.WAIT_SEND.getValue())
+			.walletLevel(payerWallet.getLevel())
+			.walletType(payerWallet.getType())
+			.channelType(TunnelType.YUNST.getValue())
+			.queryTime(DateUtil.addSecs(new Date(), configService.getNextRoundSec()))
+			.createTime(new Date())
+			.build();
+		walletApplyDao.insertSelective(walletApply);
+
+
+
+		// 生成代收单
+		String orderNo = IdGenerator.createBizId("WC", 19, id -> {
+			return walletRechargeDao.selectCountByOrderNo(id) == 0;
+		});
 		WalletCollect collect = WalletCollect.builder()
 			.applyId(walletApply.getId())
+			.orderNo(orderNo)
 			.payerWalletId(payerWallet.getId())
 			.payeeWalletId(defEntWalletId)
 			.amount(collectReq.getAmount())
-			.channelType(TunnelType.YUNST.getValue())
-			.tunnelType(payMethod.getTunnels())
+			.tunnelType(TunnelType.YUNST.getValue())
 			.progress(GwProgress.WAIT_SEND.getValue())
 			.status(CollectStatus.WAIT_PAY.getValue())
+			.expireTime(collectReq.getExpireTime())
 			.build();
 		walletCollectDao.insertSelective(collect);
-		savePayMethod(collect.getId(), WalletApplyType.COLLECT.getValue(), payMethod);
+		savePayMethod(collect.getId(), WalletApplyType.COLLECT.getValue(), collectReq.getWalletPayMethod());
 
-		// 清分记录
+		// 生成清分记录
 		collectReq.getRecievers().forEach(reciever -> {
 			WalletClearInfo clearInfo = WalletClearInfo.builder()
 				.collectId(collect.getId())
@@ -155,6 +217,140 @@ public class SeniorWalletService {
 		});
 
 		return collect;
+	}
+
+	/**
+	 * 发起代收
+	 */
+	public WalletCollect doCollect(String accessToken, WalletCollect collect) {
+		WalletApply walletApply = walletApplyDao.selectByPrimaryKey(collect.getApplyId());
+
+		EBankHandler handler = handlerHelper.selectByWalletLevel(walletApply.getWalletLevel());
+		handler.collect(walletApply.getId());
+
+		return collect;
+	}
+
+	/**
+	 * 查询代收结果
+	 */
+	public WalletCollect queryCollect(String accessToken, String orderNo) {
+		return walletCollectDao.selectByOrderNo(orderNo);
+	}
+
+
+	/**
+	 * 发起代付（加锁）
+	 */
+	@Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
+	public SettleResp agentPay(String accessToken, String collectOrderNo, List<Reciever> receivers) {
+		WalletCollect walletCollect = walletCollectDao.selectByOrderNo(collectOrderNo);
+		if(walletCollect == null){
+			throw new RuntimeException();
+		}
+		// 工单记录
+		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> {
+			WalletApply walletApply = walletApplyDao.selectByBatchNo(id);
+			return walletApply == null;
+		});
+		WalletApply walletApply = WalletApply.builder()
+			.batchNo(batchNo)
+			.type(WalletApplyType.AGENT_PAY.getValue())
+			.amount(receivers.stream().map(req -> req.getAmount()).reduce(0L, (x, y) -> x + y))
+			.status(WalletApplyStatus.WAIT_SEND.getValue())
+			.walletLevel(EnumWalletLevel.SENIOR.getValue())
+			.walletType(WalletType.COMPANY.getValue())
+			.channelType(TunnelType.YUNST.getValue())
+			.queryTime(DateUtil.addSecs(new Date(), configService.getNextRoundSec()))
+			.createTime(new Date())
+			.build();
+		walletApplyDao.insertSelective(walletApply);
+
+		List<WalletClearInfo> clearInfos = walletClearInfoDao.selectByCollectId(walletCollect.getId());
+		// 判断收款人记录不重复
+		// 匹配原始分账记录
+		receivers.forEach(receiver -> {
+			Optional<WalletClearInfo> opt = clearInfos.stream().filter(
+				clear -> clear.getWalletId().longValue() == receiver.getWalletId().longValue())
+				.findFirst();
+			WalletClearInfo clear = opt.orElseThrow(() -> new RuntimeException());
+			// 收款金额不超过剩余代付
+			if (clear.getBudgetAmount() - clear.getClearAmount() < receiver.getAmount()) {
+				throw new RuntimeException();
+			}
+		});
+		List<WalletClearing> clearings = receivers.stream().map(receiver -> {
+			WalletClearing clearing = WalletClearing.builder()
+				.applyId(walletApply.getId())
+				.collectId(walletCollect.getId())
+				.walletId(receiver.getWalletId())
+				.amount(receiver.getAmount())
+				.status(ClearingStatus.WAITING.getValue())
+				.build();
+			walletClearingDao.insertSelective(clearing);
+			return clearing;
+		}).collect(Collectors.toList());
+
+		// 代付给每个收款人
+		EBankHandler handler = handlerHelper.selectByWalletLevel(walletApply.getWalletLevel());
+		handler.agentPay(walletApply.getId());
+
+		return SettleResp.builder()
+			.collect(walletCollect)
+			.clearings(clearings)
+			.build();
+
+	}
+
+	/**
+	 * 查询代付结果
+	 */
+	public WalletClearing agentPayQuery(String agentPayOrderNo) {
+		return walletClearingDao.selectByOrderNo(agentPayOrderNo);
+	}
+
+
+	/**
+	 * 退款
+	 */
+	public void refund(String collectOrderNo, List<RefundInfo> refundList) {
+		// 工单记录
+		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> {
+			WalletApply walletApply = walletApplyDao.selectByBatchNo(id);
+			return walletApply == null;
+		});
+		WalletApply walletApply = WalletApply.builder()
+			.batchNo(batchNo)
+			.type(WalletApplyType.REFUND.getValue())
+			.amount(
+				refundList.stream().map(refund -> refund.getAmount()).reduce((x, y) -> x + y).get())
+			.status(WalletApplyStatus.WAIT_SEND.getValue())
+			.walletLevel(EnumWalletLevel.SENIOR.getValue())
+			.walletType(WalletType.COMPANY.getValue())
+			.channelType(TunnelType.YUNST.getValue())
+			.queryTime(DateUtil.addSecs(new Date(), configService.getNextRoundSec()))
+			.createTime(new Date())
+			.build();
+		walletApplyDao.insertSelective(walletApply);
+
+		// 记录退款单
+		WalletCollect collect = walletCollectDao.selectByOrderNo(collectOrderNo);
+		refundList.forEach(refund -> {
+			WalletRefund walletRefund = WalletRefund.builder()
+				.applyId(walletApply.getId())
+				.collectId(collect.getId())
+				.fromWalletId(collect.getPayeeWalletId())
+				.toWalletId(collect.getPayerWalletId())
+				.refundAmount(refund.getAmount())
+				.status(RefundStatus.WAITING.getValue())
+				.build();
+			walletRefundDao.insertSelective(walletRefund);
+		});
+
+		// 代付给每个收款人
+		EBankHandler handler = handlerHelper.selectByWalletLevel(walletApply.getWalletLevel());
+		handler.refund(collect.getApplyId());
+
 	}
 
 	/**
@@ -198,191 +394,6 @@ public class SeniorWalletService {
 		walletCollectMethodDao.insertSelective(builder.build());
 	}
 
-	/**
-	 * 发起代收
-	 */
-	public WalletCollect doCollect(String accessToken, WalletCollect collect) {
-		WalletApply walletApply = walletApplyDao.selectByPrimaryKey(collect.getApplyId());
-
-		EBankHandler handler = handlerHelper.selectByWalletLevel(walletApply.getWalletLevel());
-		handler.collect(walletApply.getId());
-
-		return collect;
-	}
-
-	/**
-	 * 查询代收结果
-	 */
-	public List<WalletCollect> getCollects(String accessToken, String batchNo) {
-		WalletApply walletApply = walletApplyDao.selectByBatchNo(batchNo);
-		return walletCollectDao.selectByApplyId(walletApply.getId());
-	}
-
-
-	/**
-	 * 发起代付（加锁）
-	 */
-	@Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
-	public SettleResp agentPay(String accessToken, Long collectId, List<Reciever> receivers) {
-		// 工单记录
-		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> {
-			WalletApply walletApply = walletApplyDao.selectByBatchNo(id);
-			return walletApply == null;
-		});
-		WalletApply walletApply = WalletApply.builder()
-			.batchNo(batchNo)
-			.type(WalletApplyType.AGENT_PAY.getValue())
-			.amount(receivers.stream().map(req -> req.getAmount()).reduce(0L, (x, y) -> x + y))
-			.status(WalletApplyStatus.WAIT_SEND.getValue())
-			.walletLevel(EnumWalletLevel.SENIOR.getValue())
-			.walletType(WalletType.COMPANY.getValue())
-			.channelType(TunnelType.YUNST.getValue())
-			.queryTime(DateUtil.addSecs(new Date(), configService.getNextRoundSec()))
-			.createTime(new Date())
-			.build();
-		walletApplyDao.insertSelective(walletApply);
-
-		List<WalletClearInfo> clearInfos = walletClearInfoDao.selectByCollectId(collectId);
-		// 判断收款人记录不重复
-		// 匹配原始分账记录
-		receivers.forEach(receiver -> {
-			Optional<WalletClearInfo> opt = clearInfos.stream().filter(
-				clear -> clear.getWalletId().longValue() == receiver.getWalletId().longValue())
-				.findFirst();
-			WalletClearInfo clear = opt.orElseThrow(() -> new RuntimeException());
-			// 收款金额不超过剩余代付
-			if (clear.getBudgetAmount() - clear.getClearAmount() < receiver.getAmount()) {
-				throw new RuntimeException();
-			}
-		});
-		List<WalletClearing> clearings = receivers.stream().map(receiver -> {
-			WalletClearing clearing = WalletClearing.builder()
-				.applyId(walletApply.getId())
-				.collectId(collectId)
-				.walletId(receiver.getWalletId())
-				.amount(receiver.getAmount())
-				.status(ClearingStatus.WAITING.getValue())
-				.build();
-			walletClearingDao.insertSelective(clearing);
-			return clearing;
-		}).collect(Collectors.toList());
-
-		// 代付给每个收款人
-		EBankHandler handler = handlerHelper.selectByWalletLevel(walletApply.getWalletLevel());
-		handler.agentPay(walletApply.getId());
-
-		return SettleResp.builder()
-			.applyId(walletApply.getId())
-			.clearings(clearings)
-			.build();
-
-	}
-
-	/**
-	 * 查询代付结果
-	 */
-	public List<WalletClearing> agentPayQuery(Long collectId) {
-		return walletClearingDao.selectByApplyId(collectId);
-	}
-
-
-	/**
-	 * 退款
-	 */
-	public void refund(Long collectId, List<RefundInfo> refundList) {
-		// 工单记录
-		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> {
-			WalletApply walletApply = walletApplyDao.selectByBatchNo(id);
-			return walletApply == null;
-		});
-		WalletApply walletApply = WalletApply.builder()
-			.batchNo(batchNo)
-			.type(WalletApplyType.REFUND.getValue())
-			.amount(
-				refundList.stream().map(refund -> refund.getAmount()).reduce((x, y) -> x + y).get())
-			.status(WalletApplyStatus.WAIT_SEND.getValue())
-			.walletLevel(EnumWalletLevel.SENIOR.getValue())
-			.walletType(WalletType.COMPANY.getValue())
-			.channelType(TunnelType.YUNST.getValue())
-			.queryTime(DateUtil.addSecs(new Date(), configService.getNextRoundSec()))
-			.createTime(new Date())
-			.build();
-		walletApplyDao.insertSelective(walletApply);
-
-		// 记录退款单
-		WalletCollect collect = walletCollectDao.selectByPrimaryKey(collectId);
-		refundList.forEach(refund -> {
-			WalletRefund walletRefund = WalletRefund.builder()
-				.applyId(walletApply.getId())
-				.collectId(collectId)
-				.fromWalletId(collect.getPayeeWalletId())
-				.toWalletId(collect.getPayerWalletId())
-				.refundAmount(refund.getAmount())
-				.status(RefundStatus.WAITING.getValue())
-				.build();
-			walletRefundDao.insertSelective(walletRefund);
-		});
-
-		// 代付给每个收款人
-		EBankHandler handler = handlerHelper.selectByWalletLevel(walletApply.getWalletLevel());
-		handler.refund(collectId);
-
-	}
-
-	/**
-	 * 充值
-	 */
-	public void recharge(String accessToken, RechargeReq rechargeReq) {
-		// 工单记录
-		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> {
-			WalletApply walletApply = walletApplyDao.selectByBatchNo(id);
-			return walletApply == null;
-		});
-		WalletApply walletApply = WalletApply.builder()
-			.batchNo(batchNo)
-			.bizNo(rechargeReq.getBizNo())
-			.type(WalletApplyType.RECHARGE.getValue())
-			.amount(rechargeReq.getAmount())
-			.status(WalletApplyStatus.WAIT_SEND.getValue())
-			.walletLevel(EnumWalletLevel.SENIOR.getValue())
-			.walletType(WalletType.COMPANY.getValue())
-			.channelType(TunnelType.YUNST.getValue())
-			.queryTime(DateUtil.addSecs(new Date(), configService.getNextRoundSec()))
-			.createTime(new Date())
-			.build();
-		walletApplyDao.insertSelective(walletApply);
-
-		Long payerWalletId =
-			(rechargeReq.getPayerWalletId() != null) ? rechargeReq.getPayerWalletId()
-				: defPayerWalletId;
-		WalletPayMethod payMethod = rechargeReq.getWalletPayMethod();
-		Wallet payerWallet = walletDao.selectByPrimaryKey(payerWalletId);
-		if (payerWallet == null || payerWallet.getStatus() != WalletStatus.ACTIVE.getValue()
-			.byteValue()) {
-			throw new RuntimeException();
-		}
-		// 代收记录
-		String orderNo = IdGenerator.createBizId("WR", 19, id -> {
-			return walletRechargeDao.selectCountByOrderNo(id) == 0;
-		});
-		WalletRecharge recharge = WalletRecharge.builder()
-			.applyId(walletApply.getId())
-			.orderNo(orderNo)
-			.payerWalletId(payerWallet.getId())
-			.payeeWalletId(defEntWalletId)
-			.amount(rechargeReq.getAmount())
-			.channelType(payMethod.getTunnels())
-			.tunnelType(TunnelType.YUNST.getValue())
-			.progress(GwProgress.WAIT_SEND.getValue())
-			.status(CollectStatus.WAIT_PAY.getValue())
-			.expireTime(rechargeReq.getExpireTime())
-			.build();
-		walletRechargeDao.insertSelective(recharge);
-		savePayMethod(recharge.getId(), WalletApplyType.RECHARGE.getValue(), payMethod);
-
-		// 银行充值
-		EBankHandler handler = handlerHelper.selectByWalletLevel(walletApply.getWalletLevel());
-		handler.recharge(walletApply.getId());
-
+	public void refundQuery(String collectOrderNo) {
 	}
 }
