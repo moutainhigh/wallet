@@ -307,16 +307,24 @@ public class WalletApiImpl implements WalletApi {
 					"batch_no: " + batchNo + ", biz_no: " + bizNo);
 		}
 
-		if (apply.getStatus().intValue() != WalletApplyStatus.SUCC.getValue().intValue()) {
-			throw new WalletResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE, "申请单状态为成功时才能进行重置为失败操作");
-		}
+		Date[] changeTime = {new Date()};
+		ApplyStatusChange statusChange;
+		if(apply.getStatus().intValue() != WalletApplyStatus.FAIL.getValue().intValue()){
 
-		ApplyStatusChange statusChange = applyStatusChangeExtDao.selectByApplyId(apply.getId());
-		if (null != statusChange) {
-			throw new WalletResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE, "该申请单已进行过状态调整");
-		}
+			if (apply.getStatus().intValue() != WalletApplyStatus.SUCC.getValue().intValue()) {
+				throw new WalletResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE, "申请单状态为成功时才能进行重置为失败操作");
+			}
 
-		walletService.setWalletApplyStatus(apply.getId(), auditUserId, auditUser, auditComment);
+			statusChange = applyStatusChangeExtDao.selectByApplyId(apply.getId());
+			if (null != statusChange) {
+				throw new WalletResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE, "该申请单已进行过状态调整");
+			}
+
+			walletService.setWalletApplyStatus(apply.getId(), auditUserId, auditUser, auditComment);
+		} else {
+			statusChange = applyStatusChangeExtDao.selectByApplyId(apply.getId());
+			changeTime[0] = statusChange.getCreateTime();
+		}
 
 		walletApiExecutor.execute(() -> mqService.publish(MqService.MqApplyStatusChange.builder()
 				.applyId(apply.getId())
@@ -324,7 +332,7 @@ public class WalletApiImpl implements WalletApi {
 				.orderNo(apply.getBizNo())
 				.newStatus(WalletApplyStatus.FAIL.getValue().intValue())
 				.oldStatus(WalletApplyStatus.SUCC.getValue().intValue())
-				.changeTime(new Date())
+				.changeTime(changeTime[0])
 				.msg(auditComment)
 				.build(), MqConstant.WALLET_APPLY_BILL_STATUS_CHANGE));
 
