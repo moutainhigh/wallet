@@ -5,6 +5,13 @@ jenkins job: platform-rfwallet-super-server-test
 
 ```
 
+## 1.2.0.b2.2019101711_Beta
+
+### [变动说明]
+
+1. 优化重置代码
+
+
 ## 1.2.0.b1.2019100916_Beta
 
 ### [变动说明]
