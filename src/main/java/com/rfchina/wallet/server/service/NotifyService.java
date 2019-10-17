@@ -44,7 +44,7 @@ public class NotifyService {
 	@Autowired
 	private YunstBizHandler yunstBizHandler;
 
-	public void yunstNotify(Map<String, String> params) {
+	public ChannelNotify yunstNotify(Map<String, String> params) {
 		String json = JsonUtil.toJSON(params);
 		log.info("Yunst notify: {}", json);
 
@@ -62,7 +62,7 @@ public class NotifyService {
 
 		if (StringUtils.isBlank(service) && StringUtils.isBlank(methodName)) {
 			log.error("云商通回调参数有误,缺少service 或 method");
-			return;
+			return channelNotify;
 		}
 		channelNotify.setYunstServiceName(service);
 		channelNotify.setYunstMethodName(methodName);
@@ -106,7 +106,7 @@ public class NotifyService {
 			log.error("云商通回调,service:{}", service);
 		}
 		channelNotifyDao.updateByPrimaryKeySelective(channelNotify);
-		return;
+		return channelNotify;
 	}
 
 	private void handleVerfiyResult(ChannelNotify channelNotify,

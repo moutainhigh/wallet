@@ -146,7 +146,14 @@ public class ConfigService {
 	private String tradeCodePay;
 
 	@Value("${yunst.recall.recharge}")
-	private String rechargeRecallUrl;
+	private String yunstRechargeRecallUrl;
+
+	@Value("${yunst.recall.collect}")
+	private String yunstCollectRecallUrl;
+
+	@Value("${yunst.recall.agentPay}")
+	private String yunstAgentPayRecallUrl;
+
 // yunst end
 
 }
