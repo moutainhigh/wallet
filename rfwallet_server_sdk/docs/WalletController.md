@@ -10,7 +10,7 @@
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
 |access_token|是|access_token|
-|audit_type|是|审核方式，1：运营，3：银企直连，5：通联|
+|audit_type|是|审核方式，1：运营，2：银企直连，3：通联|
 |company_name|是|公司名称|
 |status|是|钱包状态: 1:待审核，2：激活,3：禁用|
 |wallet_id|是|钱包ID|
@@ -36,7 +36,7 @@
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
 |access_token|是|access_token|
-|audit_type|是|审核方式，1：运营，3：银企直连，5：通联|
+|audit_type|是|审核方式，1：运营，2：银企直连，3：通联|
 |id_no|是|证件号|
 |id_type|是|证件类型，1:身份证|
 |name|是|姓名|
