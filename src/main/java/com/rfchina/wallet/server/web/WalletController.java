@@ -95,9 +95,9 @@ public class WalletController {
 			@ApiParam(value = "钱包ID", required = true, example = "2") @RequestParam("wallet_id") Long walletId,
 			@ApiParam(value = "公司名称", required = true) @RequestParam("company_name") String companyName,
 			@ApiParam(value = "钱包状态: 1:待审核，2：激活,3：禁用", required = true) @RequestParam("status") Byte status,
-			@ApiParam(value = "审核方式，1：运营，3：银企直连，5：通联", required = true, example = "6") @RequestParam("audit_type")
+			@ApiParam(value = "审核方式，1：运营，2：银企直连，3：通联", required = true, example = "3") @RequestParam("audit_type")
 					Long auditType) {
-		walletApi.activeWalletCompany(walletId, companyName, auditType);
+		walletApi.activeWalletCompany(walletId, companyName,status, auditType);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
 
@@ -109,9 +109,9 @@ public class WalletController {
 			@ApiParam(value = "证件类型，1:身份证", required = true, example = "1") @RequestParam("id_type") Byte idType,
 			@ApiParam(value = "证件号", required = true) @RequestParam("id_no") String idNo,
 			@ApiParam(value = "钱包状态: 1:待审核，2：激活,3：禁用", required = true) @RequestParam("status") Byte status,
-			@ApiParam(value = "审核方式，1：运营，3：银企直连，5：通联", required = true, example = "6") @RequestParam("audit_type")
+			@ApiParam(value = "审核方式，1：运营，2：银企直连，3：通联", required = true, example = "3") @RequestParam("audit_type")
 					Long auditType) {
-		walletApi.activeWalletPerson(walletId, name, idType, idNo, auditType);
+		walletApi.activeWalletPerson(walletId, name, idType, idNo,status, auditType);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
 

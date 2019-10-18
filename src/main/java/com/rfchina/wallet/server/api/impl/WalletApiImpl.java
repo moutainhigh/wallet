@@ -278,16 +278,16 @@ public class WalletApiImpl implements WalletApi {
 	@SignVerify
 	@Override
 	public void activeWalletPerson(Long walletId, String name, Byte idType, String idNo,
-		Long auditType) {
-		walletService.activeWalletPerson(walletId, name, idType, idNo, auditType);
+		Byte status, Long auditType) {
+		walletService.activeWalletPerson(walletId, name, idType, idNo,status, auditType);
 	}
 
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public void activeWalletCompany(Long walletId, String companyName, Long auditType) {
-		walletService.activeWalletCompany(walletId, companyName, auditType);
+	public void activeWalletCompany(Long walletId, String companyName,Byte status, Long auditType) {
+		walletService.activeWalletCompany(walletId, companyName,status, auditType);
 	}
 
 	@Log

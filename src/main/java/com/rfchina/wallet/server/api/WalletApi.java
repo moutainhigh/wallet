@@ -110,12 +110,13 @@ public interface WalletApi {
 	/**
 	 * 富慧通审核个人商家钱包
 	 */
-	void activeWalletPerson(Long walletId, String name, Byte idType, String idNo, Long auditType);
+	void activeWalletPerson(Long walletId, String name, Byte idType, String idNo, Byte status,
+		Long auditType);
 
 	/**
 	 * 富慧通审核企业商家钱包
 	 */
-	void activeWalletCompany(Long walletId, String companyName, Long auditType);
+	void activeWalletCompany(Long walletId, String companyName, Byte status, Long auditType);
 
 	/**
 	 * 发送手机验证码
@@ -250,7 +251,8 @@ public interface WalletApi {
 	 * @param cvv2 非必填, 信用卡cvv2码
 	 */
 	YunstApplyBindBankCardResult seniorWalletVerifyBankCard(String accessToken, Long walletId,
-		Byte source, String cardNo, String realName, String phone, String identityNo, String validate,
+		Byte source, String cardNo, String realName, String phone, String identityNo,
+		String validate,
 		String cvv2);
 
 	/**

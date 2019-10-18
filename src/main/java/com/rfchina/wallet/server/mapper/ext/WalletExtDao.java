@@ -20,9 +20,9 @@ public interface WalletExtDao extends WalletMapper {
 	List<Byte> selectWalletType(@Param("walletIds") List<Long> walletIds);
 
 	@Update({"update rf_wallet"
-		, "set status = 2 , audit_type = #{auditType}"
-		, "where id = #{walletId} and status in (1,2)"
+		, "set status = #{status} , audit_type = #{auditType}"
+		, "where id = #{walletId}"
 	})
-	void updateActiveStatus(@Param("walletId") Long walletId, @Param("auditType") Long auditType);
+	void updateActiveStatus(@Param("walletId") Long walletId, @Param("status") Byte status,@Param("auditType") Long auditType);
 
 }

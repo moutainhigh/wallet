@@ -715,7 +715,7 @@ public class WalletService {
 	 * 富慧通审核通过个人商家钱包
 	 */
 	public void activeWalletPerson(Long walletId, String name, Byte idType, String idNo,
-		Long auditType) {
+		Byte status, Long auditType) {
 
 		WalletPerson walletPerson = walletPersonDao.selectByWalletId(walletId);
 
@@ -732,13 +732,14 @@ public class WalletService {
 			walletPersonDao.insertSelective(walletPerson);
 		}
 
-		walletDao.updateActiveStatus(walletId, auditType);
+		walletDao.updateActiveStatus(walletId, status, auditType);
 	}
 
 	/**
 	 * 富慧通审核通过企业商家钱包
 	 */
-	public void activeWalletCompany(Long walletId, String companyName, Long auditType) {
+	public void activeWalletCompany(Long walletId, String companyName, Byte status,
+		Long auditType) {
 
 		WalletCompany walletCompany = walletCompanyDao.selectByWalletId(walletId);
 
@@ -753,7 +754,7 @@ public class WalletService {
 			walletCompanyDao.insertSelective(walletCompany);
 		}
 
-		walletDao.updateActiveStatus(walletId, auditType);
+		walletDao.updateActiveStatus(walletId, status, auditType);
 	}
 
 	/**
