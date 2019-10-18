@@ -22,16 +22,23 @@ public class SeniorWalletServiceTest extends SpringBaseTest {
 	@Autowired
 	private WalletCollectExtDao walletCollectDao;
 
+	private Long payerWalletId = 10001L;
+	private Long platWalletId = 10000L;
+
+	/**
+	 * 预代收
+	 */
 	@Test
 	public void preCollect() {
 		Balance balance = Balance.builder()
 			.amount(1L)
 			.build();
 		Reciever reciever = Reciever.builder()
-			.walletId(10000L)
+			.walletId(platWalletId)
 			.amount(1L)
 			.build();
 		CollectReq req = CollectReq.builder()
+			.payerWalletId(payerWalletId)
 			.bizNo(String.valueOf(System.currentTimeMillis()))
 			.amount(1L)
 			.note("")
@@ -46,17 +53,27 @@ public class SeniorWalletServiceTest extends SpringBaseTest {
 		seniorWalletService.preCollect("", req);
 	}
 
+	/**
+	 * 代收
+	 */
 	@Test
 	public void doCollect() {
 		WalletCollect walletCollect = walletCollectDao.selectByPrimaryKey(2L);
 		seniorWalletService.doCollect("", walletCollect);
 	}
 
+	/**
+	 * 预代付
+	 */
+
+	/**
+	 * 充值
+	 */
 	@Test
 	public void recharge() {
 		CodePay codePay = CodePay.builder()
 			.payType(CollectPayType.CODEPAY.getValue())
-			.authcode("134659812413794300")
+			.authcode("134656007344739804")
 			.amount(1L)
 			.build();
 		RechargeReq req = RechargeReq.builder()

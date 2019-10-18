@@ -23,7 +23,7 @@ public class WalletPayMethod  {
     private CodePay codePay ;
 
     @ApiModelProperty("")
-    private Integer tunnels ;
+    private Integer methods ;
 
     @ApiModelProperty("微信支付")
     private Wechat wechat ;

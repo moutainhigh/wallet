@@ -1,6 +1,5 @@
 package com.rfchina.wallet.server.model.ext;
 
-import com.rfchina.wallet.server.msic.EnumWallet;
 import com.rfchina.wallet.server.msic.EnumWallet.ChannelType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -70,7 +69,7 @@ public class CollectReq {
 		@ApiModelProperty(value = "刷卡支付")
 		private CodePay codePay;
 
-		public byte getTunnels() {
+		public byte getMethods() {
 			byte method = 0;
 			if (balance != null) {
 				method |= ChannelType.WALLET.getValue().byteValue();
@@ -90,9 +89,6 @@ public class CollectReq {
 		@NoArgsConstructor
 		@AllArgsConstructor
 		public static class Balance {
-
-//			@ApiModelProperty(name = "wallet_id", value = "钱包ID（余额支付）", required = true, example = "1")
-//			private Long walletId;
 
 			@ApiModelProperty(value = "渠道出资额(单位分)")
 			private Long amount;
@@ -173,9 +169,6 @@ public class CollectReq {
 
 		@ApiModelProperty(value = "金额,单位:分")
 		private Long amount;
-
-//		@ApiModelProperty(value = "代付接口手续费（代收无效）,单位:分")
-//		private Long feeAmount;
 
 	}
 }

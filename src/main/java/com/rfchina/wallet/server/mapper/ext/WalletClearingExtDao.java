@@ -25,4 +25,10 @@ public interface WalletClearingExtDao extends WalletClearingMapper {
 	int updateClearAmount(@Param("collectId") Long collectId, @Param("walletId") Long walletId,
 		@Param("amount") Long amount);
 
+	@Select({
+		"select * from rf_wallet_clearing",
+		"where order_no = #{orderNo}"
+	})
+	@ResultMap({"com.rfchina.wallet.domain.mapper.WalletClearingMapper.BaseResultMap"})
+	WalletClearing selectByOrderNo(@Param("orderNo") String orderNo);
 }

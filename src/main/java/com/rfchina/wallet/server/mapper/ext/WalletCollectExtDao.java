@@ -16,4 +16,11 @@ public interface WalletCollectExtDao extends WalletCollectMapper {
 	@ResultMap({"com.rfchina.wallet.domain.mapper.WalletCollectMapper.BaseResultMap"})
 	List<WalletCollect> selectByApplyId(@Param("applyId") Long applyId);
 
+	@Select({
+		"select * from rf_wallet_collect",
+		"where order_no = #{orderNo}"
+	})
+	@ResultMap({"com.rfchina.wallet.domain.mapper.WalletCollectMapper.BaseResultMap"})
+	WalletCollect selectByOrderNo(@Param("orderNo") String orderNo);
+
 }

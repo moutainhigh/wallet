@@ -12,8 +12,11 @@ public class GetOrderDetailResp {
 	@ApiModelProperty(value = "商户订单号(支付订单)")
 	private String bizOrderNo;
 
-	@ApiModelProperty(value = "订单状态")
+	@ApiModelProperty(value = "订单状态 1:未支付 3:交易失败 4:交易成功 5:交易成功-发生退款 6:关闭 99:进行中 ")
 	private Long orderStatus;
+
+	@ApiModelProperty(value = "失败原因")
+	private String errorMessage;
 
 	@ApiModelProperty(value = "订单金额")
 	private Long amount;

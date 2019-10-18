@@ -5,6 +5,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rfchina.platform.common.json.ObjectSetter;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.misc.EnumDef;
@@ -12,11 +14,16 @@ import com.rfchina.wallet.domain.misc.EnumDef.WalletChannelSignContract;
 import com.rfchina.wallet.domain.model.ChannelNotify;
 import com.rfchina.wallet.domain.model.WalletChannel;
 import com.rfchina.wallet.server.bank.yunst.response.YunstNotify;
+import com.rfchina.wallet.server.bank.yunst.response.RecallResp;
+import com.rfchina.wallet.server.bank.yunst.response.RpsResp;
+import com.rfchina.wallet.server.bank.yunst.response.RpsResp.RpsValue;
 import com.rfchina.wallet.server.mapper.ext.ChannelNotifyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletChannelExtDao;
+import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyType;
 import com.rfchina.wallet.server.msic.EnumWallet.YunstMethodName;
 import com.rfchina.wallet.server.msic.EnumWallet.YunstServiceName;
 import java.util.TimeZone;
+import com.rfchina.wallet.server.service.handler.yunst.YunstBizHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +41,10 @@ public class NotifyService {
 	private WalletChannelExtDao walletChannelExtDao;
 	@Autowired
 	private ChannelNotifyExtDao channelNotifyDao;
+	@Autowired
+	private YunstBizHandler yunstBizHandler;
 
-	public void yunstNotify(Map<String, String> params) {
+	public ChannelNotify yunstNotify(Map<String, String> params) {
 		String json = JsonUtil.toJSON(params);
 		log.info("Yunst notify: {}", json);
 
@@ -53,7 +62,7 @@ public class NotifyService {
 
 		if (StringUtils.isBlank(service) && StringUtils.isBlank(methodName)) {
 			log.error("云商通回调参数有误,缺少service 或 method");
-			return;
+			return channelNotify;
 		}
 		channelNotify.setYunstServiceName(service);
 		channelNotify.setYunstMethodName(methodName);
@@ -97,7 +106,7 @@ public class NotifyService {
 			log.error("云商通回调,service:{}", service);
 		}
 		channelNotifyDao.updateByPrimaryKeySelective(channelNotify);
-		return;
+		return channelNotify;
 	}
 
 	private void handleVerfiyResult(ChannelNotify channelNotify,
@@ -195,4 +204,24 @@ public class NotifyService {
 //			});
 //		System.out.println(result);
 //	}
+	public void handleOrderResult(ChannelNotify channelNotify, WalletApplyType type) {
+
+		RecallResp recallResp = JsonUtil.toObject(channelNotify.getContent(), RecallResp.class,
+			objectMapper -> {
+				objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			});
+		RpsResp rpsResp = JsonUtil.toObject(recallResp.getRps(), RpsResp.class, objectMapper -> {
+			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		});
+
+		if (WalletApplyType.RECHARGE == type) {
+			yunstBizHandler.updateRechargeStatus(rpsResp.getReturnValue().getBizOrderNo());
+		} else if (WalletApplyType.COLLECT == type) {
+			yunstBizHandler.updateCollectStatus(rpsResp.getReturnValue().getBizOrderNo());
+		} else if (WalletApplyType.AGENT_PAY == type) {
+			yunstBizHandler.updateAgentPayStatus(rpsResp.getReturnValue().getBizOrderNo());
+		}
+	}
+
+
 }
