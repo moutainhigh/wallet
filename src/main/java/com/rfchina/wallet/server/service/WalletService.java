@@ -20,6 +20,7 @@ import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumDefBankCard;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletCardSenior;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletChannelSignContract;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletSource;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.*;
@@ -35,6 +36,7 @@ import com.rfchina.wallet.server.bank.pudong.domain.util.ExceptionUtil;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstApplyBindBankCardResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstCreateMemberResult;
+import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstSetCompanyInfoResult;
 import com.rfchina.wallet.server.bank.yunst.util.CommonGatewayException;
 import com.rfchina.wallet.server.mapper.ext.*;
@@ -1131,5 +1133,28 @@ public class WalletService {
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 		}
 		return true;
+	}
+
+	public YunstMemberInfoResult.CompanyInfoResult seniorWalletGetCompanyInfo(Long walletId,
+		Byte source) {
+		try {
+			return (YunstMemberInfoResult.CompanyInfoResult) yunstUserHandler
+				.getMemberInfo(walletId, source);
+		} catch (Exception e) {
+			log.error("高级钱包获取企业会员信息失败, walletId: {}", walletId);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+		}
+	}
+
+
+	public YunstMemberInfoResult.PersonInfoResult seniorWalletGetPersonInfo(Long walletId,
+		Byte source) {
+		try {
+			return (YunstMemberInfoResult.PersonInfoResult) yunstUserHandler
+				.getMemberInfo(walletId, source);
+		} catch (Exception e) {
+			log.error("高级钱包获取企业会员信息失败, walletId: {}", walletId);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+		}
 	}
 }

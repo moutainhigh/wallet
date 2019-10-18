@@ -34,7 +34,7 @@ public abstract class YunstBaseHandler {
 		case 1:
 			return MEMBER_TYPE_PREFIX_COMPANY + walletId;
 		case 2:
-			return MEMBER_TYPE_PREFIX_MCH + walletId;
+			return MEMBER_TYPE_PREFIX_PERSON + walletId;
 		case 3:
 			return MEMBER_TYPE_PREFIX_PERSON + walletId;
 		}

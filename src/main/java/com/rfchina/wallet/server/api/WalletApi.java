@@ -9,6 +9,7 @@ import com.rfchina.wallet.domain.model.ext.BankClass;
 import com.rfchina.wallet.domain.model.ext.WalletCardExt;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstApplyBindBankCardResult;
+import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 
@@ -279,4 +280,25 @@ public interface WalletApi {
 	 * @param cardNo 必填, 卡号
 	 */
 	Long seniorWalletUnBindBankCard(String accessToken, Long walletId, Byte source, String cardNo);
+
+
+	/**
+	 * 高级钱包获取企业用户信息
+	 *
+	 * @param source 必填, 钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户
+	 * @param walletId 必填, 钱包id
+	 */
+	YunstMemberInfoResult.CompanyInfoResult seniorWalletGetCompanyInfo(String accessToken,
+		Long walletId,
+		Byte source);
+
+	/**
+	 * 高级钱包获取个人用户信息
+	 *
+	 * @param source 必填, 钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户
+	 * @param walletId 必填, 钱包id
+	 */
+	YunstMemberInfoResult.PersonInfoResult seniorWalletGetPersonInfo(String accessToken,
+		Long walletId,
+		Byte source);
 }

@@ -10,7 +10,6 @@ import com.rfchina.platform.common.annotation.ParamValid;
 import com.rfchina.platform.common.annotation.SignVerify;
 import com.rfchina.platform.common.exception.RfchinaResponseException;
 import com.rfchina.platform.common.misc.ResponseCode;
-import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.ResponseValue;
 import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.platform.common.utils.EnumUtil;
@@ -30,13 +29,13 @@ import com.rfchina.wallet.domain.model.ext.WalletCardExt;
 import com.rfchina.wallet.server.api.WalletApi;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstApplyBindBankCardResult;
-import com.rfchina.wallet.server.bank.yunst.response.result.YunstBindBankCardResult;
+import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.CompanyInfoResult;
+import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.PersonInfoResult;
 import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletChannelExtDao;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import com.rfchina.wallet.server.msic.EnumWallet.LockStatus;
-import com.rfchina.wallet.server.msic.EnumWallet;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyStatus;
 import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.JuniorWalletService;
@@ -49,7 +48,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -554,5 +552,41 @@ public class WalletApiImpl implements WalletApi {
 		}
 		walletService.seniorWalletUnBindBankCard(walletId, source, cardNo);
 		return walletId;
+	}
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
+	@Override
+	public CompanyInfoResult seniorWalletGetCompanyInfo(String accessToken, Long walletId,
+		Byte source) {
+		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
+		if (wallet == null) {
+			log.error("高级钱包获取企业用户信息失败, 查无此钱包, walletId: {}", walletId);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+		}
+		if (wallet.getLevel() != EnumDef.EnumWalletLevel.SENIOR.getValue().byteValue()) {
+			log.error("高级钱包获取企业用户信息失败, 钱包不是高级钱包, walletId: {}", walletId);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+		}
+		return walletService.seniorWalletGetCompanyInfo(walletId,source);
+	}
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
+	@Override
+	public PersonInfoResult seniorWalletGetPersonInfo(String accessToken, Long walletId,
+		Byte source) {
+		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
+		if (wallet == null) {
+			log.error("高级钱包获取个人用户信息失败, 查无此钱包, walletId: {}", walletId);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+		}
+		if (wallet.getLevel() != EnumDef.EnumWalletLevel.SENIOR.getValue().byteValue()) {
+			log.error("高级钱包获取个人用户信息失败, 钱包不是高级钱包, walletId: {}", walletId);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+		}
+		return walletService.seniorWalletGetPersonInfo(walletId,source);
 	}
 }
