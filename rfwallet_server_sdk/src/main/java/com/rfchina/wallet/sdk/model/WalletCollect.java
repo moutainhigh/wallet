@@ -13,6 +13,9 @@ import java.util.ArrayList;
 */
 @Data
 public class WalletCollect  {
+    @ApiModelProperty("中间账户钱包id")
+    private Long agentWalletId ;
+
     @ApiModelProperty("金额")
     private Long amount ;
 
@@ -43,14 +46,14 @@ public class WalletCollect  {
     @ApiModelProperty("支付方式 1：余额 2：微信 4：支付宝 8:刷卡支付 16：银行卡")
     private Integer payMethod ;
 
-    @ApiModelProperty("收款人钱包id（中间账户）")
-    private Long payeeWalletId ;
-
-    @ApiModelProperty("付款人钱包id（可为空）")
+    @ApiModelProperty("付款人钱包id")
     private Long payerWalletId ;
 
     @ApiModelProperty("进度。1：待发送 2：已发送 3：已接收结果")
     private Integer progress ;
+
+    @ApiModelProperty("可退总额")
+    private Long refundLimit ;
 
     @ApiModelProperty("开始时间")
     private String startTime ;

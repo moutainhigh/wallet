@@ -21,14 +21,21 @@
     amount:""  , //总金额
     apply_id:""  , //工单id
     collect_id:""  , //代收单id
+    collect_info_id:""  , //分帐id
     create_time:""  , //创建日期
-    end_time:""  , //最后清算结束时间
+    end_time:""  , //结束时间
+    err_code:""  , //通道错误码
+    err_msg:""  , //系统错误信息
+    expire_time:""  , //过期时间
     id:""  , //id
     order_no:""  , //订单号
-    start_time:""  , //最后清算发起时间
+    payee_wallet_id:""  , //收款人钱包id
+    progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
+    start_time:""  , //开始时间
     status:""  , //清算状态。1：未清算 2：已清算  3:交易失败
     tunnel_order_no:""  , //渠道订单号
-    wallet_id:""   //钱包id
+    tunnel_status:""  , //通道状态
+    tunnel_succ_time:""   //通道成功时间
 }  
 }
 ```
@@ -67,16 +74,24 @@
     amount:""  , //总金额
     apply_id:""  , //工单id
     collect_id:""  , //代收单id
+    collect_info_id:""  , //分帐id
     create_time:""  , //创建日期
-    end_time:""  , //最后清算结束时间
+    end_time:""  , //结束时间
+    err_code:""  , //通道错误码
+    err_msg:""  , //系统错误信息
+    expire_time:""  , //过期时间
     id:""  , //id
     order_no:""  , //订单号
-    start_time:""  , //最后清算发起时间
+    payee_wallet_id:""  , //收款人钱包id
+    progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
+    start_time:""  , //开始时间
     status:""  , //清算状态。1：未清算 2：已清算  3:交易失败
     tunnel_order_no:""  , //渠道订单号
-    wallet_id:""   //钱包id
+    tunnel_status:""  , //通道状态
+    tunnel_succ_time:""   //通道成功时间
 }  ]  , 
     collect:{
+    agent_wallet_id:""  , //中间账户钱包id
     amount:""  , //金额
     apply_id:""  , //工单id
     create_time:""  , //创建日期
@@ -87,9 +102,9 @@
     id:""  , //id
     order_no:""  , //订单号
     pay_method:""  , //支付方式 1：余额 2：微信 4：支付宝 8:刷卡支付 16：银行卡
-    payee_wallet_id:""  , //收款人钱包id（中间账户）
-    payer_wallet_id:""  , //付款人钱包id（可为空）
+    payer_wallet_id:""  , //付款人钱包id
     progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
+    refund_limit:""  , //可退总额
     start_time:""  , //开始时间
     status:""  , //代收状态。1：待支付 2：已支付 3：交易失败 4：交易关闭（超时或其他）
     tunnel_order_no:""  , //渠道订单号
@@ -163,6 +178,7 @@
   "code": 1001,//状态码
   "msg": ""//消息
    , "data":  {
+    agent_wallet_id:""  , //中间账户钱包id
     amount:""  , //金额
     apply_id:""  , //工单id
     create_time:""  , //创建日期
@@ -173,9 +189,9 @@
     id:""  , //id
     order_no:""  , //订单号
     pay_method:""  , //支付方式 1：余额 2：微信 4：支付宝 8:刷卡支付 16：银行卡
-    payee_wallet_id:""  , //收款人钱包id（中间账户）
-    payer_wallet_id:""  , //付款人钱包id（可为空）
+    payer_wallet_id:""  , //付款人钱包id
     progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
+    refund_limit:""  , //可退总额
     start_time:""  , //开始时间
     status:""  , //代收状态。1：待支付 2：已支付 3：交易失败 4：交易关闭（超时或其他）
     tunnel_order_no:""  , //渠道订单号
@@ -206,6 +222,7 @@
   "code": 1001,//状态码
   "msg": ""//消息
    , "data":  {
+    agent_wallet_id:""  , //中间账户钱包id
     amount:""  , //金额
     apply_id:""  , //工单id
     create_time:""  , //创建日期
@@ -216,9 +233,9 @@
     id:""  , //id
     order_no:""  , //订单号
     pay_method:""  , //支付方式 1：余额 2：微信 4：支付宝 8:刷卡支付 16：银行卡
-    payee_wallet_id:""  , //收款人钱包id（中间账户）
-    payer_wallet_id:""  , //付款人钱包id（可为空）
+    payer_wallet_id:""  , //付款人钱包id
     progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
+    refund_limit:""  , //可退总额
     start_time:""  , //开始时间
     status:""  , //代收状态。1：待支付 2：已支付 3：交易失败 4：交易关闭（超时或其他）
     tunnel_order_no:""  , //渠道订单号
@@ -291,6 +308,7 @@
   "code": 1001,//状态码
   "msg": ""//消息
    , "data":  {
+    agent_wallet_id:""  , //中间账户钱包id
     amount:""  , //金额
     apply_id:""  , //工单id
     create_time:""  , //创建日期
@@ -301,9 +319,9 @@
     id:""  , //id
     order_no:""  , //订单号
     pay_method:""  , //支付方式 1：余额 2：微信 4：支付宝 8:刷卡支付 16：银行卡
-    payee_wallet_id:""  , //收款人钱包id（中间账户）
-    payer_wallet_id:""  , //付款人钱包id（可为空）
+    payer_wallet_id:""  , //付款人钱包id
     progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
+    refund_limit:""  , //可退总额
     start_time:""  , //开始时间
     status:""  , //代收状态。1：待支付 2：已支付 3：交易失败 4：交易关闭（超时或其他）
     tunnel_order_no:""  , //渠道订单号
