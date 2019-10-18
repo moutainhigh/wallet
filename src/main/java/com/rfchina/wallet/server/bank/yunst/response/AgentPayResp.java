@@ -23,5 +23,8 @@ public class AgentPayResp {
 
 	@ApiModelProperty(value = "代付去向 1:到账户余额 2:到银行卡")
 	private Long payWhereabouts;
+
+	@ApiModelProperty(value = "最多50个字符,商户拓展参数,用于透传给商户")
+	private String extendInfo;
 }
 

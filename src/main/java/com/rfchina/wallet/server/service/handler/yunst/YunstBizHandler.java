@@ -38,6 +38,7 @@ import com.rfchina.wallet.server.bank.yunst.request.DepositApplyReq;
 import com.rfchina.wallet.server.bank.yunst.request.GetOrderDetailReq;
 import com.rfchina.wallet.server.bank.yunst.request.RefundApplyReq;
 import com.rfchina.wallet.server.bank.yunst.request.RefundApplyReq.RefundInfo;
+import com.rfchina.wallet.server.bank.yunst.response.AgentPayResp;
 import com.rfchina.wallet.server.bank.yunst.response.BatchAgentPayResp;
 import com.rfchina.wallet.server.bank.yunst.response.CollectApplyResp;
 import com.rfchina.wallet.server.bank.yunst.response.GetOrderDetailResp;
@@ -80,6 +81,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class YunstBizHandler extends EBankHandler {
 
+	public static final String TRADE_CODESTRING_COLLECT = "3001";
+	public static final String TRADE_CODESTRING_AGENTPAY = "4001";
 	@Autowired
 	private YunstTpl yunstTpl;
 
@@ -159,7 +162,7 @@ public class YunstBizHandler extends EBankHandler {
 				.fee(0L)
 				.validateType(0L)
 				.frontUrl(null)
-				.backUrl(configService.getRechargeRecallUrl())
+				.backUrl(configService.getYunstRechargeRecallUrl())
 				.orderExpireDatetime(expireTime)
 				.payMethod(getMethodMap(methods, true))
 				.industryCode("1910")
@@ -204,7 +207,7 @@ public class YunstBizHandler extends EBankHandler {
 			// 收款人
 			List<RecieveInfo> receives = clears.stream().map(clear -> {
 				WalletChannel receiver = walletChannelDao
-					.selectByWalletId(clear.getWalletId(), TunnelType.YUNST.getValue());
+					.selectByWalletId(clear.getPayeeWalletId(), collect.getTunnelType());
 				return RecieveInfo.builder()
 					.bizUserId(receiver.getBizUserId())
 					.amount(clear.getBudgetAmount())
@@ -226,10 +229,10 @@ public class YunstBizHandler extends EBankHandler {
 				.fee(0L)
 				.validateType(0L)
 				.frontUrl(null)
-				.backUrl(configService.getRechargeRecallUrl())
+				.backUrl(configService.getYunstCollectRecallUrl())
 				.ordErexpireDatetime(expireTime)
 				.payMethod(getMethodMap(methods, false))
-				.tradeCode("3001")
+				.tradeCode(TRADE_CODESTRING_COLLECT)
 				.industryCode("1910")
 				.industryName("其他")
 				.source(1L)
@@ -358,73 +361,76 @@ public class YunstBizHandler extends EBankHandler {
 
 		List<WalletClearing> walletClearings = walletClearingDao.selectByApplyId(applyId);
 		// 登记代付数额
-		List<AgentPayReq> batchPayList = walletClearings.stream().map(clear -> {
+		walletClearings.forEach(clearing -> {
 			CollectPay collectPay = CollectPay.builder()
-				.bizOrderNo("WP" + clear.getCollectId())
-				.amount(clear.getAmount())
+				.bizOrderNo(clearing.getOrderNo())
+				.amount(clearing.getAmount())
 				.build();
 			WalletChannel tunnel = walletChannelExtDao
-				.selectByWalletId(clear.getWalletId(), TunnelType.YUNST.getValue());
-			return AgentPayReq.builder()
-				.bizOrderNo("WC" + clear.getId())
+				.selectByWalletId(clearing.getPayeeWalletId(), TunnelType.YUNST.getValue());
+			AgentPayReq req = AgentPayReq.builder()
+				.bizOrderNo(clearing.getOrderNo())
 				.collectPayList(Lists.newArrayList(collectPay))
 				.bizUserId(tunnel.getBizUserId())
-				.accountSetNo("100001")  // 产品需求代付到余额账户
-				.backUrl("")
-				.amount(clear.getAmount())
+				.accountSetNo(configService.getUserAccSet())  // 产品需求代付到余额账户
+				.backUrl(configService.getYunstAgentPayRecallUrl())
+				.amount(clearing.getAmount())
 				.fee(0L)
+				.splitRuleList(null)
+				.tradeCode(TRADE_CODESTRING_AGENTPAY)
+				.summary(null)
 				.extendInfo(null)
 				.build();
-		}).collect(Collectors.toList());
 
-		WalletApply walletApply = walletApplyDao.selectByPrimaryKey(walletClearings.get(0).getId());
-		BatchAgentPayReq req = BatchAgentPayReq.builder()
-			.bizBatchNo(walletApply.getBatchNo())
-			.batchPayList(batchPayList)
-//			.tradeCode(TRADE_CODE_BUY)
-			.build();
+			try {
+				AgentPayResp resp = yunstTpl.execute(req, AgentPayResp.class);
+				clearing.setTunnelOrderNo(resp.getOrderNo());
+				clearing.setProgress(UniProgress.SENDED.getValue());
+				clearing.setStartTime(new Date());
+				walletClearingDao.updateByPrimaryKey(clearing);
+			} catch (Exception e) {
+				log.error("", e);
+				throw new RuntimeException();
+			}
+		});
 
-		try {
-			yunstTpl.execute(req, BatchAgentPayResp.class);
-		} catch (Exception e) {
-			log.error("", e);
-			throw new RuntimeException();
-		}
+
 	}
 
 	/**
 	 * 退款
 	 */
 	public void refund(Long applyId) {
-		List<WalletRefund> refunds = walletRefundDao.selectByApplyId(applyId);
-		WalletRefund refund = refunds.get(0);
-		WalletChannel toChannel = walletChannelDao
-			.selectByWalletId(refund.getToWalletId(), TunnelType.YUNST.getValue());
-		List<RefundInfo> refundList = refunds.stream().map(r -> {
-			WalletChannel fromChannel = walletChannelDao
-				.selectByWalletId(r.getFromWalletId(), TunnelType.YUNST.getValue());
-			return RefundInfo.builder()
-				.accountSetNo("")
-				.bizUserId(fromChannel.getBizUserId())
-				.amount(r.getRefundAmount())
-				.build();
-		}).collect(Collectors.toList());
-		RefundApplyReq req = RefundApplyReq.builder()
-			.bizOrderNo("WR" + refund.getId())
-			.oriBizOrderNo("WP" + refund.getCollectId())
-			.bizUserId(toChannel.getBizUserId())
-			.refundType(RefundType.D0.getValue())
-			.refundList(refundList)
-			.amount(
-				refunds.stream().map(WalletRefund::getRefundAmount).reduce((x, y) -> x + y).get())
-			.build();
-		try {
-			yunstTpl.execute(req, RefundApplyResp.class);
-		} catch (Exception e) {
-			log.error("", e);
-			throw new RuntimeException();
-		}
-
+//		List<WalletRefund> refunds = walletRefundDao.selectByApplyId(applyId);
+//
+//		List<RefundInfo> refundList = refunds.stream().map(refund -> {
+//			WalletChannel collectChannel = walletChannelDao
+//				.selectByWalletId(refund.get(), refund.getTunnelType());
+//			return RefundInfo.builder()
+//				.accountSetNo(null)
+//				.bizUserId(collectChannel.getBizUserId())
+//				.amount(refund.getRefundAmount())
+//				.build();
+//		}).collect(Collectors.toList());
+//
+//		WalletChannel refundChannel = walletChannelDao
+//			.selectByWalletId(.getToWalletId(), TunnelType.YUNST.getValue());
+//		RefundApplyReq req = RefundApplyReq.builder()
+//			.bizOrderNo("WR" + refund.getId())
+//			.oriBizOrderNo("WP" + refund.getCollectId())
+//			.bizUserId(toChannel.getBizUserId())
+//			.refundType(RefundType.D0.getValue())
+//			.refundList(refundList)
+//			.amount(
+//				refunds.stream().map(WalletRefund::getRefundAmount).reduce((x, y) -> x + y)
+//					.get())
+//			.build();
+//		try {
+//			yunstTpl.execute(req, RefundApplyResp.class);
+//		} catch (Exception e) {
+//			log.error("", e);
+//			throw new RuntimeException();
+//		}
 	}
 
 	public Tuple<WalletApply, GatewayTrans> updatePayStatus(

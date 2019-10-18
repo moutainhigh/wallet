@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @ApiModel
-public class AgentPayReq {
+public class AgentPayReq implements YunstBaseReq{
 
 	@ApiModelProperty(required = true, value = "商户订单号(支付订单)")
 	private String bizOrderNo;
@@ -22,6 +22,16 @@ public class AgentPayReq {
 	@Max(100)
 	@ApiModelProperty(required = true, value = "源托管代收订单付款信息")
 	private List<CollectPay> collectPayList;
+
+	@Override
+	public String getServcieName() {
+		return "OrderService";
+	}
+
+	@Override
+	public String getMethodName() {
+		return "signalAgentPay";
+	}
 
 
 	@Builder
@@ -41,16 +51,16 @@ public class AgentPayReq {
 	@ApiModelProperty(required = true, value = "商户系统用户标识,商户系统中唯一编号。")
 	private String bizUserId;
 
-	@ApiModelProperty(required = true,value = "收款方的账户集编号")
+	@ApiModelProperty(required = true, value = "收款方的账户集编号")
 	private String accountSetNo;
 
-	@ApiModelProperty(required = true,value = "后台通知地址")
+	@ApiModelProperty(required = true, value = "后台通知地址")
 	private String backUrl;
 
-	@ApiModelProperty(required = true,value = "金额,单位:分")
+	@ApiModelProperty(required = true, value = "金额,单位:分")
 	private Long amount;
 
-	@ApiModelProperty(required = true,value = "手续费,单位:分")
+	@ApiModelProperty(required = true, value = "手续费,单位:分")
 	private Long fee;
 
 	@ApiModelProperty(value = "内扣。支持分账到会员或者平台账户")
@@ -81,18 +91,17 @@ public class AgentPayReq {
 		private List<SplitRule> splitRuleList;
 	}
 
-	@ApiModelProperty(value = "摘要 最多20个字符")
+	@ApiModelProperty(value = "商品类型")
+	private Long goodsType;
+
+	@ApiModelProperty(value = "商户系统商品编号")
+	private String bizGoodsNo;
+
+	@ApiModelProperty(required = true, value = "业务码")
+	private String tradeCode;
+
+	@ApiModelProperty(value = "摘要")
 	private String summary;
-
-//	@ApiModelProperty(value = "商品类型")
-//	private Long goodsType;
-//
-//	@ApiModelProperty(value = "商户系统商品编号")
-//	private String bizGoodsNo;
-//
-//	@ApiModelProperty(value = "业务码")
-//	private String tradeCode;
-
 
 	@ApiModelProperty(value = "最多50个字符,商户拓展参数,用于透传给商户")
 	private String extendInfo;
