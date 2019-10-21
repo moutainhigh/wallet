@@ -215,4 +215,9 @@ public class UrlConstant {
 	 * 云商通代付回调
 	 */
 	public static final String YUNST_AGENT_PAY_RECALL = VERSION + "/yunst/agent_pay_recall";
+
+	/**
+	 * 云商通退款回调
+	 */
+	public static final String YUNST_REFUND_RECALL = VERSION + "/yunst/refund_recall";
 }

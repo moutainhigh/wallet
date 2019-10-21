@@ -3,6 +3,7 @@ package com.rfchina.wallet.server.service;
 import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EnumUtil;
+import com.rfchina.wallet.domain.mapper.WalletRefundDetailMapper;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletLevel;
 import com.rfchina.wallet.domain.model.Wallet;
@@ -14,6 +15,7 @@ import com.rfchina.wallet.domain.model.WalletCollectMethod;
 import com.rfchina.wallet.domain.model.WalletCollectMethod.WalletCollectMethodBuilder;
 import com.rfchina.wallet.domain.model.WalletRecharge;
 import com.rfchina.wallet.domain.model.WalletRefund;
+import com.rfchina.wallet.domain.model.WalletRefundDetail;
 import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletClearInfoExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletClearingExtDao;
@@ -89,6 +91,9 @@ public class SeniorWalletService {
 
 	@Autowired
 	private WalletRefundExtDao walletRefundDao;
+
+	@Autowired
+	private WalletRefundDetailMapper walletRefundDetailDao;
 
 	@Autowired
 	private WalletRechargeExtDao walletRechargeDao;
@@ -364,7 +369,7 @@ public class SeniorWalletService {
 		}
 
 		// 核对清分记录
-		List<WalletClearInfo> clearInfos = walletClearInfoDao.selectByCollectId(collect.getId());
+//		List<WalletClearInfo> clearInfos = walletClearInfoDao.selectByCollectId(collect.getId());
 //		refundList.forEach(r -> {
 //			Long clearedValue = histClearings.stream()
 //				.filter(
@@ -416,6 +421,15 @@ public class SeniorWalletService {
 			.build();
 		walletRefundDao.insertSelective(walletRefund);
 
+		// 记录退款明细
+		refundList.forEach(refund -> {
+			WalletRefundDetail detail = WalletRefundDetail.builder()
+				.refundId(walletRefund.getId())
+				.payeeWalletId(Long.valueOf(refund.getWalletId()))
+				.amount(refund.getAmount())
+				.build();
+			walletRefundDetailDao.insertSelective(detail);
+		});
 
 		// 代付给每个收款人
 		EBankHandler handler = handlerHelper.selectByWalletLevel(walletApply.getWalletLevel());
