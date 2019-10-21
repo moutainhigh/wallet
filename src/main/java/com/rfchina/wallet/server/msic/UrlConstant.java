@@ -195,6 +195,14 @@ public class UrlConstant {
 	 * 高级钱包解除绑定银行卡
 	 */
 	public static final String WALLET_SENIOR_UN_BIND_BANK_CARD = VERSION + "/m/wallet/senior_un_bind_bank_card";
+	/**
+	 * 高级钱包个人信息
+	 */
+	public static final String WALLET_SENIOR_PERSON_INFO = VERSION + "/m/wallet/senior_person_info";
+	/**
+	 * 高级钱包企业信息
+	 */
+	public static final String WALLET_SENIOR_COMPANY_INFO= VERSION + "/m/wallet/senior_company_info";
 
 	/**
 	 * 云商通统一回调
