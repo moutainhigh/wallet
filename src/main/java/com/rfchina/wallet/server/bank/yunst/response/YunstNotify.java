@@ -46,4 +46,12 @@ public class YunstNotify {
 		private String bizUserId;
 		private String newPhone;
 	}
+
+	@Data
+	@NoArgsConstructor
+	@AllArgsConstructor
+	@ToString
+	public static class SetPayPwd{
+		private String bizUserId;
+	}
 }

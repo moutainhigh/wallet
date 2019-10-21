@@ -770,6 +770,7 @@ public class EnumWallet {
 		VERIFY_RESULT("verifyResult"),
 		SIGN_CONTRACT("signContract"),
 		CHANGE_BIND_PHONE("updatePhoneByPayPwd"),
+		SET_PAY_PWD("setPayPwd"),
 		PAY("pay"),
 		;
 

@@ -35,7 +35,8 @@
     status:""  , //清算状态。1：未清算 2：已清算  3:交易失败
     tunnel_order_no:""  , //渠道订单号
     tunnel_status:""  , //通道状态
-    tunnel_succ_time:""   //通道成功时间
+    tunnel_succ_time:""  , //通道成功时间
+    tunnel_type:""   //通道类型。1: 浦发银企直连，2：通联云商通
 }  
 }
 ```
@@ -88,7 +89,8 @@
     status:""  , //清算状态。1：未清算 2：已清算  3:交易失败
     tunnel_order_no:""  , //渠道订单号
     tunnel_status:""  , //通道状态
-    tunnel_succ_time:""   //通道成功时间
+    tunnel_succ_time:""  , //通道成功时间
+    tunnel_type:""   //通道类型。1: 浦发银企直连，2：通联云商通
 }  ]  , 
     collect:{
     agent_wallet_id:""  , //中间账户钱包id

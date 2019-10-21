@@ -594,6 +594,7 @@
     check_time:""  , //审核时间
     create_time:""  , //创建日期
     fail_reason:""  , //失败原因
+    has_pay_password:""  , //是否设置支付密码 1-是 2-否
     id:""  , //id
     is_sign_contact:""  , //签订通联会员协议 0-未签订 1-签订电子会员协议 2-签订扣款协议
     member_type:""  , //银行用户类型。2：企业会员 3：个人会员
@@ -815,6 +816,33 @@
 }
 ```
 
+###  高级钱包个人设置支付密码
+
+请求地址: /wallet_server/v1/m/wallet/senior_person_set_paypassword
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|identity_no|是|身份证|
+|name|是|姓名|
+|phone|是|绑定手机|
+|source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
+|wallet_id|是|钱包id|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+  
+}
+```
+
 ###  高级钱包委托代扣协议
 
 请求地址: /wallet_server/v1/m/wallet/senior_balance_protocol
@@ -894,6 +922,7 @@
     check_time:""  , //审核时间
     create_time:""  , //创建日期
     fail_reason:""  , //失败原因
+    has_pay_password:""  , //是否设置支付密码 1-是 2-否
     id:""  , //id
     is_sign_contact:""  , //签订通联会员协议 0-未签订 1-签订电子会员协议 2-签订扣款协议
     member_type:""  , //银行用户类型。2：企业会员 3：个人会员
@@ -960,6 +989,7 @@
     check_time:""  , //审核时间
     create_time:""  , //创建日期
     fail_reason:""  , //失败原因
+    has_pay_password:""  , //是否设置支付密码 1-是 2-否
     id:""  , //id
     is_sign_contact:""  , //签订通联会员协议 0-未签订 1-签订电子会员协议 2-签订扣款协议
     member_type:""  , //银行用户类型。2：企业会员 3：个人会员

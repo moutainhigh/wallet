@@ -378,6 +378,21 @@ public class WalletController {
 			walletApi.signBalanceProtocol(accessToken, source, walletId));
 	}
 
+	@ApiOperation("高级钱包个人设置支付密码")
+	@PostMapping(UrlConstant.WALLET_SENIOR_PERSON_SET_PAY_PASSWORD)
+	public ResponseValue<String> seniorWalletPersonSetPayPassword(
+		@RequestParam("access_token") String accessToken,
+		@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2")
+		@RequestParam("source") Byte source,
+		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+		@ApiParam(value = "绑定手机", required = true) @RequestParam("phone") String phone,
+		@ApiParam(value = "姓名", required = true) @RequestParam("name") String name,
+		@ApiParam(value = "身份证", required = true) @RequestParam("identity_no") String identityNo) {
+
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
+			walletApi.personSetPayPassword(accessToken, source, walletId, phone, name, identityNo));
+	}
+
 	@ApiOperation("高级钱包验证银行卡")
 	@PostMapping(UrlConstant.WALLET_SENIOR_VERIFY_BANK_CARD)
 	public ResponseValue<YunstApplyBindBankCardResult> seniorWalletVerifyBankCard(

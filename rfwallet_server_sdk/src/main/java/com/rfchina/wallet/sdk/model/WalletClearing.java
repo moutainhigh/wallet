@@ -67,6 +67,9 @@ public class WalletClearing  {
     @ApiModelProperty("通道成功时间")
     private String tunnelSuccTime ;
 
+    @ApiModelProperty("通道类型。1: 浦发银企直连，2：通联云商通")
+    private Integer tunnelType ;
+
 
 }
 
