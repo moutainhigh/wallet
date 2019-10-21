@@ -132,11 +132,15 @@ public class YunstBizHandler extends EBankHandler {
 		return null;
 	}
 
-	public Tuple<GatewayMethod, PayTuple> transfer(Long applyId) {
+
+	public PayStatusResp onAskErr(WalletApply walletLog, IGatewayError err) {
 		return null;
 	}
 
-	public PayStatusResp onAskErr(WalletApply walletLog, IGatewayError err) {
+	/**
+	 * 转账
+	 */
+	public Tuple<GatewayMethod, PayTuple> transfer(Long applyId) {
 		return null;
 	}
 

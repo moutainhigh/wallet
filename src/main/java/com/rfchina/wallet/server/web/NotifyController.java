@@ -86,7 +86,7 @@ public class NotifyController {
 	/**
 	 * 云商通退款回调
 	 */
-	@RequestMapping(value = UrlConstant.YUNST_AGENT_PAY_RECALL)
+	@RequestMapping(value = UrlConstant.YUNST_REFUND_RECALL)
 	public ResponseValue<String> agentRefund(HttpServletRequest request){
 
 		Map<String, String> params = request.getParameterMap().entrySet().stream().collect(

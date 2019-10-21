@@ -3,7 +3,6 @@ package com.rfchina.wallet.server.service;
 import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EnumUtil;
-import com.rfchina.wallet.domain.mapper.WalletRefundDetailMapper;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletLevel;
 import com.rfchina.wallet.domain.model.Wallet;
@@ -22,6 +21,7 @@ import com.rfchina.wallet.server.mapper.ext.WalletClearingExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectMethodExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRechargeExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletRefundDetailExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRefundExtDao;
 import com.rfchina.wallet.server.model.ext.CollectReq;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod;
@@ -93,7 +93,7 @@ public class SeniorWalletService {
 	private WalletRefundExtDao walletRefundDao;
 
 	@Autowired
-	private WalletRefundDetailMapper walletRefundDetailDao;
+	private WalletRefundDetailExtDao walletRefundDetailDao;
 
 	@Autowired
 	private WalletRechargeExtDao walletRechargeDao;
