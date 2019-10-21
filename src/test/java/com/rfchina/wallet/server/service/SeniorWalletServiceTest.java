@@ -26,6 +26,29 @@ public class SeniorWalletServiceTest extends SpringBaseTest {
 	private Long platWalletId = 10000L;
 
 	/**
+	 * 充值
+	 */
+	@Test
+	public void recharge() {
+		CodePay codePay = CodePay.builder()
+			.payType(CollectPayType.CODEPAY.getValue())
+			.authcode("134775946646746617")
+			.amount(1L)
+			.build();
+		RechargeReq req = RechargeReq.builder()
+			.bizNo(String.valueOf(System.currentTimeMillis()))
+			.amount(1L)
+			.fee(0L)
+			.validateType((byte) 0)
+			.expireTime(null)
+			.industryCode("1010")
+			.industryName("保险代理")
+			.walletPayMethod(WalletPayMethod.builder().codePay(codePay).build())
+			.build();
+		seniorWalletService.recharge("", req);
+	}
+
+	/**
 	 * 预代收
 	 */
 	@Test
@@ -62,30 +85,5 @@ public class SeniorWalletServiceTest extends SpringBaseTest {
 		seniorWalletService.doCollect("", walletCollect);
 	}
 
-	/**
-	 * 预代付
-	 */
 
-	/**
-	 * 充值
-	 */
-	@Test
-	public void recharge() {
-		CodePay codePay = CodePay.builder()
-			.payType(CollectPayType.CODEPAY.getValue())
-			.authcode("134656007344739804")
-			.amount(1L)
-			.build();
-		RechargeReq req = RechargeReq.builder()
-			.bizNo(String.valueOf(System.currentTimeMillis()))
-			.amount(1L)
-			.fee(0L)
-			.validateType((byte) 0)
-			.expireTime(null)
-			.industryCode("1010")
-			.industryName("保险代理")
-			.walletPayMethod(WalletPayMethod.builder().codePay(codePay).build())
-			.build();
-		seniorWalletService.recharge("", req);
-	}
 }

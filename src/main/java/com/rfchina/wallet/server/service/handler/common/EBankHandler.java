@@ -67,4 +67,5 @@ public abstract class EBankHandler {
 	 */
 	public abstract List<WalletRecharge> recharge(Long applyId);
 
+
 }

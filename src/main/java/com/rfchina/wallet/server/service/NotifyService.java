@@ -228,6 +228,7 @@ public class NotifyService {
 //			});
 //		System.out.println(result);
 //	}
+
 	public void handleOrderResult(ChannelNotify channelNotify, WalletApplyType type) {
 
 		RecallResp recallResp = JsonUtil.toObject(channelNotify.getContent(), RecallResp.class,
@@ -244,6 +245,10 @@ public class NotifyService {
 			yunstBizHandler.updateCollectStatus(rpsResp.getReturnValue().getBizOrderNo());
 		} else if (WalletApplyType.AGENT_PAY == type) {
 			yunstBizHandler.updateAgentPayStatus(rpsResp.getReturnValue().getBizOrderNo());
+		} else if (WalletApplyType.REFUND == type) {
+			yunstBizHandler.updateRefundStatus(rpsResp.getReturnValue().getBizOrderNo());
+		} else {
+			throw new RuntimeException();
 		}
 	}
 

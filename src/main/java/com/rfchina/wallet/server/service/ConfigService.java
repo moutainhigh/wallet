@@ -154,6 +154,9 @@ public class ConfigService {
 	@Value("${yunst.recall.agentPay}")
 	private String yunstAgentPayRecallUrl;
 
+	@Value("${yunst.recall.refund}")
+	private String yunstRefundRecallUrl;
+
 // yunst end
 
 }

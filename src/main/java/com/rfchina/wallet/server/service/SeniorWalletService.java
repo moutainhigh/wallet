@@ -14,12 +14,14 @@ import com.rfchina.wallet.domain.model.WalletCollectMethod;
 import com.rfchina.wallet.domain.model.WalletCollectMethod.WalletCollectMethodBuilder;
 import com.rfchina.wallet.domain.model.WalletRecharge;
 import com.rfchina.wallet.domain.model.WalletRefund;
+import com.rfchina.wallet.domain.model.WalletRefundDetail;
 import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletClearInfoExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletClearingExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectMethodExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRechargeExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletRefundDetailExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRefundExtDao;
 import com.rfchina.wallet.server.model.ext.CollectReq;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod;
@@ -89,6 +91,9 @@ public class SeniorWalletService {
 
 	@Autowired
 	private WalletRefundExtDao walletRefundDao;
+
+	@Autowired
+	private WalletRefundDetailExtDao walletRefundDetailDao;
 
 	@Autowired
 	private WalletRechargeExtDao walletRechargeDao;
@@ -364,7 +369,7 @@ public class SeniorWalletService {
 		}
 
 		// 核对清分记录
-		List<WalletClearInfo> clearInfos = walletClearInfoDao.selectByCollectId(collect.getId());
+//		List<WalletClearInfo> clearInfos = walletClearInfoDao.selectByCollectId(collect.getId());
 //		refundList.forEach(r -> {
 //			Long clearedValue = histClearings.stream()
 //				.filter(
@@ -416,6 +421,15 @@ public class SeniorWalletService {
 			.build();
 		walletRefundDao.insertSelective(walletRefund);
 
+		// 记录退款明细
+		refundList.forEach(refund -> {
+			WalletRefundDetail detail = WalletRefundDetail.builder()
+				.refundId(walletRefund.getId())
+				.payeeWalletId(Long.valueOf(refund.getWalletId()))
+				.amount(refund.getAmount())
+				.build();
+			walletRefundDetailDao.insertSelective(detail);
+		});
 
 		// 代付给每个收款人
 		EBankHandler handler = handlerHelper.selectByWalletLevel(walletApply.getWalletLevel());

@@ -16,10 +16,10 @@ import com.rfchina.wallet.domain.model.WalletCollect;
 import com.rfchina.wallet.domain.model.WalletCollectMethod;
 import com.rfchina.wallet.domain.model.WalletRecharge;
 import com.rfchina.wallet.domain.model.WalletRefund;
+import com.rfchina.wallet.domain.model.WalletRefundDetail;
 import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
 import com.rfchina.wallet.server.bank.yunst.request.AgentPayReq;
 import com.rfchina.wallet.server.bank.yunst.request.AgentPayReq.CollectPay;
-import com.rfchina.wallet.server.bank.yunst.request.BatchAgentPayReq;
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq;
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod.Alipay;
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod.Alipay.AlipayService;
@@ -39,7 +39,6 @@ import com.rfchina.wallet.server.bank.yunst.request.GetOrderDetailReq;
 import com.rfchina.wallet.server.bank.yunst.request.RefundApplyReq;
 import com.rfchina.wallet.server.bank.yunst.request.RefundApplyReq.RefundInfo;
 import com.rfchina.wallet.server.bank.yunst.response.AgentPayResp;
-import com.rfchina.wallet.server.bank.yunst.response.BatchAgentPayResp;
 import com.rfchina.wallet.server.bank.yunst.response.CollectApplyResp;
 import com.rfchina.wallet.server.bank.yunst.response.GetOrderDetailResp;
 import com.rfchina.wallet.server.bank.yunst.response.RefundApplyResp;
@@ -51,6 +50,7 @@ import com.rfchina.wallet.server.mapper.ext.WalletClearingExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectMethodExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRechargeExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletRefundDetailExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRefundExtDao;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.PayTuple;
@@ -114,6 +114,9 @@ public class YunstBizHandler extends EBankHandler {
 	private WalletRefundExtDao walletRefundDao;
 
 	@Autowired
+	private WalletRefundDetailExtDao walletRefundDetailDao;
+
+	@Autowired
 	private WalletRechargeExtDao walletRechargeDao;
 
 	@Autowired
@@ -129,11 +132,15 @@ public class YunstBizHandler extends EBankHandler {
 		return null;
 	}
 
-	public Tuple<GatewayMethod, PayTuple> transfer(Long applyId) {
+
+	public PayStatusResp onAskErr(WalletApply walletLog, IGatewayError err) {
 		return null;
 	}
 
-	public PayStatusResp onAskErr(WalletApply walletLog, IGatewayError err) {
+	/**
+	 * 转账
+	 */
+	public Tuple<GatewayMethod, PayTuple> transfer(Long applyId) {
 		return null;
 	}
 
@@ -401,36 +408,49 @@ public class YunstBizHandler extends EBankHandler {
 	 * 退款
 	 */
 	public void refund(Long applyId) {
-//		List<WalletRefund> refunds = walletRefundDao.selectByApplyId(applyId);
-//
-//		List<RefundInfo> refundList = refunds.stream().map(refund -> {
-//			WalletChannel collectChannel = walletChannelDao
-//				.selectByWalletId(refund.get(), refund.getTunnelType());
-//			return RefundInfo.builder()
-//				.accountSetNo(null)
-//				.bizUserId(collectChannel.getBizUserId())
-//				.amount(refund.getRefundAmount())
-//				.build();
-//		}).collect(Collectors.toList());
-//
-//		WalletChannel refundChannel = walletChannelDao
-//			.selectByWalletId(.getToWalletId(), TunnelType.YUNST.getValue());
-//		RefundApplyReq req = RefundApplyReq.builder()
-//			.bizOrderNo("WR" + refund.getId())
-//			.oriBizOrderNo("WP" + refund.getCollectId())
-//			.bizUserId(toChannel.getBizUserId())
-//			.refundType(RefundType.D0.getValue())
-//			.refundList(refundList)
-//			.amount(
-//				refunds.stream().map(WalletRefund::getRefundAmount).reduce((x, y) -> x + y)
-//					.get())
-//			.build();
-//		try {
-//			yunstTpl.execute(req, RefundApplyResp.class);
-//		} catch (Exception e) {
-//			log.error("", e);
-//			throw new RuntimeException();
-//		}
+		List<WalletRefund> refunds = walletRefundDao.selectByApplyId(applyId);
+
+		refunds.forEach(refund -> {
+			List<WalletRefundDetail> details = walletRefundDetailDao
+				.selectByRefundId(refund.getId());
+			List<RefundInfo> refundList = details.stream().map(detail -> {
+				WalletChannel payeeChannel = walletChannelDao
+					.selectByWalletId(detail.getPayeeWalletId(), refund.getTunnelType());
+				return RefundInfo.builder()
+					.accountSetNo(null)
+					.bizUserId(payeeChannel.getBizUserId())
+					.amount(detail.getAmount())
+					.build();
+			}).collect(Collectors.toList());
+
+			WalletCollect collect = walletCollectDao.selectByPrimaryKey(refund.getCollectId());
+			WalletChannel payerChannel = walletChannelDao
+				.selectByWalletId(refund.getPayerWalletId(), refund.getTunnelType());
+			RefundApplyReq req = RefundApplyReq.builder()
+				.bizOrderNo(refund.getOrderNo())
+				.oriBizOrderNo(collect.getOrderNo())
+				.bizUserId(payerChannel.getBizUserId())
+				.refundType(RefundType.D0.getValue())
+				.refundList(refundList)
+				.backUrl(configService.getYunstRefundRecallUrl())
+				.amount(details.stream()
+					.collect(Collectors.summingLong(WalletRefundDetail::getAmount)))
+				.couponAmount(0L)
+				.feeAmount(0L)
+				.build();
+			try {
+				RefundApplyResp resp = yunstTpl.execute(req, RefundApplyResp.class);
+				refund.setTunnelOrderNo(resp.getOrderNo());
+				refund.setProgress(UniProgress.SENDED.getValue());
+				refund.setStartTime(new Date());
+				walletRefundDao.updateByPrimaryKey(refund);
+			} catch (Exception e) {
+				log.error("", e);
+				throw new RuntimeException();
+			}
+		});
+
+
 	}
 
 	public Tuple<WalletApply, GatewayTrans> updatePayStatus(
@@ -544,6 +564,30 @@ public class YunstBizHandler extends EBankHandler {
 			walletClearing.setEndTime(new Date());
 		}
 		walletClearingDao.updateByPrimaryKey(walletClearing);
+	}
+
+	public void updateRefundStatus(String orderNo) {
+		WalletRefund refund = walletRefundDao.selectByOrderNo(orderNo);
+
+		GetOrderDetailResp channelOrder = queryOrderDetail(orderNo);
+		if (!refund.getTunnelOrderNo().equals(channelOrder.getOrderNo())) {
+			log.error("渠道单号不匹配， refund = {} , channelOrderNo = {}", refund,
+				channelOrder.getBizOrderNo());
+			return;
+		}
+		refund.setTunnelStatus(String.valueOf(channelOrder.getOrderStatus()));
+		refund.setTunnelSuccTime(
+			DateUtil.parse(channelOrder.getPayDatetime(), DateUtil.STANDARD_DTAETIME_PATTERN));
+		refund.setErrMsg(channelOrder.getErrorMessage());
+		YunstOrderStatus orderStatus = EnumUtil
+			.parse(YunstOrderStatus.class, channelOrder.getOrderStatus());
+		CollectStatus applyStatus = orderStatus.toUniStatus();
+		refund.setStatus(applyStatus.getValue());
+		refund.setProgress(UniProgress.RECEIVED.getValue());
+		if (applyStatus.isEndStatus()) {
+			refund.setEndTime(new Date());
+		}
+		walletRefundDao.updateByPrimaryKey(refund);
 	}
 
 	private GetOrderDetailResp queryOrderDetail(String orderNo) {

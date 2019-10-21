@@ -83,4 +83,21 @@ public class NotifyController {
 			"Receive Yunst agent pay recall");
 	}
 
+	/**
+	 * 云商通退款回调
+	 */
+	@RequestMapping(value = UrlConstant.YUNST_REFUND_RECALL)
+	public ResponseValue<String> agentRefund(HttpServletRequest request){
+
+		Map<String, String> params = request.getParameterMap().entrySet().stream().collect(
+			Collectors.toMap(entry -> entry.getKey(),
+				entry -> entry.getValue().length > 0 ? entry.getValue()[0] : null));
+
+		ChannelNotify channelNotify = notifyService.yunstNotify(params);
+		notifyService.handleOrderResult(channelNotify, WalletApplyType.REFUND);
+
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS.getValue(),
+			"Receive Yunst agent pay recall");
+	}
+
 }
