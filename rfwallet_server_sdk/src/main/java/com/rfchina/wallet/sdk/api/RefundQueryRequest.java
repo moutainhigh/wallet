@@ -14,7 +14,7 @@ import java.util.List;
 public class RefundQueryRequest extends  AbstractApiRequest {
 
   @ApiModelProperty("退款单号")
-  private String collectOrderNo ;
+  private String refundOrderNo ;
 
   @ApiModelProperty("应用令牌")
   private String accessToken ;
@@ -27,14 +27,14 @@ public class RefundQueryRequest extends  AbstractApiRequest {
 
   @Override
   public Class<?> getResponseModelClass() {
-    return RefundResult.class;
+    return WalletRefund.class;
   }
 
   @Override
   public Map<String, String> getTextParmas() {
     Map<String, String> parameters = new HashMap<>(2);
-      if(collectOrderNo != null){
-        parameters.put("collect_order_no", collectOrderNo.toString());
+      if(refundOrderNo != null){
+        parameters.put("refund_order_no", refundOrderNo.toString());
       }
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());

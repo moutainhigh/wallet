@@ -30,7 +30,7 @@ public class RefundRequest extends  AbstractApiRequest {
 
   @Override
   public Class<?> getResponseModelClass() {
-    return RefundResult.class;
+    return WalletRefund.class;
   }
 
   @Override

@@ -404,7 +404,7 @@
 
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
-|collect_order_no|是|退款单号|
+|refund_order_no|是|退款单号|
 |access_token|否|应用令牌|
 
 返回数据
@@ -413,6 +413,26 @@
   "code": 1001,//状态码
   "msg": ""//消息
    , "data":  {
+    agent_wallet_id:""  , //中间账户钱包id
+    amount:""  , //退款金额
+    apply_id:""  , //工单id
+    collect_amount:""  , //原代收金额
+    collect_id:""  , //代收单id
+    create_time:""  , //创建日期
+    end_time:""  , //结束时间
+    err_code:""  , //通道错误码
+    err_msg:""  , //系统错误信息
+    expire_time:""  , //过期时间
+    id:""  , //id
+    order_no:""  , //订单号
+    payer_wallet_id:""  , //付款人钱包id
+    progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
+    start_time:""  , //开始时间
+    status:""  , //退款状态。1：未退款 2：已退款 3:交易失败
+    tunnel_order_no:""  , //渠道订单号
+    tunnel_status:""  , //通道状态
+    tunnel_succ_time:""  , //通道成功时间
+    tunnel_type:""   //通道类型。1: 浦发银企直连，2：通联云商通
 }  
 }
 ```
@@ -444,6 +464,26 @@
   "code": 1001,//状态码
   "msg": ""//消息
    , "data":  {
+    agent_wallet_id:""  , //中间账户钱包id
+    amount:""  , //退款金额
+    apply_id:""  , //工单id
+    collect_amount:""  , //原代收金额
+    collect_id:""  , //代收单id
+    create_time:""  , //创建日期
+    end_time:""  , //结束时间
+    err_code:""  , //通道错误码
+    err_msg:""  , //系统错误信息
+    expire_time:""  , //过期时间
+    id:""  , //id
+    order_no:""  , //订单号
+    payer_wallet_id:""  , //付款人钱包id
+    progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
+    start_time:""  , //开始时间
+    status:""  , //退款状态。1：未退款 2：已退款 3:交易失败
+    tunnel_order_no:""  , //渠道订单号
+    tunnel_status:""  , //通道状态
+    tunnel_succ_time:""  , //通道成功时间
+    tunnel_type:""   //通道类型。1: 浦发银企直连，2：通联云商通
 }  
 }
 ```

@@ -3,8 +3,10 @@ package com.rfchina.wallet.server.service.handler.common;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.wallet.domain.model.GatewayTrans;
 import com.rfchina.wallet.domain.model.WalletApply;
+import com.rfchina.wallet.domain.model.WalletClearing;
 import com.rfchina.wallet.domain.model.WalletCollect;
 import com.rfchina.wallet.domain.model.WalletRecharge;
+import com.rfchina.wallet.domain.model.WalletRefund;
 import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.PayTuple;
@@ -54,12 +56,13 @@ public abstract class EBankHandler {
 	/**
 	 * 代付
 	 */
-	public abstract void agentPay(Long applyId);
+	public abstract List<WalletClearing> agentPay(Long applyId);
 
 	/**
 	 * 退款
+	 * @return
 	 */
-	public abstract void refund(Long collectId);
+	public abstract List<WalletRefund> refund(Long collectId);
 
 	/**
 	 * 充值

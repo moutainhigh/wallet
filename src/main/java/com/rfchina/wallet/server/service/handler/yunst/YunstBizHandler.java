@@ -42,6 +42,7 @@ import com.rfchina.wallet.server.bank.yunst.response.AgentPayResp;
 import com.rfchina.wallet.server.bank.yunst.response.CollectApplyResp;
 import com.rfchina.wallet.server.bank.yunst.response.GetOrderDetailResp;
 import com.rfchina.wallet.server.bank.yunst.response.RefundApplyResp;
+import com.rfchina.wallet.server.bank.yunst.util.CommonGatewayException;
 import com.rfchina.wallet.server.bank.yunst.util.YunstTpl;
 import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletChannelExtDao;
@@ -65,7 +66,6 @@ import com.rfchina.wallet.server.msic.EnumWallet.YunstOrderStatus;
 import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.GatewayTransService;
 import com.rfchina.wallet.server.service.handler.common.EBankHandler;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -150,9 +150,8 @@ public class YunstBizHandler extends EBankHandler {
 	public List<WalletRecharge> recharge(Long applyId) {
 		WalletApply walletApply = walletApplyDao.selectByPrimaryKey(applyId);
 		List<WalletRecharge> recharges = walletRechargeDao.selectByApplyId(applyId);
-		List<WalletRecharge> result = new ArrayList<>();
 
-		for (WalletRecharge recharge : recharges) {
+		return recharges.stream().map(recharge -> {
 
 			List<WalletCollectMethod> methods = walletCollectMethodDao
 				.selectByCollectId(recharge.getId(), WalletApplyType.RECHARGE.getValue());
@@ -177,29 +176,28 @@ public class YunstBizHandler extends EBankHandler {
 				.source(1L)
 				.build();
 
+			recharge.setStartTime(new Date());
+			recharge.setProgress(UniProgress.SENDED.getValue());
 			try {
 				CollectApplyResp resp = yunstTpl.execute(req, CollectApplyResp.class);
-				if (StringUtils.isNotBlank(resp.getPayStatus())) {
-					if ("success".equals(resp.getPayStatus())) {
-						recharge.setStatus(CollectStatus.SUCC.getValue());
-					} else if ("fail".equals(resp.getPayStatus())) {
-						recharge.setStatus(CollectStatus.FAIL.getValue());
-					}
-					recharge.setTunnelOrderNo(resp.getOrderNo());
-					recharge.setStartTime(new Date());
-					recharge.setProgress(UniProgress.SENDED.getValue());
-					walletRechargeDao.updateByPrimaryKey(recharge);
+				recharge.setTunnelOrderNo(resp.getOrderNo());
+				if (StringUtils.isNotBlank(resp.getPayStatus())
+					&& "fail".equals(resp.getPayStatus())) {
+					recharge.setStatus(CollectStatus.FAIL.getValue());
+					recharge.setErrCode(resp.getPayCode());
+					recharge.setErrMsg(resp.getPayFailMessage());
 				}
-
-				result.add(recharge);
+			} catch (CommonGatewayException e) {
+				log.error("{}", JsonUtil.toJSON(e));
+				recharge.setErrCode(e.getBankErrCode());
+				recharge.setErrMsg(e.getBankErrMsg());
 			} catch (Exception e) {
 				log.error("{}", JSON.toJSONString(e));
 			}
-
-		}
-
-		return result;
-
+			walletRechargeDao.updateByPrimaryKey(recharge);
+			return recharge;
+		}).filter(item -> item != null)
+			.collect(Collectors.toList());
 	}
 
 	/**
@@ -207,9 +205,8 @@ public class YunstBizHandler extends EBankHandler {
 	 */
 	public List<WalletCollect> collect(Long applyId) {
 		List<WalletCollect> collects = walletCollectDao.selectByApplyId(applyId);
-		List<WalletCollect> result = new ArrayList<>();
 		// 付款人
-		for (WalletCollect collect : collects) {
+		return collects.stream().map(collect -> {
 			List<WalletClearInfo> clears = walletClearInfoDao.selectByCollectId(collect.getId());
 			// 收款人
 			List<RecieveInfo> receives = clears.stream().map(clear -> {
@@ -245,30 +242,294 @@ public class YunstBizHandler extends EBankHandler {
 				.source(1L)
 				.build();
 
+			collect.setProgress(UniProgress.SENDED.getValue());
+			collect.setStartTime(new Date());
 			try {
 				CollectApplyResp resp = yunstTpl.execute(req, CollectApplyResp.class);
-				if (StringUtils.isNotBlank(resp.getPayStatus())) {
-					if ("success".equals(resp.getPayStatus())) {
-						collect.setStatus(CollectStatus.SUCC.getValue());
-					} else if ("fail".equals(resp.getPayStatus())) {
-						collect.setStatus(CollectStatus.FAIL.getValue());
-					}
-					collect.setProgress(UniProgress.RECEIVED.getValue());
-				} else {
-					collect.setProgress(UniProgress.SENDED.getValue());
-				}
 				collect.setTunnelOrderNo(resp.getOrderNo());
-				collect.setStartTime(new Date());
-				walletCollectDao.updateByPrimaryKey(collect);
-				result.add(collect);
-
+				if (StringUtils.isNotBlank(resp.getPayStatus())
+					&& "fail".equals(resp.getPayStatus())) {
+					collect.setStatus(CollectStatus.FAIL.getValue());
+					collect.setErrCode(resp.getPayCode());
+					collect.setErrMsg(resp.getPayFailMessage());
+				}
+			} catch (CommonGatewayException e) {
+				log.error("{}", JsonUtil.toJSON(e));
+				collect.setErrCode(e.getBankErrCode());
+				collect.setErrMsg(e.getBankErrMsg());
 			} catch (Exception e) {
 				log.error("{}", JsonUtil.toJSON(e));
 			}
+			walletCollectDao.updateByPrimaryKey(collect);
+			return collect;
+		}).filter(item -> item != null)
+			.collect(Collectors.toList());
+	}
 
+
+	/**
+	 * 代付
+	 */
+	public List<WalletClearing> agentPay(Long applyId) {
+
+		List<WalletClearing> walletClearings = walletClearingDao.selectByApplyId(applyId);
+		// 登记代付数额
+		return walletClearings.stream().map(clearing -> {
+			WalletCollect collect = walletCollectDao.selectByPrimaryKey(clearing.getCollectId());
+			CollectPay collectPay = CollectPay.builder()
+				.bizOrderNo(collect.getOrderNo())
+				.amount(clearing.getAmount())
+				.build();
+			WalletChannel tunnel = walletChannelExtDao
+				.selectByWalletId(clearing.getPayeeWalletId(), TunnelType.YUNST.getValue());
+			AgentPayReq req = AgentPayReq.builder()
+				.bizOrderNo(clearing.getOrderNo())
+				.collectPayList(Lists.newArrayList(collectPay))
+				.bizUserId(tunnel.getBizUserId())
+				.accountSetNo(configService.getUserAccSet())  // 产品需求代付到余额账户
+				.backUrl(configService.getYunstAgentPayRecallUrl())
+				.amount(clearing.getAmount())
+				.fee(0L)
+				.splitRuleList(null)
+				.tradeCode(TRADE_CODESTRING_AGENTPAY)
+				.summary(null)
+//				.extendInfo(clearing.getOrderNo())
+				.build();
+
+			clearing.setProgress(UniProgress.SENDED.getValue());
+			clearing.setStartTime(new Date());
+			try {
+				AgentPayResp resp = yunstTpl.execute(req, AgentPayResp.class);
+				if (StringUtils.isNotBlank(resp.getPayStatus())
+					&& "fail".equals(resp.getPayStatus())) {
+					clearing.setStatus(CollectStatus.FAIL.getValue());
+					clearing.setErrMsg(resp.getPayFailMessage());
+				}
+				clearing.setTunnelOrderNo(resp.getOrderNo());
+			} catch (CommonGatewayException e) {
+				log.error("{}", JsonUtil.toJSON(e));
+				clearing.setErrCode(e.getBankErrCode());
+				clearing.setErrMsg(e.getBankErrMsg());
+			} catch (Exception e) {
+				log.error("", e);
+			}
+			walletClearingDao.updateByPrimaryKey(clearing);
+
+			return clearing;
+		}).filter(item -> item != null)
+			.collect(Collectors.toList());
+	}
+
+	/**
+	 * 退款
+	 */
+	public List<WalletRefund> refund(Long applyId) {
+		List<WalletRefund> refunds = walletRefundDao.selectByApplyId(applyId);
+
+		return refunds.stream().map(refund -> {
+			List<WalletRefundDetail> details = walletRefundDetailDao
+				.selectByRefundId(refund.getId());
+			List<RefundInfo> refundList = details.stream().map(detail -> {
+				WalletChannel payeeChannel = walletChannelDao
+					.selectByWalletId(detail.getPayeeWalletId(), refund.getTunnelType());
+				return RefundInfo.builder()
+					.accountSetNo(null)
+					.bizUserId(payeeChannel.getBizUserId())
+					.amount(detail.getAmount())
+					.build();
+			}).collect(Collectors.toList());
+
+			WalletCollect collect = walletCollectDao.selectByPrimaryKey(refund.getCollectId());
+			WalletChannel payerChannel = walletChannelDao
+				.selectByWalletId(refund.getPayerWalletId(), refund.getTunnelType());
+			RefundApplyReq req = RefundApplyReq.builder()
+				.bizOrderNo(refund.getOrderNo())
+				.oriBizOrderNo(collect.getOrderNo())
+				.bizUserId(payerChannel.getBizUserId())
+				.refundType(RefundType.D0.getValue())
+				.refundList(refundList)
+				.backUrl(configService.getYunstRefundRecallUrl())
+				.amount(details.stream()
+					.collect(Collectors.summingLong(WalletRefundDetail::getAmount)))
+				.couponAmount(0L)
+				.feeAmount(0L)
+				.build();
+
+			refund.setProgress(UniProgress.SENDED.getValue());
+			refund.setStartTime(new Date());
+			try {
+				RefundApplyResp resp = yunstTpl.execute(req, RefundApplyResp.class);
+				if (StringUtils.isNotBlank(resp.getPayStatus())
+					&& "fail".equals(resp.getPayStatus())) {
+					refund.setStatus(CollectStatus.FAIL.getValue());
+					refund.setErrMsg(resp.getPayFailMessage());
+				}
+				refund.setTunnelOrderNo(resp.getOrderNo());
+			} catch (CommonGatewayException e) {
+				log.error("{}", JsonUtil.toJSON(e));
+				refund.setErrCode(e.getBankErrCode());
+				refund.setErrMsg(e.getBankErrMsg());
+			} catch (Exception e) {
+				log.error("", e);
+			}
+			walletRefundDao.updateByPrimaryKey(refund);
+			return refund;
+		}).collect(Collectors.toList());
+
+
+	}
+
+
+	/**
+	 * 更新转账状态
+	 */
+	public Tuple<WalletApply, GatewayTrans> updatePayStatus(
+		Tuple<WalletApply, GatewayTrans> applyTuple) {
+
+//		applyTuples.forEach(tuple -> {
+//			WalletApply walletApply = tuple.left;
+//			GatewayTrans trans = tuple.right;
+//			// 查询订单状态
+//			GetOrderDetailReq req = GetOrderDetailReq.builder().bizOrderNo(trans.getAcceptNo())
+//				.build();
+//			trans.setStage(req.getServcieName() + "." + req.getMethodName());
+//			try {
+//				GetOrderDetailResp resp = yunstTpl.execute(req, GetOrderDetailResp.class);
+//				YunstOrderStatus yunstStatus = EnumUtil
+//					.parse(YunstOrderStatus.class, resp.getOrderStatus());
+//				WalletApplyStatus status = yunstStatus.toApplyStatus();
+//				walletApply.setStatus(status.getValue());
+//				Date bizTime = DateUtil
+//					.parse(resp.getPayDatetime(), DateUtil.STANDARD_DTAETIME_PATTERN);
+//				walletApply.setBizTime(bizTime);
+//				walletApplyDao.updateByPrimaryKey(walletApply);
+//
+//				trans.setBizTime(bizTime);
+//				trans.setEndTime(new Date());
+//				gatewayTransService.updateTrans(trans);
+//			} catch (CommonGatewayException e) {
+//				walletApply.setStatus(WalletApplyStatus.WAIT_DEAL.getValue());
+//				walletApplyDao.updateByPrimaryKey(walletApply);
+//
+//				trans.setErrCode(e.getBankErrCode());
+//				trans.setSysErrMsg(e.getBankErrMsg());
+//				gatewayTransService.updateTrans(trans);
+//
+//				log.info("", e);
+//			} catch (Exception e) {
+//				log.error("", e);
+//			}
+//
+//		});
+		return null;
+	}
+
+	/**
+	 * 更新充值状态
+	 */
+	public void updateRechargeStatus(String orderNo) {
+		WalletRecharge recharge = walletRechargeDao.selectByOrderNo(orderNo);
+
+		GetOrderDetailResp tunnelOrder = queryOrderDetail(orderNo);
+		if (!recharge.getTunnelOrderNo().equals(tunnelOrder.getOrderNo())) {
+			log.error("渠道单号不匹配， recharge = {} , channelOrderNo = {}", recharge,
+				tunnelOrder.getBizOrderNo());
+			return;
 		}
+		recharge.setTunnelStatus(String.valueOf(tunnelOrder.getOrderStatus()));
+		recharge.setTunnelSuccTime(
+			DateUtil.parse(tunnelOrder.getPayDatetime(), DateUtil.STANDARD_DTAETIME_PATTERN));
+		recharge.setErrMsg(tunnelOrder.getErrorMessage());
+		YunstOrderStatus orderStatus = EnumUtil
+			.parse(YunstOrderStatus.class, tunnelOrder.getOrderStatus());
+		CollectStatus applyStatus = orderStatus.toUniStatus();
+		recharge.setStatus(applyStatus.getValue());
+		recharge.setProgress(UniProgress.RECEIVED.getValue());
+		if (applyStatus.isEndStatus()) {
+			recharge.setEndTime(new Date());
+		}
+		walletRechargeDao.updateByPrimaryKey(recharge);
+	}
 
-		return result;
+	/**
+	 * 更新代收状态
+	 */
+	public void updateCollectStatus(String orderNo) {
+		WalletCollect collect = walletCollectDao.selectByOrderNo(orderNo);
+
+		GetOrderDetailResp channelOrder = queryOrderDetail(orderNo);
+		if (!collect.getTunnelOrderNo().equals(channelOrder.getOrderNo())) {
+			log.error("渠道单号不匹配， collect = {} , channelOrderNo = {}", collect,
+				channelOrder.getBizOrderNo());
+			return;
+		}
+		collect.setTunnelStatus(String.valueOf(channelOrder.getOrderStatus()));
+		collect.setTunnelSuccTime(
+			DateUtil.parse(channelOrder.getPayDatetime(), DateUtil.STANDARD_DTAETIME_PATTERN));
+		collect.setErrMsg(channelOrder.getErrorMessage());
+		YunstOrderStatus orderStatus = EnumUtil
+			.parse(YunstOrderStatus.class, channelOrder.getOrderStatus());
+		CollectStatus applyStatus = orderStatus.toUniStatus();
+		collect.setStatus(applyStatus.getValue());
+		collect.setProgress(UniProgress.RECEIVED.getValue());
+		if (applyStatus.isEndStatus()) {
+			collect.setEndTime(new Date());
+		}
+		walletCollectDao.updateByPrimaryKey(collect);
+	}
+
+	/**
+	 * 更新代付状态
+	 */
+	public void updateAgentPayStatus(String orderNo) {
+		WalletClearing clearing = walletClearingDao.selectByOrderNo(orderNo);
+
+		GetOrderDetailResp channelOrder = queryOrderDetail(orderNo);
+		if (!clearing.getTunnelOrderNo().equals(channelOrder.getOrderNo())) {
+			log.error("渠道单号不匹配， clear = {} , channelOrderNo = {}", clearing,
+				channelOrder.getBizOrderNo());
+			return;
+		}
+		clearing.setTunnelStatus(String.valueOf(channelOrder.getOrderStatus()));
+		clearing.setTunnelSuccTime(
+			DateUtil.parse(channelOrder.getPayDatetime(), DateUtil.STANDARD_DTAETIME_PATTERN));
+		clearing.setErrMsg(channelOrder.getErrorMessage());
+		YunstOrderStatus orderStatus = EnumUtil
+			.parse(YunstOrderStatus.class, channelOrder.getOrderStatus());
+		CollectStatus applyStatus = orderStatus.toUniStatus();
+		clearing.setStatus(applyStatus.getValue());
+		clearing.setProgress(UniProgress.RECEIVED.getValue());
+		if (applyStatus.isEndStatus()) {
+			clearing.setEndTime(new Date());
+		}
+		walletClearingDao.updateByPrimaryKey(clearing);
+	}
+
+	/**
+	 * 更新退款状态
+	 */
+	public void updateRefundStatus(String orderNo) {
+		WalletRefund refund = walletRefundDao.selectByOrderNo(orderNo);
+
+		GetOrderDetailResp channelOrder = queryOrderDetail(orderNo);
+		if (!refund.getTunnelOrderNo().equals(channelOrder.getOrderNo())) {
+			log.error("渠道单号不匹配， refund = {} , channelOrderNo = {}", refund,
+				channelOrder.getBizOrderNo());
+			return;
+		}
+		refund.setTunnelStatus(String.valueOf(channelOrder.getOrderStatus()));
+		refund.setTunnelSuccTime(
+			DateUtil.parse(channelOrder.getPayDatetime(), DateUtil.STANDARD_DTAETIME_PATTERN));
+		refund.setErrMsg(channelOrder.getErrorMessage());
+		YunstOrderStatus orderStatus = EnumUtil
+			.parse(YunstOrderStatus.class, channelOrder.getOrderStatus());
+		CollectStatus applyStatus = orderStatus.toUniStatus();
+		refund.setStatus(applyStatus.getValue());
+		refund.setProgress(UniProgress.RECEIVED.getValue());
+		if (applyStatus.isEndStatus()) {
+			refund.setEndTime(new Date());
+		}
+		walletRefundDao.updateByPrimaryKey(refund);
 	}
 
 	/**
@@ -362,234 +623,8 @@ public class YunstBizHandler extends EBankHandler {
 	}
 
 	/**
-	 * 代付
+	 * 查询订单状态
 	 */
-	public void agentPay(Long applyId) {
-
-		List<WalletClearing> walletClearings = walletClearingDao.selectByApplyId(applyId);
-		// 登记代付数额
-		walletClearings.forEach(clearing -> {
-			CollectPay collectPay = CollectPay.builder()
-				.bizOrderNo(clearing.getOrderNo())
-				.amount(clearing.getAmount())
-				.build();
-			WalletChannel tunnel = walletChannelExtDao
-				.selectByWalletId(clearing.getPayeeWalletId(), TunnelType.YUNST.getValue());
-			AgentPayReq req = AgentPayReq.builder()
-				.bizOrderNo(clearing.getOrderNo())
-				.collectPayList(Lists.newArrayList(collectPay))
-				.bizUserId(tunnel.getBizUserId())
-				.accountSetNo(configService.getUserAccSet())  // 产品需求代付到余额账户
-				.backUrl(configService.getYunstAgentPayRecallUrl())
-				.amount(clearing.getAmount())
-				.fee(0L)
-				.splitRuleList(null)
-				.tradeCode(TRADE_CODESTRING_AGENTPAY)
-				.summary(null)
-				.extendInfo(null)
-				.build();
-
-			try {
-				AgentPayResp resp = yunstTpl.execute(req, AgentPayResp.class);
-				clearing.setTunnelOrderNo(resp.getOrderNo());
-				clearing.setProgress(UniProgress.SENDED.getValue());
-				clearing.setStartTime(new Date());
-				walletClearingDao.updateByPrimaryKey(clearing);
-			} catch (Exception e) {
-				log.error("", e);
-				throw new RuntimeException();
-			}
-		});
-
-
-	}
-
-	/**
-	 * 退款
-	 */
-	public void refund(Long applyId) {
-		List<WalletRefund> refunds = walletRefundDao.selectByApplyId(applyId);
-
-		refunds.forEach(refund -> {
-			List<WalletRefundDetail> details = walletRefundDetailDao
-				.selectByRefundId(refund.getId());
-			List<RefundInfo> refundList = details.stream().map(detail -> {
-				WalletChannel payeeChannel = walletChannelDao
-					.selectByWalletId(detail.getPayeeWalletId(), refund.getTunnelType());
-				return RefundInfo.builder()
-					.accountSetNo(null)
-					.bizUserId(payeeChannel.getBizUserId())
-					.amount(detail.getAmount())
-					.build();
-			}).collect(Collectors.toList());
-
-			WalletCollect collect = walletCollectDao.selectByPrimaryKey(refund.getCollectId());
-			WalletChannel payerChannel = walletChannelDao
-				.selectByWalletId(refund.getPayerWalletId(), refund.getTunnelType());
-			RefundApplyReq req = RefundApplyReq.builder()
-				.bizOrderNo(refund.getOrderNo())
-				.oriBizOrderNo(collect.getOrderNo())
-				.bizUserId(payerChannel.getBizUserId())
-				.refundType(RefundType.D0.getValue())
-				.refundList(refundList)
-				.backUrl(configService.getYunstRefundRecallUrl())
-				.amount(details.stream()
-					.collect(Collectors.summingLong(WalletRefundDetail::getAmount)))
-				.couponAmount(0L)
-				.feeAmount(0L)
-				.build();
-			try {
-				RefundApplyResp resp = yunstTpl.execute(req, RefundApplyResp.class);
-				refund.setTunnelOrderNo(resp.getOrderNo());
-				refund.setProgress(UniProgress.SENDED.getValue());
-				refund.setStartTime(new Date());
-				walletRefundDao.updateByPrimaryKey(refund);
-			} catch (Exception e) {
-				log.error("", e);
-				throw new RuntimeException();
-			}
-		});
-
-
-	}
-
-	public Tuple<WalletApply, GatewayTrans> updatePayStatus(
-		Tuple<WalletApply, GatewayTrans> applyTuple) {
-
-//		applyTuples.forEach(tuple -> {
-//			WalletApply walletApply = tuple.left;
-//			GatewayTrans trans = tuple.right;
-//			// 查询订单状态
-//			GetOrderDetailReq req = GetOrderDetailReq.builder().bizOrderNo(trans.getAcceptNo())
-//				.build();
-//			trans.setStage(req.getServcieName() + "." + req.getMethodName());
-//			try {
-//				GetOrderDetailResp resp = yunstTpl.execute(req, GetOrderDetailResp.class);
-//				YunstOrderStatus yunstStatus = EnumUtil
-//					.parse(YunstOrderStatus.class, resp.getOrderStatus());
-//				WalletApplyStatus status = yunstStatus.toApplyStatus();
-//				walletApply.setStatus(status.getValue());
-//				Date bizTime = DateUtil
-//					.parse(resp.getPayDatetime(), DateUtil.STANDARD_DTAETIME_PATTERN);
-//				walletApply.setBizTime(bizTime);
-//				walletApplyDao.updateByPrimaryKey(walletApply);
-//
-//				trans.setBizTime(bizTime);
-//				trans.setEndTime(new Date());
-//				gatewayTransService.updateTrans(trans);
-//			} catch (CommonGatewayException e) {
-//				walletApply.setStatus(WalletApplyStatus.WAIT_DEAL.getValue());
-//				walletApplyDao.updateByPrimaryKey(walletApply);
-//
-//				trans.setErrCode(e.getBankErrCode());
-//				trans.setSysErrMsg(e.getBankErrMsg());
-//				gatewayTransService.updateTrans(trans);
-//
-//				log.info("", e);
-//			} catch (Exception e) {
-//				log.error("", e);
-//			}
-//
-//		});
-		return null;
-	}
-
-	public void updateRechargeStatus(String orderNo) {
-		WalletRecharge walletRecharge = walletRechargeDao.selectByOrderNo(orderNo);
-
-		GetOrderDetailResp channelOrder = queryOrderDetail(orderNo);
-		if (!walletRecharge.getTunnelOrderNo().equals(channelOrder.getOrderNo())) {
-			log.error("渠道单号不匹配， recharge = {} , channelOrderNo = {}", walletRecharge,
-				channelOrder.getBizOrderNo());
-			return;
-		}
-		walletRecharge.setTunnelStatus(String.valueOf(channelOrder.getOrderStatus()));
-		walletRecharge.setTunnelSuccTime(
-			DateUtil.parse(channelOrder.getPayDatetime(), DateUtil.STANDARD_DTAETIME_PATTERN));
-		walletRecharge.setErrMsg(channelOrder.getErrorMessage());
-		YunstOrderStatus orderStatus = EnumUtil
-			.parse(YunstOrderStatus.class, channelOrder.getOrderStatus());
-		CollectStatus applyStatus = orderStatus.toUniStatus();
-		walletRecharge.setStatus(applyStatus.getValue());
-		walletRecharge.setProgress(UniProgress.RECEIVED.getValue());
-		if (applyStatus.isEndStatus()) {
-			walletRecharge.setEndTime(new Date());
-		}
-		walletRechargeDao.updateByPrimaryKey(walletRecharge);
-	}
-
-	public void updateCollectStatus(String orderNo) {
-		WalletCollect walletCollect = walletCollectDao.selectByOrderNo(orderNo);
-
-		GetOrderDetailResp channelOrder = queryOrderDetail(orderNo);
-		if (!walletCollect.getTunnelOrderNo().equals(channelOrder.getOrderNo())) {
-			log.error("渠道单号不匹配， collect = {} , channelOrderNo = {}", walletCollect,
-				channelOrder.getBizOrderNo());
-			return;
-		}
-		walletCollect.setTunnelStatus(String.valueOf(channelOrder.getOrderStatus()));
-		walletCollect.setTunnelSuccTime(
-			DateUtil.parse(channelOrder.getPayDatetime(), DateUtil.STANDARD_DTAETIME_PATTERN));
-		walletCollect.setErrMsg(channelOrder.getErrorMessage());
-		YunstOrderStatus orderStatus = EnumUtil
-			.parse(YunstOrderStatus.class, channelOrder.getOrderStatus());
-		CollectStatus applyStatus = orderStatus.toUniStatus();
-		walletCollect.setStatus(applyStatus.getValue());
-		walletCollect.setProgress(UniProgress.RECEIVED.getValue());
-		if (applyStatus.isEndStatus()) {
-			walletCollect.setEndTime(new Date());
-		}
-		walletCollectDao.updateByPrimaryKey(walletCollect);
-	}
-
-	public void updateAgentPayStatus(String orderNo) {
-		WalletClearing walletClearing = walletClearingDao.selectByOrderNo(orderNo);
-
-		GetOrderDetailResp channelOrder = queryOrderDetail(orderNo);
-		if (!walletClearing.getTunnelOrderNo().equals(channelOrder.getOrderNo())) {
-			log.error("渠道单号不匹配， clear = {} , channelOrderNo = {}", walletClearing,
-				channelOrder.getBizOrderNo());
-			return;
-		}
-		walletClearing.setTunnelStatus(String.valueOf(channelOrder.getOrderStatus()));
-		walletClearing.setTunnelSuccTime(
-			DateUtil.parse(channelOrder.getPayDatetime(), DateUtil.STANDARD_DTAETIME_PATTERN));
-		walletClearing.setErrMsg(channelOrder.getErrorMessage());
-		YunstOrderStatus orderStatus = EnumUtil
-			.parse(YunstOrderStatus.class, channelOrder.getOrderStatus());
-		CollectStatus applyStatus = orderStatus.toUniStatus();
-		walletClearing.setStatus(applyStatus.getValue());
-		walletClearing.setProgress(UniProgress.RECEIVED.getValue());
-		if (applyStatus.isEndStatus()) {
-			walletClearing.setEndTime(new Date());
-		}
-		walletClearingDao.updateByPrimaryKey(walletClearing);
-	}
-
-	public void updateRefundStatus(String orderNo) {
-		WalletRefund refund = walletRefundDao.selectByOrderNo(orderNo);
-
-		GetOrderDetailResp channelOrder = queryOrderDetail(orderNo);
-		if (!refund.getTunnelOrderNo().equals(channelOrder.getOrderNo())) {
-			log.error("渠道单号不匹配， refund = {} , channelOrderNo = {}", refund,
-				channelOrder.getBizOrderNo());
-			return;
-		}
-		refund.setTunnelStatus(String.valueOf(channelOrder.getOrderStatus()));
-		refund.setTunnelSuccTime(
-			DateUtil.parse(channelOrder.getPayDatetime(), DateUtil.STANDARD_DTAETIME_PATTERN));
-		refund.setErrMsg(channelOrder.getErrorMessage());
-		YunstOrderStatus orderStatus = EnumUtil
-			.parse(YunstOrderStatus.class, channelOrder.getOrderStatus());
-		CollectStatus applyStatus = orderStatus.toUniStatus();
-		refund.setStatus(applyStatus.getValue());
-		refund.setProgress(UniProgress.RECEIVED.getValue());
-		if (applyStatus.isEndStatus()) {
-			refund.setEndTime(new Date());
-		}
-		walletRefundDao.updateByPrimaryKey(refund);
-	}
-
 	private GetOrderDetailResp queryOrderDetail(String orderNo) {
 
 		GetOrderDetailReq req = GetOrderDetailReq.builder().bizOrderNo(orderNo).build();
@@ -600,19 +635,5 @@ public class YunstBizHandler extends EBankHandler {
 			throw new RuntimeException();
 		}
 	}
-
-//	/**
-//	 * 查询余额
-//	 */
-//	public YunstQueryBalanceResult queryBalance(String bizUserId, Integer type, String accountSetNo)
-//		throws Exception {
-//		bizUserId = transferToYunstBizUserFormat(bizUserId, type);
-//		YunstQueryBalanceReq req = YunstQueryBalanceReq.builder$()
-//			.bizUserId(bizUserId)
-//			.accountSetNo(accountSetNo)
-//			.build();
-//
-//		return yunstTpl.execute(req, YunstQueryBalanceResult.class);
-//	}
 
 }

@@ -17,7 +17,7 @@ public class RefundInfo  {
     private Long amount ;
 
     @ApiModelProperty("钱包ID")
-    private String walletId ;
+    private Long walletId ;
 
 
 }
