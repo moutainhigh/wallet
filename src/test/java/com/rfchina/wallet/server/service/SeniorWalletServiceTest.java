@@ -12,7 +12,7 @@ import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Balance;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.CodePay;
 import com.rfchina.wallet.server.model.ext.RechargeReq;
 import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
-import com.rfchina.wallet.server.model.ext.SettleReq;
+import com.rfchina.wallet.server.model.ext.AgentPayReq;
 import com.rfchina.wallet.server.model.ext.SettleResp;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
 import java.util.Arrays;
@@ -93,7 +93,7 @@ public class SeniorWalletServiceTest extends SpringBaseTest {
 
 	@Test
 	public void agentPay() {
-		SettleReq.Reciever reciever = new SettleReq.Reciever();
+		AgentPayReq.Reciever reciever = new AgentPayReq.Reciever();
 		reciever.setWalletId(platWalletId);
 		reciever.setAmount(1L);
 		reciever.setFeeAmount(0L);
@@ -107,7 +107,7 @@ public class SeniorWalletServiceTest extends SpringBaseTest {
 		RefundInfo refundInfo = new RefundInfo();
 		refundInfo.setWalletId(payerWalletId);
 		refundInfo.setAmount(1L);
-		WalletRefund refund = seniorWalletService.refund("", "WC20191022404064023", Arrays.asList(refundInfo));
+		WalletRefund refund = seniorWalletService.refund("", "WC20191022133861641", Arrays.asList(refundInfo));
 		log.info("refund {}", refund);
 	}
 }

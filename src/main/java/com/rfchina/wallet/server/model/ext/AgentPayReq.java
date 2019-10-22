@@ -7,7 +7,7 @@ import lombok.Data;
 
 @ApiModel
 @Data
-public class SettleReq {
+public class AgentPayReq {
 
 
 	@ApiModelProperty(name = "receivers", value = "收款人列表")
