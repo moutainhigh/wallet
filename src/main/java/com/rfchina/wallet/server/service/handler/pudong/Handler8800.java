@@ -18,8 +18,10 @@ import com.rfchina.wallet.domain.model.BankCode;
 import com.rfchina.wallet.domain.model.GatewayTrans;
 import com.rfchina.wallet.domain.model.WalletApply;
 import com.rfchina.wallet.domain.model.WalletCard;
+import com.rfchina.wallet.domain.model.WalletClearing;
 import com.rfchina.wallet.domain.model.WalletCollect;
 import com.rfchina.wallet.domain.model.WalletRecharge;
+import com.rfchina.wallet.domain.model.WalletRefund;
 import com.rfchina.wallet.server.bank.pudong.builder.EBankQuery48Builder;
 import com.rfchina.wallet.server.bank.pudong.builder.EBankQuery49Builder;
 import com.rfchina.wallet.server.bank.pudong.builder.PubPayQueryBuilder;
@@ -44,8 +46,6 @@ import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.PayTuple;
-import com.rfchina.wallet.server.model.ext.SettleReq.Reciever;
-import com.rfchina.wallet.server.model.ext.WalletApplyVo;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.LancherType;
 import com.rfchina.wallet.server.msic.EnumWallet.RemitLocation;
@@ -556,12 +556,12 @@ public class Handler8800 extends EBankHandler {
 	}
 
 	@Override
-	public void agentPay(Long applyId) {
+	public List<WalletClearing> agentPay(Long applyId) {
 		throw new RuntimeException();
 	}
 
 	@Override
-	public void refund(Long collectId) {
+	public List<WalletRefund> refund(Long collectId) {
 		throw new RuntimeException();
 	}
 

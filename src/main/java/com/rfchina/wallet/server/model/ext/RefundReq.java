@@ -20,10 +20,10 @@ public class RefundReq {
 
 	@ApiModel
 	@Data
-	public class RefundInfo {
+	public static class RefundInfo {
 
 		@ApiModelProperty(value = "钱包ID")
-		private String walletId;
+		private Long walletId;
 
 		@ApiModelProperty(value = "金额,单位:分")
 		private Long amount;

@@ -594,6 +594,7 @@
     check_time:""  , //审核时间
     create_time:""  , //创建日期
     fail_reason:""  , //失败原因
+    has_pay_password:""  , //是否设置支付密码 1-是 2-否
     id:""  , //id
     is_sign_contact:""  , //签订通联会员协议 0-未签订 1-签订电子会员协议 2-签订扣款协议
     member_type:""  , //银行用户类型。2：企业会员 3：个人会员
@@ -894,6 +895,7 @@
     check_time:""  , //审核时间
     create_time:""  , //创建日期
     fail_reason:""  , //失败原因
+    has_pay_password:""  , //是否设置支付密码 1-是 2-否
     id:""  , //id
     is_sign_contact:""  , //签订通联会员协议 0-未签订 1-签订电子会员协议 2-签订扣款协议
     member_type:""  , //银行用户类型。2：企业会员 3：个人会员
@@ -960,6 +962,7 @@
     check_time:""  , //审核时间
     create_time:""  , //创建日期
     fail_reason:""  , //失败原因
+    has_pay_password:""  , //是否设置支付密码 1-是 2-否
     id:""  , //id
     is_sign_contact:""  , //签订通联会员协议 0-未签订 1-签订电子会员协议 2-签订扣款协议
     member_type:""  , //银行用户类型。2：企业会员 3：个人会员

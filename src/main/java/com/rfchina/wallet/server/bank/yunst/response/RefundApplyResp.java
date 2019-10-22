@@ -16,7 +16,7 @@ public class RefundApplyResp {
 	private String payStatus;
 
 	@ApiModelProperty( value = "支付失败信息")
-	private String payFailMessag;
+	private String payFailMessage;
 
 	@ApiModelProperty( value = "通商云订单编号")
 	private String orderNo;

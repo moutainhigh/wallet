@@ -1,7 +1,9 @@
 package com.rfchina.wallet.server.service;
 
 import com.rfchina.wallet.domain.model.WalletCollect;
+import com.rfchina.wallet.domain.model.WalletRefund;
 import com.rfchina.wallet.server.SpringBaseTest;
+import com.rfchina.wallet.server.bank.yunst.util.YunstTpl;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectExtDao;
 import com.rfchina.wallet.server.model.ext.CollectReq;
 import com.rfchina.wallet.server.model.ext.CollectReq.Reciever;
@@ -9,11 +11,17 @@ import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Balance;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.CodePay;
 import com.rfchina.wallet.server.model.ext.RechargeReq;
+import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
+import com.rfchina.wallet.server.model.ext.SettleReq;
+import com.rfchina.wallet.server.model.ext.SettleResp;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
 import java.util.Arrays;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
+import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 
+@Slf4j
 public class SeniorWalletServiceTest extends SpringBaseTest {
 
 	@Autowired
@@ -21,6 +29,10 @@ public class SeniorWalletServiceTest extends SpringBaseTest {
 
 	@Autowired
 	private WalletCollectExtDao walletCollectDao;
+
+	@Spy
+	@Autowired
+	private YunstTpl yunstTpl;
 
 	private Long payerWalletId = 10001L;
 	private Long platWalletId = 10000L;
@@ -32,7 +44,7 @@ public class SeniorWalletServiceTest extends SpringBaseTest {
 	public void recharge() {
 		CodePay codePay = CodePay.builder()
 			.payType(CollectPayType.CODEPAY.getValue())
-			.authcode("134775946646746617")
+			.authcode("134572047983132026")
 			.amount(1L)
 			.build();
 		RechargeReq req = RechargeReq.builder()
@@ -49,10 +61,10 @@ public class SeniorWalletServiceTest extends SpringBaseTest {
 	}
 
 	/**
-	 * 预代收
+	 * 代收
 	 */
 	@Test
-	public void preCollect() {
+	public void collect() {
 		Balance balance = Balance.builder()
 			.amount(1L)
 			.build();
@@ -73,17 +85,29 @@ public class SeniorWalletServiceTest extends SpringBaseTest {
 			.recievers(Arrays.asList(reciever))
 			.walletPayMethod(WalletPayMethod.builder().balance(balance).build())
 			.build();
-		seniorWalletService.preCollect("", req);
+		WalletCollect collect = seniorWalletService.preCollect("", req);
+		log.info("预代收 {}", collect);
+		seniorWalletService.doCollect("", collect);
 	}
 
-	/**
-	 * 代收
-	 */
+
 	@Test
-	public void doCollect() {
-		WalletCollect walletCollect = walletCollectDao.selectByPrimaryKey(2L);
-		seniorWalletService.doCollect("", walletCollect);
+	public void agentPay() {
+		SettleReq.Reciever reciever = new SettleReq.Reciever();
+		reciever.setWalletId(platWalletId);
+		reciever.setAmount(1L);
+		reciever.setFeeAmount(0L);
+		SettleResp resp = seniorWalletService.agentPay("", "WC20191021829821028"
+			, Arrays.asList(reciever));
+		log.info("agent pay {}", resp);
 	}
 
-
+	@Test
+	public void refund() {
+		RefundInfo refundInfo = new RefundInfo();
+		refundInfo.setWalletId(payerWalletId);
+		refundInfo.setAmount(1L);
+		WalletRefund refund = seniorWalletService.refund("", "WC20191022404064023", Arrays.asList(refundInfo));
+		log.info("refund {}", refund);
+	}
 }

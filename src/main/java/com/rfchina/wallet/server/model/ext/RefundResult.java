@@ -1,7 +1,15 @@
 package com.rfchina.wallet.server.model.ext;
 
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class RefundResult {
 
 	@ApiModelProperty(value = "工单ID")
