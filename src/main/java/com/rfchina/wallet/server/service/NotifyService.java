@@ -1,25 +1,23 @@
 package com.rfchina.wallet.server.service;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.platform.common.json.ObjectSetter;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletChannelSetPayPwd;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletChannelSignContract;
+import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.model.ChannelNotify;
 import com.rfchina.wallet.domain.model.WalletChannel;
 import com.rfchina.wallet.server.bank.yunst.response.YunstNotify;
 import com.rfchina.wallet.server.bank.yunst.response.RecallResp;
 import com.rfchina.wallet.server.bank.yunst.response.RpsResp;
-import com.rfchina.wallet.server.bank.yunst.response.RpsResp.RpsValue;
 import com.rfchina.wallet.server.mapper.ext.ChannelNotifyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletChannelExtDao;
+import com.rfchina.wallet.server.model.ext.SLWalletMqMessage;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyType;
 import com.rfchina.wallet.server.msic.EnumWallet.YunstMethodName;
 import com.rfchina.wallet.server.msic.EnumWallet.YunstServiceName;
@@ -101,7 +99,7 @@ public class NotifyService {
 							getObjectMapper());
 					this.handleChangeBindPhoneResult(channelNotify, rtnVal);
 				}
-			}else if (YunstMethodName.SET_PAY_PWD.getValue().equals(methodName)){
+			} else if (YunstMethodName.SET_PAY_PWD.getValue().equals(methodName)) {
 				if (YUNST_NOTIFY_SUCCESS.equals(yunstNotify.getStatus())) {
 					String rtnValJson = JsonUtil.toJSON(yunstNotify.getReturnValue());
 					YunstNotify.SetPayPwd rtnVal = JsonUtil
@@ -117,15 +115,15 @@ public class NotifyService {
 		return channelNotify;
 	}
 
-	private void handleVerfiyResult(ChannelNotify channelNotify,
+	@PostMq(routingKey = MqConstant.WALLET_SENIOR_COMPANY_AUDIT)
+	private SLWalletMqMessage handleVerfiyResult(ChannelNotify channelNotify,
 		YunstNotify.CompanyAuditResult rtnVal) {
-		log.info("处理企业信息审核结果通知 rtnVal:{}",rtnVal);
+		log.info("处理企业信息审核结果通知 rtnVal:{}", rtnVal);
 
 		String bizUserId = rtnVal.getBizUserId();
 		String checkTime = rtnVal.getCheckTime();
 		long result = rtnVal.getResult();
 		String failReason = rtnVal.getFailReason();
-		;
 		String remark = rtnVal.getRemark();
 
 		channelNotify.setBizUserId(bizUserId);
@@ -150,12 +148,13 @@ public class NotifyService {
 		if (effectRows != 1) {
 			log.error("处理企业信息审核结果通知-更新审核状态状态失败:bizUserId:{}", bizUserId);
 		}
-
+		return SLWalletMqMessage.builder().walletId(walletChannel.getWalletId())
+			.isPass(result == 2L).checkTime(checkTime).failReason(failReason).build();
 	}
 
 	private void handleSignContractResult(ChannelNotify channelNotify,
 		YunstNotify.SignContractResult rtnVal) {
-		log.info("处理会员电子签约通知 rtnVal:{}",rtnVal);
+		log.info("处理会员电子签约通知 rtnVal:{}", rtnVal);
 		String bizUserId = rtnVal.getBizUserId();
 		channelNotify.setBizUserId(bizUserId);
 		WalletChannel walletChannel = walletChannelExtDao.selectByChannelTypeAndBizUserId(
@@ -172,7 +171,7 @@ public class NotifyService {
 
 	private void handleChangeBindPhoneResult(ChannelNotify channelNotify,
 		YunstNotify.UpdatePhoneResult rtnVal) {
-		log.info("处理个人会员修改绑定手机通知 rtnVal:{}",rtnVal);
+		log.info("处理个人会员修改绑定手机通知 rtnVal:{}", rtnVal);
 		String bizUserId = rtnVal.getBizUserId();
 		String newPhone = rtnVal.getNewPhone();
 		channelNotify.setBizUserId(bizUserId);
@@ -189,7 +188,7 @@ public class NotifyService {
 
 	private void handleSetPayPwdResult(ChannelNotify channelNotify,
 		YunstNotify.SetPayPwd rtnVal) {
-		log.info("处理个人设置支付密码通知 rtnVal:{}",rtnVal);
+		log.info("处理个人设置支付密码通知 rtnVal:{}", rtnVal);
 		String bizUserId = rtnVal.getBizUserId();
 		channelNotify.setBizUserId(bizUserId);
 		WalletChannel walletChannel = walletChannelExtDao.selectByChannelTypeAndBizUserId(
