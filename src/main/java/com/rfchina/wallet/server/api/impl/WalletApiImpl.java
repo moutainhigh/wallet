@@ -277,15 +277,16 @@ public class WalletApiImpl implements WalletApi {
 	@Override
 	public void activeWalletPerson(Long walletId, String name, Byte idType, String idNo,
 		Byte status, Long auditType) {
-		walletService.activeWalletPerson(walletId, name, idType, idNo,status, auditType);
+		walletService.activeWalletPerson(walletId, name, idType, idNo, status, auditType);
 	}
 
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public void activeWalletCompany(Long walletId, String companyName,Byte status, Long auditType) {
-		walletService.activeWalletCompany(walletId, companyName,status, auditType);
+	public void activeWalletCompany(Long walletId, String companyName, Byte status,
+		Long auditType) {
+		walletService.activeWalletCompany(walletId, companyName, status, auditType);
 	}
 
 	@Log
@@ -485,6 +486,15 @@ public class WalletApiImpl implements WalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
+	public String personSetPayPassword(String accessToken, Byte source, Long walletId, String phone,
+		String name, String identityNo) {
+		return walletService.setPersonPayPassword(source, walletId, phone, name, identityNo);
+	}
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
+	@Override
 	public String signBalanceProtocol(String accessToken, Byte source, Long walletId) {
 		return walletService.signBalanceProtocol(source, walletId);
 	}
@@ -569,7 +579,7 @@ public class WalletApiImpl implements WalletApi {
 			log.error("高级钱包获取企业用户信息失败, 钱包不是高级钱包, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 		}
-		return walletService.seniorWalletGetCompanyInfo(walletId,source);
+		return walletService.seniorWalletGetCompanyInfo(walletId, source);
 	}
 
 	@Log
@@ -587,6 +597,6 @@ public class WalletApiImpl implements WalletApi {
 			log.error("高级钱包获取个人用户信息失败, 钱包不是高级钱包, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 		}
-		return walletService.seniorWalletGetPersonInfo(walletId,source);
+		return walletService.seniorWalletGetPersonInfo(walletId, source);
 	}
 }

@@ -240,6 +240,18 @@ public interface WalletApi {
 	String signBalanceProtocol(String accessToken, Byte source, Long walletId);
 
 	/**
+	 * 高级钱包个人设置支付密码地址
+	 *
+	 * @param source 必填, 钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户
+	 * @param walletId 必填, 钱包id
+	 * @param phone 必填, 绑定手机
+	 * @param name 必填,姓名
+	 * @param identityNo 必填,身份证号
+	 */
+	String personSetPayPassword(String accessToken, Byte source, Long walletId, String phone,
+		String name, String identityNo);
+
+	/**
 	 * 高级钱包银行卡验证
 	 *
 	 * @param source 必填, 钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户

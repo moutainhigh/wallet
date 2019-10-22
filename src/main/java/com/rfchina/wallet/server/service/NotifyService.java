@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.misc.EnumDef;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletChannelSetPayPwd;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletChannelSignContract;
 import com.rfchina.wallet.domain.model.ChannelNotify;
 import com.rfchina.wallet.domain.model.WalletChannel;
@@ -100,7 +101,14 @@ public class NotifyService {
 							getObjectMapper());
 					this.handleChangeBindPhoneResult(channelNotify, rtnVal);
 				}
-
+			}else if (YunstMethodName.SET_PAY_PWD.getValue().equals(methodName)){
+				if (YUNST_NOTIFY_SUCCESS.equals(yunstNotify.getStatus())) {
+					String rtnValJson = JsonUtil.toJSON(yunstNotify.getReturnValue());
+					YunstNotify.SetPayPwd rtnVal = JsonUtil
+						.toObject(rtnValJson, YunstNotify.SetPayPwd.class,
+							getObjectMapper());
+					this.handleSetPayPwdResult(channelNotify, rtnVal);
+				}
 			}
 		} else {
 			log.error("云商通回调,service:{}", service);
@@ -111,7 +119,7 @@ public class NotifyService {
 
 	private void handleVerfiyResult(ChannelNotify channelNotify,
 		YunstNotify.CompanyAuditResult rtnVal) {
-		log.info("处理企业信息审核结果通知");
+		log.info("处理企业信息审核结果通知 rtnVal:{}",rtnVal);
 
 		String bizUserId = rtnVal.getBizUserId();
 		String checkTime = rtnVal.getCheckTime();
@@ -147,7 +155,7 @@ public class NotifyService {
 
 	private void handleSignContractResult(ChannelNotify channelNotify,
 		YunstNotify.SignContractResult rtnVal) {
-		log.info("处理会员电子签约通知");
+		log.info("处理会员电子签约通知 rtnVal:{}",rtnVal);
 		String bizUserId = rtnVal.getBizUserId();
 		channelNotify.setBizUserId(bizUserId);
 		WalletChannel walletChannel = walletChannelExtDao.selectByChannelTypeAndBizUserId(
@@ -164,7 +172,7 @@ public class NotifyService {
 
 	private void handleChangeBindPhoneResult(ChannelNotify channelNotify,
 		YunstNotify.UpdatePhoneResult rtnVal) {
-		log.info("处理个人会员修改绑定手机通知");
+		log.info("处理个人会员修改绑定手机通知 rtnVal:{}",rtnVal);
 		String bizUserId = rtnVal.getBizUserId();
 		String newPhone = rtnVal.getNewPhone();
 		channelNotify.setBizUserId(bizUserId);
@@ -176,6 +184,22 @@ public class NotifyService {
 		int effectRows = walletChannelExtDao.updateByPrimaryKeySelective(walletChannel);
 		if (effectRows != 1) {
 			log.error("处理个人会员修改绑定手机失败:bizUserId:{},newPhone:{}", bizUserId, newPhone);
+		}
+	}
+
+	private void handleSetPayPwdResult(ChannelNotify channelNotify,
+		YunstNotify.SetPayPwd rtnVal) {
+		log.info("处理个人设置支付密码通知 rtnVal:{}",rtnVal);
+		String bizUserId = rtnVal.getBizUserId();
+		channelNotify.setBizUserId(bizUserId);
+		WalletChannel walletChannel = walletChannelExtDao.selectByChannelTypeAndBizUserId(
+			EnumDef.ChannelType.YUNST.getValue().intValue(), bizUserId);
+
+		walletChannel.setHasPayPassword(WalletChannelSetPayPwd.YES.getValue().byteValue());
+
+		int effectRows = walletChannelExtDao.updateByPrimaryKeySelective(walletChannel);
+		if (effectRows != 1) {
+			log.error("处理个人设置支付密码失败:bizUserId:{}", bizUserId);
 		}
 	}
 

@@ -184,6 +184,10 @@ public class UrlConstant {
 	 */
 	public static final String WALLET_SENIOR_BANLACE_PROTOCOL = VERSION + "/m/wallet/senior_balance_protocol";
 	/**
+	 * 高级钱包个人设置支付密码
+	 */
+	public static final String WALLET_SENIOR_PERSON_SET_PAY_PASSWORD = VERSION + "/m/wallet/senior_person_set_paypassword";
+	/**
 	 * 高级钱包验证银行卡
 	 */
 	public static final String WALLET_SENIOR_VERIFY_BANK_CARD = VERSION + "/m/wallet/senior_verify_bank_card";

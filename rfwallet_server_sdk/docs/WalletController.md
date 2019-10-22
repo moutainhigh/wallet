@@ -816,6 +816,33 @@
 }
 ```
 
+###  高级钱包个人设置支付密码
+
+请求地址: /wallet_server/v1/m/wallet/senior_person_set_paypassword
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|identity_no|是|身份证|
+|name|是|姓名|
+|phone|是|绑定手机|
+|source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
+|wallet_id|是|钱包id|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+  
+}
+```
+
 ###  高级钱包委托代扣协议
 
 请求地址: /wallet_server/v1/m/wallet/senior_balance_protocol

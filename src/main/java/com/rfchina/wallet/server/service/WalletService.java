@@ -1055,7 +1055,7 @@ public class WalletService {
 		try {
 			return yunstUserHandler.generateBalanceProtocolUrl(walletId, source);
 		} catch (Exception e) {
-			log.error("高级钱包生成扣款协议连接失败, walletId: {}", walletId);
+			log.error("高级钱包生成扣款协议链接失败, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 		}
 	}
@@ -1067,7 +1067,21 @@ public class WalletService {
 		try {
 			return yunstUserHandler.generateSignContractUrl(walletId, source);
 		} catch (Exception e) {
-			log.error("高级钱包生成会员协议连接失败, walletId: {}", walletId);
+			log.error("高级钱包生成会员协议链接失败, walletId: {}", walletId);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+		}
+	}
+
+	/**
+	 * 高级钱包会员协议地址
+	 */
+	public String setPersonPayPassword(Byte source, Long walletId, String phone,
+		String name, String identityNo) {
+		try {
+			return yunstUserHandler.generatePersonSetPayPasswordUrl(walletId, source, phone, name,
+				EnumDef.EnumIdType.ID_CARD.getValue().longValue(), identityNo);
+		} catch (Exception e) {
+			log.error("高级钱包生成设置支付密码链接失败, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 		}
 	}
