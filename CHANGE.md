@@ -4,6 +4,11 @@
 jenkins job: platform-rfwallet-super-server-test
 
 ```
+## 1.2.0.b3.2019102209_Beta
+
+### [变动说明]
+
+1. v1/m/wallet/bank_card/list, v1/m/wallet/query_wallet_info和v1/m/wallet/query_wallet_info_by_uid增加应用令牌的访问权限
 
 ## 1.2.0.b2.2019101711_Beta
 

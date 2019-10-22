@@ -157,7 +157,7 @@ public class WalletApiImpl implements WalletApi {
 	}
 
 	@Log
-	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
+	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER, EnumTokenType.APP })
 	@SignVerify
 	@Override
 	public WalletInfoResp queryWalletInfo(String accessToken, @ParamValid(nullable = false) Long walletId) {
@@ -165,7 +165,7 @@ public class WalletApiImpl implements WalletApi {
 	}
 
 	@Log
-	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
+	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER, EnumTokenType.APP })
 	@SignVerify
 	@Override
 	public WalletInfoResp queryWalletInfoByUserId(String accessToken, Long userId) {
@@ -192,7 +192,7 @@ public class WalletApiImpl implements WalletApi {
 	}
 
 	@Log
-	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER })
+	@TokenVerify(verifyAppToken = true, accept = { EnumTokenType.APP_MANAGER, EnumTokenType.APP })
 	@SignVerify
 	@Override
 	public List<WalletCard> bankCardList(String accessToken, Long walletId) {
