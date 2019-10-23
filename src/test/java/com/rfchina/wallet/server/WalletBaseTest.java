@@ -201,6 +201,21 @@ public abstract class WalletBaseTest extends BaseTest {
 		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_SMS_VERIFY_CODE, params, 1001);
 	}
 
+	protected Map<String, Object> seniorWalletBindPhone(Integer channelType, Byte source, Long walletId,
+		String mobile, String verifyCode) {
+		Map<String, String> params = new HashMap<>();
+		params.put("access_token", getAccessToken(appId, appSecret));
+		params.put("channel_type", String.valueOf(channelType));
+		params.put("source", String.valueOf(source));
+		params.put("wallet_id", String.valueOf(walletId));
+		params.put("mobile", String.valueOf(mobile));
+		params.put("verify_code", verifyCode);
+		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+		params.put("sign", sign);
+		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_BIND_PHONE, params, 1001);
+	}
+
 	protected Map<String, Object> seniorWalletChangeBindPhone(Integer channelType, Byte source, Long walletId,
 			String realName, String idNo,String oldPhone) {
 		Map<String, String> params = new HashMap<>();
@@ -247,5 +262,55 @@ public abstract class WalletBaseTest extends BaseTest {
 		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
 		params.put("sign", sign);
 		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_COMPANY_INFO_AUDIT, params, 1001);
+	}
+
+
+	protected Map<String, Object> seniorWalletChannel(Integer channelType, Long walletId) {
+		Map<String, String> params = new HashMap<>();
+		params.put("access_token", getAccessToken(appId, appSecret));
+		params.put("channel_type", String.valueOf(channelType));
+		params.put("wallet_id", String.valueOf(walletId));
+		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+		params.put("sign", sign);
+		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_CHANNEL_INFO, params, 1001);
+	}
+
+
+	protected Map<String, Object> seniorWalletSignMemberProtocol(Byte source, Long walletId){
+		Map<String, String> params = new HashMap<>();
+		params.put("access_token", getAccessToken(appId, appSecret));
+		params.put("source", String.valueOf(source));
+		params.put("wallet_id", String.valueOf(walletId));
+		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+		params.put("sign", sign);
+		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_MEMBER_PROTOCOL, params, 1001);
+	}
+
+	protected Map<String, Object> seniorWalletSignBalanceProtocol(Byte source, Long walletId){
+		Map<String, String> params = new HashMap<>();
+		params.put("access_token", getAccessToken(appId, appSecret));
+		params.put("source", String.valueOf(source));
+		params.put("wallet_id", String.valueOf(walletId));
+		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+		params.put("sign", sign);
+		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_BANLACE_PROTOCOL, params, 1001);
+	}
+
+
+	protected Map<String, Object> seniorWalletPersonSetPayPassword(Byte source, Long walletId,String name,String phone,String idNum){
+		Map<String, String> params = new HashMap<>();
+		params.put("access_token", getAccessToken(appId, appSecret));
+		params.put("source", String.valueOf(source));
+		params.put("wallet_id", String.valueOf(walletId));
+		params.put("name", name);
+		params.put("phone", phone);
+		params.put("identity_no", idNum);
+		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+		params.put("sign", sign);
+		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_PERSON_SET_PAY_PASSWORD, params, 1001);
 	}
 }

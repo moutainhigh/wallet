@@ -922,7 +922,7 @@ public class WalletService {
 					log.error("个人实名认证失败, channelType: {}, walletId: {},source: {}", channelType,
 						walletId, source);
 					throw new RfchinaResponseException(
-						ResponseCode.EnumResponseCode.COMMON_FAILURE);
+						ResponseCode.EnumResponseCode.COMMON_FAILURE, "个人实名认证失败");
 				}
 				walletChannel.setStatus(
 					EnumDef.WalletChannelAuditStatus.AUDIT_SUCCESS.getValue().byteValue());
@@ -932,7 +932,7 @@ public class WalletService {
 					log.error("更新高级钱包审核状态信息失败:effectRows:{},walletChannel: {}", effectRows,
 						JsonUtil.toJSON(walletChannel));
 					throw new RfchinaResponseException(
-						ResponseCode.EnumResponseCode.COMMON_FAILURE);
+						ResponseCode.EnumResponseCode.COMMON_FAILURE, "更新高级钱包审核状态信息失败");
 				}
 				WalletPerson walletPerson = walletPersonDao.selectByWalletId(walletId);
 				if (walletPerson == null) {
@@ -951,14 +951,15 @@ public class WalletService {
 						log.error("更新个人钱包个人信息表失败:channelType: {}, walletId:{}", channelType,
 							walletId);
 						throw new RfchinaResponseException(
-							ResponseCode.EnumResponseCode.COMMON_FAILURE);
+							ResponseCode.EnumResponseCode.COMMON_FAILURE, "更新个人钱包个人信息表失败");
 					}
 				}
 
 				return this.signMemberProtocol(source, walletId);
 			} catch (Exception e) {
 				log.error("高级钱包个人认证失败 msg:{}", e);
-				throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+				throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+					e.getMessage());
 			}
 		}
 		return "";
@@ -1021,9 +1022,14 @@ public class WalletService {
 					throw new RfchinaResponseException(
 						ResponseCode.EnumResponseCode.COMMON_FAILURE);
 				}
+			} catch (CommonGatewayException cge) {
+				log.error("高级钱包企业信息审核失败 msg:{}", cge.getBankErrMsg());
+				throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+					cge.getBankErrMsg());
 			} catch (Exception e) {
-				log.error("高级钱包企业信息审核失败 msg:{}", e);
-				throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+				log.error("高级钱包企业信息审核失败 msg:{}", e.getMessage());
+				throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+					e.getMessage());
 			}
 		}
 		return EnumDef.WalletChannelAuditStatus.WAITING_AUDIT.getValue();
@@ -1040,7 +1046,8 @@ public class WalletService {
 			}
 		} catch (Exception e) {
 			log.error("高级钱包绑定申请绑定手机发送验证码失败, 查无此钱包, telephone: {}", telephone);
-			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+				"高级钱包绑定申请绑定手机发送验证码失败");
 		}
 		return "";
 	}
@@ -1053,7 +1060,8 @@ public class WalletService {
 			return yunstUserHandler.generateBalanceProtocolUrl(walletId, source);
 		} catch (Exception e) {
 			log.error("高级钱包生成扣款协议链接失败, walletId: {}", walletId);
-			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+				"高级钱包生成扣款协议链接失败");
 		}
 	}
 
@@ -1065,7 +1073,8 @@ public class WalletService {
 			return yunstUserHandler.generateSignContractUrl(walletId, source);
 		} catch (Exception e) {
 			log.error("高级钱包生成会员协议链接失败, walletId: {}", walletId);
-			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+				"高级钱包生成会员协议链接失败");
 		}
 	}
 
@@ -1079,7 +1088,8 @@ public class WalletService {
 				EnumDef.EnumIdType.ID_CARD.getValue().longValue(), identityNo);
 		} catch (Exception e) {
 			log.error("高级钱包生成设置支付密码链接失败, walletId: {}", walletId);
-			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+				"高级钱包生成设置支付密码链接失败");
 		}
 	}
 
@@ -1141,7 +1151,8 @@ public class WalletService {
 			yunstUserHandler.unbindBankCard(walletId, source, cardNo);
 		} catch (Exception e) {
 			log.error("高级钱包银行卡解绑失败, walletId: {}", walletId);
-			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+				"高级钱包银行卡解绑失败");
 		}
 		return true;
 	}
@@ -1153,7 +1164,8 @@ public class WalletService {
 				.getMemberInfo(walletId, source);
 		} catch (Exception e) {
 			log.error("高级钱包获取企业会员信息失败, walletId: {}", walletId);
-			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+				"高级钱包获取企业会员信息失败");
 		}
 	}
 
@@ -1165,7 +1177,8 @@ public class WalletService {
 				.getMemberInfo(walletId, source);
 		} catch (Exception e) {
 			log.error("高级钱包获取企业会员信息失败, walletId: {}", walletId);
-			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+				"高级钱包获取企业会员信息失败");
 		}
 	}
 }
