@@ -68,7 +68,7 @@ dependencies {
     // 本地依赖
     compile('com.rfchina:rfchina-commons-utils:2.3.7')
     compile 'com.rfchina:rfchina-platform-passport-common:1.2.1'
-    compile('com.rfchina:rfwallet-domain:1.2.2-SNAPSHOT')
+    compile('com.rfchina:rfwallet-domain:1.2.2')
     compile('com.rfchina.biztool:IdGenarator:1.0.1')
     compile('com.rfchina.biztool:spring-mq:1.0.1')
     compile 'org.tas:post-core:1.0.0'
