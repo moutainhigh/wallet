@@ -842,16 +842,20 @@ public class WalletService {
 				.selectByChannelTypeAndWalletId(channelType, walletId);
 			if (walletChannel == null) {
 				log.error("未创建云商通用户: bizUserId:{}", transformBizUserId);
-				return false;
+				throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+					"未创建云商通用户");
 			}
 			try {
-				if (StringUtils.isEmpty(walletChannel.getSecurityTel())) {
-					return true;
+				if (!StringUtils.isEmpty(walletChannel.getSecurityTel())) {
+					log.error("已设置安全手机: bizUserId:{}", transformBizUserId);
+					throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+						"已设置安全手机");
 				}
 				if (!yunstUserHandler.bindPhone(walletId, source, mobile, verifyCode)) {
 					log.error("高级钱包绑定手机失败, channelType: {}, walletId: {},source: {}", channelType,
 						walletId, source);
-					return false;
+					throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+						"高级钱包绑定手机失败");
 				}
 				walletChannel.setSecurityTel(mobile);
 				int effectRows = walletChannelDao.updateByPrimaryKeySelective(walletChannel);
