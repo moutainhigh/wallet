@@ -13,14 +13,14 @@ import java.util.List;
 @Builder
 public class AgentPayRequest extends  AbstractApiRequest {
 
-  @ApiModelProperty("代收单号")
-  private String collectOrderNo ;
-
-  @ApiModelProperty("代付列表（与代收的分账规则对应）")
-  private SettleReq settleReq ;
-
   @ApiModelProperty("应用令牌")
   private String accessToken ;
+
+  @ApiModelProperty("代付列表（与代收的分账规则对应），参考AgentPayReq结构体")
+  private String agentPayReq ;
+
+  @ApiModelProperty("代收单号")
+  private String collectOrderNo ;
 
 
   @Override
@@ -36,14 +36,14 @@ public class AgentPayRequest extends  AbstractApiRequest {
   @Override
   public Map<String, String> getTextParmas() {
     Map<String, String> parameters = new HashMap<>(2);
-      if(collectOrderNo != null){
-        parameters.put("collect_order_no", collectOrderNo.toString());
-      }
-      if(settleReq != null){
-        parameters.put("settleReq", settleReq.toString());
-      }
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
+      }
+      if(agentPayReq != null){
+        parameters.put("agent_pay_req", agentPayReq.toString());
+      }
+      if(collectOrderNo != null){
+        parameters.put("collect_order_no", collectOrderNo.toString());
       }
     return parameters;
   }

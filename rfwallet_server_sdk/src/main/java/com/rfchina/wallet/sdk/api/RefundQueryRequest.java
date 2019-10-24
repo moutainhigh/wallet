@@ -13,11 +13,11 @@ import java.util.List;
 @Builder
 public class RefundQueryRequest extends  AbstractApiRequest {
 
-  @ApiModelProperty("退款单号")
-  private String refundOrderNo ;
-
   @ApiModelProperty("应用令牌")
   private String accessToken ;
+
+  @ApiModelProperty("退款单号")
+  private String refundOrderNo ;
 
 
   @Override
@@ -33,11 +33,11 @@ public class RefundQueryRequest extends  AbstractApiRequest {
   @Override
   public Map<String, String> getTextParmas() {
     Map<String, String> parameters = new HashMap<>(2);
-      if(refundOrderNo != null){
-        parameters.put("refund_order_no", refundOrderNo.toString());
-      }
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
+      }
+      if(refundOrderNo != null){
+        parameters.put("refund_order_no", refundOrderNo.toString());
       }
     return parameters;
   }

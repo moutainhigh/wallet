@@ -242,7 +242,7 @@ public class SeniorWalletController {
 
 	@ApiOperation("高级钱包商家资料审核（通道）")
 	@PostMapping(UrlConstant.WALLET_SENIOR_COMPANY_INFO_AUDIT)
-	public ResponseValue<Integer> seniorWalletCompanyInfoAudit(
+	public ResponseValue<WalletChannel> seniorWalletCompanyInfoAudit(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = true, example = "1") @RequestParam("channel_type")
 			Integer channelType,
@@ -252,18 +252,15 @@ public class SeniorWalletController {
 		@ApiParam(value = "审核方式", required = true) @RequestParam("audit_type") Integer auditType,
 		@ApiParam(value = "企业信息(json)", required = true) @RequestParam("company_basic_info")
 			String companyBasicInfo) {
-
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
-			walletApi
-				.seniorWalletCompanyAudit(accessToken, source, channelType, auditType, walletId,
-					JsonUtil
-						.toObject(companyBasicInfo, YunstSetCompanyInfoReq.CompanyBasicInfo.class,
-							objectMapper -> {
-								objectMapper.setTimeZone(TimeZone.getDefault());
-								objectMapper
-									.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
-										false);
-							})));
+		WalletChannel walletChannel = walletApi
+			.seniorWalletCompanyAudit(accessToken, source, channelType, auditType, walletId,
+				JsonUtil.toObject(companyBasicInfo, YunstSetCompanyInfoReq.CompanyBasicInfo.class,
+					objectMapper -> {
+						objectMapper.setTimeZone(TimeZone.getDefault());
+						objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+							false);
+					}));
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, walletChannel);
 	}
 
 	@ApiOperation("高级钱包会员协议")

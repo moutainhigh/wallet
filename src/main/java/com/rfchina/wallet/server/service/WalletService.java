@@ -974,18 +974,16 @@ public class WalletService {
 	/**
 	 * 高级钱包企业资料审核
 	 */
-	public Integer seniorWalletCompanyAudit(Integer channelType, Long walletId, Byte source,
+	public WalletChannel seniorWalletCompanyAudit(Integer channelType, Long walletId, Byte source,
 		Integer auditType,
 		YunstSetCompanyInfoReq.CompanyBasicInfo companyBasicInfo) {
+		WalletChannel walletChannel = walletChannelDao
+			.selectByChannelTypeAndWalletId(channelType, walletId);
+		walletChannel.setStatus(
+			EnumDef.WalletChannelAuditStatus.WAITING_AUDIT.getValue().byteValue());
 		if (channelType == EnumDef.ChannelType.YUNST.getValue().intValue()) {
 			String transformBizUserId = YunstBaseHandler
 				.transferToYunstBizUserFormat(walletId, source);
-			WalletChannel walletChannel = walletChannelDao
-				.selectByChannelTypeAndWalletId(channelType, walletId);
-			if (walletChannel == null) {
-				log.error("未创建云商通用户: bizUserId:{}", transformBizUserId);
-				throw new WalletResponseException(EnumWalletResponseCode.WALLET_ACCOUNT_NOT_EXIST);
-			}
 			try {
 				boolean isAuth =
 					auditType == EnumDef.WalletChannelAuditType.AUTO.getValue().intValue();
@@ -1018,8 +1016,7 @@ public class WalletService {
 					}
 					walletChannel.setRemark(remark);
 					walletChannelDao.updateByPrimaryKeySelective(walletChannel);
-					log.info("高级钱包企业信息审核状态:{},walletId:{}", walletChannel.getStatus(), walletId);
-					return walletChannel.getStatus().intValue();
+
 				} else {
 					log.error("高级钱包企业信息审核失败:channelType: {}, walletId:{}", channelType, walletId);
 					throw new RfchinaResponseException(
@@ -1035,9 +1032,8 @@ public class WalletService {
 					e.getMessage());
 			}
 		}
-		log.info("高级钱包企业信息审核状态:{},walletId:{}",
-			EnumDef.WalletChannelAuditStatus.WAITING_AUDIT.getValue(), walletId);
-		return EnumDef.WalletChannelAuditStatus.WAITING_AUDIT.getValue();
+		log.info("高级钱包企业信息审核状态:{},walletId:{}", walletChannel.getStatus(), walletId);
+		return walletChannel;
 	}
 
 	/**

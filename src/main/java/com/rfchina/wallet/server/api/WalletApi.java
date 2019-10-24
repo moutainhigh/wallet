@@ -220,7 +220,7 @@ public interface WalletApi {
 	 * @param walletId 必填, 钱包id
 	 * @param companyBasicInfo 必填, 企业基本信息
 	 */
-	Integer seniorWalletCompanyAudit(String accessToken, Byte source, Integer channelType,
+	WalletChannel seniorWalletCompanyAudit(String accessToken, Byte source, Integer channelType,
 		Integer auditType, Long walletId, YunstSetCompanyInfoReq.CompanyBasicInfo companyBasicInfo);
 
 	/**

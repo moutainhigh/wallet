@@ -13,11 +13,11 @@ import java.util.List;
 @Builder
 public class CollectQueryRequest extends  AbstractApiRequest {
 
-  @ApiModelProperty("代收单号")
-  private String collectOrderNo ;
-
   @ApiModelProperty("应用令牌")
   private String accessToken ;
+
+  @ApiModelProperty("代收单号")
+  private String collectOrderNo ;
 
 
   @Override
@@ -33,11 +33,11 @@ public class CollectQueryRequest extends  AbstractApiRequest {
   @Override
   public Map<String, String> getTextParmas() {
     Map<String, String> parameters = new HashMap<>(2);
-      if(collectOrderNo != null){
-        parameters.put("collect_order_no", collectOrderNo.toString());
-      }
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
+      }
+      if(collectOrderNo != null){
+        parameters.put("collect_order_no", collectOrderNo.toString());
       }
     return parameters;
   }

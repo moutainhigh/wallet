@@ -39,7 +39,7 @@ public class SeniorWalletCompanyInfoAuditRequest extends  AbstractApiRequest {
 
   @Override
   public Class<?> getResponseModelClass() {
-    return Map.class;
+    return WalletChannel.class;
   }
 
   @Override

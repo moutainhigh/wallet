@@ -13,11 +13,11 @@ import java.util.List;
 @Builder
 public class CollectAsyncRequest extends  AbstractApiRequest {
 
-  @ApiModelProperty("collectReq")
-  private CollectReq collectReq ;
-
   @ApiModelProperty("应用令牌")
   private String accessToken ;
+
+  @ApiModelProperty("代收内容，参考CollectReq结构体")
+  private String collectReq ;
 
 
   @Override
@@ -33,11 +33,11 @@ public class CollectAsyncRequest extends  AbstractApiRequest {
   @Override
   public Map<String, String> getTextParmas() {
     Map<String, String> parameters = new HashMap<>(2);
-      if(collectReq != null){
-        parameters.put("collectReq", collectReq.toString());
-      }
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
+      }
+      if(collectReq != null){
+        parameters.put("collect_req", collectReq.toString());
       }
     return parameters;
   }

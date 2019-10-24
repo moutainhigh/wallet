@@ -408,6 +408,8 @@ public class WalletApiImpl implements WalletApi {
 				oldPhone);
 	}
 
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
 	@Override
 	public Long seniorWalletBindPhone(String accessToken, Byte source, Integer channelType,
 		Long walletId,
@@ -447,8 +449,11 @@ public class WalletApiImpl implements WalletApi {
 			.seniorWalletPersonAuth(channelType, walletId, source, realName, idNo, mobile);
 	}
 
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
 	@Override
-	public Integer seniorWalletCompanyAudit(String accessToken, Byte source, Integer channelType,
+	public WalletChannel seniorWalletCompanyAudit(String accessToken, Byte source, Integer channelType,
 		Integer auditType,
 		Long walletId, YunstSetCompanyInfoReq.CompanyBasicInfo companyBasicInfo) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);

@@ -13,11 +13,11 @@ import java.util.List;
 @Builder
 public class AgentPayQueryRequest extends  AbstractApiRequest {
 
-  @ApiModelProperty("代付单号")
-  private String payOrderNo ;
-
   @ApiModelProperty("应用令牌")
   private String accessToken ;
+
+  @ApiModelProperty("代付单号")
+  private String payOrderNo ;
 
 
   @Override
@@ -33,11 +33,11 @@ public class AgentPayQueryRequest extends  AbstractApiRequest {
   @Override
   public Map<String, String> getTextParmas() {
     Map<String, String> parameters = new HashMap<>(2);
-      if(payOrderNo != null){
-        parameters.put("pay_order_no", payOrderNo.toString());
-      }
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
+      }
+      if(payOrderNo != null){
+        parameters.put("pay_order_no", payOrderNo.toString());
       }
     return parameters;
   }

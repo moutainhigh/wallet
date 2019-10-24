@@ -13,11 +13,11 @@ import java.util.List;
 @Builder
 public class RechargeRequest extends  AbstractApiRequest {
 
-  @ApiModelProperty("rechargeReq")
-  private RechargeReq rechargeReq ;
-
   @ApiModelProperty("应用令牌")
   private String accessToken ;
+
+  @ApiModelProperty("充值内容，参考RechargeReq结构体")
+  private String rechargeReq ;
 
 
   @Override
@@ -33,11 +33,11 @@ public class RechargeRequest extends  AbstractApiRequest {
   @Override
   public Map<String, String> getTextParmas() {
     Map<String, String> parameters = new HashMap<>(2);
-      if(rechargeReq != null){
-        parameters.put("rechargeReq", rechargeReq.toString());
-      }
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
+      }
+      if(rechargeReq != null){
+        parameters.put("recharge_req", rechargeReq.toString());
       }
     return parameters;
   }
