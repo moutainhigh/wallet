@@ -218,15 +218,15 @@ public class YunstHandlerTest extends SpringBaseTest {
 //		String tel = RandomUtils.getTelephone();
 		String tel = "18928847212";
 		try {
-			//		YunstApplyBindBankCardResult yunstApplyBindBankCardResult = yunstUserHandler.applyBindBankCard(walletId, source,
+			//		ApplyBindBankCardResp applyBindBankCardResp = yunstUserHandler.applyBindBankCard(walletId, source,
 			//				RSAUtil.encrypt("4581240118157727"), realName, tel, identityType, identityNo,
 			//				RSAUtil.encrypt("1119"), RSAUtil.encrypt("102"));
-			YunstApplyBindBankCardResult yunstApplyBindBankCardResult = yunstUserHandler.applyBindBankCard(walletId, source,
+			ApplyBindBankCardResp applyBindBankCardResp = yunstUserHandler.applyBindBankCard(walletId, source,
 					"4581240118157727", realName, tel, identityType, identityNo,
 					null, null);
-			logStack(yunstApplyBindBankCardResult);
+			logStack(applyBindBankCardResp);
 		}catch (CommonGatewayException e){
-			YunstApplyBindBankCardResult yunstApplyBindBankCardResult = new YunstApplyBindBankCardResult();
+			ApplyBindBankCardResp applyBindBankCardResp = new ApplyBindBankCardResp();
 			String errMsg = e.getBankErrMsg();
 			if (errMsg.indexOf("参数validate为空") > -1){
 			}else {
@@ -252,12 +252,12 @@ public class YunstHandlerTest extends SpringBaseTest {
 
 //		String tel = RandomUtils.getTelephone();
 		String tel = "18928847212";
-		YunstApplyBindBankCardResult yunstApplyBindBankCardResult = yunstUserHandler.applyBindBankCard(walletId, source,
+		ApplyBindBankCardResp applyBindBankCardResp = yunstUserHandler.applyBindBankCard(walletId, source,
 				"4581240118157727", realName, tel, identityType, identityNo,
 				"1119", "102");
-		assertNotNull(yunstApplyBindBankCardResult);
-		assertNotNull(yunstApplyBindBankCardResult.getTranceNum());
-		logStack(yunstApplyBindBankCardResult);
+		assertNotNull(applyBindBankCardResp);
+		assertNotNull(applyBindBankCardResp.getTranceNum());
+		logStack(applyBindBankCardResp);
 
 		String verifyCodePath = System.getProperty("user.dir") + "/src/test/verifyCode";
 		System.out.println("请输入验证码到" + verifyCodePath + "文件");
@@ -274,7 +274,7 @@ public class YunstHandlerTest extends SpringBaseTest {
 
 		System.out.println("验证码为:" + verificationCode);
 		YunstBindBankCardResult yunstBindBankCardResult = yunstUserHandler.bindBankCard(walletId, source,
-				yunstApplyBindBankCardResult.getTranceNum(),yunstApplyBindBankCardResult.getTransDate(), tel, "1119", "102",
+				applyBindBankCardResp.getTranceNum(), applyBindBankCardResp.getTransDate(), tel, "1119", "102",
 				verificationCode);
 		logStack(yunstBindBankCardResult);
 	}

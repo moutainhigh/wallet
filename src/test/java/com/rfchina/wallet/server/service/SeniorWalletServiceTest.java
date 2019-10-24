@@ -66,16 +66,16 @@ public class SeniorWalletServiceTest extends SpringBaseTest {
 	@Test
 	public void collect() {
 		Balance balance = Balance.builder()
-			.amount(1L)
+			.amount(2L)
 			.build();
 		Reciever reciever = Reciever.builder()
 			.walletId(platWalletId)
-			.amount(1L)
+			.amount(2L)
 			.build();
 		CollectReq req = CollectReq.builder()
 			.payerWalletId(payerWalletId)
 			.bizNo(String.valueOf(System.currentTimeMillis()))
-			.amount(1L)
+			.amount(2L)
 			.note("")
 			.fee(0L)
 			.validateType((byte) 0)
@@ -105,9 +105,9 @@ public class SeniorWalletServiceTest extends SpringBaseTest {
 	@Test
 	public void refund() {
 		RefundInfo refundInfo = new RefundInfo();
-		refundInfo.setWalletId(payerWalletId);
+		refundInfo.setWalletId(platWalletId);
 		refundInfo.setAmount(1L);
-		WalletRefund refund = seniorWalletService.refund("", "WC20191022133861641", Arrays.asList(refundInfo));
+		WalletRefund refund = seniorWalletService.refund("", "WC20191022924053256", Arrays.asList(refundInfo));
 		log.info("refund {}", refund);
 	}
 }

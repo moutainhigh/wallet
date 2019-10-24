@@ -188,17 +188,17 @@ public class UrlConstant {
 	 */
 	public static final String WALLET_SENIOR_PERSON_SET_PAY_PASSWORD = VERSION + "/m/wallet/senior_person_set_paypassword";
 	/**
-	 * 高级钱包验证银行卡
+	 * 高级钱包-预绑定银行卡
 	 */
-	public static final String WALLET_SENIOR_VERIFY_BANK_CARD = VERSION + "/m/wallet/senior_verify_bank_card";
+	public static final String WALLET_SENIOR_PRE_BIND_BANK_CARD = VERSION + "/m/senior/pre_bind_bank_card";
 	/**
-	 * 高级钱包确认绑定银行卡
+	 * 高级钱包-确认绑定银行卡
 	 */
-	public static final String WALLET_SENIOR_CONFIRM_BIND_BANK_CARD = VERSION + "/m/wallet/senior_confirm_bind_bank_card";
+	public static final String WALLET_SENIOR_CONFIRM_BIND_CARD = VERSION + "/m/senior/confirm_bind_card";
 	/**
-	 * 高级钱包解除绑定银行卡
+	 * 高级钱包-解绑银行卡
 	 */
-	public static final String WALLET_SENIOR_UN_BIND_BANK_CARD = VERSION + "/m/wallet/senior_un_bind_bank_card";
+	public static final String WALLET_SENIOR_UNBIND_CARD = VERSION + "/m/senior/unbind_card";
 	/**
 	 * 高级钱包个人信息
 	 */

@@ -1,0 +1,72 @@
+package com.rfchina.wallet.server.web;
+
+import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
+import com.rfchina.platform.common.misc.ResponseValue;
+import com.rfchina.wallet.server.api.SeniorCardApi;
+import com.rfchina.wallet.server.bank.yunst.response.result.ApplyBindBankCardResp;
+import com.rfchina.wallet.server.msic.UrlConstant;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@Api
+@RestController
+public class SeniorCardController {
+
+	@Autowired
+	private SeniorCardApi seniorCardApi;
+
+	@ApiOperation("高级钱包-预绑定银行卡")
+	@PostMapping(UrlConstant.WALLET_SENIOR_PRE_BIND_BANK_CARD)
+	public ResponseValue<ApplyBindBankCardResp> preBindBankCard(
+		@RequestParam("access_token") String accessToken,
+		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+		@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2") @RequestParam("source") Byte source,
+		@ApiParam(value = "银行卡号", required = true) @RequestParam("card_no") String cardNo,
+		@ApiParam(value = "姓名", required = true) @RequestParam("real_name") String realName,
+		@ApiParam(value = "银行预留手机号", required = true) @RequestParam("phone") String phone,
+		@ApiParam(value = "身份证", required = true) @RequestParam("identity_no") String identityNo,
+		@ApiParam(value = "信用卡到期4位日期", required = false) @RequestParam(value = "validate", required = false) String validate,
+		@ApiParam(value = "信用卡cvv2码", required = false) @RequestParam(value = "cvv2", required = false) String cvv2) {
+
+		ApplyBindBankCardResp resp = seniorCardApi.preBindBandCard(accessToken, walletId, source,
+			cardNo, realName, phone, identityNo, validate, cvv2);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, resp);
+	}
+
+	@ApiOperation("高级钱包-确认绑定银行卡")
+	@PostMapping(UrlConstant.WALLET_SENIOR_CONFIRM_BIND_CARD)
+	public ResponseValue<Long> confirmBindBankCard(
+		@RequestParam("access_token") String accessToken,
+		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+		@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2") @RequestParam("source") Byte source,
+		@ApiParam(value = "验证银行卡流水号", required = true) @RequestParam("trans_num") String transNum,
+		@ApiParam(value = "验证银行卡申请时间", required = true) @RequestParam("trans_date") String transDate,
+		@ApiParam(value = "银行预留手机号", required = true) @RequestParam("phone") String phone,
+		@ApiParam(value = "信用卡到期4位日期", required = false) @RequestParam(value = "validate", required = false) String validate,
+		@ApiParam(value = "信用卡cvv2码", required = false) @RequestParam(value = "cvv2", required = false) String cvv2,
+		@ApiParam(value = "短信验证码", required = true) @RequestParam("verify_code") String verifyCode) {
+
+		Long result = seniorCardApi.confirmBindCard(accessToken, walletId, source, transNum,
+			transDate, phone, validate, cvv2, verifyCode);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result);
+	}
+
+
+	@ApiOperation("高级钱包-解绑银行卡")
+	@PostMapping(UrlConstant.WALLET_SENIOR_UNBIND_CARD)
+	public ResponseValue unBindBankCard(
+		@RequestParam("access_token") String accessToken,
+		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+		@ApiParam(value = "银行卡号", required = true) @RequestParam("card_no") String cardNo,
+		@ApiParam(value = "来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true) @RequestParam("source") Byte source) {
+
+		seniorCardApi.unBindCard(accessToken, walletId, source, cardNo);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
+	}
+
+}

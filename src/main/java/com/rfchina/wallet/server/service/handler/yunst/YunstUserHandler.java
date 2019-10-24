@@ -254,7 +254,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 申请绑定银行卡
 	 */
-	public YunstApplyBindBankCardResult applyBindBankCard(Long walletId, Byte source, String cardNo,
+	public ApplyBindBankCardResp applyBindBankCard(Long walletId, Byte source, String cardNo,
 		String name,
 		String phone, Long identityType, String identityNo, String validate, String cvv2)
 		throws Exception {
@@ -271,7 +271,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 		if (StringUtils.isNoneBlank(validate, cvv2)) {
 			buider.cvv2(RSAUtil.encrypt(cvv2)).validate(RSAUtil.encrypt(validate));
 		}
-		return yunstTpl.execute(buider.build(), YunstApplyBindBankCardResult.class);
+		return yunstTpl.execute(buider.build(), ApplyBindBankCardResp.class);
 	}
 
 	/**

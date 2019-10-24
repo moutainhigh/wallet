@@ -370,7 +370,7 @@ public class SeniorWalletService {
 		Long applyValue = refundList.stream()
 			.map(r -> r.getAmount())
 			.reduce(0L, (a, b) -> a + b);
-		if (collect.getAmount().longValue() > clearedValue.longValue() + histRefund.longValue()
+		if (collect.getAmount().longValue() < clearedValue.longValue() + histRefund.longValue()
 			+ applyValue.longValue()) {
 			throw new RuntimeException();
 		}
