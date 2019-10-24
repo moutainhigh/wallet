@@ -882,4 +882,25 @@ public class EnumWallet {
 //
 //	}
 
+	/**
+	 * 通联sdk返回枚举
+	 */
+	public enum EnumYunstResponse implements Valuable<String> {
+		ALREADY_BIND_PHONE("30024", "已绑定手机"),
+		;
+
+		private String value;
+		private String valueName;
+
+		EnumYunstResponse(String value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public String getValue() {
+			return this.value;
+		}
+
+	}
 }

@@ -18,6 +18,8 @@ import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.*;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumDefBankCard;
+import com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType;
+import com.rfchina.wallet.domain.misc.EnumDef.EnumVerifyCodeType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletCardSenior;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
@@ -35,6 +37,8 @@ import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstApplyBindBankCardResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstCreateMemberResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult;
+import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.CompanyInfoResult;
+import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.PersonInfoResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstSetCompanyInfoResult;
 import com.rfchina.wallet.server.bank.yunst.util.CommonGatewayException;
 import com.rfchina.wallet.server.mapper.ext.*;
@@ -52,6 +56,7 @@ import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.PayTuple;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp.WalletInfoRespBuilder;
+import com.rfchina.wallet.server.msic.EnumWallet.EnumYunstResponse;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.NotifyType;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyStatus;
@@ -832,9 +837,10 @@ public class WalletService {
 	/**
 	 * 高级钱包绑定手机
 	 */
-	public boolean seniorWalletBindPhone(Integer channelType, Long walletId, Byte source,
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+	public void seniorWalletBindPhone(Integer channelType, Long walletId, Byte source,
 		String mobile,
-		String verifyCode) {
+		String verifyCode) throws Exception {
 		if (channelType == EnumDef.ChannelType.YUNST.getValue().intValue()) {
 			String transformBizUserId = YunstBaseHandler
 				.transferToYunstBizUserFormat(walletId, source);
@@ -845,31 +851,31 @@ public class WalletService {
 				throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
 					"未创建云商通用户");
 			}
+
+			if (!StringUtils.isEmpty(walletChannel.getSecurityTel())) {
+				log.error("已设置安全手机: bizUserId:{}", transformBizUserId);
+				throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+					"已设置安全手机");
+			}
+
 			try {
-				if (!StringUtils.isEmpty(walletChannel.getSecurityTel())) {
-					log.error("已设置安全手机: bizUserId:{}", transformBizUserId);
+				yunstUserHandler.bindPhone(walletId, source, mobile, verifyCode);
+			} catch (CommonGatewayException e) {
+				if (!EnumYunstResponse.ALREADY_BIND_PHONE.getValue().equals(e.getBankErrCode())) {
+					log.error("渠道绑定手机失败: bizUserId:{}", transformBizUserId);
 					throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
-						"已设置安全手机");
+						"渠道绑定手机失败");
 				}
-				if (!yunstUserHandler.bindPhone(walletId, source, mobile, verifyCode)) {
-					log.error("高级钱包绑定手机失败, channelType: {}, walletId: {},source: {}", channelType,
-						walletId, source);
-					throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
-						"高级钱包绑定手机失败");
-				}
-				walletChannel.setSecurityTel(mobile);
-				int effectRows = walletChannelDao.updateByPrimaryKeySelective(walletChannel);
-				if (effectRows != 1) {
-					log.error("更新高级钱包手机信息失败:effectRows:{},walletChannel: {}", effectRows,
-						JsonUtil.toJSON(walletChannel));
-					return false;
-				}
-			} catch (Exception e) {
-				log.error("更新高级钱包手机信息失败 msg:{}", e);
-				return false;
+			}
+			walletChannel.setSecurityTel(mobile);
+			int effectRows = walletChannelDao.updateByPrimaryKeySelective(walletChannel);
+			if (effectRows != 1) {
+				log.error("更新高级钱包手机信息失败:effectRows:{},walletChannel: {}", effectRows,
+					JsonUtil.toJSON(walletChannel));
+				throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+					"更新高级钱包手机信息失败");
 			}
 		}
-		return true;
 	}
 
 	/**
@@ -908,9 +914,9 @@ public class WalletService {
 	 * 高级钱包个人认证
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-	public String seniorWalletPersonAuth(Integer channelType, Long walletId, Byte source,
+	public void seniorWalletPersonAuth(Integer channelType, Long walletId, Byte source,
 		String realName, String idNo,
-		String mobile) {
+		String mobile, String verifyCode) throws Exception {
 		if (channelType == EnumDef.ChannelType.YUNST.getValue().intValue()) {
 			String transformBizUserId = YunstBaseHandler
 				.transferToYunstBizUserFormat(walletId, source);
@@ -920,59 +926,43 @@ public class WalletService {
 				log.error("未创建云商通用户: bizUserId:{}", transformBizUserId);
 				throw new WalletResponseException(EnumWalletResponseCode.WALLET_ACCOUNT_NOT_EXIST);
 			}
-			try {
-				if (StringUtils.isEmpty(walletChannel.getSecurityTel())) {
-					log.error("高级钱包未绑定手机: walletId:{}", walletId);
-					throw new WalletResponseException(
-						EnumWalletResponseCode.WALLET_ACCOUNT_NOT_EXIST);
-				}
-				boolean result = yunstUserHandler.personCertification(walletId, source, realName,
-					EnumDef.EnumIdType.ID_CARD.getValue().longValue(), idNo);
-				if (!result) {
-					log.error("个人实名认证失败, channelType: {}, walletId: {},source: {}", channelType,
-						walletId, source);
-					throw new RfchinaResponseException(
-						ResponseCode.EnumResponseCode.COMMON_FAILURE, "个人实名认证失败");
-				}
-				walletChannel.setStatus(
-					EnumDef.WalletChannelAuditStatus.AUDIT_SUCCESS.getValue().byteValue());
-				walletChannel.setCheckTime(new Date());
-				int effectRows = walletChannelDao.updateByPrimaryKeySelective(walletChannel);
-				if (effectRows != 1) {
-					log.error("更新高级钱包审核状态信息失败:effectRows:{},walletChannel: {}", effectRows,
-						JsonUtil.toJSON(walletChannel));
-					throw new RfchinaResponseException(
-						ResponseCode.EnumResponseCode.COMMON_FAILURE, "更新高级钱包审核状态信息失败");
-				}
-				WalletPerson walletPerson = walletPersonDao.selectByWalletId(walletId);
-				if (walletPerson == null) {
-					Date curDate = new Date();
-					effectRows = walletPersonDao.insertSelective(WalletPerson.builder()
-						.walletId(walletId)
-						.idType(EnumDef.EnumIdType.ID_CARD.getValue().byteValue())
-						.idNo(idNo)
-						.name(realName)
-						.realLevel(EnumDef.EnumUserRealType.ID_CARD.getValue().byteValue())
-						.tel(mobile)
-						.createTime(curDate)
-						.lastUpdTime(curDate)
-						.build());
-					if (effectRows != 1) {
-						log.error("更新个人钱包个人信息表失败:channelType: {}, walletId:{}", channelType,
-							walletId);
-						throw new RfchinaResponseException(
-							ResponseCode.EnumResponseCode.COMMON_FAILURE, "更新个人钱包个人信息表失败");
-					}
-				}
 
-				return this.signMemberProtocol(source, walletId);
-			} catch (Exception e) {
-				log.error("高级钱包个人认证失败 msg:{}", e);
-				throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
-					e.getMessage());
+			if (StringUtils.isEmpty(walletChannel.getSecurityTel())) {
+				this.seniorWalletBindPhone(channelType, walletId, source, mobile, verifyCode);
+			}
+			yunstUserHandler.personCertification(walletId, source, realName,
+				EnumDef.EnumIdType.ID_CARD.getValue().longValue(), idNo);
+			walletChannel.setStatus(
+				EnumDef.WalletChannelAuditStatus.AUDIT_SUCCESS.getValue().byteValue());
+			walletChannel.setCheckTime(new Date());
+			int effectRows = walletChannelDao.updateByPrimaryKeySelective(walletChannel);
+			if (effectRows != 1) {
+				log.error("更新高级钱包审核状态信息失败:effectRows:{},walletChannel: {}", effectRows,
+					JsonUtil.toJSON(walletChannel));
+				throw new RfchinaResponseException(
+					ResponseCode.EnumResponseCode.COMMON_FAILURE, "更新高级钱包审核状态信息失败");
+			}
+			WalletPerson walletPerson = walletPersonDao.selectByWalletId(walletId);
+			if (walletPerson == null) {
+				Date curDate = new Date();
+				effectRows = walletPersonDao.insertSelective(WalletPerson.builder()
+					.walletId(walletId)
+					.idType(EnumDef.EnumIdType.ID_CARD.getValue().byteValue())
+					.idNo(idNo)
+					.name(realName)
+					.realLevel(EnumDef.EnumUserRealType.ID_CARD.getValue().byteValue())
+					.tel(mobile)
+					.createTime(curDate)
+					.lastUpdTime(curDate)
+					.build());
+				if (effectRows != 1) {
+					log.error("更新个人钱包个人信息表失败:channelType: {}, walletId:{}", channelType,
+						walletId);
+					throw new RfchinaResponseException(
+						ResponseCode.EnumResponseCode.COMMON_FAILURE, "更新个人钱包个人信息表失败");
+				}
 			}
 		}
-		return "";
 	}
 
 	/**
@@ -1043,59 +1033,35 @@ public class WalletService {
 	/**
 	 * 高级钱包绑定申请绑定手机
 	 */
-	public String seniorWalletApplyBindPhone(Integer channelType, Long walletId, Byte source,
-		String telephone) {
-		try {
-			if (channelType.intValue() == EnumDef.ChannelType.YUNST.getValue().intValue()) {
-				return yunstUserHandler.sendVerificationCode(walletId, source, telephone, 9);
-			}
-		} catch (Exception e) {
-			log.error("高级钱包绑定申请绑定手机发送验证码失败, 查无此钱包, telephone: {}", telephone);
-			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
-				"高级钱包绑定申请绑定手机发送验证码失败");
+	public void seniorWalletApplyBindPhone(Integer channelType, Long walletId, Byte source,
+		String telephone) throws Exception {
+		if (channelType.intValue() == EnumDef.ChannelType.YUNST.getValue().intValue()) {
+			yunstUserHandler.sendVerificationCode(walletId, source, telephone,
+				EnumVerifyCodeType.YUNST_BIND_PHONE.getValue());
 		}
-		return "";
 	}
 
 	/**
 	 * 高级钱包扣款协议地址
 	 */
-	public String signBalanceProtocol(Byte source, Long walletId) {
-		try {
-			return yunstUserHandler.generateBalanceProtocolUrl(walletId, source);
-		} catch (Exception e) {
-			log.error("高级钱包生成扣款协议链接失败, walletId: {}", walletId);
-			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
-				"高级钱包生成扣款协议链接失败");
-		}
+	public String signBalanceProtocol(Byte source, Long walletId) throws Exception {
+		return yunstUserHandler.generateBalanceProtocolUrl(walletId, source);
 	}
 
 	/**
 	 * 高级钱包会员协议地址
 	 */
-	public String signMemberProtocol(Byte source, Long walletId) {
-		try {
-			return yunstUserHandler.generateSignContractUrl(walletId, source);
-		} catch (Exception e) {
-			log.error("高级钱包生成会员协议链接失败, walletId: {}", walletId);
-			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
-				"高级钱包生成会员协议链接失败");
-		}
+	public String signMemberProtocol(Byte source, Long walletId) throws Exception {
+		return yunstUserHandler.generateSignContractUrl(walletId, source);
 	}
 
 	/**
 	 * 高级钱包会员协议地址
 	 */
 	public String setPersonPayPassword(Byte source, Long walletId, String phone,
-		String name, String identityNo) {
-		try {
-			return yunstUserHandler.generatePersonSetPayPasswordUrl(walletId, source, phone, name,
-				EnumDef.EnumIdType.ID_CARD.getValue().longValue(), identityNo);
-		} catch (Exception e) {
-			log.error("高级钱包生成设置支付密码链接失败, walletId: {}", walletId);
-			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
-				"高级钱包生成设置支付密码链接失败");
-		}
+		String name, String identityNo) throws Exception {
+		return yunstUserHandler.generatePersonSetPayPasswordUrl(walletId, source, phone, name,
+			EnumDef.EnumIdType.ID_CARD.getValue().longValue(), identityNo);
 	}
 
 	/**
@@ -1163,27 +1129,17 @@ public class WalletService {
 	}
 
 	public YunstMemberInfoResult.CompanyInfoResult seniorWalletGetCompanyInfo(Long walletId,
-		Byte source) {
-		try {
-			return (YunstMemberInfoResult.CompanyInfoResult) yunstUserHandler
-				.getMemberInfo(walletId, source);
-		} catch (Exception e) {
-			log.error("高级钱包获取企业会员信息失败, walletId: {}", walletId);
-			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
-				"高级钱包获取企业会员信息失败");
-		}
+		Byte source) throws Exception {
+		CompanyInfoResult memberInfo = (CompanyInfoResult) yunstUserHandler
+			.getMemberInfo(walletId, source);
+		return memberInfo;
 	}
 
 
 	public YunstMemberInfoResult.PersonInfoResult seniorWalletGetPersonInfo(Long walletId,
-		Byte source) {
-		try {
-			return (YunstMemberInfoResult.PersonInfoResult) yunstUserHandler
-				.getMemberInfo(walletId, source);
-		} catch (Exception e) {
-			log.error("高级钱包获取企业会员信息失败, walletId: {}", walletId);
-			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
-				"高级钱包获取企业会员信息失败");
-		}
+		Byte source) throws Exception {
+		PersonInfoResult memberInfo = (PersonInfoResult) yunstUserHandler
+			.getMemberInfo(walletId, source);
+		return memberInfo;
 	}
 }
