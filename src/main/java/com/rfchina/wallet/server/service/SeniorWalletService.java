@@ -274,6 +274,7 @@ public class SeniorWalletService {
 							EnumDef.WalletChannelAuditStatus.WAITING_AUDIT.getValue().byteValue());
 					}
 					walletChannel.setRemark(remark);
+					walletChannel.setFailReason(null);
 					walletChannelDao.updateByPrimaryKeySelective(walletChannel);
 
 				} else {
