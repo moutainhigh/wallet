@@ -4,23 +4,36 @@ import com.allinpay.yunst.sdk.util.RSAUtil;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.JsonUtil;
+import com.rfchina.wallet.server.bank.yunst.request.YunstApplyBindBankCardReq;
+import com.rfchina.wallet.server.bank.yunst.request.YunstBalanceProtocolReq;
+import com.rfchina.wallet.server.bank.yunst.request.YunstBindBankCardReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstBindPhoneReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstChangeBindPhoneReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstCreateMemberReq;
+import com.rfchina.wallet.server.bank.yunst.request.YunstGetMemberInfoReq;
+import com.rfchina.wallet.server.bank.yunst.request.YunstPersonSetRealNameReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSMSVerificationCodeReq;
-import com.rfchina.wallet.server.bank.yunst.request.*;
-import com.rfchina.wallet.server.bank.yunst.response.result.*;
-import com.rfchina.wallet.server.bank.yunst.util.CommonGatewayException;
+import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
+import com.rfchina.wallet.server.bank.yunst.request.YunstSetPayPwdReq;
+import com.rfchina.wallet.server.bank.yunst.request.YunstSignContractReq;
+import com.rfchina.wallet.server.bank.yunst.request.YunstUnBindBankCardReq;
+import com.rfchina.wallet.server.bank.yunst.response.result.ApplyBindBankCardResp;
+import com.rfchina.wallet.server.bank.yunst.response.result.YunstBindBankCardResult;
+import com.rfchina.wallet.server.bank.yunst.response.result.YunstBindPhoneResult;
+import com.rfchina.wallet.server.bank.yunst.response.result.YunstCreateMemberResult;
+import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult;
+import com.rfchina.wallet.server.bank.yunst.response.result.YunstPersonSetRealNameResult;
+import com.rfchina.wallet.server.bank.yunst.response.result.YunstSendVerificationCodeResult;
+import com.rfchina.wallet.server.bank.yunst.response.result.YunstSetCompanyInfoResult;
+import com.rfchina.wallet.server.bank.yunst.response.result.YunstUnBindBankCardResult;
 import com.rfchina.wallet.server.bank.yunst.util.YunstTpl;
-import com.rfchina.wallet.server.msic.EnumWallet.EnumYunstResponse;
+import java.util.TimeZone;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
-
-import java.util.TimeZone;
-import java.util.UUID;
 
 @Slf4j
 @Component
@@ -235,7 +248,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 申请绑定银行卡
 	 */
-	public YunstApplyBindBankCardResult applyBindBankCard(Long walletId, Byte source, String cardNo,
+	public ApplyBindBankCardResp applyBindBankCard(Long walletId, Byte source, String cardNo,
 		String name,
 		String phone, Long identityType, String identityNo, String validate, String cvv2)
 		throws Exception {
@@ -252,7 +265,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 		if (StringUtils.isNoneBlank(validate, cvv2)) {
 			buider.cvv2(RSAUtil.encrypt(cvv2)).validate(RSAUtil.encrypt(validate));
 		}
-		return yunstTpl.execute(buider.build(), YunstApplyBindBankCardResult.class);
+		return yunstTpl.execute(buider.build(), ApplyBindBankCardResp.class);
 	}
 
 	/**

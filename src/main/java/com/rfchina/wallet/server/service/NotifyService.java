@@ -12,24 +12,24 @@ import com.rfchina.wallet.domain.misc.EnumDef.WalletChannelSignContract;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.model.ChannelNotify;
 import com.rfchina.wallet.domain.model.WalletChannel;
-import com.rfchina.wallet.server.bank.yunst.response.YunstNotify;
 import com.rfchina.wallet.server.bank.yunst.response.RecallResp;
 import com.rfchina.wallet.server.bank.yunst.response.RpsResp;
+import com.rfchina.wallet.server.bank.yunst.response.YunstNotify;
 import com.rfchina.wallet.server.mapper.ext.ChannelNotifyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletChannelExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletCompanyExtDao;
 import com.rfchina.wallet.server.model.ext.SLWalletMqMessage;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyType;
 import com.rfchina.wallet.server.msic.EnumWallet.YunstMethodName;
 import com.rfchina.wallet.server.msic.EnumWallet.YunstServiceName;
-import java.util.TimeZone;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBizHandler;
+import java.util.Date;
+import java.util.Map;
+import java.util.TimeZone;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Date;
-import java.util.Map;
 
 @Slf4j
 @Service
@@ -39,9 +39,13 @@ public class NotifyService {
 	@Autowired
 	private WalletChannelExtDao walletChannelExtDao;
 	@Autowired
+	private WalletCompanyExtDao walletCompanyExtDao;
+	@Autowired
 	private ChannelNotifyExtDao channelNotifyDao;
 	@Autowired
 	private YunstBizHandler yunstBizHandler;
+	@Autowired
+	private SeniorWalletService seniorWalletService;
 
 	public ChannelNotify yunstNotify(Map<String, String> params) {
 		String json = JsonUtil.toJSON(params);
@@ -148,6 +152,8 @@ public class NotifyService {
 		if (effectRows != 1) {
 			log.error("处理企业信息审核结果通知-更新审核状态状态失败:bizUserId:{}", bizUserId);
 		}
+
+
 		return SLWalletMqMessage.builder().walletId(walletChannel.getWalletId())
 			.isPass(result == 2L).checkTime(checkTime).failReason(failReason).build();
 	}

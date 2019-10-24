@@ -22,10 +22,10 @@ import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Slf4j
-public class SeniorWalletServiceTest extends SpringBaseTest {
+public class SeniorPayServiceTest extends SpringBaseTest {
 
 	@Autowired
-	private SeniorWalletService seniorWalletService;
+	private SeniorPayService seniorPayService;
 
 	@Autowired
 	private WalletCollectExtDao walletCollectDao;
@@ -57,7 +57,7 @@ public class SeniorWalletServiceTest extends SpringBaseTest {
 			.industryName("保险代理")
 			.walletPayMethod(WalletPayMethod.builder().codePay(codePay).build())
 			.build();
-		seniorWalletService.recharge("", req);
+		seniorPayService.recharge("", req);
 	}
 
 	/**
@@ -66,16 +66,16 @@ public class SeniorWalletServiceTest extends SpringBaseTest {
 	@Test
 	public void collect() {
 		Balance balance = Balance.builder()
-			.amount(1L)
+			.amount(2L)
 			.build();
 		Reciever reciever = Reciever.builder()
 			.walletId(platWalletId)
-			.amount(1L)
+			.amount(2L)
 			.build();
 		CollectReq req = CollectReq.builder()
 			.payerWalletId(payerWalletId)
 			.bizNo(String.valueOf(System.currentTimeMillis()))
-			.amount(1L)
+			.amount(2L)
 			.note("")
 			.fee(0L)
 			.validateType((byte) 0)
@@ -85,9 +85,9 @@ public class SeniorWalletServiceTest extends SpringBaseTest {
 			.recievers(Arrays.asList(reciever))
 			.walletPayMethod(WalletPayMethod.builder().balance(balance).build())
 			.build();
-		WalletCollect collect = seniorWalletService.preCollect("", req);
+		WalletCollect collect = seniorPayService.preCollect("", req);
 		log.info("预代收 {}", collect);
-		seniorWalletService.doCollect("", collect);
+		seniorPayService.doCollect("", collect);
 	}
 
 
@@ -97,7 +97,7 @@ public class SeniorWalletServiceTest extends SpringBaseTest {
 		reciever.setWalletId(platWalletId);
 		reciever.setAmount(1L);
 		reciever.setFeeAmount(0L);
-		SettleResp resp = seniorWalletService.agentPay("", "WC20191021829821028"
+		SettleResp resp = seniorPayService.agentPay("", "WC20191021829821028"
 			, Arrays.asList(reciever));
 		log.info("agent pay {}", resp);
 	}
@@ -105,9 +105,9 @@ public class SeniorWalletServiceTest extends SpringBaseTest {
 	@Test
 	public void refund() {
 		RefundInfo refundInfo = new RefundInfo();
-		refundInfo.setWalletId(payerWalletId);
+		refundInfo.setWalletId(platWalletId);
 		refundInfo.setAmount(1L);
-		WalletRefund refund = seniorWalletService.refund("", "WC20191022133861641", Arrays.asList(refundInfo));
+		WalletRefund refund = seniorPayService.refund("", "WC20191022924053256", Arrays.asList(refundInfo));
 		log.info("refund {}", refund);
 	}
 }

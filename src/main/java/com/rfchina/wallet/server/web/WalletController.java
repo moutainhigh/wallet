@@ -1,34 +1,31 @@
 package com.rfchina.wallet.server.web;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.ResponseValue;
 import com.rfchina.platform.common.page.Pagination;
-import com.rfchina.platform.common.utils.JsonUtil;
-import com.rfchina.wallet.domain.model.*;
+import com.rfchina.wallet.domain.model.BankCode;
+import com.rfchina.wallet.domain.model.Wallet;
+import com.rfchina.wallet.domain.model.WalletApply;
+import com.rfchina.wallet.domain.model.WalletCard;
+import com.rfchina.wallet.domain.model.WalletUser;
 import com.rfchina.wallet.domain.model.ext.Bank;
 import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
 import com.rfchina.wallet.server.api.WalletApi;
-import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
-import com.rfchina.wallet.server.bank.yunst.response.result.YunstApplyBindBankCardResult;
-import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
 
 @RestController
 @Api
@@ -100,8 +97,10 @@ public class WalletController {
 		@ApiParam(value = "公司名称", required = true) @RequestParam("company_name") String companyName,
 		@ApiParam(value = "钱包状态: 1:待审核，2：激活,3：禁用", required = true) @RequestParam("status") Byte status,
 		@ApiParam(value = "审核方式，1：运营，2：银企直连，3：通联", required = true, example = "3") @RequestParam("audit_type")
-			Long auditType) {
-		walletApi.activeWalletCompany(walletId, companyName, status, auditType);
+			Long auditType,
+		@ApiParam(value = "公司电话", required = false) @RequestParam(value = "phone", required = false) String phone,
+		@ApiParam(value = "公司邮箱", required = false) @RequestParam(value = "email", required = false) String email) {
+		walletApi.activeWalletCompany(walletId, companyName, status, auditType, phone, email);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
 

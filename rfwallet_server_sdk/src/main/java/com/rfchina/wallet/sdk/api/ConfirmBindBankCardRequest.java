@@ -9,21 +9,24 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 
 
-/** 高级钱包企业用户绑定手机 */
+/** 高级钱包-确认绑定银行卡 */
 @Builder
-public class SeniorWalletBindPhoneRequest extends  AbstractApiRequest {
+public class ConfirmBindBankCardRequest extends  AbstractApiRequest {
 
   @ApiModelProperty("access_token")
   private String accessToken ;
 
-  @ApiModelProperty("渠道类型 1:浦发银企直连,2:通联云商通")
-  private Integer channelType ;
-
-  @ApiModelProperty("手机号码")
-  private String mobile ;
+  @ApiModelProperty("银行预留手机号")
+  private String phone ;
 
   @ApiModelProperty("钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户")
   private Integer source ;
+
+  @ApiModelProperty("验证银行卡申请时间")
+  private String transDate ;
+
+  @ApiModelProperty("验证银行卡流水号")
+  private String transNum ;
 
   @ApiModelProperty("短信验证码")
   private String verifyCode ;
@@ -31,15 +34,21 @@ public class SeniorWalletBindPhoneRequest extends  AbstractApiRequest {
   @ApiModelProperty("钱包id")
   private Long walletId ;
 
+  @ApiModelProperty("信用卡cvv2码")
+  private String cvv2 ;
+
+  @ApiModelProperty("信用卡到期4位日期")
+  private String validate ;
+
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/wallet/senior_bind_phone";
+    return "/wallet_server/v1/m/senior/confirm_bind_card";
   }
 
   @Override
   public Class<?> getResponseModelClass() {
-    return Wallet.class;
+    return Map.class;
   }
 
   @Override
@@ -48,20 +57,29 @@ public class SeniorWalletBindPhoneRequest extends  AbstractApiRequest {
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
       }
-      if(channelType != null){
-        parameters.put("channel_type", channelType.toString());
-      }
-      if(mobile != null){
-        parameters.put("mobile", mobile.toString());
+      if(phone != null){
+        parameters.put("phone", phone.toString());
       }
       if(source != null){
         parameters.put("source", source.toString());
+      }
+      if(transDate != null){
+        parameters.put("trans_date", transDate.toString());
+      }
+      if(transNum != null){
+        parameters.put("trans_num", transNum.toString());
       }
       if(verifyCode != null){
         parameters.put("verify_code", verifyCode.toString());
       }
       if(walletId != null){
         parameters.put("wallet_id", walletId.toString());
+      }
+      if(cvv2 != null){
+        parameters.put("cvv2", cvv2.toString());
+      }
+      if(validate != null){
+        parameters.put("validate", validate.toString());
       }
     return parameters;
   }

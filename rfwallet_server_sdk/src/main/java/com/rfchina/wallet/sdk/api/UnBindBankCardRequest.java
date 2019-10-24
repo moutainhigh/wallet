@@ -9,24 +9,18 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 
 
-/** 高级钱包企业用户绑定手机 */
+/** 高级钱包-解绑银行卡 */
 @Builder
-public class SeniorWalletBindPhoneRequest extends  AbstractApiRequest {
+public class UnBindBankCardRequest extends  AbstractApiRequest {
 
   @ApiModelProperty("access_token")
   private String accessToken ;
 
-  @ApiModelProperty("渠道类型 1:浦发银企直连,2:通联云商通")
-  private Integer channelType ;
+  @ApiModelProperty("银行卡号")
+  private String cardNo ;
 
-  @ApiModelProperty("手机号码")
-  private String mobile ;
-
-  @ApiModelProperty("钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户")
+  @ApiModelProperty("来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户")
   private Integer source ;
-
-  @ApiModelProperty("短信验证码")
-  private String verifyCode ;
 
   @ApiModelProperty("钱包id")
   private Long walletId ;
@@ -34,12 +28,12 @@ public class SeniorWalletBindPhoneRequest extends  AbstractApiRequest {
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/wallet/senior_bind_phone";
+    return "/wallet_server/v1/m/senior/unbind_card";
   }
 
   @Override
   public Class<?> getResponseModelClass() {
-    return Wallet.class;
+    return Map.class;
   }
 
   @Override
@@ -48,17 +42,11 @@ public class SeniorWalletBindPhoneRequest extends  AbstractApiRequest {
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
       }
-      if(channelType != null){
-        parameters.put("channel_type", channelType.toString());
-      }
-      if(mobile != null){
-        parameters.put("mobile", mobile.toString());
+      if(cardNo != null){
+        parameters.put("card_no", cardNo.toString());
       }
       if(source != null){
         parameters.put("source", source.toString());
-      }
-      if(verifyCode != null){
-        parameters.put("verify_code", verifyCode.toString());
       }
       if(walletId != null){
         parameters.put("wallet_id", walletId.toString());

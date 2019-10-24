@@ -28,6 +28,12 @@ public class ActiveWalletCompanyRequest extends  AbstractApiRequest {
   @ApiModelProperty("钱包ID")
   private Long walletId ;
 
+  @ApiModelProperty("公司邮箱")
+  private String email ;
+
+  @ApiModelProperty("公司电话")
+  private String phone ;
+
 
   @Override
   public String getApiUrl() {
@@ -56,6 +62,12 @@ public class ActiveWalletCompanyRequest extends  AbstractApiRequest {
       }
       if(walletId != null){
         parameters.put("wallet_id", walletId.toString());
+      }
+      if(email != null){
+        parameters.put("email", email.toString());
+      }
+      if(phone != null){
+        parameters.put("phone", phone.toString());
       }
     return parameters;
   }

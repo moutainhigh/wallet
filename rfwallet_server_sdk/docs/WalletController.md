@@ -14,6 +14,8 @@
 |company_name|是|公司名称|
 |status|是|钱包状态: 1:待审核，2：激活,3：禁用|
 |wallet_id|是|钱包ID|
+|email|否|公司邮箱|
+|phone|否|公司电话|
 
 返回数据
 ```
