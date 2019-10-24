@@ -764,7 +764,7 @@ public class WalletService {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		if (wallet == null) {
 			log.error("开通高级钱包失败, 查无此钱包, walletId: {}", walletId);
-			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,"开通高级钱包失败");
 		}
 		WalletChannel walletChannel = walletChannelDao
 			.selectByChannelTypeAndWalletId(channelType, walletId);
@@ -783,7 +783,7 @@ public class WalletService {
 			} catch (Exception e) {
 				log.error("开通高级钱包失败, channelType: {}, walletId: {}, source:{}", channelType,
 					walletId, source);
-				throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+				throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,"开通高级钱包失败");
 			}
 			builder.bizUserId(member.left.getBizUserId())
 				.channelUserId(member.left.getUserId())
@@ -794,13 +794,13 @@ public class WalletService {
 		if (effectRows != 1) {
 			log.error("开通高级钱包失败, channelType: {}, walletId: {}, source:{}", channelType, walletId,
 				source);
-			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,"开通高级钱包失败-插入渠道信息");
 		}
 		wallet.setLevel(EnumDef.EnumWalletLevel.SENIOR.getValue());
 		effectRows = walletDao.updateByPrimaryKeySelective(wallet);
 		if (effectRows != 1) {
 			log.error("更新钱包等级失败, walletId: {}", walletId);
-			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,"更新钱包等级失败");
 		}
 		return walletChannel;
 	}
@@ -812,13 +812,13 @@ public class WalletService {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		if (wallet == null) {
 			log.error("更新钱包等级失败, 查无此钱包, walletId: {}", walletId);
-			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,"更新钱包等级失败");
 		}
 		wallet.setLevel(EnumDef.EnumWalletLevel.SENIOR.getValue());
 		int effctRows = walletDao.updateByPrimaryKeySelective(wallet);
 		if (effctRows != 1) {
 			log.error("更新钱包等级失败, walletId: {}", walletId);
-			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,"更新钱包等级失败");
 		}
 		return wallet;
 	}
