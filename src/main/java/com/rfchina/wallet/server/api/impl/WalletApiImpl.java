@@ -440,9 +440,10 @@ public class WalletApiImpl implements WalletApi {
 			log.error("高级钱包个人认证失败, 查无此钱包, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 		}
-		if (!walletService
-			.seniorWalletBindPhone(channelType, walletId, source, mobile, verifyCode)) {
-			log.error("高级钱包个人失败, 查钱包绑定手机失败, walletId: {}", walletId);
+		WalletChannel walletChannel = walletChannelDao
+			.selectByChannelTypeAndWalletId(channelType, walletId);
+		if (StringUtils.isEmpty(walletChannel.getSecurityTel())) {
+			log.error("高级钱包-个人实名验证失败, 钱包未绑定安全手机 walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
 		}
 		return walletService
