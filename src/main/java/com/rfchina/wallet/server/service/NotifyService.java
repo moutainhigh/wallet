@@ -71,13 +71,11 @@ public class NotifyService {
 		channelNotify.setYunstMethodName(methodName);
 		if (YunstServiceName.MEMBER.getValue().equals(service)) {
 			if (YunstMethodName.VERIFY_RESULT.getValue().equals(methodName)) {
-				if (YUNST_NOTIFY_SUCCESS.equals(yunstNotify.getStatus())) {
-					String rtnValJson = JsonUtil.toJSON(yunstNotify.getReturnValue());
-					YunstNotify.CompanyAuditResult rtnVal = JsonUtil
-						.toObject(rtnValJson, YunstNotify.CompanyAuditResult.class,
-							getObjectMapper());
-					this.handleVerfiyResult(channelNotify, rtnVal);
-				}
+				String rtnValJson = JsonUtil.toJSON(yunstNotify.getReturnValue());
+				YunstNotify.CompanyAuditResult rtnVal = JsonUtil
+					.toObject(rtnValJson, YunstNotify.CompanyAuditResult.class,
+						getObjectMapper());
+				this.handleVerfiyResult(channelNotify, rtnVal);
 
 			} else if (YunstMethodName.SIGN_CONTRACT.getValue().equals(methodName)) {
 				if (YUNST_NOTIFY_SUCCESS.equals(yunstNotify.getStatus()) && StringUtils
@@ -152,7 +150,6 @@ public class NotifyService {
 		if (effectRows != 1) {
 			log.error("处理企业信息审核结果通知-更新审核状态状态失败:bizUserId:{}", bizUserId);
 		}
-
 
 		return SLWalletMqMessage.builder().walletId(walletChannel.getWalletId())
 			.isPass(result == 2L).checkTime(checkTime).failReason(failReason).build();
