@@ -764,7 +764,8 @@ public class WalletService {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		if (wallet == null) {
 			log.error("开通高级钱包失败, 查无此钱包, walletId: {}", walletId);
-			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,"开通高级钱包失败");
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+				"开通高级钱包失败");
 		}
 		WalletChannel walletChannel = walletChannelDao
 			.selectByChannelTypeAndWalletId(channelType, walletId);
@@ -783,7 +784,8 @@ public class WalletService {
 			} catch (Exception e) {
 				log.error("开通高级钱包失败, channelType: {}, walletId: {}, source:{}", channelType,
 					walletId, source);
-				throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,"开通高级钱包失败");
+				throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+					"开通高级钱包失败");
 			}
 			builder.bizUserId(member.left.getBizUserId())
 				.channelUserId(member.left.getUserId())
@@ -794,13 +796,15 @@ public class WalletService {
 		if (effectRows != 1) {
 			log.error("开通高级钱包失败, channelType: {}, walletId: {}, source:{}", channelType, walletId,
 				source);
-			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,"开通高级钱包失败-插入渠道信息");
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+				"开通高级钱包失败-插入渠道信息");
 		}
 		wallet.setLevel(EnumDef.EnumWalletLevel.SENIOR.getValue());
 		effectRows = walletDao.updateByPrimaryKeySelective(wallet);
 		if (effectRows != 1) {
 			log.error("更新钱包等级失败, walletId: {}", walletId);
-			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,"更新钱包等级失败");
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+				"更新钱包等级失败");
 		}
 		return walletChannel;
 	}
@@ -812,13 +816,15 @@ public class WalletService {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		if (wallet == null) {
 			log.error("更新钱包等级失败, 查无此钱包, walletId: {}", walletId);
-			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,"更新钱包等级失败");
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+				"更新钱包等级失败");
 		}
 		wallet.setLevel(EnumDef.EnumWalletLevel.SENIOR.getValue());
 		int effctRows = walletDao.updateByPrimaryKeySelective(wallet);
 		if (effctRows != 1) {
 			log.error("更新钱包等级失败, walletId: {}", walletId);
-			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,"更新钱包等级失败");
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+				"更新钱包等级失败");
 		}
 		return wallet;
 	}
@@ -986,9 +992,11 @@ public class WalletService {
 				YunstSetCompanyInfoResult yunstSetCompanyInfoResult = yunstUserHandler
 					.setCompanyInfo(walletId, source,
 						isAuth, companyBasicInfo);
+
 				if (Objects.nonNull(yunstSetCompanyInfoResult) && yunstSetCompanyInfoResult
 					.getBizUserId()
 					.equals(transformBizUserId)) {
+					log.info("通联审核结果:{}", JsonUtil.toJSON(yunstSetCompanyInfoResult));
 					Long result = yunstSetCompanyInfoResult.getResult();
 					String failReason = yunstSetCompanyInfoResult.getFailReason();
 					String remark = yunstSetCompanyInfoResult.getRemark();
@@ -1009,18 +1017,13 @@ public class WalletService {
 							EnumDef.WalletChannelAuditStatus.WAITING_AUDIT.getValue().byteValue());
 					}
 					walletChannel.setRemark(remark);
-					int effectRows = walletChannelDao.updateByPrimaryKeySelective(walletChannel);
-					if (effectRows != 1) {
-						log.error("更新高级钱包企业信息审核状态失败:channelType: {}, walletId:{}", channelType,
-							walletId);
-						throw new RfchinaResponseException(
-							ResponseCode.EnumResponseCode.COMMON_FAILURE);
-					}
+					walletChannelDao.updateByPrimaryKeySelective(walletChannel);
+					log.info("高级钱包企业信息审核状态:{},walletId:{}", walletChannel.getStatus(), walletId);
 					return walletChannel.getStatus().intValue();
 				} else {
 					log.error("高级钱包企业信息审核失败:channelType: {}, walletId:{}", channelType, walletId);
 					throw new RfchinaResponseException(
-						ResponseCode.EnumResponseCode.COMMON_FAILURE);
+						ResponseCode.EnumResponseCode.COMMON_FAILURE, "高级钱包企业信息审核失败");
 				}
 			} catch (CommonGatewayException cge) {
 				log.error("高级钱包企业信息审核失败 msg:{}", cge.getBankErrMsg());
@@ -1032,6 +1035,8 @@ public class WalletService {
 					e.getMessage());
 			}
 		}
+		log.info("高级钱包企业信息审核状态:{},walletId:{}",
+			EnumDef.WalletChannelAuditStatus.WAITING_AUDIT.getValue(), walletId);
 		return EnumDef.WalletChannelAuditStatus.WAITING_AUDIT.getValue();
 	}
 
