@@ -21,24 +21,7 @@
 {
   "code": 1001,//状态码
   "msg": ""//消息
-   , "data":  {
-    audit_type:""  , //审核方式，1：运营，2：银企直连，3：通联
-    balance_upd_time:""  , //钱包余额最后更新日期
-    create_time:""  , //创建日期
-    freeze_amount:""  , //冻结金额
-    id:""  , //钱包ID
-    last_upd_time:""  , //钱包信息最后更新日期
-    level:""  , //钱包等级，1： 初级钱包，2： 高级钱包
-    pay_amount:""  , //累计支付金额
-    pay_count:""  , //累计支付次数
-    recharge_amount:""  , //累计充值金额
-    recharge_count:""  , //累计充值次数
-    source:""  , //钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户
-    status:""  , //钱包状态: 1:待激活，2：激活,3：禁用
-    title:""  , //钱包标题，通常是姓名或公司名
-    type:""  , //钱包类型， 1：企业钱包，2：个人钱包
-    wallet_balance:""   //钱包余额
-}  
+  
 }
 ```
 

@@ -3,6 +3,7 @@ package com.rfchina.wallet.server.service.handler.yunst;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Lists;
 import com.rfchina.platform.common.misc.Tuple;
+import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EnumUtil;
 import com.rfchina.platform.common.utils.JsonUtil;
@@ -55,6 +56,7 @@ import com.rfchina.wallet.server.mapper.ext.WalletRefundDetailExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRefundExtDao;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.PayTuple;
+import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
@@ -203,7 +205,7 @@ public class YunstBizHandler extends EBankHandler {
 	/**
 	 * 代收
 	 */
-	public List<WalletCollect> collect(Long applyId) {
+	public List<WalletCollectResp> collect(Long applyId) {
 		List<WalletCollect> collects = walletCollectDao.selectByApplyId(applyId);
 		// 付款人
 		return collects.stream().map(collect -> {
@@ -244,8 +246,9 @@ public class YunstBizHandler extends EBankHandler {
 
 			collect.setProgress(UniProgress.SENDED.getValue());
 			collect.setStartTime(new Date());
+			CollectApplyResp resp = null;
 			try {
-				CollectApplyResp resp = yunstTpl.execute(req, CollectApplyResp.class);
+				resp = yunstTpl.execute(req, CollectApplyResp.class);
 				collect.setTunnelOrderNo(resp.getOrderNo());
 				if (StringUtils.isNotBlank(resp.getPayStatus())
 					&& "fail".equals(resp.getPayStatus())) {
@@ -261,7 +264,12 @@ public class YunstBizHandler extends EBankHandler {
 				log.error("{}", JsonUtil.toJSON(e));
 			}
 			walletCollectDao.updateByPrimaryKey(collect);
-			return collect;
+			WalletCollectResp result = BeanUtil.newInstance(collect, WalletCollectResp.class);
+			if (resp != null) {
+				result.setPayInfo(resp.getPayInfo());
+				result.setWeChatAPPInfo(resp.getWeChatAPPInfo());
+			}
+			return result;
 		}).filter(item -> item != null)
 			.collect(Collectors.toList());
 	}
@@ -610,6 +618,14 @@ public class YunstBizHandler extends EBankHandler {
 					.build();
 				payMethod.put(Alipay.KEY_AppOpen, appOpen);
 			} else if (CollectPayType.CODEPAY.getValue().byteValue() ==
+				m.getPayType().byteValue()) {
+				CodePayVsp codePayVsp = CodePayVsp.builder()
+					.limitPay(isRecharge ? "no_credit" : "")
+					.amount(m.getAmount())
+					.authcode(m.getSceneInfo())
+					.build();
+				payMethod.put(CodePay.KEY_CodePayVsp, codePayVsp);
+			} else if (CollectPayType.BANKCARD.getValue().byteValue() ==
 				m.getPayType().byteValue()) {
 				CodePayVsp codePayVsp = CodePayVsp.builder()
 					.limitPay(isRecharge ? "no_credit" : "")

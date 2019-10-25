@@ -227,6 +227,7 @@
     expire_time:""  , //过期时间
     id:""  , //id
     order_no:""  , //订单号
+    pay_info:""  , //扫码支付信息/ JS 支付串信息/微信原生 H5 支付串信息
     pay_method:""  , //支付方式 1：余额 2：微信 4：支付宝 8:刷卡支付 16：银行卡
     payer_wallet_id:""  , //付款人钱包id
     progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
@@ -236,7 +237,8 @@
     tunnel_order_no:""  , //渠道订单号
     tunnel_status:""  , //通道状态
     tunnel_succ_time:""  , //通道成功时间
-    tunnel_type:""   //通道类型。1: 浦发银企直连，2：通联云商通
+    tunnel_type:""  , //通道类型。1: 浦发银企直连，2：通联云商通
+    we_chat_a_p_p_info:""   //微信 APP 支付信息
 }  
 }
 ```

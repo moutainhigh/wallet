@@ -69,16 +69,22 @@ public class CollectReq {
 		@ApiModelProperty(value = "刷卡支付")
 		private CodePay codePay;
 
+		@ApiModelProperty(value = "银行卡支付")
+		private BankCard bankCard;
+
+		@ApiModelProperty(hidden = true)
 		public byte getMethods() {
 			byte method = 0;
 			if (balance != null) {
-				method |= ChannelType.WALLET.getValue().byteValue();
+				method |= ChannelType.BALANCE.getValue().byteValue();
 			} else if (wechat != null) {
 				method |= ChannelType.WECHAT.getValue().byteValue();
 			} else if (alipay != null) {
 				method |= ChannelType.ALIPAY.getValue().byteValue();
 			} else if (codePay != null) {
 				method |= ChannelType.CODEPAY.getValue().byteValue();
+			} else if (bankCard != null) {
+				method |= ChannelType.BANKCARD.getValue().byteValue();
 			}
 			return method;
 		}
@@ -153,6 +159,22 @@ public class CollectReq {
 
 			@ApiModelProperty(value = "支付授权码，支付宝被扫刷卡支付时,用户的付款二维码")
 			private String authcode;
+		}
+
+		@ApiModel
+		@Data
+		@Builder
+		@NoArgsConstructor
+		@AllArgsConstructor
+		public static class BankCard {
+			@ApiModelProperty(name = "pay_type", value = "51：银行卡快捷支付")
+			private Byte payType;
+
+			@ApiModelProperty(value = "银行卡号")
+			private String bankCardNo;
+
+			@ApiModelProperty(value = "渠道出资额(单位分)")
+			private Long amount;
 		}
 
 	}

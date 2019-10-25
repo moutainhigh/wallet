@@ -559,7 +559,7 @@ public class EnumWallet {
 	 * 支付渠道 1：钱包余额 2：微信 4：支付宝 8：银行卡
 	 */
 	public enum ChannelType implements Valuable<Byte> {
-		WALLET((byte) 1, "钱包余额"),
+		BALANCE((byte) 1, "钱包余额"),
 		WECHAT((byte) 2, "微信"),
 		ALIPAY((byte) 4, "支付宝"),
 		CODEPAY((byte) 8, "统一刷卡"),
@@ -642,6 +642,7 @@ public class EnumWallet {
 		ALIPAY_Service((byte) 32, "支付宝JS支付(生活号)"),
 		ALIPAY_AppOpen((byte) 33, "支付宝原生"),
 		CODEPAY((byte) 41, "扫码支付"),
+		BANKCARD((byte) 51, "银行卡快捷支付"),
 		;
 
 		private Byte value;

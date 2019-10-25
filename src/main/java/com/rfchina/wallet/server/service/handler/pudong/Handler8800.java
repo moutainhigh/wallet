@@ -46,6 +46,7 @@ import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.PayTuple;
+import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.LancherType;
 import com.rfchina.wallet.server.msic.EnumWallet.RemitLocation;
@@ -551,7 +552,7 @@ public class Handler8800 extends EBankHandler {
 	}
 
 	@Override
-	public List<WalletCollect> collect(Long applyId) {
+	public List<WalletCollectResp> collect(Long applyId) {
 		throw new RuntimeException();
 	}
 

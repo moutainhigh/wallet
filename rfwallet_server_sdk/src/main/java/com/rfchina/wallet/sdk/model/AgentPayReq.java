@@ -9,10 +9,10 @@ import java.util.ArrayList;
 
     
 /**
-* SettleReq
+* AgentPayReq
 */
 @Data
-public class SettleReq  {
+public class AgentPayReq  {
     @ApiModelProperty("收款人列表")
     private List<Reciever> receivers ;
 

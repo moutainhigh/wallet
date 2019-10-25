@@ -27,7 +27,7 @@ public class CollectSyncRequest extends  AbstractApiRequest {
 
   @Override
   public Class<?> getResponseModelClass() {
-    return WalletCollect.class;
+    return WalletCollectResp.class;
   }
 
   @Override

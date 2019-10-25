@@ -33,7 +33,7 @@ public class CollectApplyResp {
 	private String extendInfo;
 
 	@ApiModelProperty(value = "微信 APP 支付信息")
-	private WechatAppInfo weChatAPPInfo;
+	private String weChatAPPInfo;
 
 	@Data
 	@ApiModel

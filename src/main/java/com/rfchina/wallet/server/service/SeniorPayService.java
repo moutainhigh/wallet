@@ -27,12 +27,14 @@ import com.rfchina.wallet.server.model.ext.CollectReq;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Alipay;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Balance;
+import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.BankCard;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.CodePay;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Wechat;
 import com.rfchina.wallet.server.model.ext.RechargeReq;
 import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
 import com.rfchina.wallet.server.model.ext.AgentPayReq.Reciever;
 import com.rfchina.wallet.server.model.ext.SettleResp;
+import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.msic.EnumWallet.ChannelType;
 import com.rfchina.wallet.server.msic.EnumWallet.ClearInfoStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.ClearingStatus;
@@ -108,7 +110,7 @@ public class SeniorPayService {
 	/**
 	 * 充值
 	 */
-	public void recharge(String accessToken, RechargeReq rechargeReq) {
+	public void recharge(RechargeReq rechargeReq) {
 		// 工单记录
 		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> {
 			WalletApply walletApply = walletApplyDao.selectByBatchNo(id);
@@ -156,7 +158,7 @@ public class SeniorPayService {
 		walletRechargeDao.insertSelective(recharge);
 		savePayMethod(recharge.getId(), WalletApplyType.RECHARGE.getValue(), payMethod);
 
-		// 银行充值
+		// 充值
 		EBankHandler handler = handlerHelper.selectByWalletLevel(walletApply.getWalletLevel());
 		handler.recharge(walletApply.getId());
 
@@ -165,7 +167,7 @@ public class SeniorPayService {
 	/**
 	 * 预代收
 	 */
-	public WalletCollect preCollect(String accessToken, CollectReq collectReq) {
+	public WalletCollect preCollect(CollectReq collectReq) {
 
 		// 定义付款人
 		Long payerWalletId = (collectReq.getPayerWalletId() != null) ? collectReq.getPayerWalletId()
@@ -239,11 +241,11 @@ public class SeniorPayService {
 	/**
 	 * 发起代收
 	 */
-	public WalletCollect doCollect(String accessToken, WalletCollect collect) {
+	public WalletCollectResp doCollect(WalletCollect collect) {
 		WalletApply walletApply = walletApplyDao.selectByPrimaryKey(collect.getApplyId());
 
 		EBankHandler handler = handlerHelper.selectByWalletLevel(walletApply.getWalletLevel());
-		List<WalletCollect> result = handler.collect(walletApply.getId());
+		List<WalletCollectResp> result = handler.collect(walletApply.getId());
 
 		return result.stream()
 			.filter(c -> c.getId().longValue() == collect.getId().longValue())
@@ -254,7 +256,7 @@ public class SeniorPayService {
 	/**
 	 * 查询代收结果
 	 */
-	public WalletCollect queryCollect(String accessToken, String orderNo) {
+	public WalletCollect queryCollect(String orderNo) {
 		return walletCollectDao.selectByOrderNo(orderNo);
 	}
 
@@ -263,7 +265,7 @@ public class SeniorPayService {
 	 * 发起代付（加锁）
 	 */
 	@Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
-	public SettleResp agentPay(String accessToken, String collectOrderNo,
+	public SettleResp agentPay(String collectOrderNo,
 		List<Reciever> receivers) {
 		WalletCollect collect = walletCollectDao.selectByOrderNo(collectOrderNo);
 		if (collect == null) {
@@ -336,7 +338,7 @@ public class SeniorPayService {
 	/**
 	 * 查询代付结果
 	 */
-	public WalletClearing agentPayQuery(String accessToken, String agentPayOrderNo) {
+	public WalletClearing agentPayQuery(String agentPayOrderNo) {
 		return walletClearingDao.selectByOrderNo(agentPayOrderNo);
 	}
 
@@ -344,7 +346,7 @@ public class SeniorPayService {
 	/**
 	 * 退款
 	 */
-	public WalletRefund refund(String accessToken, String collectOrderNo,
+	public WalletRefund refund(String collectOrderNo,
 		List<RefundInfo> refundList) {
 		// 退款申请不重复
 		Set<String> walletIdSet = refundList.stream().map(r -> r.getWalletId().toString())
@@ -458,7 +460,7 @@ public class SeniorPayService {
 			.type(type);
 		if (payMethod.getBalance() != null) {
 			Balance balance = payMethod.getBalance();
-			builder.channelType(ChannelType.WALLET.getValue())
+			builder.channelType(ChannelType.BALANCE.getValue())
 				.payType(CollectPayType.BALANCE.getValue())
 				.amount(balance.getAmount());
 		} else if (payMethod.getWechat() != null) {
@@ -485,11 +487,17 @@ public class SeniorPayService {
 				.payType(payType.getValue().byteValue())
 				.amount(codePay.getAmount())
 				.sceneInfo(codePay.getAuthcode());
+		} else if (payMethod.getBankCard() != null) {
+			BankCard bankCard = payMethod.getBankCard();
+			builder.channelType(ChannelType.BANKCARD.getValue())
+				.payType(CollectPayType.BANKCARD.getValue())
+				.amount(bankCard.getAmount())
+				.openId(bankCard.getBankCardNo());
 		}
 		walletCollectMethodDao.insertSelective(builder.build());
 	}
 
-	public WalletRefund refundQuery(String accessToken, String refundOrderNo) {
+	public WalletRefund refundQuery(String refundOrderNo) {
 		return walletRefundDao.selectByOrderNo(refundOrderNo);
 	}
 }

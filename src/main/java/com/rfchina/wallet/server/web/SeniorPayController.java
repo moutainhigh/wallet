@@ -11,13 +11,14 @@ import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.model.WalletClearing;
 import com.rfchina.wallet.domain.model.WalletCollect;
 import com.rfchina.wallet.domain.model.WalletRefund;
+import com.rfchina.wallet.server.api.SeniorPayApi;
 import com.rfchina.wallet.server.model.ext.AgentPayReq;
 import com.rfchina.wallet.server.model.ext.CollectReq;
 import com.rfchina.wallet.server.model.ext.RechargeReq;
 import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
 import com.rfchina.wallet.server.model.ext.SettleResp;
+import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.msic.UrlConstant;
-import com.rfchina.wallet.server.service.SeniorPayService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -39,7 +40,7 @@ public class SeniorPayController {
 	};
 
 	@Autowired
-	private SeniorPayService seniorPayService;
+	private SeniorPayApi seniorPayApi;
 
 	@ApiOperation("高级钱包-充值")
 	@PostMapping(UrlConstant.SENIOR_WALLET_RECHARGE)
@@ -49,7 +50,7 @@ public class SeniorPayController {
 	) {
 
 		RechargeReq req = JsonUtil.toObject(rechargeReq, RechargeReq.class, DEF_REQ_OBJ_MAP);
-		seniorPayService.recharge(accessToken, req);
+		seniorPayApi.recharge(accessToken, req);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
 
@@ -60,19 +61,19 @@ public class SeniorPayController {
 		@ApiParam(value = "代收内容，参考CollectReq结构体", required = true) @RequestParam("collect_req") String collectReq
 	) {
 		CollectReq req = JsonUtil.toObject(collectReq, CollectReq.class, DEF_REQ_OBJ_MAP);
-		WalletCollect collect = seniorPayService.preCollect(accessToken, req);
+		WalletCollect collect = seniorPayApi.preCollect(accessToken, req);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, collect);
 	}
 
 	@ApiOperation("高级钱包-即刻代收")
 	@PostMapping(UrlConstant.SENIOR_WALLET_COLLECT_SYNC)
-	public ResponseValue<WalletCollect> collectSync(
+	public ResponseValue<WalletCollectResp> collectSync(
 		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
 		@ApiParam(value = "代收内容，参考CollectReq结构体", required = true) @RequestParam("collect_req") String collectReq
 	) {
 		CollectReq req = JsonUtil.toObject(collectReq, CollectReq.class, DEF_REQ_OBJ_MAP);
-		WalletCollect walletCollect = seniorPayService.preCollect(accessToken, req);
-		WalletCollect result = seniorPayService.doCollect(accessToken, walletCollect);
+		WalletCollect walletCollect = seniorPayApi.preCollect(accessToken, req);
+		WalletCollectResp result = seniorPayApi.doCollect(accessToken, walletCollect);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result);
 	}
 
@@ -82,7 +83,7 @@ public class SeniorPayController {
 		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
 		@ApiParam(value = "代收单号", required = true) @RequestParam("collect_order_no") String collectOrderNo
 	) {
-		WalletCollect collect = seniorPayService.queryCollect(accessToken, collectOrderNo);
+		WalletCollect collect = seniorPayApi.queryCollect(accessToken, collectOrderNo);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, collect);
 	}
 
@@ -94,7 +95,7 @@ public class SeniorPayController {
 		@ApiParam(value = "代付列表（与代收的分账规则对应），参考AgentPayReq结构体", required = true) @RequestParam("agent_pay_req") String agentPayReq
 	) {
 		AgentPayReq req = JsonUtil.toObject(agentPayReq, AgentPayReq.class, DEF_REQ_OBJ_MAP);
-		seniorPayService.agentPay(accessToken, collectOrderNo, req.getReceivers());
+		seniorPayApi.agentPay(accessToken, collectOrderNo, req.getReceivers());
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
 
@@ -104,7 +105,7 @@ public class SeniorPayController {
 		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
 		@ApiParam(value = "代付单号", required = true) @RequestParam(value = "pay_order_no") String payOrderNo
 	) {
-		WalletClearing walletClearings = seniorPayService.agentPayQuery(accessToken, payOrderNo);
+		WalletClearing walletClearings = seniorPayApi.agentPayQuery(accessToken, payOrderNo);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, walletClearings);
 	}
 
@@ -116,7 +117,7 @@ public class SeniorPayController {
 		@ApiParam(value = "退款清单，参考List<RefundInfo>结构体", required = true) @RequestParam("refund_list") String refundList
 	) {
 		List<RefundInfo> rList = JsonUtil.toArray(refundList, RefundInfo.class, DEF_REQ_OBJ_MAP);
-		WalletRefund refund = seniorPayService.refund(accessToken, collectOrderNo, rList);
+		WalletRefund refund = seniorPayApi.refund(accessToken, collectOrderNo, rList);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, refund);
 	}
 
@@ -126,7 +127,7 @@ public class SeniorPayController {
 		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
 		@ApiParam(value = "退款单号", required = true) @RequestParam("refund_order_no") String refundOrderNo
 	) {
-		WalletRefund refund = seniorPayService.refundQuery(accessToken, refundOrderNo);
+		WalletRefund refund = seniorPayApi.refundQuery(accessToken, refundOrderNo);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, refund);
 	}
 

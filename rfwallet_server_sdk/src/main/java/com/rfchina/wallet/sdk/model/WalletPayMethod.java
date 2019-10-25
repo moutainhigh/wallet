@@ -28,6 +28,9 @@ public class WalletPayMethod  {
     @ApiModelProperty("微信支付")
     private Wechat wechat ;
 
+    @ApiModelProperty(value = "银行卡支付")
+    private BankCard bankCard;
+
 
 }
 
