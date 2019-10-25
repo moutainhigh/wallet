@@ -9,15 +9,20 @@ import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletChannelSetPayPwd;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletChannelSignContract;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyChannel;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyRefType;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyType;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.model.ChannelNotify;
 import com.rfchina.wallet.domain.model.WalletChannel;
+import com.rfchina.wallet.domain.model.WalletVerifyHis;
 import com.rfchina.wallet.server.bank.yunst.response.RecallResp;
 import com.rfchina.wallet.server.bank.yunst.response.RpsResp;
 import com.rfchina.wallet.server.bank.yunst.response.YunstNotify;
 import com.rfchina.wallet.server.mapper.ext.ChannelNotifyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletChannelExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCompanyExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletVerifyHisExtDao;
 import com.rfchina.wallet.server.model.ext.SLWalletMqMessage;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyType;
 import com.rfchina.wallet.server.msic.EnumWallet.YunstMethodName;
@@ -42,6 +47,8 @@ public class NotifyService {
 	private WalletCompanyExtDao walletCompanyExtDao;
 	@Autowired
 	private ChannelNotifyExtDao channelNotifyDao;
+	@Autowired
+	private WalletVerifyHisExtDao walletVerifyHisExtDao;
 	@Autowired
 	private YunstBizHandler yunstBizHandler;
 	@Autowired
@@ -137,6 +144,14 @@ public class NotifyService {
 			walletChannel.setStatus(
 				EnumDef.WalletChannelAuditStatus.AUDIT_SUCCESS.getValue().byteValue());
 			walletChannel.setFailReason(null);
+			walletVerifyHisExtDao.insertSelective(
+				WalletVerifyHis.builder().walletId(walletChannel.getWalletId())
+					.refId(walletChannel.getId()).type(
+					WalletVerifyRefType.COMPANY.getValue().byteValue()).verifyType(
+					WalletVerifyChannel.TONGLIAN.getValue().byteValue()).verifyType(
+					WalletVerifyType.COMPANY_VERIFY.getValue().byteValue())
+					.verifyTime(DateUtil.parse(checkTime, DateUtil.STANDARD_DTAETIME_PATTERN))
+					.createTime(new Date()).build());
 		} else if (result == 3L) {
 			walletChannel
 				.setStatus(EnumDef.WalletChannelAuditStatus.AUDIT_FAIL.getValue().byteValue());

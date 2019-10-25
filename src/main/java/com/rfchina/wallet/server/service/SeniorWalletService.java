@@ -7,10 +7,14 @@ import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumVerifyCodeType;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyChannel;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyRefType;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletChannel;
 import com.rfchina.wallet.domain.model.WalletPerson;
+import com.rfchina.wallet.domain.model.WalletVerifyHis;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstCreateMemberResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.CompanyInfoResult;
@@ -20,6 +24,7 @@ import com.rfchina.wallet.server.bank.yunst.util.CommonGatewayException;
 import com.rfchina.wallet.server.mapper.ext.WalletChannelExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletVerifyHisExtDao;
 import com.rfchina.wallet.server.msic.EnumWallet.EnumYunstResponse;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBaseHandler;
 import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
@@ -47,6 +52,9 @@ public class SeniorWalletService {
 
 	@Autowired
 	private WalletChannelExtDao walletChannelDao;
+
+	@Autowired
+	private WalletVerifyHisExtDao walletVerifyHisExtDao;
 
 
 	/**
@@ -195,6 +203,7 @@ public class SeniorWalletService {
 			if (StringUtils.isEmpty(walletChannel.getSecurityTel())) {
 				this.seniorWalletBindPhone(channelType, walletId, source, mobile, verifyCode);
 			}
+			Date curDate = new Date();
 			yunstUserHandler.personCertification(walletId, source, realName,
 				EnumDef.EnumIdType.ID_CARD.getValue().longValue(), idNo);
 			walletChannel.setStatus(
@@ -207,9 +216,17 @@ public class SeniorWalletService {
 				throw new RfchinaResponseException(
 					EnumResponseCode.COMMON_FAILURE, "更新高级钱包审核状态信息失败");
 			}
+
+			walletVerifyHisExtDao.insertSelective(
+				WalletVerifyHis.builder().walletId(walletId)
+					.refId(walletChannel.getId()).type(
+					WalletVerifyRefType.PERSON.getValue().byteValue()).verifyType(
+					WalletVerifyChannel.TONGLIAN.getValue().byteValue()).verifyType(
+					WalletVerifyType.TWO_FACTOR.getValue().byteValue())
+					.verifyTime(curDate).createTime(curDate).build());
+
 			WalletPerson walletPerson = walletPersonDao.selectByWalletId(walletId);
 			if (walletPerson == null) {
-				Date curDate = new Date();
 				effectRows = walletPersonDao.insertSelective(WalletPerson.builder()
 					.walletId(walletId)
 					.idType(EnumDef.EnumIdType.ID_CARD.getValue().byteValue())
@@ -233,6 +250,7 @@ public class SeniorWalletService {
 	/**
 	 * 高级钱包企业资料审核
 	 */
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 	public WalletChannel seniorWalletCompanyAudit(Integer channelType, Long walletId, Byte source,
 		Integer auditType,
 		YunstSetCompanyInfoReq.CompanyBasicInfo companyBasicInfo) {
@@ -257,18 +275,28 @@ public class SeniorWalletService {
 					Long result = yunstSetCompanyInfoResult.getResult();
 					String failReason = yunstSetCompanyInfoResult.getFailReason();
 					String remark = yunstSetCompanyInfoResult.getRemark();
+					Date curDate = new Date();
 					if (Objects.nonNull(result)) {
 						if (2L == result.longValue()) {
 							walletChannel.setStatus(
 								EnumDef.WalletChannelAuditStatus.AUDIT_SUCCESS.getValue()
 									.byteValue());
 							walletChannel.setFailReason(null);
+							walletChannel.setCheckTime(curDate);
+
+							walletVerifyHisExtDao.insertSelective(
+								WalletVerifyHis.builder().walletId(walletId)
+									.refId(walletChannel.getId()).type(
+									WalletVerifyRefType.COMPANY.getValue().byteValue()).verifyType(
+									WalletVerifyChannel.TONGLIAN.getValue().byteValue()).verifyType(
+									WalletVerifyType.COMPANY_VERIFY.getValue().byteValue())
+									.verifyTime(curDate).createTime(curDate).build());
 						} else if (3L == result.longValue()) {
 							walletChannel.setStatus(
 								EnumDef.WalletChannelAuditStatus.AUDIT_FAIL.getValue().byteValue());
 							walletChannel.setFailReason(failReason);
 						}
-						walletChannel.setCheckTime(new Date());
+						walletChannel.setCheckTime(curDate);
 					} else {
 						walletChannel.setStatus(
 							EnumDef.WalletChannelAuditStatus.WAITING_AUDIT.getValue().byteValue());
