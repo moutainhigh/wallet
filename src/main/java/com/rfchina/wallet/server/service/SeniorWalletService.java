@@ -204,6 +204,11 @@ public class SeniorWalletService {
 					EnumWalletResponseCode.WALLET_ACCOUNT_NOT_EXIST);
 			}
 
+			if (EnumDef.WalletChannelAuditStatus.AUDIT_SUCCESS.getValue().byteValue()
+				== walletChannel.getStatus()) {
+				return;
+			}
+
 			if (StringUtils.isEmpty(walletChannel.getSecurityTel())) {
 				this.seniorWalletBindPhone(channelType, walletId, source, mobile, verifyCode);
 			}
