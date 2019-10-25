@@ -19,6 +19,7 @@ import com.rfchina.wallet.domain.mapper.ext.BankCodeDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumDefBankCard;
+import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletCardStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletCardSenior;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
@@ -528,8 +529,11 @@ public class WalletService {
 			.selectByWalletId(walletId, EnumDefBankCard.YES.getValue(),
 				WalletCardSenior.NO.getValue()).get(0);
 
+		int bankCardCount = walletCardDao
+			.selectCountByWalletId(walletId, EnumWalletCardStatus.BIND.getValue());
 		return builder.wallet(wallet).defWalletCard(walletCard)
-			.bankCardCount(walletCardDao.count(walletId)).build();
+			.bankCardCount(bankCardCount)
+			.build();
 	}
 
 	public WalletInfoResp queryWalletInfoByUserId(Long userId) {
@@ -641,8 +645,8 @@ public class WalletService {
 
 		//更新已绑定的银行卡状态为已解绑
 		int effectRows = walletCardDao
-			.updateWalletCard(walletId, EnumDef.EnumCardBindStatus.UNBIND.getValue(),
-				EnumDef.EnumCardBindStatus.BIND.getValue(), null,
+			.updateWalletCard(walletId, EnumDef.EnumWalletCardStatus.UNBIND.getValue(),
+				EnumDef.EnumWalletCardStatus.BIND.getValue(), null,
 				EnumDef.EnumDefBankCard.NO.getValue());
 
 		//首次绑定银行卡
