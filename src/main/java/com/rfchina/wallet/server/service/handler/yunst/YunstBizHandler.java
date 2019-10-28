@@ -31,6 +31,7 @@ import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMe
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod.Alipay.AlipayService;
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod.Alipay.ScanAlipay;
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod.Balance;
+import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod.BankCard.CardQuickPay;
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod.CodePay;
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod.CodePay.CodePayVsp;
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod.Wechat;
@@ -63,6 +64,7 @@ import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.BankCard;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.PayTuple;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
+import com.rfchina.wallet.server.msic.EnumWallet.ChannelType;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.EnumYunstDeviceType;
@@ -83,6 +85,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -243,7 +246,7 @@ public class YunstBizHandler extends EBankHandler {
 				.recieverList(receives)
 				.amount(collect.getAmount())
 				.fee(0L)
-				.validateType(0L)
+				.validateType(collect.getPayMethod() == ChannelType.BALANCE.getValue() ? 2L : 0L)
 				.frontUrl(null)
 				.backUrl(configService.getYunstCollectRecallUrl())
 				.ordErexpireDatetime(expireTime)
@@ -643,11 +646,11 @@ public class YunstBizHandler extends EBankHandler {
 				} catch (Exception e) {
 					log.error("银行卡加密错误", e);
 				}
-				BankCard bankCard = BankCard.builder()
+				CardQuickPay bankCard = CardQuickPay.builder()
 					.bankCardNo(bankCardNo)
 					.amount(m.getAmount())
 					.build();
-				payMethod.put(CollectPayMethod.BankCard.KEY_CodePayVsp, bankCard);
+				payMethod.put(CollectPayMethod.BankCard.KEY_QuickPayVsp, bankCard);
 			}
 		});
 		return payMethod;

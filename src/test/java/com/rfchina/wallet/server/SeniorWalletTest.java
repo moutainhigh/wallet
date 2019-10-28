@@ -151,8 +151,10 @@ public class SeniorWalletTest extends WalletBaseTest {
 		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
 		params.put("sign", sign);
 
-		postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_PRE_BIND_BANK_CARD, params,
+		Map<String, Object> result = postAndValidateSpecCode(BASE_URL,
+			UrlConstant.WALLET_SENIOR_PRE_BIND_BANK_CARD, params,
 			1001);
+		log.info("", result);
 	}
 
 	/**
@@ -164,10 +166,8 @@ public class SeniorWalletTest extends WalletBaseTest {
 		params.put("access_token", getAccessToken(appId, appSecret));
 		params.put("wallet_id", String.valueOf(10035));
 		params.put("source", String.valueOf(3));
-		params.put("card_no", "6214850201481956");
-		params.put("real_name", "观富昌");
-		params.put("phone", "13710819640");
-		params.put("identity_no", "440923198711033434");
+		params.put("pre_bind_ticket", "");
+		params.put("verify_code", "");
 		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
 		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
 		params.put("sign", sign);

@@ -293,9 +293,9 @@ public class CollectApplyReq implements YunstBaseReq {
 		@ApiModel
 		public static class BankCard {
 
-			public static String KEY_CodePayVsp = "QUICKPAY_TLT";
+			public static String KEY_QuickPayVsp = "QUICKPAY_VSP";
 
-			@ApiModel(description = "收银宝刷卡支付（被扫）")
+			@ApiModel(description = "收银宝快捷支付")
 			@Getter
 			@Builder
 			public static class CardQuickPay {
@@ -304,7 +304,7 @@ public class CollectApplyReq implements YunstBaseReq {
 				private Long amount;
 
 				@ApiModelProperty(required = true, value = "银行卡号，RSA 加密")
-				private String bankCard;
+				private String bankCardNo;
 
 				@ApiModelProperty(value = "有效期，信用卡必填，格式为月年； 如 0321，2 位月 2 位年；RSA 加密。")
 				private String validate;

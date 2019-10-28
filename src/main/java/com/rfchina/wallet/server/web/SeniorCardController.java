@@ -46,7 +46,7 @@ public class SeniorCardController {
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
 		@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2") @RequestParam("source") Byte source,
-		@ApiParam(value = "信用卡cvv2码", required = false) @RequestParam(value = "pre_bind_ticket", required = false) String preBindTicket,
+		@ApiParam(value = "预绑卡票据", required = false) @RequestParam(value = "pre_bind_ticket", required = false) String preBindTicket,
 		@ApiParam(value = "短信验证码", required = true) @RequestParam("verify_code") String verifyCode) {
 
 		Long result = seniorCardApi
