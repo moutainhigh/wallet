@@ -13,10 +13,13 @@ import com.rfchina.wallet.domain.misc.EnumDef.EnumIdType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletCardType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.Wallet;
+import com.rfchina.wallet.domain.model.WalletChannel;
 import com.rfchina.wallet.server.api.SeniorCardApi;
 import com.rfchina.wallet.server.bank.yunst.response.result.ApplyBindBankCardResp;
 import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
+import com.rfchina.wallet.server.mapper.ext.WalletChannelExtDao;
 import com.rfchina.wallet.server.model.ext.PreBindCardVo;
+import com.rfchina.wallet.server.msic.EnumWallet.TunnelType;
 import com.rfchina.wallet.server.service.VerifyService;
 import com.rfchina.wallet.server.service.WalletService;
 import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
@@ -46,6 +49,9 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 	@Autowired
 	private RedisTemplate redisTemplate;
 
+	@Autowired
+	private WalletChannelExtDao walletChannelDao;
+
 	/**
 	 * 高级钱包-预绑定银行卡
 	 */
@@ -58,9 +64,12 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 		String cvv2) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		verifyService.checkWallet(walletId, wallet);
+		WalletChannel walletChannel = walletChannelDao
+			.selectByWalletId(walletId, TunnelType.YUNST.getValue());
+
 		try {
 			ApplyBindBankCardResp result = yunstUserHandler
-				.applyBindBankCard(walletId, source, cardNo, realName, phone,
+				.applyBindBankCard(walletChannel.getBizUserId(), cardNo, realName, phone,
 					EnumIdType.ID_CARD.getValue().longValue(), identityNo, validate, cvv2);
 
 			PreBindCardVo preBindCardVo = PreBindCardVo.builder()
@@ -102,7 +111,7 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 	@SignVerify
 	@Override
 	public Long confirmBindCard(String accessToken, Long walletId, Byte source,
-		String verifyCode,String preBindTicket) {
+		String verifyCode, String preBindTicket) {
 
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		verifyService.checkWallet(walletId, wallet);
@@ -112,11 +121,13 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 		if (preBindCardVo == null || walletId.longValue() != preBindCardVo.getWalletId()) {
 			throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_BIND_TIMEOUT);
 		}
+		WalletChannel walletChannel = walletChannelDao
+			.selectByWalletId(walletId, TunnelType.YUNST.getValue());
 
 		try {
-			yunstUserHandler.bindBankCard(walletId, source, preBindCardVo.getTransNum(),
+			yunstUserHandler.bindBankCard(walletChannel.getBizUserId(), preBindCardVo.getTransNum(),
 				preBindCardVo.getTransDate(), preBindCardVo.getPhone(), preBindCardVo.getValidate(),
-				preBindCardVo.getCvv2(),verifyCode);
+				preBindCardVo.getCvv2(), verifyCode);
 		} catch (CommonGatewayException e) {
 			String errMsg = e.getBankErrMsg();
 			if (errMsg.indexOf("参数validate为空") > -1) {
@@ -146,8 +157,10 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 	public Long unBindCard(String accessToken, Long walletId, Byte source, String cardNo) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		verifyService.checkWallet(walletId, wallet);
+		WalletChannel walletChannel = walletChannelDao
+			.selectByWalletId(walletId, TunnelType.YUNST.getValue());
 		try {
-			yunstUserHandler.unbindBankCard(walletId, source, cardNo);
+			yunstUserHandler.unbindBankCard(walletChannel.getBizUserId(), cardNo);
 		} catch (Exception e) {
 			log.error("高级钱包银行卡解绑失败, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
