@@ -9,11 +9,14 @@ import com.rfchina.platform.common.misc.ResponseCode;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
 import com.rfchina.wallet.domain.misc.EnumDef;
+import com.rfchina.wallet.domain.misc.EnumDef.ChannelType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.Wallet;
+import com.rfchina.wallet.domain.model.WalletChannel;
 import com.rfchina.wallet.server.api.SeniorCardApi;
 import com.rfchina.wallet.server.bank.yunst.response.result.ApplyBindBankCardResp;
 import com.rfchina.wallet.server.bank.yunst.util.CommonGatewayException;
+import com.rfchina.wallet.server.mapper.ext.WalletChannelExtDao;
 import com.rfchina.wallet.server.service.VerifyService;
 import com.rfchina.wallet.server.service.WalletService;
 import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
@@ -27,6 +30,9 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 
 	@Autowired
 	private WalletDao walletDao;
+
+	@Autowired
+	private WalletChannelExtDao walletChannelExtDao;
 
 	@Autowired
 	private WalletService walletService;
@@ -49,14 +55,18 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 		String cvv2) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		verifyService.checkWallet(walletId, wallet);
+		WalletChannel walletChannel = walletChannelExtDao
+			.selectByChannelTypeAndWalletId(ChannelType.YUNST.getValue().intValue(), walletId);
 		try {
-			return yunstUserHandler.applyBindBankCard(walletId, source, cardNo, realName, phone,
-				EnumDef.EnumIdType.ID_CARD.getValue().longValue(), identityNo, validate, cvv2);
+			return yunstUserHandler
+				.applyBindBankCard(walletChannel.getBizUserId(), cardNo, realName, phone,
+					EnumDef.EnumIdType.ID_CARD.getValue().longValue(), identityNo, validate, cvv2);
 		} catch (CommonGatewayException e) {
 			String errMsg = e.getBankErrMsg();
 			if (errMsg.indexOf("参数validate为空") > -1) {
 				log.error("高级钱包-银行卡资料缺失, walletId: {}", walletId);
-				throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_CREDIT_INVALID);
+				throw new WalletResponseException(
+					EnumWalletResponseCode.BANK_CARD_CREDIT_INVALID);
 			}
 			log.error("高级钱包-银行卡验证失败, walletId: {}", walletId);
 			throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_INFO_INVALID);
@@ -79,14 +89,18 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 		String verifyCode) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		verifyService.checkWallet(walletId, wallet);
+		WalletChannel walletChannel = walletChannelExtDao
+			.selectByChannelTypeAndWalletId(ChannelType.YUNST.getValue().intValue(), walletId);
 		try {
-			yunstUserHandler.bindBankCard(walletId, source, transNum, transDate, phone, validate,
-				cvv2,verifyCode);
+			yunstUserHandler
+				.bindBankCard(walletChannel.getBizUserId(), transNum, transDate, phone, validate,
+					cvv2, verifyCode);
 		} catch (CommonGatewayException e) {
 			String errMsg = e.getBankErrMsg();
 			if (errMsg.indexOf("参数validate为空") > -1) {
 				log.error("高级钱包银行卡 信用卡资料缺失, walletId: {}", walletId);
-				throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_CREDIT_INVALID);
+				throw new WalletResponseException(
+					EnumWalletResponseCode.BANK_CARD_CREDIT_INVALID);
 			}
 			log.error("高级钱包银行卡确认绑定失败, walletId: {}", walletId);
 			throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_INFO_INVALID);
@@ -111,8 +125,10 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 	public Long unBindCard(String accessToken, Long walletId, Byte source, String cardNo) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		verifyService.checkWallet(walletId, wallet);
+		WalletChannel walletChannel = walletChannelExtDao
+			.selectByChannelTypeAndWalletId(ChannelType.YUNST.getValue().intValue(), walletId);
 		try {
-			yunstUserHandler.unbindBankCard(walletId, source, cardNo);
+			yunstUserHandler.unbindBankCard(walletChannel.getBizUserId(), cardNo);
 		} catch (Exception e) {
 			log.error("高级钱包银行卡解绑失败, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
