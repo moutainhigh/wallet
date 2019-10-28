@@ -19,6 +19,7 @@ import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstCreateMemberResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.CompanyInfoResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.PersonInfoResult;
+import com.rfchina.wallet.server.bank.yunst.response.result.YunstQueryBalanceResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstSetCompanyInfoResult;
 import com.rfchina.wallet.server.bank.yunst.util.CommonGatewayException;
 import com.rfchina.wallet.server.mapper.ext.WalletChannelExtDao;
@@ -373,7 +374,9 @@ public class SeniorWalletService {
 			EnumDef.EnumIdType.ID_CARD.getValue().longValue(), identityNo);
 	}
 
-
+	/**
+	 * 高级钱包企业会员信息
+	 */
 	public CompanyInfoResult seniorWalletGetCompanyInfo(Long walletId,
 		Byte source) throws Exception {
 		CompanyInfoResult memberInfo = (CompanyInfoResult) yunstUserHandler
@@ -381,12 +384,47 @@ public class SeniorWalletService {
 		return memberInfo;
 	}
 
-
+	/**
+	 * 高级钱包个人会员信息
+	 */
 	public PersonInfoResult seniorWalletGetPersonInfo(Long walletId,
 		Byte source) throws Exception {
 		PersonInfoResult memberInfo = (PersonInfoResult) yunstUserHandler
 			.getMemberInfo(walletId, source);
 		return memberInfo;
+	}
+
+	/**
+	 * 获取钱包渠道信息
+	 */
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+	public WalletChannel getWalletChannel(Integer channelType, Long walletId) throws Exception {
+		WalletChannel walletChannel = walletChannelDao
+			.selectByChannelTypeAndWalletId(channelType, walletId);
+
+		YunstQueryBalanceResult yunstQueryBalanceResult = yunstUserHandler
+			.queryBalance(walletChannel.getBizUserId());
+
+		Long allAmount = walletChannel.getBalance();
+		Long freezenAmount = walletChannel.getFreezenAmount();
+
+		if (null == allAmount || null == freezenAmount
+			|| allAmount.longValue() != yunstQueryBalanceResult.getAllAmount()
+			|| freezenAmount.longValue() != yunstQueryBalanceResult.getFreezenAmount()) {
+			//金额不一致 更新
+			walletChannel.setBalance(yunstQueryBalanceResult.getAllAmount());
+			walletChannel.setFreezenAmount(yunstQueryBalanceResult.getFreezenAmount());
+
+			walletChannelDao.updateByPrimaryKeySelective(walletChannel);
+
+			Wallet wallet = walletDao.selectByPrimaryKey(walletId);
+			wallet.setWalletBalance(walletChannel.getBalance());
+			wallet.setFreezeAmount(walletChannel.getFreezenAmount());
+
+			walletDao.updateByPrimaryKeySelective(wallet);
+		}
+
+		return walletChannel;
 	}
 
 }
