@@ -48,7 +48,7 @@ public class PreBindBankCardRequest extends  AbstractApiRequest {
 
   @Override
   public Class<?> getResponseModelClass() {
-    return ApplyBindBankCardResp.class;
+    return Map.class;
   }
 
   @Override

@@ -9,6 +9,8 @@ import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.platform.common.utils.SignUtil;
 import com.rfchina.wallet.server.service.AppService;
 import com.rfchina.wallet.server.service.ConfigService;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -44,13 +46,19 @@ public class SpringBaseTest {
 	}
 
 	@Before
-	public void initYunst() {
-		YunClient.configure(new YunConfig(configService.getYstServerUrl(),
-			configService.getYstSysId(),
-			configService.getYstPassword(), configService.getYstAlias(),
-			configService.getYstVersion(),
-			"/data/env/config/dev-key/yunst/1902271423530473681.pfx",
-			"/data/env/config/dev-key/yunst/TLCert-test.cer"));
+	public void initYunst() throws Exception {
+		Process process = Runtime.getRuntime().exec("git config user.name");
+		process.waitFor();
+		BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+		String name = reader.readLine();
+		if (name.startsWith("niezengming")) {
+			YunClient.configure(new YunConfig(configService.getYstServerUrl(),
+				configService.getYstSysId(),
+				configService.getYstPassword(), configService.getYstAlias(),
+				configService.getYstVersion(),
+				"/data/env/config/dev-key/yunst/1902271423530473681.pfx",
+				"/data/env/config/dev-key/yunst/TLCert-test.cer"));
+		}
 	}
 
 

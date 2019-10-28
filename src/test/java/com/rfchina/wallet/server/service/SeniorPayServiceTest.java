@@ -44,12 +44,13 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	public void recharge() {
 		CodePay codePay = CodePay.builder()
 			.payType(CollectPayType.CODEPAY.getValue())
-			.authcode("134572047983132026")
-			.amount(1L)
+			.authcode("134743276673265508")
+			.amount(5L)
 			.build();
 		RechargeReq req = RechargeReq.builder()
 			.bizNo(String.valueOf(System.currentTimeMillis()))
-			.amount(1L)
+			.payerWalletId(10001L)
+			.amount(5L)
 			.fee(0L)
 			.validateType((byte) 0)
 			.expireTime(null)

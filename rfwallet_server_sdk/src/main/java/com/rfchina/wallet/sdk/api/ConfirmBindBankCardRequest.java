@@ -16,17 +16,8 @@ public class ConfirmBindBankCardRequest extends  AbstractApiRequest {
   @ApiModelProperty("access_token")
   private String accessToken ;
 
-  @ApiModelProperty("银行预留手机号")
-  private String phone ;
-
   @ApiModelProperty("钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户")
   private Integer source ;
-
-  @ApiModelProperty("验证银行卡申请时间")
-  private String transDate ;
-
-  @ApiModelProperty("验证银行卡流水号")
-  private String transNum ;
 
   @ApiModelProperty("短信验证码")
   private String verifyCode ;
@@ -35,10 +26,7 @@ public class ConfirmBindBankCardRequest extends  AbstractApiRequest {
   private Long walletId ;
 
   @ApiModelProperty("信用卡cvv2码")
-  private String cvv2 ;
-
-  @ApiModelProperty("信用卡到期4位日期")
-  private String validate ;
+  private String preBindTicket ;
 
 
   @Override
@@ -57,17 +45,8 @@ public class ConfirmBindBankCardRequest extends  AbstractApiRequest {
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
       }
-      if(phone != null){
-        parameters.put("phone", phone.toString());
-      }
       if(source != null){
         parameters.put("source", source.toString());
-      }
-      if(transDate != null){
-        parameters.put("trans_date", transDate.toString());
-      }
-      if(transNum != null){
-        parameters.put("trans_num", transNum.toString());
       }
       if(verifyCode != null){
         parameters.put("verify_code", verifyCode.toString());
@@ -75,11 +54,8 @@ public class ConfirmBindBankCardRequest extends  AbstractApiRequest {
       if(walletId != null){
         parameters.put("wallet_id", walletId.toString());
       }
-      if(cvv2 != null){
-        parameters.put("cvv2", cvv2.toString());
-      }
-      if(validate != null){
-        parameters.put("validate", validate.toString());
+      if(preBindTicket != null){
+        parameters.put("pre_bind_ticket", preBindTicket.toString());
       }
     return parameters;
   }

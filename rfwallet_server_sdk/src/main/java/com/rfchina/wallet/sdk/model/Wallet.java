@@ -13,7 +13,7 @@ import java.util.ArrayList;
 */
 @Data
 public class Wallet  {
-    @ApiModelProperty("审核方式，1：运营，2：银企直连，3：通联")
+    @ApiModelProperty("审核方式，1：运营，2：银企直连，4：通联")
     private Integer auditType ;
 
     @ApiModelProperty("钱包余额最后更新日期")

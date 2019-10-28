@@ -244,7 +244,7 @@
   "code": 1001,//状态码
   "msg": ""//消息
    , "data":  {
-    audit_type:""  , //审核方式，1：运营，2：银企直连，3：通联
+    audit_type:""  , //审核方式，1：运营，2：银企直连，4：通联
     balance_upd_time:""  , //钱包余额最后更新日期
     create_time:""  , //创建日期
     freeze_amount:""  , //冻结金额
@@ -385,7 +385,7 @@
     wallet_id:""   //关联的钱包ID
 }  , 
     wallet:{
-    audit_type:""  , //审核方式，1：运营，2：银企直连，3：通联
+    audit_type:""  , //审核方式，1：运营，2：银企直连，4：通联
     balance_upd_time:""  , //钱包余额最后更新日期
     create_time:""  , //创建日期
     freeze_amount:""  , //冻结金额
@@ -467,7 +467,7 @@
     wallet_id:""   //关联的钱包ID
 }  , 
     wallet:{
-    audit_type:""  , //审核方式，1：运营，2：银企直连，3：通联
+    audit_type:""  , //审核方式，1：运营，2：银企直连，4：通联
     balance_upd_time:""  , //钱包余额最后更新日期
     create_time:""  , //创建日期
     freeze_amount:""  , //冻结金额

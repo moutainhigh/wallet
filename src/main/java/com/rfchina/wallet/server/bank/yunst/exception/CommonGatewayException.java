@@ -1,4 +1,4 @@
-package com.rfchina.wallet.server.bank.yunst.util;
+package com.rfchina.wallet.server.bank.yunst.exception;
 
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.misc.WalletResponseCode;

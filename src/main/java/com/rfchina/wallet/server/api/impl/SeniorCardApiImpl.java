@@ -9,16 +9,22 @@ import com.rfchina.platform.common.misc.ResponseCode;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
 import com.rfchina.wallet.domain.misc.EnumDef;
+import com.rfchina.wallet.domain.misc.EnumDef.EnumIdType;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletCardType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.server.api.SeniorCardApi;
 import com.rfchina.wallet.server.bank.yunst.response.result.ApplyBindBankCardResp;
-import com.rfchina.wallet.server.bank.yunst.util.CommonGatewayException;
+import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
+import com.rfchina.wallet.server.model.ext.PreBindCardVo;
 import com.rfchina.wallet.server.service.VerifyService;
 import com.rfchina.wallet.server.service.WalletService;
 import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -37,6 +43,9 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 	@Autowired
 	private VerifyService verifyService;
 
+	@Autowired
+	private RedisTemplate redisTemplate;
+
 	/**
 	 * 高级钱包-预绑定银行卡
 	 */
@@ -44,14 +53,32 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public ApplyBindBankCardResp preBindBandCard(String accessToken, Long walletId, Byte source,
+	public String preBindBandCard(String accessToken, Long walletId, Byte source,
 		String cardNo, String realName, String phone, String identityNo, String validate,
 		String cvv2) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		verifyService.checkWallet(walletId, wallet);
 		try {
-			return yunstUserHandler.applyBindBankCard(walletId, source, cardNo, realName, phone,
-				EnumDef.EnumIdType.ID_CARD.getValue().longValue(), identityNo, validate, cvv2);
+			ApplyBindBankCardResp result = yunstUserHandler
+				.applyBindBankCard(walletId, source, cardNo, realName, phone,
+					EnumIdType.ID_CARD.getValue().longValue(), identityNo, validate, cvv2);
+
+			PreBindCardVo preBindCardVo = PreBindCardVo.builder()
+				.walletId(walletId)
+				.cardNo(cardNo)
+				.phone(phone)
+				.transNum(result.getTranceNum())
+				.transDate(result.getTransDate())
+				.cardType(result.getCardType() != null ? result.getCardType().byteValue()
+					: WalletCardType.DEPOSIT.getValue())
+				.validate(validate)
+				.cvv2(cvv2)
+				.bankName(result.getBankName())
+				.bankCode(result.getBankCode())
+				.build();
+			String preBindTicket = UUID.randomUUID().toString();
+			redisTemplate.opsForValue().set(preBindTicket, preBindCardVo, 10, TimeUnit.MINUTES);
+			return preBindTicket;
 		} catch (CommonGatewayException e) {
 			String errMsg = e.getBankErrMsg();
 			if (errMsg.indexOf("参数validate为空") > -1) {
@@ -75,13 +102,21 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 	@SignVerify
 	@Override
 	public Long confirmBindCard(String accessToken, Long walletId, Byte source,
-		String transNum, String transDate, String phone, String validate, String cvv2,
-		String verifyCode) {
+		String verifyCode,String preBindTicket) {
+
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		verifyService.checkWallet(walletId, wallet);
+
+		PreBindCardVo preBindCardVo = (PreBindCardVo) redisTemplate.opsForValue()
+			.get(preBindTicket);
+		if (preBindCardVo == null || walletId.longValue() != preBindCardVo.getWalletId()) {
+			throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_BIND_TIMEOUT);
+		}
+
 		try {
-			yunstUserHandler.bindBankCard(walletId, source, transNum, transDate, phone, validate,
-				cvv2,verifyCode);
+			yunstUserHandler.bindBankCard(walletId, source, preBindCardVo.getTransNum(),
+				preBindCardVo.getTransDate(), preBindCardVo.getPhone(), preBindCardVo.getValidate(),
+				preBindCardVo.getCvv2(),verifyCode);
 		} catch (CommonGatewayException e) {
 			String errMsg = e.getBankErrMsg();
 			if (errMsg.indexOf("参数validate为空") > -1) {

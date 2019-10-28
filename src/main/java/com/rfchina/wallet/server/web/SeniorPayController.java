@@ -54,6 +54,18 @@ public class SeniorPayController {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
 
+	@ApiOperation("高级钱包-提现")
+	@PostMapping(UrlConstant.SENIOR_WALLET_WITHDRAW)
+	public ResponseValue withdraw(
+		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
+		@ApiParam(value = "充值内容，参考RechargeReq结构体", required = true) @RequestParam("recharge_req") String rechargeReq
+	) {
+
+		RechargeReq req = JsonUtil.toObject(rechargeReq, RechargeReq.class, DEF_REQ_OBJ_MAP);
+		seniorPayApi.recharge(accessToken, req);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
+	}
+
 	@ApiOperation("高级钱包-定时代收")
 	@PostMapping(UrlConstant.SENIOR_WALLET_COLLECT_ASYNC)
 	public ResponseValue<WalletCollect> collectAsync(
