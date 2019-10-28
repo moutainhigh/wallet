@@ -18,8 +18,11 @@ import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.BankCodeDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.misc.EnumDef;
+import com.rfchina.wallet.domain.misc.EnumDef.ChannelType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumDefBankCard;
+import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletAuditType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletCardStatus;
+import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletLevel;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletCardSenior;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
@@ -31,6 +34,7 @@ import com.rfchina.wallet.domain.model.WalletApply;
 import com.rfchina.wallet.domain.model.WalletApplyCriteria;
 import com.rfchina.wallet.domain.model.WalletApplyCriteria.Criteria;
 import com.rfchina.wallet.domain.model.WalletCard;
+import com.rfchina.wallet.domain.model.WalletChannel;
 import com.rfchina.wallet.domain.model.WalletCompany;
 import com.rfchina.wallet.domain.model.WalletPerson;
 import com.rfchina.wallet.domain.model.WalletUser;
@@ -38,17 +42,10 @@ import com.rfchina.wallet.domain.model.ext.Bank;
 import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
 import com.rfchina.wallet.domain.model.ext.WalletCardExt;
-import com.rfchina.wallet.server.adapter.UserAdapter;
 import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
 import com.rfchina.wallet.server.bank.pudong.domain.predicate.ExactErrPredicate;
 import com.rfchina.wallet.server.bank.pudong.domain.util.ExceptionUtil;
-import com.rfchina.wallet.server.mapper.ext.GatewayTransExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
-import com.rfchina.wallet.server.mapper.ext.WalletChannelExtDao;
-import com.rfchina.wallet.server.mapper.ext.WalletClearInfoExtDao;
-import com.rfchina.wallet.server.mapper.ext.WalletClearingExtDao;
-import com.rfchina.wallet.server.mapper.ext.WalletCollectExtDao;
-import com.rfchina.wallet.server.mapper.ext.WalletCollectMethodExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCompanyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
@@ -65,7 +62,6 @@ import com.rfchina.wallet.server.msic.EnumWallet.WalletStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletType;
 import com.rfchina.wallet.server.service.handler.common.EBankHandler;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
-import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -106,9 +102,6 @@ public class WalletService {
 	private WalletCardDao walletCardDao;
 
 	@Autowired
-	private UserAdapter userAdapter;
-
-	@Autowired
 	private AppService appService;
 
 	@Autowired
@@ -133,25 +126,8 @@ public class WalletService {
 	private GatewayTransService gatewayTransService;
 
 	@Autowired
-	private GatewayTransExtDao gatewayTransDao;
+	private SeniorWalletService seniorWalletService;
 
-	@Autowired
-	private WalletCollectExtDao walletCollectDao;
-
-	@Autowired
-	private WalletClearingExtDao walletClearingDao;
-
-	@Autowired
-	private WalletCollectMethodExtDao walletCollectMethodDao;
-
-	@Autowired
-	private WalletClearInfoExtDao walletClearInfoDao;
-
-	@Autowired
-	private YunstUserHandler yunstUserHandler;
-
-	@Autowired
-	private WalletChannelExtDao walletChannelDao;
 
 	/**
 	 * 查询出佣结果
@@ -517,6 +493,21 @@ public class WalletService {
 				, String.valueOf(walletId));
 		}
 
+		if (wallet.getLevel() == EnumWalletLevel.SENIOR.getValue().byteValue()
+			&& wallet.getAuditType() == EnumWalletAuditType.ALLINPAY
+			.getValue().byteValue()) {
+			try {
+				WalletChannel walletChannel = seniorWalletService
+					.getWalletChannel(ChannelType.YUNST.getValue().intValue(), walletId);
+				wallet.setWalletBalance(walletChannel.getBalance());
+				wallet.setFreezeAmount(walletChannel.getFreezenAmount());
+			} catch (Exception e) {
+				log.error("获取高级钱包渠道信息失败 walletId:{}", walletId);
+				throw new RfchinaResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST
+					, String.valueOf(walletId));
+			}
+		}
+
 		if (WalletType.COMPANY.getValue().byteValue() == wallet.getType()) {
 			WalletCompany walletCompany = walletCompanyDao.selectByWalletId(walletId);
 			builder.companyInfo(walletCompany);
@@ -744,7 +735,7 @@ public class WalletService {
 	 * 富慧通审核通过企业商家钱包
 	 */
 	public void activeWalletCompany(Long walletId, String companyName, Byte status,
-		Long auditType,String tel,String email) {
+		Long auditType, String tel, String email) {
 
 		WalletCompany walletCompany = walletCompanyDao.selectByWalletId(walletId);
 
