@@ -104,13 +104,13 @@ public class SeniorPayService {
 	@Autowired
 	private WalletRechargeExtDao walletRechargeDao;
 
-	private Long defPayerWalletId = 10001L;
-	private Long defEntWalletId = 10000L;
+	private Long anonyPayerWalletId = 10001L;
+	private Long agentEntWalletId = 10000L;
 
 	/**
 	 * 充值
 	 */
-	public void recharge(RechargeReq rechargeReq) {
+	public void recharge(RechargeReq req) {
 		// 工单记录
 		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> {
 			WalletApply walletApply = walletApplyDao.selectByBatchNo(id);
@@ -118,9 +118,9 @@ public class SeniorPayService {
 		});
 		WalletApply walletApply = WalletApply.builder()
 			.batchNo(batchNo)
-			.bizNo(rechargeReq.getBizNo())
+			.bizNo(req.getBizNo())
 			.type(WalletApplyType.RECHARGE.getValue())
-			.amount(rechargeReq.getAmount())
+			.amount(req.getAmount())
 			.status(WalletApplyStatus.WAIT_SEND.getValue())
 			.walletLevel(EnumWalletLevel.SENIOR.getValue())
 			.walletType(WalletType.COMPANY.getValue())
@@ -131,9 +131,9 @@ public class SeniorPayService {
 		walletApplyDao.insertSelective(walletApply);
 
 		Long payerWalletId =
-			(rechargeReq.getPayerWalletId() != null) ? rechargeReq.getPayerWalletId()
-				: defPayerWalletId;
-		WalletPayMethod payMethod = rechargeReq.getWalletPayMethod();
+			(req.getPayerWalletId() != null) ? req.getPayerWalletId()
+				: anonyPayerWalletId;
+		WalletPayMethod payMethod = req.getWalletPayMethod();
 		Wallet payerWallet = walletDao.selectByPrimaryKey(payerWalletId);
 		if (payerWallet == null || payerWallet.getStatus() != WalletStatus.ACTIVE.getValue()
 			.byteValue()) {
@@ -148,12 +148,12 @@ public class SeniorPayService {
 			.orderNo(orderNo)
 			.payerWalletId(payerWallet.getId())
 			.payeeWalletId(payerWallet.getId())
-			.amount(rechargeReq.getAmount())
+			.amount(req.getAmount())
 			.tunnelType(TunnelType.YUNST.getValue())
 			.payMethod(payMethod.getMethods())
 			.progress(GwProgress.WAIT_SEND.getValue())
 			.status(CollectStatus.WAIT_PAY.getValue())
-			.expireTime(rechargeReq.getExpireTime())
+			.expireTime(req.getExpireTime())
 			.build();
 		walletRechargeDao.insertSelective(recharge);
 		savePayMethod(recharge.getId(), WalletApplyType.RECHARGE.getValue(), payMethod);
@@ -171,7 +171,7 @@ public class SeniorPayService {
 
 		// 定义付款人
 		Long payerWalletId = (collectReq.getPayerWalletId() != null) ? collectReq.getPayerWalletId()
-			: defPayerWalletId;
+			: anonyPayerWalletId;
 		Wallet payerWallet = walletDao.selectByPrimaryKey(payerWalletId);
 		if (payerWallet == null || payerWallet.getStatus() != WalletStatus.ACTIVE.getValue()
 			.byteValue()) {
@@ -209,7 +209,7 @@ public class SeniorPayService {
 			.orderNo(orderNo)
 			.applyId(walletApply.getId())
 			.payerWalletId(payerWallet.getId())
-			.agentWalletId(defEntWalletId)
+			.agentWalletId(agentEntWalletId)
 			.amount(collectReq.getAmount())
 			.refundLimit(collectReq.getAmount())
 			.tunnelType(TunnelType.YUNST.getValue())
@@ -421,7 +421,7 @@ public class SeniorPayService {
 			.applyId(walletApply.getId())
 			.collectId(collect.getId())
 			.payerWalletId(collect.getPayerWalletId())
-			.agentWalletId(defEntWalletId)
+			.agentWalletId(agentEntWalletId)
 			.amount(applyValue)
 			.collectAmount(collect.getAmount())
 			.tunnelType(collect.getTunnelType())

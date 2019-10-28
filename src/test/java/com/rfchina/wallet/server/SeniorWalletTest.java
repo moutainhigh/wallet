@@ -1,6 +1,11 @@
 package com.rfchina.wallet.server;
 
 import com.alibaba.fastjson.JSONObject;
+import com.rfchina.platform.common.security.SecurityCoder;
+import com.rfchina.platform.common.utils.SignUtil;
+import com.rfchina.wallet.server.msic.UrlConstant;
+import java.util.HashMap;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
@@ -27,7 +32,7 @@ public class SeniorWalletTest extends WalletBaseTest {
 	 */
 	@Test
 	public void testSeniorWalletChannelInfo() {
-		seniorWalletChannel(2,  11L);
+		seniorWalletChannel(2, 11L);
 	}
 
 	/**
@@ -35,7 +40,7 @@ public class SeniorWalletTest extends WalletBaseTest {
 	 */
 	@Test
 	public void testSeniorWalletChangeBindPhone() {
-		seniorWalletChangeBindPhone(2, (byte) 3, 11L,"张二丰", "440104198803124487", "13800138111");
+		seniorWalletChangeBindPhone(2, (byte) 3, 11L, "张二丰", "440104198803124487", "13800138111");
 	}
 
 	/**
@@ -51,7 +56,7 @@ public class SeniorWalletTest extends WalletBaseTest {
 	 */
 	@Test
 	public void testSeniorWalletBindPhone() {
-		seniorWalletBindPhone(2, (byte) 3, 11L,  "13800138111", "11111");
+		seniorWalletBindPhone(2, (byte) 3, 11L, "13800138111", "11111");
 	}
 
 	/**
@@ -64,7 +69,6 @@ public class SeniorWalletTest extends WalletBaseTest {
 
 	/**
 	 * 高级钱包商户提交审核资料
-	 * @throws Exception
 	 */
 	@Test
 	public void testSeniorWalletCompanyInfoAudit() throws Exception {
@@ -100,7 +104,7 @@ public class SeniorWalletTest extends WalletBaseTest {
 //				});
 //
 //		System.out.println(info);
-		seniorWalletCompanyInfoAudit(2,(byte)1,12L,2,companyBasicInfo.toJSONString());
+		seniorWalletCompanyInfoAudit(2, (byte) 1, 12L, 2, companyBasicInfo.toJSONString());
 	}
 
 	/**
@@ -108,7 +112,7 @@ public class SeniorWalletTest extends WalletBaseTest {
 	 */
 	@Test
 	public void testSeniorWalletSignMemberProtocol() {
-		seniorWalletSignMemberProtocol( (byte) 3, 11L);
+		seniorWalletSignMemberProtocol((byte) 3, 11L);
 	}
 
 	/**
@@ -116,7 +120,7 @@ public class SeniorWalletTest extends WalletBaseTest {
 	 */
 	@Test
 	public void testSeniorWalletSignBalanceProtocol() {
-		seniorWalletSignBalanceProtocol( (byte) 3, 11L);
+		seniorWalletSignBalanceProtocol((byte) 3, 11L);
 	}
 
 	/**
@@ -124,7 +128,19 @@ public class SeniorWalletTest extends WalletBaseTest {
 	 */
 	@Test
 	public void testSeniorWalletPersonSetPayPassword() {
-		seniorWalletPersonSetPayPassword( (byte) 3, 11L,"张二丰","13800138111","440104198803124487");
+		seniorWalletPersonSetPayPassword((byte) 3, 11L, "张二丰", "13800138111", "440104198803124487");
+	}
+
+	@Test
+	public void testRecharge() {
+		String rechargeReq = "{\"amount\":1,\"biz_no\":\""+System.currentTimeMillis()+"\",\"expire_time\":null,\"fee\":0,\"industry_code\":\"1910\",\"industry_name\":\"其他\",\"payer_wallet_id\":10035,\"validate_type\":2,\"wallet_pay_method\":{\"alipay\":null,\"balance\":null,\"code_pay\":null,\"methods\":null,\"wechat\":null,\"bank_card\":{\"pay_type\":51,\"bank_card_no\":\"6214850201481956\",\"amount\":1}}}";
+		Map<String, String> params = new HashMap<>();
+		params.put("access_token", getAccessToken(appId, appSecret));
+		params.put("recharge_req", rechargeReq);
+		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+		params.put("sign", sign);
+		postAndValidateSpecCode(BASE_URL, UrlConstant.SENIOR_WALLET_RECHARGE, params, 1001);
 	}
 
 }

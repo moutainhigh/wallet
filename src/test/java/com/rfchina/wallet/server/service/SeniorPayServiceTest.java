@@ -57,7 +57,7 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 			.industryName("保险代理")
 			.walletPayMethod(WalletPayMethod.builder().codePay(codePay).build())
 			.build();
-		seniorPayService.recharge("", req);
+		seniorPayService.recharge(req);
 	}
 
 	/**
@@ -85,9 +85,9 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 			.recievers(Arrays.asList(reciever))
 			.walletPayMethod(WalletPayMethod.builder().balance(balance).build())
 			.build();
-		WalletCollect collect = seniorPayService.preCollect("", req);
+		WalletCollect collect = seniorPayService.preCollect(req);
 		log.info("预代收 {}", collect);
-		seniorPayService.doCollect("", collect);
+		seniorPayService.doCollect(collect);
 	}
 
 
@@ -97,7 +97,7 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 		reciever.setWalletId(platWalletId);
 		reciever.setAmount(1L);
 		reciever.setFeeAmount(0L);
-		SettleResp resp = seniorPayService.agentPay("", "WC20191021829821028"
+		SettleResp resp = seniorPayService.agentPay("WC20191021829821028"
 			, Arrays.asList(reciever));
 		log.info("agent pay {}", resp);
 	}
@@ -107,7 +107,8 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 		RefundInfo refundInfo = new RefundInfo();
 		refundInfo.setWalletId(platWalletId);
 		refundInfo.setAmount(1L);
-		WalletRefund refund = seniorPayService.refund("", "WC20191022924053256", Arrays.asList(refundInfo));
+		WalletRefund refund = seniorPayService
+			.refund("WC20191022924053256", Arrays.asList(refundInfo));
 		log.info("refund {}", refund);
 	}
 }
