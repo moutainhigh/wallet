@@ -12,6 +12,7 @@ import com.rfchina.wallet.server.bank.yunst.request.YunstChangeBindPhoneReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstCreateMemberReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstGetMemberInfoReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstPersonSetRealNameReq;
+import com.rfchina.wallet.server.bank.yunst.request.YunstQueryBalanceReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSMSVerificationCodeReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetPayPwdReq;
@@ -23,6 +24,7 @@ import com.rfchina.wallet.server.bank.yunst.response.result.YunstBindPhoneResult
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstCreateMemberResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstPersonSetRealNameResult;
+import com.rfchina.wallet.server.bank.yunst.response.result.YunstQueryBalanceResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstSendVerificationCodeResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstSetCompanyInfoResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstUnBindBankCardResult;
@@ -123,7 +125,8 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 发送短信验证码
 	 */
-	public YunstSendVerificationCodeResult sendVerificationCode(Long walletId, Byte source, String phone, Integer bizType)
+	public YunstSendVerificationCodeResult sendVerificationCode(Long walletId, Byte source,
+		String phone, Integer bizType)
 		throws Exception {
 		String bizUserId = transferToYunstBizUserFormat(walletId, source);
 		YunstSMSVerificationCodeReq req = YunstSMSVerificationCodeReq.builder$()
@@ -300,6 +303,16 @@ public class YunstUserHandler extends YunstBaseHandler {
 			.build();
 
 		return yunstTpl.execute(req, YunstUnBindBankCardResult.class);
+	}
+
+	/**
+	 *查询余额
+	 */
+	public YunstQueryBalanceResult queryBalance(String bizUserId) throws Exception {
+		YunstQueryBalanceReq req = YunstQueryBalanceReq.builder$().bizUserId(bizUserId)
+			.accountSetNo(configService.getUserAccSet()).build();
+
+		return yunstTpl.execute(req, YunstQueryBalanceResult.class);
 	}
 
 }
