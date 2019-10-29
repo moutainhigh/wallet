@@ -34,6 +34,9 @@ public class WalletChannel  {
     @ApiModelProperty("失败原因")
     private String failReason ;
 
+    @ApiModelProperty("冻结金额")
+    private Long freezenAmount ;
+
     @ApiModelProperty("是否设置支付密码 1-是 2-否")
     private Integer hasPayPassword ;
 

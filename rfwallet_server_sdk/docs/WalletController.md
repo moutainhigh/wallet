@@ -10,7 +10,7 @@
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
 |access_token|是|access_token|
-|audit_type|是|审核方式，1：运营，2：银企直连，3：通联|
+|audit_type|是|审核方式，1：运营，2：银企直连，4：通联|
 |company_name|是|公司名称|
 |status|是|钱包状态: 1:待审核，2：激活,3：禁用|
 |wallet_id|是|钱包ID|
@@ -38,7 +38,7 @@
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
 |access_token|是|access_token|
-|audit_type|是|审核方式，1：运营，2：银企直连，3：通联|
+|audit_type|是|审核方式，1：运营，2：银企直连，4：通联|
 |id_no|是|证件号|
 |id_type|是|证件类型，1:身份证|
 |name|是|姓名|
@@ -244,7 +244,7 @@
   "code": 1001,//状态码
   "msg": ""//消息
    , "data":  {
-    audit_type:""  , //审核方式，1：运营，2：银企直连，3：通联
+    audit_type:""  , //审核方式，1：运营，2：银企直连，4：通联
     balance_upd_time:""  , //钱包余额最后更新日期
     create_time:""  , //创建日期
     freeze_amount:""  , //冻结金额
@@ -385,7 +385,7 @@
     wallet_id:""   //关联的钱包ID
 }  , 
     wallet:{
-    audit_type:""  , //审核方式，1：运营，2：银企直连，3：通联
+    audit_type:""  , //审核方式，1：运营，2：银企直连，4：通联
     balance_upd_time:""  , //钱包余额最后更新日期
     create_time:""  , //创建日期
     freeze_amount:""  , //冻结金额
@@ -467,7 +467,7 @@
     wallet_id:""   //关联的钱包ID
 }  , 
     wallet:{
-    audit_type:""  , //审核方式，1：运营，2：银企直连，3：通联
+    audit_type:""  , //审核方式，1：运营，2：银企直连，4：通联
     balance_upd_time:""  , //钱包余额最后更新日期
     create_time:""  , //创建日期
     freeze_amount:""  , //冻结金额

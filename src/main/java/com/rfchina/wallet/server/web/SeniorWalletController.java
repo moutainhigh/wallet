@@ -9,6 +9,7 @@ import com.rfchina.wallet.domain.model.WalletChannel;
 import com.rfchina.wallet.server.api.SeniorWalletApi;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult;
+import com.rfchina.wallet.server.model.ext.PageVo;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Api
 @RestController
 public class SeniorWalletController {
+
 	@Autowired
 	private SeniorWalletApi seniorWalletApi;
 
@@ -74,7 +76,7 @@ public class SeniorWalletController {
 
 	@ApiOperation("高级钱包个人用户修改手机")
 	@PostMapping(UrlConstant.WALLET_SENIOR_PERSON_CHANGE_BIND_PHONE)
-	public ResponseValue<String> seniorWalletPersonChangeBindPhone(
+	public ResponseValue<PageVo> seniorWalletPersonChangeBindPhone(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = true, example = "1") @RequestParam("channel_type")
 			Integer channelType,
@@ -85,10 +87,11 @@ public class SeniorWalletController {
 		@ApiParam(value = "身份证号", required = true) @RequestParam("id_no") String idNo,
 		@ApiParam(value = "手机号码", required = true) @RequestParam("old_phone") String oldPhone) {
 
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
-			seniorWalletApi.seniorWalletPersonChangeBindPhone(accessToken, source, channelType, walletId,
-				realName, idNo,
-				oldPhone));
+		String tongLianUrl = seniorWalletApi
+			.seniorWalletPersonChangeBindPhone(accessToken, source, channelType, walletId,
+				realName, idNo, oldPhone);
+		PageVo pageVo = PageVo.builder().url(tongLianUrl).build();
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, pageVo);
 	}
 
 	@ApiOperation("高级钱包企业用户绑定手机")
@@ -104,13 +107,14 @@ public class SeniorWalletController {
 		@ApiParam(value = "短信验证码", required = true) @RequestParam("verify_code") String verifyCode) {
 
 		return new ResponseValue<Wallet>(EnumResponseCode.COMMON_SUCCESS,
-			seniorWalletApi.seniorWalletBindPhone(accessToken, source, channelType, walletId, mobile,
-				verifyCode));
+			seniorWalletApi
+				.seniorWalletBindPhone(accessToken, source, channelType, walletId, mobile,
+					verifyCode));
 	}
 
 	@ApiOperation("高级钱包认证")
 	@PostMapping(UrlConstant.WALLET_SENIOR_PERSON_AUTHENTICATION)
-	public ResponseValue<String> seniorWalletPersonAuthentication(
+	public ResponseValue<PageVo> seniorWalletPersonAuthentication(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = true, example = "1") @RequestParam("channel_type")
 			Integer channelType,
@@ -121,11 +125,11 @@ public class SeniorWalletController {
 		@ApiParam(value = "身份证号", required = true) @RequestParam("id_no") String idNo,
 		@ApiParam(value = "手机号码", required = true) @RequestParam("mobile") String mobile,
 		@ApiParam(value = "短信验证码", required = true) @RequestParam("verify_code") String verifyCode) {
-
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
-			seniorWalletApi.seniorWalletPersonAuthentication(accessToken, source, channelType, walletId,
-				realName, idNo,
-				mobile, verifyCode));
+		String tongLianUrl = seniorWalletApi
+			.seniorWalletPersonAuthentication(accessToken, source, channelType, walletId,
+				realName, idNo, mobile, verifyCode);
+		PageVo pageVo = PageVo.builder().url(tongLianUrl).build();
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,pageVo);
 	}
 
 	@ApiOperation("高级钱包商家资料审核（通道）")
@@ -153,31 +157,31 @@ public class SeniorWalletController {
 
 	@ApiOperation("高级钱包会员协议")
 	@PostMapping(UrlConstant.WALLET_SENIOR_MEMBER_PROTOCOL)
-	public ResponseValue<String> seniorWalletSignMemberProtocol(
+	public ResponseValue<PageVo> seniorWalletSignMemberProtocol(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2")
 		@RequestParam("source") Byte source,
 		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId) {
-
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
-			seniorWalletApi.signMemberProtocol(accessToken, source, walletId));
+		String tongLianUrl = seniorWalletApi.signMemberProtocol(accessToken, source, walletId);
+		PageVo pageVo = PageVo.builder().url(tongLianUrl).build();
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,pageVo);
 	}
 
 	@ApiOperation("高级钱包委托代扣协议")
 	@PostMapping(UrlConstant.WALLET_SENIOR_BANLACE_PROTOCOL)
-	public ResponseValue<String> seniorWalletSignBalanceProtocol(
+	public ResponseValue<PageVo> seniorWalletSignBalanceProtocol(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2")
 		@RequestParam("source") Byte source,
 		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId) {
-
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
-			seniorWalletApi.signBalanceProtocol(accessToken, source, walletId));
+		String tongLianUrl = seniorWalletApi.signBalanceProtocol(accessToken, source, walletId);
+		PageVo pageVo = PageVo.builder().url(tongLianUrl).build();
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,pageVo);
 	}
 
 	@ApiOperation("高级钱包个人设置支付密码")
 	@PostMapping(UrlConstant.WALLET_SENIOR_PERSON_SET_PAY_PASSWORD)
-	public ResponseValue<String> seniorWalletPersonSetPayPassword(
+	public ResponseValue<PageVo> seniorWalletPersonSetPayPassword(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2")
 		@RequestParam("source") Byte source,
@@ -185,9 +189,9 @@ public class SeniorWalletController {
 		@ApiParam(value = "绑定手机", required = true) @RequestParam("phone") String phone,
 		@ApiParam(value = "姓名", required = true) @RequestParam("name") String name,
 		@ApiParam(value = "身份证", required = true) @RequestParam("identity_no") String identityNo) {
-
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
-			seniorWalletApi.personSetPayPassword(accessToken, source, walletId, phone, name, identityNo));
+		String tongLianUrl = seniorWalletApi.personSetPayPassword(accessToken, source, walletId, phone, name, identityNo);
+		PageVo pageVo = PageVo.builder().url(tongLianUrl).build();
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,pageVo);
 	}
 
 	@ApiOperation("高级钱包个人信息")

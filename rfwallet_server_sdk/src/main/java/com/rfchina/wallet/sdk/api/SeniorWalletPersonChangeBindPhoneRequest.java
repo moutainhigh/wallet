@@ -42,7 +42,7 @@ public class SeniorWalletPersonChangeBindPhoneRequest extends  AbstractApiReques
 
   @Override
   public Class<?> getResponseModelClass() {
-    return Map.class;
+    return PageVo.class;
   }
 
   @Override
