@@ -54,6 +54,11 @@ public class UrlConstant {
 	public static final String SENIOR_WALLET_RECHARGE = VERSION + "/m/senior/recharge";
 
 	/**
+	 * 高级钱包-充值确认
+	 */
+	public static final String SENIOR_WALLET_RECHARGE_CONFIRM = VERSION + "/m/senior/recharge_confirm";
+
+	/**
 	 * 高级钱包-提现
 	 */
 	public static final String SENIOR_WALLET_WITHDRAW = VERSION + "/m/senior/withdraw";
@@ -222,6 +227,11 @@ public class UrlConstant {
 	 * 云商通充值回调
 	 */
 	public static final String YUNST_RECHARGE_RECALL = VERSION + "/yunst/recharge_recall";
+
+	/**
+	 * 云商通提现回调
+	 */
+	public static final String YUNST_WITHDRAW_RECALL = VERSION + "/yunst/withdraw_recall";
 
 	/**
 	 * 云商通代收回调

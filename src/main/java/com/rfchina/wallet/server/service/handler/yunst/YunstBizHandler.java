@@ -3,7 +3,6 @@ package com.rfchina.wallet.server.service.handler.yunst;
 import com.alibaba.fastjson.JSON;
 import com.allinpay.yunst.sdk.util.RSAUtil;
 import com.google.common.collect.Lists;
-import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.platform.common.utils.DateUtil;
@@ -21,7 +20,9 @@ import com.rfchina.wallet.domain.model.WalletCollectMethod;
 import com.rfchina.wallet.domain.model.WalletRecharge;
 import com.rfchina.wallet.domain.model.WalletRefund;
 import com.rfchina.wallet.domain.model.WalletRefundDetail;
+import com.rfchina.wallet.domain.model.WalletWithdraw;
 import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
+import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
 import com.rfchina.wallet.server.bank.yunst.exception.UnknownException;
 import com.rfchina.wallet.server.bank.yunst.request.AgentPayReq;
 import com.rfchina.wallet.server.bank.yunst.request.AgentPayReq.CollectPay;
@@ -45,11 +46,14 @@ import com.rfchina.wallet.server.bank.yunst.request.DepositApplyReq;
 import com.rfchina.wallet.server.bank.yunst.request.GetOrderDetailReq;
 import com.rfchina.wallet.server.bank.yunst.request.RefundApplyReq;
 import com.rfchina.wallet.server.bank.yunst.request.RefundApplyReq.RefundInfo;
+import com.rfchina.wallet.server.bank.yunst.request.SmsPayReq;
+import com.rfchina.wallet.server.bank.yunst.request.WithdrawApplyReq;
 import com.rfchina.wallet.server.bank.yunst.response.AgentPayResp;
 import com.rfchina.wallet.server.bank.yunst.response.CollectApplyResp;
 import com.rfchina.wallet.server.bank.yunst.response.GetOrderDetailResp;
 import com.rfchina.wallet.server.bank.yunst.response.RefundApplyResp;
-import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
+import com.rfchina.wallet.server.bank.yunst.response.SmsPayResp;
+import com.rfchina.wallet.server.bank.yunst.response.WithdrawApplyResp;
 import com.rfchina.wallet.server.bank.yunst.util.YunstTpl;
 import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletChannelExtDao;
@@ -60,14 +64,17 @@ import com.rfchina.wallet.server.mapper.ext.WalletCollectMethodExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRechargeExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRefundDetailExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRefundExtDao;
-import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.BankCard;
+import com.rfchina.wallet.server.mapper.ext.WalletWithdrawExtDao;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.PayTuple;
+import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.msic.EnumWallet.ChannelType;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectStatus;
+import com.rfchina.wallet.server.msic.EnumWallet.EnumYunstCardPro;
 import com.rfchina.wallet.server.msic.EnumWallet.EnumYunstDeviceType;
+import com.rfchina.wallet.server.msic.EnumWallet.EnumYunstWithdrawType;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.RefundType;
 import com.rfchina.wallet.server.msic.EnumWallet.TunnelType;
@@ -85,7 +92,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -132,6 +138,9 @@ public class YunstBizHandler extends EBankHandler {
 	private WalletRechargeExtDao walletRechargeDao;
 
 	@Autowired
+	private WalletWithdrawExtDao walletWithdrawDao;
+
+	@Autowired
 	private ConfigService configService;
 
 
@@ -159,7 +168,7 @@ public class YunstBizHandler extends EBankHandler {
 	/**
 	 * 充值
 	 */
-	public List<WalletRecharge> recharge(Long applyId) {
+	public List<RechargeResp> recharge(Long applyId) {
 		WalletApply walletApply = walletApplyDao.selectByPrimaryKey(applyId);
 		List<WalletRecharge> recharges = walletRechargeDao.selectByApplyId(applyId);
 
@@ -169,7 +178,7 @@ public class YunstBizHandler extends EBankHandler {
 				.selectByCollectId(recharge.getId(), WalletApplyType.RECHARGE.getValue());
 
 			WalletChannel payer = walletChannelDao
-				.selectByWalletId(recharge.getPayerWalletId(), TunnelType.YUNST.getValue());
+				.selectByWalletId(recharge.getPayerWalletId(), recharge.getTunnelType());
 			String expireTime = recharge.getExpireTime() != null ? DateUtil
 				.formatDate(recharge.getExpireTime(), DateUtil.STANDARD_DTAETIME_PATTERN) : null;
 			DepositApplyReq req = DepositApplyReq.builder()
@@ -200,12 +209,109 @@ public class YunstBizHandler extends EBankHandler {
 					recharge.setErrMsg(resp.getPayFailMessage());
 				}
 				walletRechargeDao.updateByPrimaryKey(recharge);
-				return recharge;
+				RechargeResp rechargeResp = BeanUtil.newInstance(recharge, RechargeResp.class);
+				rechargeResp.setPayInfo(resp.getPayInfo());
+				rechargeResp.setWeChatAPPInfo(resp.getWeChatAPPInfo());
+				rechargeResp.setExtendInfo(resp.getExtendInfo());
+				rechargeResp.setTradeNo(resp.getTradeNo());
+				rechargeResp.setSmsConfirm(
+					(resp.getValidateType() != null && resp.getValidateType() == 1) ? true : false);
+				rechargeResp.setPasswordConfirm(false); // 收银宝不支持密码验证
+				return rechargeResp;
 			} catch (CommonGatewayException e) {
 				log.error("{}", JsonUtil.toJSON(e));
 				recharge.setErrCode(e.getBankErrCode());
 				recharge.setErrMsg(e.getBankErrMsg());
 				walletRechargeDao.updateByPrimaryKey(recharge);
+				throw e;
+			} catch (Exception e) {
+				log.error("{}", JSON.toJSONString(e));
+				throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
+			}
+		}).filter(item -> item != null)
+			.collect(Collectors.toList());
+	}
+
+	/**
+	 * 短信确认支付
+	 */
+	public void smsConfirm(WalletApply walletApply, String tradeNo, String verifyCode, String ip) {
+		List<WalletRecharge> recharges = walletRechargeDao.selectByApplyId(walletApply.getId());
+
+		recharges.forEach(recharge -> {
+			WalletChannel payer = walletChannelDao
+				.selectByWalletId(recharge.getPayerWalletId(), recharge.getTunnelType());
+			SmsPayReq req = SmsPayReq.builder()
+				.bizUserId(payer.getBizUserId())
+				.bizOrderNo(recharge.getOrderNo())
+				.tradeNo(tradeNo)
+				.verificationCode(verifyCode)
+				.consumerIp(ip)
+				.build();
+			try {
+				yunstTpl.execute(req, SmsPayResp.class);
+			} catch (Exception e) {
+				log.error("{}", JSON.toJSONString(e));
+				throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
+			}
+		});
+	}
+
+
+	/**
+	 * 提现
+	 */
+	public List<WalletWithdraw> withdraw(Long applyId) {
+		WalletApply walletApply = walletApplyDao.selectByPrimaryKey(applyId);
+		List<WalletWithdraw> withdraws = walletWithdrawDao.selectByApplyId(applyId);
+
+		return withdraws.stream().map(withdraw -> {
+
+			WalletChannel payer = walletChannelDao
+				.selectByWalletId(withdraw.getPayerWalletId(), withdraw.getTunnelType());
+			String expireTime = withdraw.getExpireTime() != null ? DateUtil
+				.formatDate(withdraw.getExpireTime(), DateUtil.STANDARD_DTAETIME_PATTERN) : null;
+			String bankAccount = null;
+			try {
+				bankAccount = RSAUtil.encrypt(withdraw.getBankAccount());
+			} catch (Exception e) {
+				log.error("银行卡加密失败", e);
+			}
+			WithdrawApplyReq req = WithdrawApplyReq.builder()
+				.bizOrderNo(withdraw.getOrderNo())
+				.bizUserId(payer.getBizUserId())
+				.accountSetNo(configService.getUserAccSet())
+				.amount(walletApply.getAmount())
+				.fee(0L)
+				.validateType(Long.valueOf(withdraw.getValidateType()))
+				.backUrl(configService.getYunstWithdrawRecallUrl())
+				.orderExpireDatetime(expireTime)
+				.payMethod(null)
+				.bankCardNo(bankAccount)
+				.bankCardPro(EnumYunstCardPro.PERSON.getValue())
+				.withdrawType(EnumYunstWithdrawType.D0.getValue())
+				.industryCode("1910")
+				.industryName("其他")
+				.source(EnumYunstDeviceType.MOBILE.getValue())
+				.build();
+
+			withdraw.setStartTime(new Date());
+			withdraw.setProgress(UniProgress.SENDED.getValue());
+			try {
+				WithdrawApplyResp resp = yunstTpl.execute(req, WithdrawApplyResp.class);
+				withdraw.setTunnelOrderNo(resp.getOrderNo());
+				if (StringUtils.isNotBlank(resp.getPayStatus())
+					&& "fail".equals(resp.getPayStatus())) {
+					withdraw.setStatus(CollectStatus.FAIL.getValue());
+					withdraw.setErrMsg(resp.getPayFailMessage());
+				}
+				walletWithdrawDao.updateByPrimaryKey(withdraw);
+				return withdraw;
+			} catch (CommonGatewayException e) {
+				log.error("{}", JsonUtil.toJSON(e));
+				withdraw.setErrCode(e.getBankErrCode());
+				withdraw.setErrMsg(e.getBankErrMsg());
+				walletWithdrawDao.updateByPrimaryKey(withdraw);
 				throw e;
 			} catch (Exception e) {
 				log.error("{}", JSON.toJSONString(e));
@@ -449,6 +555,33 @@ public class YunstBizHandler extends EBankHandler {
 	 * 更新充值状态
 	 */
 	public void updateRechargeStatus(String orderNo) {
+		WalletRecharge recharge = walletRechargeDao.selectByOrderNo(orderNo);
+
+		GetOrderDetailResp tunnelOrder = queryOrderDetail(orderNo);
+		if (!recharge.getTunnelOrderNo().equals(tunnelOrder.getOrderNo())) {
+			log.error("渠道单号不匹配， recharge = {} , channelOrderNo = {}", recharge,
+				tunnelOrder.getBizOrderNo());
+			return;
+		}
+		recharge.setTunnelStatus(String.valueOf(tunnelOrder.getOrderStatus()));
+		recharge.setTunnelSuccTime(
+			DateUtil.parse(tunnelOrder.getPayDatetime(), DateUtil.STANDARD_DTAETIME_PATTERN));
+		recharge.setErrMsg(tunnelOrder.getErrorMessage());
+		YunstOrderStatus orderStatus = EnumUtil
+			.parse(YunstOrderStatus.class, tunnelOrder.getOrderStatus());
+		CollectStatus applyStatus = orderStatus.toUniStatus();
+		recharge.setStatus(applyStatus.getValue());
+		recharge.setProgress(UniProgress.RECEIVED.getValue());
+		if (applyStatus.isEndStatus()) {
+			recharge.setEndTime(new Date());
+		}
+		walletRechargeDao.updateByPrimaryKey(recharge);
+	}
+
+	/**
+	 * 更新充值状态
+	 */
+	public void updateWithdrawStatus(String orderNo) {
 		WalletRecharge recharge = walletRechargeDao.selectByOrderNo(orderNo);
 
 		GetOrderDetailResp tunnelOrder = queryOrderDetail(orderNo);

@@ -852,37 +852,6 @@ public class EnumWallet {
 
 	}
 
-//	/**
-//	 * 代收状态。1：待支付 2：支付成功 3：交易失败 4：交易关闭（超时或其他）
-//	 */
-//	public enum UniBizStatus implements Valuable<Byte> {
-//		WAIT((byte) 1, "待支付"),
-//		SUCC((byte) 2, "支付成功"),
-//		FAIL((byte) 3, "交易失败"),
-//		CLOSED((byte) 4, "交易关闭（超时或其他）"),
-//		;
-//
-//		private Byte value;
-//		private String valueName;
-//
-//		UniBizStatus(Byte value, String valueName) {
-//			this.value = value;
-//			this.valueName = valueName;
-//		}
-//
-//		@Override
-//		public Byte getValue() {
-//			return this.value;
-//		}
-//
-//		public boolean isEndStatus() {
-//			return this.value.byteValue() == SUCC.getValue().byteValue()
-//				|| this.value.byteValue() == FAIL.getValue().byteValue()
-//				|| this.value.byteValue() == CLOSED.getValue().byteValue();
-//		}
-//
-//	}
-
 	/**
 	 * 通联sdk返回枚举
 	 */
@@ -926,4 +895,52 @@ public class EnumWallet {
 		}
 
 	}
+
+
+	/**
+	 * 通联银行卡/账户属性
+	 */
+	public enum EnumYunstCardPro implements Valuable<Long> {
+		PERSON(0L, "个人银行卡"),
+		ENTERPRICE(1L, "企业对公账户");
+
+		private Long value;
+		private String valueName;
+
+		EnumYunstCardPro(Long value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Long getValue() {
+			return this.value;
+		}
+
+	}
+
+	/**
+	 * 通联提现方式 D0：D+0 到账 D1：D+1 到账 T1customized：T+1 到账，仅工作日代付 D0customized：D+0 到账，根据平台资金头寸付款 默认为 D0
+	 */
+	public enum EnumYunstWithdrawType implements Valuable<String> {
+		D0("D0", "D+0 到账"),
+		D1("D1", "D+1 到账"),
+		T1_CUSTOMIZED("T1customized", "T+1 到账，仅工作日代付"),
+		D0_CUSTOMIZED("D0customized", "D+0 到账，根据平台资金头寸付款");
+
+		private String value;
+		private String valueName;
+
+		EnumYunstWithdrawType(String value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public String getValue() {
+			return this.value;
+		}
+
+	}
+
 }

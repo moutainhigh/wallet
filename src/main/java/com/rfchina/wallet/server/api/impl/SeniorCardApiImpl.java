@@ -34,6 +34,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SeniorCardApiImpl implements SeniorCardApi {
 
+	public static final String PRE_BINDCARD = "wallet:bindcard:";
 	@Autowired
 	private WalletDao walletDao;
 
@@ -86,7 +87,8 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 				.bankCode(result.getBankCode())
 				.build();
 			String preBindTicket = UUID.randomUUID().toString();
-			redisTemplate.opsForValue().set(preBindTicket, preBindCardVo, 10, TimeUnit.MINUTES);
+			redisTemplate.opsForValue()
+				.set(PRE_BINDCARD + preBindTicket, preBindCardVo, 10, TimeUnit.MINUTES);
 			return preBindTicket;
 		} catch (CommonGatewayException e) {
 			String errMsg = e.getBankErrMsg();
@@ -117,7 +119,7 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 		verifyService.checkWallet(walletId, wallet);
 
 		PreBindCardVo preBindCardVo = (PreBindCardVo) redisTemplate.opsForValue()
-			.get(preBindTicket);
+			.get(PRE_BINDCARD + preBindTicket);
 		if (preBindCardVo == null || walletId.longValue() != preBindCardVo.getWalletId()) {
 			throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_BIND_TIMEOUT);
 		}

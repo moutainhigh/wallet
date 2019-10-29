@@ -1,7 +1,10 @@
 package com.rfchina.wallet.server.service;
 
+import com.rfchina.platform.common.utils.JsonUtil;
+import com.rfchina.wallet.domain.misc.EnumDef.BizValidateType;
 import com.rfchina.wallet.domain.model.WalletCollect;
 import com.rfchina.wallet.domain.model.WalletRefund;
+import com.rfchina.wallet.domain.model.WalletWithdraw;
 import com.rfchina.wallet.server.SpringBaseTest;
 import com.rfchina.wallet.server.bank.yunst.util.YunstTpl;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectExtDao;
@@ -9,11 +12,14 @@ import com.rfchina.wallet.server.model.ext.CollectReq;
 import com.rfchina.wallet.server.model.ext.CollectReq.Reciever;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Balance;
+import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.BankCard;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.CodePay;
 import com.rfchina.wallet.server.model.ext.RechargeReq;
+import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
 import com.rfchina.wallet.server.model.ext.AgentPayReq;
 import com.rfchina.wallet.server.model.ext.SettleResp;
+import com.rfchina.wallet.server.model.ext.WithdrawReq;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
 import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
@@ -42,23 +48,54 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	 */
 	@Test
 	public void recharge() {
+
+//		BankCard bankCard = BankCard.builder()
+//			.payType(CollectPayType.BANKCARD.getValue())
+//			.bankCardNo("6214850201481956")
+//			.amount(1L)
+//			.build();
+
 		CodePay codePay = CodePay.builder()
 			.payType(CollectPayType.CODEPAY.getValue())
-			.authcode("134743276673265508")
-			.amount(5L)
+			.authcode("134535230243995898")
+			.amount(1L)
 			.build();
+
 		RechargeReq req = RechargeReq.builder()
 			.bizNo(String.valueOf(System.currentTimeMillis()))
-			.payerWalletId(10001L)
-			.amount(5L)
+			.payerWalletId(10035L)
+			.amount(1L)
 			.fee(0L)
-			.validateType((byte) 0)
 			.expireTime(null)
 			.industryCode("1010")
 			.industryName("保险代理")
 			.walletPayMethod(WalletPayMethod.builder().codePay(codePay).build())
 			.build();
-		seniorPayService.recharge(req);
+		RechargeResp resp = seniorPayService.recharge(req);
+		log.info("recharge.resp = {}", JsonUtil.toJSON(resp));
+	}
+
+	@Test
+	public void rechargeConfirm() {
+		seniorPayService.rechargeConfirm(1000188L,
+			"{\"sign\":\"\",\"tphtrxcrtime\":\"\",\"tphtrxid\":0,\"trxflag\":\"trx\",\"trxsn\":\"\"}",
+			"767023", "113.194.30.199");
+	}
+
+	@Test
+	public void withdraw() {
+		WithdrawReq req = WithdrawReq.builder()
+			.bizNo(String.valueOf(System.currentTimeMillis()))
+			.payerWalletId(10035L)
+			.cardId(12L)
+			.amount(1L)
+			.fee(0L)
+			.expireTime(null)
+			.industryCode("1010")
+			.industryName("保险代理")
+			.build();
+		WalletWithdraw withdraw = seniorPayService.withdraw(req);
+		log.info("withdraw.resp = {]", withdraw);
 	}
 
 	/**
@@ -112,4 +149,6 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 			.refund("WC20191022924053256", Arrays.asList(refundInfo));
 		log.info("refund {}", refund);
 	}
+
+
 }

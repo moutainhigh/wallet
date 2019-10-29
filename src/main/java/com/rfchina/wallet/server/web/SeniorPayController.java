@@ -15,9 +15,11 @@ import com.rfchina.wallet.server.api.SeniorPayApi;
 import com.rfchina.wallet.server.model.ext.AgentPayReq;
 import com.rfchina.wallet.server.model.ext.CollectReq;
 import com.rfchina.wallet.server.model.ext.RechargeReq;
+import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
 import com.rfchina.wallet.server.model.ext.SettleResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
+import com.rfchina.wallet.server.model.ext.WithdrawReq;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -44,7 +46,7 @@ public class SeniorPayController {
 
 	@ApiOperation("高级钱包-充值")
 	@PostMapping(UrlConstant.SENIOR_WALLET_RECHARGE)
-	public ResponseValue recharge(
+	public ResponseValue<RechargeResp> recharge(
 		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
 		@ApiParam(value = "充值内容，参考RechargeReq结构体", required = true) @RequestParam("recharge_req") String rechargeReq
 	) {
@@ -54,15 +56,29 @@ public class SeniorPayController {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
 
+	@ApiOperation("高级钱包-充值确认")
+	@PostMapping(UrlConstant.SENIOR_WALLET_RECHARGE_CONFIRM)
+	public ResponseValue<RechargeResp> rechargeConfirm(
+		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
+		@ApiParam(value = "充值业务令牌", required = true) @RequestParam("recharge_ticket") String rechargeTicket,
+		@ApiParam(value = "短信验证码", required = true) @RequestParam("verify_code") String verifyCode,
+		@ApiParam(value = "客户ip", required = true) @RequestParam("customer_ip") String customerIp
+	) {
+
+		seniorPayApi.rechargeConfirm(accessToken, rechargeTicket, verifyCode, customerIp);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
+	}
+
+
 	@ApiOperation("高级钱包-提现")
 	@PostMapping(UrlConstant.SENIOR_WALLET_WITHDRAW)
 	public ResponseValue withdraw(
 		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
-		@ApiParam(value = "充值内容，参考RechargeReq结构体", required = true) @RequestParam("recharge_req") String rechargeReq
+		@ApiParam(value = "充值内容，参考WithdrawReq结构体", required = true) @RequestParam("withdraw_req") String withdrawReq
 	) {
 
-		RechargeReq req = JsonUtil.toObject(rechargeReq, RechargeReq.class, DEF_REQ_OBJ_MAP);
-		seniorPayApi.recharge(accessToken, req);
+		WithdrawReq req = JsonUtil.toObject(withdrawReq, WithdrawReq.class, DEF_REQ_OBJ_MAP);
+		seniorPayApi.withdraw(accessToken, req);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
 

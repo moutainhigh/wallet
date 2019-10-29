@@ -258,7 +258,9 @@ public class NotifyService {
 
 		if (WalletApplyType.RECHARGE == type) {
 			yunstBizHandler.updateRechargeStatus(rpsResp.getReturnValue().getBizOrderNo());
-		} else if (WalletApplyType.COLLECT == type) {
+		} else if (WalletApplyType.WITHDRAWAL == type) {
+			yunstBizHandler.updateRechargeStatus(rpsResp.getReturnValue().getBizOrderNo());
+		}else if (WalletApplyType.COLLECT == type) {
 			yunstBizHandler.updateCollectStatus(rpsResp.getReturnValue().getBizOrderNo());
 		} else if (WalletApplyType.AGENT_PAY == type) {
 			yunstBizHandler.updateAgentPayStatus(rpsResp.getReturnValue().getBizOrderNo());

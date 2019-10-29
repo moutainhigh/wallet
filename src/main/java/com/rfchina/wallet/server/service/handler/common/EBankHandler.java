@@ -7,9 +7,11 @@ import com.rfchina.wallet.domain.model.WalletClearing;
 import com.rfchina.wallet.domain.model.WalletCollect;
 import com.rfchina.wallet.domain.model.WalletRecharge;
 import com.rfchina.wallet.domain.model.WalletRefund;
+import com.rfchina.wallet.domain.model.WalletWithdraw;
 import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.PayTuple;
+import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import java.util.List;
@@ -61,15 +63,18 @@ public abstract class EBankHandler {
 
 	/**
 	 * 退款
-	 * @return
 	 */
 	public abstract List<WalletRefund> refund(Long collectId);
 
 	/**
 	 * 充值
-	 * @return
 	 */
-	public abstract List<WalletRecharge> recharge(Long applyId);
+	public abstract List<RechargeResp> recharge(Long applyId);
+
+	/**
+	 * 提现
+	 */
+	public abstract List<WalletWithdraw> withdraw(Long applyId);
 
 
 }

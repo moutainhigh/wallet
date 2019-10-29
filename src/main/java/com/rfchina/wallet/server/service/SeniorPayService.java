@@ -3,10 +3,13 @@ package com.rfchina.wallet.server.service;
 import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EnumUtil;
+import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
+import com.rfchina.wallet.domain.misc.EnumDef.BizValidateType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletLevel;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletApply;
+import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletClearInfo;
 import com.rfchina.wallet.domain.model.WalletClearing;
 import com.rfchina.wallet.domain.model.WalletCollect;
@@ -15,6 +18,7 @@ import com.rfchina.wallet.domain.model.WalletCollectMethod.WalletCollectMethodBu
 import com.rfchina.wallet.domain.model.WalletRecharge;
 import com.rfchina.wallet.domain.model.WalletRefund;
 import com.rfchina.wallet.domain.model.WalletRefundDetail;
+import com.rfchina.wallet.domain.model.WalletWithdraw;
 import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletClearInfoExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletClearingExtDao;
@@ -23,6 +27,7 @@ import com.rfchina.wallet.server.mapper.ext.WalletCollectMethodExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRechargeExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRefundDetailExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRefundExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletWithdrawExtDao;
 import com.rfchina.wallet.server.model.ext.CollectReq;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Alipay;
@@ -31,10 +36,12 @@ import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.BankCard;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.CodePay;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Wechat;
 import com.rfchina.wallet.server.model.ext.RechargeReq;
+import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
 import com.rfchina.wallet.server.model.ext.AgentPayReq.Reciever;
 import com.rfchina.wallet.server.model.ext.SettleResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
+import com.rfchina.wallet.server.model.ext.WithdrawReq;
 import com.rfchina.wallet.server.msic.EnumWallet.ChannelType;
 import com.rfchina.wallet.server.msic.EnumWallet.ClearInfoStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.ClearingStatus;
@@ -49,6 +56,7 @@ import com.rfchina.wallet.server.msic.EnumWallet.WalletStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletType;
 import com.rfchina.wallet.server.service.handler.common.EBankHandler;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
+import com.rfchina.wallet.server.service.handler.yunst.YunstBizHandler;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +75,7 @@ public class SeniorPayService {
 	public static final String PREFIX_AGENT_PAY = "WO";
 	public static final String PREFIX_COLLECT = "WC";
 	public static final String PREFIX_RECHARGE = "WR";
+	public static final String PREFIX_WITHDRAW = "WW";
 
 	@Autowired
 	private HandlerHelper handlerHelper;
@@ -104,13 +113,19 @@ public class SeniorPayService {
 	@Autowired
 	private WalletRechargeExtDao walletRechargeDao;
 
+	@Autowired
+	private WalletCardDao walletCardDao;
+
+	@Autowired
+	private WalletWithdrawExtDao walletWithdrawDao;
+
 	private Long anonyPayerWalletId = 10001L;
 	private Long agentEntWalletId = 10000L;
 
 	/**
 	 * 充值
 	 */
-	public void recharge(RechargeReq req) {
+	public RechargeResp recharge(RechargeReq req) {
 		// 工单记录
 		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> {
 			WalletApply walletApply = walletApplyDao.selectByBatchNo(id);
@@ -130,8 +145,8 @@ public class SeniorPayService {
 			.build();
 		walletApplyDao.insertSelective(walletApply);
 
-		Long payerWalletId =(req.getPayerWalletId() != null) ? req.getPayerWalletId()
-				: anonyPayerWalletId;
+		Long payerWalletId = (req.getPayerWalletId() != null) ? req.getPayerWalletId()
+			: anonyPayerWalletId;
 		WalletPayMethod payMethod = req.getWalletPayMethod();
 		Wallet payerWallet = walletDao.selectByPrimaryKey(payerWalletId);
 		if (payerWallet == null || payerWallet.getStatus() != WalletStatus.ACTIVE.getValue()
@@ -147,7 +162,7 @@ public class SeniorPayService {
 			.orderNo(orderNo)
 			.payerWalletId(payerWallet.getId())
 			.payeeWalletId(payerWallet.getId())
-			.validateType(req.getValidateType())
+			.validateType(BizValidateType.SMS.getValue())
 			.amount(req.getAmount())
 			.tunnelType(TunnelType.YUNST.getValue())
 			.payMethod(payMethod.getMethods())
@@ -160,8 +175,88 @@ public class SeniorPayService {
 
 		// 充值
 		EBankHandler handler = handlerHelper.selectByWalletLevel(walletApply.getWalletLevel());
-		handler.recharge(walletApply.getId());
+		List<RechargeResp> results = handler.recharge(walletApply.getId());
+		return results.stream()
+			.filter(r -> r.getId() == recharge.getId())
+			.findFirst()
+			.orElse(null);
+	}
 
+	/**
+	 * 充值确认
+	 */
+	public void rechargeConfirm(Long applyId, String tradeNo, String verifyCode, String ip) {
+		WalletApply walletApply = walletApplyDao.selectByPrimaryKey(applyId);
+		// 充值
+		EBankHandler handler = handlerHelper.selectByWalletLevel(walletApply.getWalletLevel());
+		if (handler instanceof YunstBizHandler) {
+			((YunstBizHandler) handler).smsConfirm(walletApply, tradeNo, verifyCode, ip);
+		}
+	}
+
+	/**
+	 * 提现
+	 */
+	public WalletWithdraw withdraw(WithdrawReq req) {
+		// 工单记录
+		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> {
+			WalletApply walletApply = walletApplyDao.selectByBatchNo(id);
+			return walletApply == null;
+		});
+		WalletApply walletApply = WalletApply.builder()
+			.batchNo(batchNo)
+			.bizNo(req.getBizNo())
+			.type(WalletApplyType.WITHDRAWAL.getValue())
+			.amount(req.getAmount())
+			.status(WalletApplyStatus.WAIT_SEND.getValue())
+			.walletLevel(EnumWalletLevel.SENIOR.getValue())
+			.walletType(WalletType.COMPANY.getValue())
+			.channelType(TunnelType.YUNST.getValue())
+			.queryTime(DateUtil.addSecs(new Date(), configService.getNextRoundSec()))
+			.createTime(new Date())
+			.build();
+		walletApplyDao.insertSelective(walletApply);
+
+		// 检查钱包状态
+		Wallet payerWallet = walletDao.selectByPrimaryKey(req.getPayerWalletId());
+		Optional.ofNullable(payerWallet)
+			.filter(wallet -> wallet.getStatus() == WalletStatus.ACTIVE.getValue())
+			.orElseThrow(() -> new RuntimeException());
+
+		// 检查银行卡状态
+		WalletCard walletCard = walletCardDao.selectByPrimaryKey(req.getCardId());
+		Optional.ofNullable(walletCard)
+			.filter(card -> card.getWalletId().longValue() == payerWallet.getId().longValue()
+				&& card.getStatus().byteValue() == 1)
+			.orElseThrow(() -> new RuntimeException());
+
+		// 充值记录
+		String orderNo = IdGenerator.createBizId(PREFIX_WITHDRAW, 19, id -> {
+			return walletRechargeDao.selectCountByOrderNo(id) == 0;
+		});
+		WalletWithdraw withdraw = WalletWithdraw.builder()
+			.applyId(walletApply.getId())
+			.orderNo(orderNo)
+			.payerWalletId(payerWallet.getId())
+			.cardId(walletCard.getId())
+			.bankAccount(walletCard.getBankAccount())
+			.validateType(BizValidateType.SMS.getValue())
+			.amount(req.getAmount())
+			.tunnelType(TunnelType.YUNST.getValue())
+			.payMethod(ChannelType.BANKCARD.getValue())
+			.progress(GwProgress.WAIT_SEND.getValue())
+			.status(CollectStatus.WAIT_PAY.getValue())
+			.expireTime(req.getExpireTime())
+			.build();
+		walletWithdrawDao.insertSelective(withdraw);
+
+		// 充值
+		EBankHandler handler = handlerHelper.selectByWalletLevel(walletApply.getWalletLevel());
+		List<WalletWithdraw> results = handler.withdraw(walletApply.getId());
+		return results.stream()
+			.filter(r -> r.getId() == withdraw.getId())
+			.findFirst()
+			.orElse(null);
 	}
 
 	/**

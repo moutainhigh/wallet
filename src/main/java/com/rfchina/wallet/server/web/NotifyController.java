@@ -49,6 +49,24 @@ public class NotifyController {
 			"Receive Yunst recharge recall");
 	}
 
+
+	/**
+	 * 云商通提现回调
+	 */
+	@RequestMapping(value = UrlConstant.YUNST_WITHDRAW_RECALL)
+	public ResponseValue<String> withdrawRecall(HttpServletRequest request){
+
+		Map<String, String> params = request.getParameterMap().entrySet().stream().collect(
+			Collectors.toMap(entry -> entry.getKey(),
+				entry -> entry.getValue().length > 0 ? entry.getValue()[0] : null));
+
+		ChannelNotify channelNotify = notifyService.yunstNotify(params);
+		notifyService.handleOrderResult(channelNotify, WalletApplyType.WITHDRAWAL);
+
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS.getValue(),
+			"Receive Yunst recharge recall");
+	}
+
 	/**
 	 * 云商通代收回调
 	 */

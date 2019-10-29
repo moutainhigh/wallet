@@ -22,6 +22,7 @@ import com.rfchina.wallet.domain.model.WalletClearing;
 import com.rfchina.wallet.domain.model.WalletCollect;
 import com.rfchina.wallet.domain.model.WalletRecharge;
 import com.rfchina.wallet.domain.model.WalletRefund;
+import com.rfchina.wallet.domain.model.WalletWithdraw;
 import com.rfchina.wallet.server.bank.pudong.builder.EBankQuery48Builder;
 import com.rfchina.wallet.server.bank.pudong.builder.EBankQuery49Builder;
 import com.rfchina.wallet.server.bank.pudong.builder.PubPayQueryBuilder;
@@ -46,6 +47,7 @@ import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.PayTuple;
+import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.LancherType;
@@ -567,7 +569,12 @@ public class Handler8800 extends EBankHandler {
 	}
 
 	@Override
-	public List<WalletRecharge> recharge(Long applyId) {
+	public List<RechargeResp> recharge(Long applyId) {
+		throw new RuntimeException();
+	}
+
+	@Override
+	public List<WalletWithdraw> withdraw(Long applyId) {
 		throw new RuntimeException();
 	}
 }
