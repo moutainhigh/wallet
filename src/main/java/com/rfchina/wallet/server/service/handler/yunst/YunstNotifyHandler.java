@@ -20,6 +20,7 @@ import com.rfchina.wallet.server.mapper.ext.WalletVerifyHisExtDao;
 import com.rfchina.wallet.server.model.ext.SLWalletMqMessage;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyType;
 import java.util.Date;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -93,6 +94,29 @@ public class YunstNotifyHandler {
 		int effectRows = walletChannelExtDao.updateByPrimaryKeySelective(walletChannel);
 		if (effectRows != 1) {
 			log.error("更新电子签约状态失败:bizUserId:{}", bizUserId);
+		}
+	}
+
+	public void handleSignBalanceContractResult(ChannelNotify channelNotify,
+		YunstNotify.BalanceContractResult rtnVal) {
+		log.info("处理扣款协议签约通知 rtnVal:{}", rtnVal);
+		String reqSn = rtnVal.getProtocolReqSn();
+		String signStatus = rtnVal.getSignStatus();
+
+		WalletChannel walletChannel = walletChannelExtDao.selectByBanlceProtocolReqSn(reqSn);
+		if (Objects.isNull(walletChannel)) {
+			return;
+		}
+		String bizUserId = walletChannel.getBizUserId();
+		channelNotify.setBizUserId(bizUserId);
+
+		if ("success".equalsIgnoreCase(signStatus)) {
+			walletChannel
+				.setIsSignContact(WalletChannelSignContract.BALANCE.getValue().byteValue());
+			int effectRows = walletChannelExtDao.updateByPrimaryKeySelective(walletChannel);
+			if (effectRows != 1) {
+				log.error("更新扣款协议状态失败:bizUserId:{}", bizUserId);
+			}
 		}
 	}
 

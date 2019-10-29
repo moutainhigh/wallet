@@ -73,6 +73,12 @@ public class NotifyService {
 							getObjectMapper());
 					yunstNotifyHandler.handleSignContractResult(channelNotify, rtnVal);
 				}
+			} else if (YunstMethodName.SIGN_BALANCE_PROTOCOL.getValue().equals(methodName)) {
+					String rtnValJson = JsonUtil.toJSON(yunstNotify.getReturnValue());
+					YunstNotify.BalanceContractResult rtnVal = JsonUtil
+						.toObject(rtnValJson, YunstNotify.BalanceContractResult.class,
+							getObjectMapper());
+					yunstNotifyHandler.handleSignBalanceContractResult(channelNotify, rtnVal);
 
 			} else {
 				log.error("云商通回调,未知method参数:{}", methodName);

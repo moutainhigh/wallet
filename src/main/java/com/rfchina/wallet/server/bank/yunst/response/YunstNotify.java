@@ -38,6 +38,17 @@ public class YunstNotify {
 		private String bizUserId;
 	}
 
+
+	@Data
+	@NoArgsConstructor
+	@AllArgsConstructor
+	@ToString
+	public static class BalanceContractResult{
+		private String protocolReqSn;
+		private String signStatus;
+		private String protocolNo;
+	}
+
 	@Data
 	@NoArgsConstructor
 	@AllArgsConstructor

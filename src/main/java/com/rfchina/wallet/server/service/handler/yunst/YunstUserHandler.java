@@ -103,9 +103,10 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 委托扣款协议签约(生成前端H5 url)
 	 */
-	public String generateBalanceProtocolUrl(String bizUserId) throws Exception {
+	public Tuple<String,String> generateBalanceProtocolUrl(String bizUserId) throws Exception {
+		String protocolReqSn = UUID.randomUUID().toString().replaceAll("-", "");
 		YunstBalanceProtocolReq req = YunstBalanceProtocolReq.builder$()
-			.protocolReqSn(UUID.randomUUID().toString().replaceAll("-", ""))
+			.protocolReqSn(protocolReqSn)
 			.payerId(bizUserId)
 			.receiverId(configService.getYunstReceiverId())
 			.protocolName(configService.getYunstBalanceProtocolName())
@@ -116,7 +117,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 		String res = yunstTpl.signRequest(req);
 		String webParamUrl = configService.getYunstSignBalanceProtocolUrl() + "?" + res;
 		log.info("webParamUrl: " + webParamUrl);
-		return webParamUrl;
+		return new Tuple<>(protocolReqSn,webParamUrl);
 	}
 
 	/**
