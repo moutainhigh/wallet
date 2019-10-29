@@ -8,9 +8,12 @@ import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.model.ChannelNotify;
+import com.rfchina.wallet.server.bank.yunst.response.RecallResp;
+import com.rfchina.wallet.server.bank.yunst.response.RpsResp;
 import com.rfchina.wallet.server.bank.yunst.response.YunstNotify;
 import com.rfchina.wallet.server.mapper.ext.ChannelNotifyExtDao;
 import com.rfchina.wallet.server.model.ext.SLWalletMqMessage;
+import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyType;
 import com.rfchina.wallet.server.msic.EnumWallet.YunstMethodName;
 import com.rfchina.wallet.server.msic.EnumWallet.YunstServiceName;
 import com.rfchina.wallet.server.service.handler.yunst.YunstNotifyHandler;
@@ -124,25 +127,6 @@ public class NotifyService {
 			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		};
 	}
-
-//	public static void main(String[] args) {
-//		String s = "{\"returnValue\":{\"result\":2,\"checkTime\":\"2019-09-25 14:56:09\",\"bizUserId\":\"SILI001\"},\"method\":\"verifyResult\",\"service\":\"MemberService\"}";
-//
-//		System.out.println(s);
-//		YunstNotify yunstNotify = JsonUtil.toObject(s, YunstNotify.class, objectMapper -> {
-//			objectMapper.setTimeZone(TimeZone.getDefault());
-//			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-//		});
-//		System.out.println(yunstNotify);
-//		String s2 = JsonUtil.toJSON(yunstNotify.getReturnValue());
-//		System.out.println(s2);
-//		YunstNotify.CompanyAuditResult result = JsonUtil
-//			.toObject(s2, YunstNotify.CompanyAuditResult.class, objectMapper -> {
-//				objectMapper.setTimeZone(TimeZone.getDefault());
-//				objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-//			});
-//		System.out.println(result);
-//	}
 
 	public void handleOrderResult(ChannelNotify channelNotify, WalletApplyType type) {
 
