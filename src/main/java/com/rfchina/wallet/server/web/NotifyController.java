@@ -6,6 +6,7 @@ import com.rfchina.wallet.domain.model.ChannelNotify;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyType;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import com.rfchina.wallet.server.service.NotifyService;
+import com.rfchina.wallet.server.service.handler.yunst.YunstNotifyHandler;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +20,8 @@ public class NotifyController {
 
 	@Autowired
 	private NotifyService notifyService;
+	@Autowired
+	private YunstNotifyHandler yunstNotifyHandler;
 
 	@RequestMapping(value = UrlConstant.YUNST_NOTIFY)
 	@SuppressWarnings("unchecked")
@@ -36,14 +39,14 @@ public class NotifyController {
 	 * 云商通充值回调
 	 */
 	@RequestMapping(value = UrlConstant.YUNST_RECHARGE_RECALL)
-	public ResponseValue<String> rechargeRecall(HttpServletRequest request){
+	public ResponseValue<String> rechargeRecall(HttpServletRequest request) {
 
 		Map<String, String> params = request.getParameterMap().entrySet().stream().collect(
 			Collectors.toMap(entry -> entry.getKey(),
 				entry -> entry.getValue().length > 0 ? entry.getValue()[0] : null));
 
 		ChannelNotify channelNotify = notifyService.yunstNotify(params);
-		notifyService.handleOrderResult(channelNotify, WalletApplyType.RECHARGE);
+		yunstNotifyHandler.handleOrderResult(channelNotify, WalletApplyType.RECHARGE);
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS.getValue(),
 			"Receive Yunst recharge recall");
@@ -53,14 +56,14 @@ public class NotifyController {
 	 * 云商通代收回调
 	 */
 	@RequestMapping(value = UrlConstant.YUNST_COLLECT_RECALL)
-	public ResponseValue<String> collectRecall(HttpServletRequest request){
+	public ResponseValue<String> collectRecall(HttpServletRequest request) {
 
 		Map<String, String> params = request.getParameterMap().entrySet().stream().collect(
 			Collectors.toMap(entry -> entry.getKey(),
 				entry -> entry.getValue().length > 0 ? entry.getValue()[0] : null));
 
 		ChannelNotify channelNotify = notifyService.yunstNotify(params);
-		notifyService.handleOrderResult(channelNotify, WalletApplyType.COLLECT);
+		yunstNotifyHandler.handleOrderResult(channelNotify, WalletApplyType.COLLECT);
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS.getValue(),
 			"Receive Yunst collect recall");
@@ -70,14 +73,14 @@ public class NotifyController {
 	 * 云商通代付回调
 	 */
 	@RequestMapping(value = UrlConstant.YUNST_AGENT_PAY_RECALL)
-	public ResponseValue<String> agentPayRecall(HttpServletRequest request){
+	public ResponseValue<String> agentPayRecall(HttpServletRequest request) {
 
 		Map<String, String> params = request.getParameterMap().entrySet().stream().collect(
 			Collectors.toMap(entry -> entry.getKey(),
 				entry -> entry.getValue().length > 0 ? entry.getValue()[0] : null));
 
 		ChannelNotify channelNotify = notifyService.yunstNotify(params);
-		notifyService.handleOrderResult(channelNotify, WalletApplyType.AGENT_PAY);
+		yunstNotifyHandler.handleOrderResult(channelNotify, WalletApplyType.AGENT_PAY);
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS.getValue(),
 			"Receive Yunst agent pay recall");
@@ -87,17 +90,18 @@ public class NotifyController {
 	 * 云商通退款回调
 	 */
 	@RequestMapping(value = UrlConstant.YUNST_REFUND_RECALL)
-	public ResponseValue<String> agentRefund(HttpServletRequest request){
+	public ResponseValue<String> agentRefund(HttpServletRequest request) {
 
 		Map<String, String> params = request.getParameterMap().entrySet().stream().collect(
 			Collectors.toMap(entry -> entry.getKey(),
 				entry -> entry.getValue().length > 0 ? entry.getValue()[0] : null));
 
 		ChannelNotify channelNotify = notifyService.yunstNotify(params);
-		notifyService.handleOrderResult(channelNotify, WalletApplyType.REFUND);
+		yunstNotifyHandler.handleOrderResult(channelNotify, WalletApplyType.REFUND);
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS.getValue(),
 			"Receive Yunst agent pay recall");
 	}
+
 
 }

@@ -7,11 +7,9 @@ import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.spring.exception.RfchinaExceptionResolver;
 import com.rfchina.wallet.server.interceptor.AllInterceptor;
 import com.rfchina.wallet.server.interceptor.BasicInterceptor;
-
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-
 import com.rfchina.wallet.server.msic.UrlConstant;
+import java.text.SimpleDateFormat;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,8 +21,6 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import java.util.List;
 
 /**
  * MVC配置，配置拦截器、异常处理、消息转换等
