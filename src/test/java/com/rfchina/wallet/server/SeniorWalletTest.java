@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.rfchina.platform.common.security.SecurityCoder;
 import com.rfchina.platform.common.utils.SignUtil;
 import com.rfchina.wallet.server.msic.UrlConstant;
+import io.swagger.annotations.ApiParam;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,7 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Slf4j
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -112,7 +114,7 @@ public class SeniorWalletTest extends WalletBaseTest {
 	 */
 	@Test
 	public void testSeniorWalletSignMemberProtocol() {
-		seniorWalletSignMemberProtocol((byte) 3, 11L);
+		seniorWalletSignMemberProtocol((byte) 3, 10035L);
 	}
 
 	/**
@@ -120,7 +122,7 @@ public class SeniorWalletTest extends WalletBaseTest {
 	 */
 	@Test
 	public void testSeniorWalletSignBalanceProtocol() {
-		seniorWalletSignBalanceProtocol((byte) 3, 11L);
+		seniorWalletSignBalanceProtocol((byte) 3, 10035L);
 	}
 
 	/**
@@ -128,12 +130,57 @@ public class SeniorWalletTest extends WalletBaseTest {
 	 */
 	@Test
 	public void testSeniorWalletPersonSetPayPassword() {
-		seniorWalletPersonSetPayPassword((byte) 3, 11L, "张二丰", "13800138111", "440104198803124487");
+		seniorWalletPersonSetPayPassword((byte) 3, 10035L, "观富昌", "13710819640",
+			"440923198711033434");
 	}
+
+	/**
+	 * 高级钱包-预绑定银行卡
+	 */
+	@Test
+	public void preBindCard() {
+		Map<String, String> params = new HashMap<>();
+		params.put("access_token", getAccessToken(appId, appSecret));
+		params.put("wallet_id", String.valueOf(10035));
+		params.put("source", String.valueOf(3));
+		params.put("card_no", "6214850201481956");
+		params.put("real_name", "观富昌");
+		params.put("phone", "13710819640");
+		params.put("identity_no", "440923198711033434");
+		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+		params.put("sign", sign);
+
+		Map<String, Object> result = postAndValidateSpecCode(BASE_URL,
+			UrlConstant.WALLET_SENIOR_PRE_BIND_BANK_CARD, params,
+			1001);
+		log.info("", result);
+	}
+
+	/**
+	 * 高级钱包-确认绑定银行卡
+	 */
+	@Test
+	public void confirmBindBankCard() {
+		Map<String, String> params = new HashMap<>();
+		params.put("access_token", getAccessToken(appId, appSecret));
+		params.put("wallet_id", String.valueOf(10035));
+		params.put("source", String.valueOf(3));
+		params.put("pre_bind_ticket", "");
+		params.put("verify_code", "");
+		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+		params.put("sign", sign);
+
+		postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_CONFIRM_BIND_CARD, params,
+			1001);
+	}
+
 
 	@Test
 	public void testRecharge() {
-		String rechargeReq = "{\"amount\":1,\"biz_no\":\""+System.currentTimeMillis()+"\",\"expire_time\":null,\"fee\":0,\"industry_code\":\"1910\",\"industry_name\":\"其他\",\"payer_wallet_id\":10035,\"validate_type\":2,\"wallet_pay_method\":{\"alipay\":null,\"balance\":null,\"code_pay\":null,\"methods\":null,\"wechat\":null,\"bank_card\":{\"pay_type\":51,\"bank_card_no\":\"6214850201481956\",\"amount\":1}}}";
+		String rechargeReq = "{\"amount\":1,\"biz_no\":\"" + System.currentTimeMillis()
+			+ "\",\"expire_time\":null,\"fee\":0,\"industry_code\":\"1910\",\"industry_name\":\"其他\",\"payer_wallet_id\":10035,\"validate_type\":2,\"wallet_pay_method\":{\"alipay\":null,\"balance\":null,\"code_pay\":null,\"methods\":null,\"wechat\":null,\"bank_card\":{\"pay_type\":51,\"bank_card_no\":\"6214850201481956\",\"amount\":1}}}";
 		Map<String, String> params = new HashMap<>();
 		params.put("access_token", getAccessToken(appId, appSecret));
 		params.put("recharge_req", rechargeReq);

@@ -904,4 +904,26 @@ public class EnumWallet {
 		}
 
 	}
+
+	/**
+	 * 通联设备类型
+	 */
+	public enum EnumYunstDeviceType implements Valuable<Long> {
+		MOBILE(1L, "移动"),
+		PC(2L, "PC");
+
+		private Long value;
+		private String valueName;
+
+		EnumYunstDeviceType(Long value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Long getValue() {
+			return this.value;
+		}
+
+	}
 }

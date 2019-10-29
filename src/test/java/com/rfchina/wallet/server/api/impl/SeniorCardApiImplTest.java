@@ -20,7 +20,7 @@ public class SeniorCardApiImplTest extends SpringBaseTest {
 
 	@Test
 	public void preBindBandCard() {
-		ApplyBindBankCardResp resp = seniorCardApi
+		String resp = seniorCardApi
 			.preBindBandCard(null, WALLET_ID, WalletSource.USER.getValue(), "6214850201481956",
 				"观富昌", CARD_PHONE, "440923198711033434", null, null);
 		log.info("预绑卡 {}", resp);
@@ -30,7 +30,7 @@ public class SeniorCardApiImplTest extends SpringBaseTest {
 	@Test
 	public void confirmBindCard() {
 		seniorCardApi.confirmBindCard(null, WALLET_ID, WalletSource.USER.getValue(),
-			"177982799745", null, CARD_PHONE, null, null, "964441");
+			"177982799745", null);
 	}
 
 	@Test

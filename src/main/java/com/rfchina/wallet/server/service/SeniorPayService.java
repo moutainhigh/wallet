@@ -130,8 +130,7 @@ public class SeniorPayService {
 			.build();
 		walletApplyDao.insertSelective(walletApply);
 
-		Long payerWalletId =
-			(req.getPayerWalletId() != null) ? req.getPayerWalletId()
+		Long payerWalletId =(req.getPayerWalletId() != null) ? req.getPayerWalletId()
 				: anonyPayerWalletId;
 		WalletPayMethod payMethod = req.getWalletPayMethod();
 		Wallet payerWallet = walletDao.selectByPrimaryKey(payerWalletId);
@@ -148,6 +147,7 @@ public class SeniorPayService {
 			.orderNo(orderNo)
 			.payerWalletId(payerWallet.getId())
 			.payeeWalletId(payerWallet.getId())
+			.validateType(req.getValidateType())
 			.amount(req.getAmount())
 			.tunnelType(TunnelType.YUNST.getValue())
 			.payMethod(payMethod.getMethods())

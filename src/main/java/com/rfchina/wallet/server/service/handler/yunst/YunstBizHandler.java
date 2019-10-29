@@ -1,13 +1,16 @@
 package com.rfchina.wallet.server.service.handler.yunst;
 
 import com.alibaba.fastjson.JSON;
+import com.allinpay.yunst.sdk.util.RSAUtil;
 import com.google.common.collect.Lists;
+import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EnumUtil;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletLevel;
+import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.GatewayTrans;
 import com.rfchina.wallet.domain.model.WalletApply;
 import com.rfchina.wallet.domain.model.WalletChannel;
@@ -19,13 +22,16 @@ import com.rfchina.wallet.domain.model.WalletRecharge;
 import com.rfchina.wallet.domain.model.WalletRefund;
 import com.rfchina.wallet.domain.model.WalletRefundDetail;
 import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
+import com.rfchina.wallet.server.bank.yunst.exception.UnknownException;
 import com.rfchina.wallet.server.bank.yunst.request.AgentPayReq;
 import com.rfchina.wallet.server.bank.yunst.request.AgentPayReq.CollectPay;
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq;
+import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod;
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod.Alipay;
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod.Alipay.AlipayService;
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod.Alipay.ScanAlipay;
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod.Balance;
+import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod.BankCard.CardQuickPay;
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod.CodePay;
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod.CodePay.CodePayVsp;
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod.Wechat;
@@ -43,7 +49,7 @@ import com.rfchina.wallet.server.bank.yunst.response.AgentPayResp;
 import com.rfchina.wallet.server.bank.yunst.response.CollectApplyResp;
 import com.rfchina.wallet.server.bank.yunst.response.GetOrderDetailResp;
 import com.rfchina.wallet.server.bank.yunst.response.RefundApplyResp;
-import com.rfchina.wallet.server.bank.yunst.util.CommonGatewayException;
+import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
 import com.rfchina.wallet.server.bank.yunst.util.YunstTpl;
 import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletChannelExtDao;
@@ -54,11 +60,14 @@ import com.rfchina.wallet.server.mapper.ext.WalletCollectMethodExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRechargeExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRefundDetailExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRefundExtDao;
+import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.BankCard;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.PayTuple;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
+import com.rfchina.wallet.server.msic.EnumWallet.ChannelType;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectStatus;
+import com.rfchina.wallet.server.msic.EnumWallet.EnumYunstDeviceType;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.RefundType;
 import com.rfchina.wallet.server.msic.EnumWallet.TunnelType;
@@ -76,6 +85,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -168,14 +178,14 @@ public class YunstBizHandler extends EBankHandler {
 				.accountSetNo(configService.getUserAccSet())
 				.amount(walletApply.getAmount())
 				.fee(0L)
-				.validateType(0L)
+				.validateType(Long.valueOf(recharge.getValidateType()))
 				.frontUrl(null)
 				.backUrl(configService.getYunstRechargeRecallUrl())
 				.orderExpireDatetime(expireTime)
 				.payMethod(getMethodMap(methods, true))
 				.industryCode("1910")
 				.industryName("其他")
-				.source(1L)
+				.source(EnumYunstDeviceType.MOBILE.getValue())
 				.build();
 
 			recharge.setStartTime(new Date());
@@ -189,15 +199,18 @@ public class YunstBizHandler extends EBankHandler {
 					recharge.setErrCode(resp.getPayCode());
 					recharge.setErrMsg(resp.getPayFailMessage());
 				}
+				walletRechargeDao.updateByPrimaryKey(recharge);
+				return recharge;
 			} catch (CommonGatewayException e) {
 				log.error("{}", JsonUtil.toJSON(e));
 				recharge.setErrCode(e.getBankErrCode());
 				recharge.setErrMsg(e.getBankErrMsg());
+				walletRechargeDao.updateByPrimaryKey(recharge);
+				throw e;
 			} catch (Exception e) {
 				log.error("{}", JSON.toJSONString(e));
+				throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
 			}
-			walletRechargeDao.updateByPrimaryKey(recharge);
-			return recharge;
 		}).filter(item -> item != null)
 			.collect(Collectors.toList());
 	}
@@ -233,7 +246,7 @@ public class YunstBizHandler extends EBankHandler {
 				.recieverList(receives)
 				.amount(collect.getAmount())
 				.fee(0L)
-				.validateType(0L)
+				.validateType(collect.getPayMethod() == ChannelType.BALANCE.getValue() ? 2L : 0L)
 				.frontUrl(null)
 				.backUrl(configService.getYunstCollectRecallUrl())
 				.ordErexpireDatetime(expireTime)
@@ -627,12 +640,17 @@ public class YunstBizHandler extends EBankHandler {
 				payMethod.put(CodePay.KEY_CodePayVsp, codePayVsp);
 			} else if (CollectPayType.BANKCARD.getValue().byteValue() ==
 				m.getPayType().byteValue()) {
-				CodePayVsp codePayVsp = CodePayVsp.builder()
-					.limitPay(isRecharge ? "no_credit" : "")
+				String bankCardNo = null;
+				try {
+					bankCardNo = RSAUtil.encrypt(m.getOpenId());
+				} catch (Exception e) {
+					log.error("银行卡加密错误", e);
+				}
+				CardQuickPay bankCard = CardQuickPay.builder()
+					.bankCardNo(bankCardNo)
 					.amount(m.getAmount())
-					.authcode(m.getSceneInfo())
 					.build();
-				payMethod.put(CodePay.KEY_CodePayVsp, codePayVsp);
+				payMethod.put(CollectPayMethod.BankCard.KEY_QuickPayVsp, bankCard);
 			}
 		});
 		return payMethod;

@@ -1,16 +1,24 @@
 package com.rfchina.wallet.server;
 
+import com.allinpay.yunst.sdk.YunClient;
+import com.allinpay.yunst.sdk.bean.YunConfig;
 import com.rfchina.platform.common.security.SecurityCoder;
 import com.rfchina.platform.common.utils.SignUtil;
 import com.rfchina.platform.unittest.BaseTest;
 import com.rfchina.wallet.server.msic.UrlConstant;
+import com.rfchina.wallet.server.service.ConfigService;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.StringReader;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.stereotype.Service;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Date;
@@ -23,11 +31,33 @@ import java.util.Optional;
 @SpringBootTest
 @AutoConfigureMockMvc
 public abstract class WalletBaseTest extends BaseTest {
+
 	@Value("${app.base.url}")
 	protected String BASE_URL;
 
+	@Autowired
+	private ConfigService configService;
+
 	static {
 		System.setProperty("spring.profiles.active", "dev");
+	}
+
+
+	@Before
+	public void initYunst() throws Exception {
+		Process process = Runtime.getRuntime().exec("git config user.name");
+		process.waitFor();
+		BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+		String name = reader.readLine();
+		if (name.startsWith("niezengming")) {
+			YunClient.configure(new YunConfig(configService.getYstServerUrl(),
+				configService.getYstSysId(),
+				configService.getYstPassword(), configService.getYstAlias(),
+				configService.getYstVersion(),
+				"/data/env/config/dev-key/yunst/1902271423530473681.pfx",
+				"/data/env/config/dev-key/yunst/TLCert-test.cer"));
+
+		}
 	}
 
 	@Autowired
@@ -60,9 +90,10 @@ public abstract class WalletBaseTest extends BaseTest {
 		return postAndValidateSuccessCode(BASE_URL, UrlConstant.CREATE_WALLET, params);
 	}
 
-	protected Map<String, Object> walletLogList(Long walletId, String startTime, String endTime, int limit,
-			long offset,
-			Boolean stat) {
+	protected Map<String, Object> walletLogList(Long walletId, String startTime, String endTime,
+		int limit,
+		long offset,
+		Boolean stat) {
 		Map<String, String> params = new HashMap<>();
 
 		params.put("access_token", getAccessToken(appId, appSecret));
@@ -92,8 +123,9 @@ public abstract class WalletBaseTest extends BaseTest {
 		return postAndValidateSuccessCode(BASE_URL, UrlConstant.WALLET_BANK_CARD_LIST, params);
 	}
 
-	protected Map<String, Object> bindBankCard(Long walletId, String bankCode, String bankAccount, String depositName,
-			Integer isDef, String telephone) {
+	protected Map<String, Object> bindBankCard(Long walletId, String bankCode, String bankAccount,
+		String depositName,
+		Integer isDef, String telephone) {
 		Map<String, String> params = new HashMap<>();
 		params.put("access_token", getAccessToken(appId, appSecret));
 		params.put("wallet_id", String.valueOf(walletId));
@@ -160,7 +192,8 @@ public abstract class WalletBaseTest extends BaseTest {
 		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SEND_VERIFY_CODE, params, 2033);
 	}
 
-	protected Map<String, Object> loginWithVerify(String mobile, String verifyCode, Integer type, String ip) {
+	protected Map<String, Object> loginWithVerify(String mobile, String verifyCode, Integer type,
+		String ip) {
 		Map<String, String> params = new HashMap<>();
 		params.put("access_token", getAccessToken(appId, appSecret));
 		params.put("mobile", mobile);
@@ -171,7 +204,8 @@ public abstract class WalletBaseTest extends BaseTest {
 		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
 		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
 		params.put("sign", sign);
-		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_LOGIN_WITH_VERIFY_CODE, params, 2033);
+		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_LOGIN_WITH_VERIFY_CODE, params,
+			2033);
 	}
 
 	protected Map<String, Object> upgradeWallet(Integer channelType, Byte source, Long walletId) {
@@ -186,8 +220,9 @@ public abstract class WalletBaseTest extends BaseTest {
 		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_UPGRADE, params, 1001);
 	}
 
-	protected Map<String, Object> seniorWalletApplyBindPhone(Integer channelType, Byte source, Long walletId,
-			String mobile, Integer smsType) {
+	protected Map<String, Object> seniorWalletApplyBindPhone(Integer channelType, Byte source,
+		Long walletId,
+		String mobile, Integer smsType) {
 		Map<String, String> params = new HashMap<>();
 		params.put("access_token", getAccessToken(appId, appSecret));
 		params.put("channel_type", String.valueOf(channelType));
@@ -198,10 +233,12 @@ public abstract class WalletBaseTest extends BaseTest {
 		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
 		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
 		params.put("sign", sign);
-		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_SMS_VERIFY_CODE, params, 1001);
+		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_SMS_VERIFY_CODE, params,
+			1001);
 	}
 
-	protected Map<String, Object> seniorWalletBindPhone(Integer channelType, Byte source, Long walletId,
+	protected Map<String, Object> seniorWalletBindPhone(Integer channelType, Byte source,
+		Long walletId,
 		String mobile, String verifyCode) {
 		Map<String, String> params = new HashMap<>();
 		params.put("access_token", getAccessToken(appId, appSecret));
@@ -213,27 +250,31 @@ public abstract class WalletBaseTest extends BaseTest {
 		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
 		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
 		params.put("sign", sign);
-		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_BIND_PHONE, params, 1001);
+		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_BIND_PHONE, params,
+			1001);
 	}
 
-	protected Map<String, Object> seniorWalletChangeBindPhone(Integer channelType, Byte source, Long walletId,
-			String realName, String idNo,String oldPhone) {
+	protected Map<String, Object> seniorWalletChangeBindPhone(Integer channelType, Byte source,
+		Long walletId,
+		String realName, String idNo, String oldPhone) {
 		Map<String, String> params = new HashMap<>();
 		params.put("access_token", getAccessToken(appId, appSecret));
 		params.put("channel_type", String.valueOf(channelType));
 		params.put("source", String.valueOf(source));
 		params.put("wallet_id", String.valueOf(walletId));
 		params.put("real_name", realName);
-		params.put("id_no",idNo);
+		params.put("id_no", idNo);
 		params.put("old_phone", oldPhone);
 		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
 		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
 		params.put("sign", sign);
-		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_PERSON_CHANGE_BIND_PHONE, params, 1001);
+		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_PERSON_CHANGE_BIND_PHONE,
+			params, 1001);
 	}
 
-	protected Map<String, Object> seniorWalletAuth(Integer channelType, Byte source, Long walletId, String realName,
-			String idNo, String mobile, String smsVerifyCode) {
+	protected Map<String, Object> seniorWalletAuth(Integer channelType, Byte source, Long walletId,
+		String realName,
+		String idNo, String mobile, String smsVerifyCode) {
 		Map<String, String> params = new HashMap<>();
 		params.put("access_token", getAccessToken(appId, appSecret));
 		params.put("channel_type", String.valueOf(channelType));
@@ -246,11 +287,13 @@ public abstract class WalletBaseTest extends BaseTest {
 		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
 		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
 		params.put("sign", sign);
-		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_PERSON_AUTHENTICATION, params, 1001);
+		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_PERSON_AUTHENTICATION,
+			params, 1001);
 	}
 
-	protected Map<String, Object> seniorWalletCompanyInfoAudit(Integer channelType, Byte source, Long walletId,
-			Integer auditType, String companyBasicInfo) {
+	protected Map<String, Object> seniorWalletCompanyInfoAudit(Integer channelType, Byte source,
+		Long walletId,
+		Integer auditType, String companyBasicInfo) {
 		Map<String, String> params = new HashMap<>();
 		params.put("access_token", getAccessToken(appId, appSecret));
 		params.put("channel_type", String.valueOf(channelType));
@@ -261,7 +304,8 @@ public abstract class WalletBaseTest extends BaseTest {
 		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
 		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
 		params.put("sign", sign);
-		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_COMPANY_INFO_AUDIT, params, 1001);
+		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_COMPANY_INFO_AUDIT,
+			params, 1001);
 	}
 
 
@@ -277,7 +321,7 @@ public abstract class WalletBaseTest extends BaseTest {
 	}
 
 
-	protected Map<String, Object> seniorWalletSignMemberProtocol(Byte source, Long walletId){
+	protected Map<String, Object> seniorWalletSignMemberProtocol(Byte source, Long walletId) {
 		Map<String, String> params = new HashMap<>();
 		params.put("access_token", getAccessToken(appId, appSecret));
 		params.put("source", String.valueOf(source));
@@ -285,10 +329,11 @@ public abstract class WalletBaseTest extends BaseTest {
 		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
 		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
 		params.put("sign", sign);
-		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_MEMBER_PROTOCOL, params, 1001);
+		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_MEMBER_PROTOCOL, params,
+			1001);
 	}
 
-	protected Map<String, Object> seniorWalletSignBalanceProtocol(Byte source, Long walletId){
+	protected Map<String, Object> seniorWalletSignBalanceProtocol(Byte source, Long walletId) {
 		Map<String, String> params = new HashMap<>();
 		params.put("access_token", getAccessToken(appId, appSecret));
 		params.put("source", String.valueOf(source));
@@ -296,11 +341,13 @@ public abstract class WalletBaseTest extends BaseTest {
 		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
 		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
 		params.put("sign", sign);
-		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_BANLACE_PROTOCOL, params, 1001);
+		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_BANLACE_PROTOCOL, params,
+			1001);
 	}
 
 
-	protected Map<String, Object> seniorWalletPersonSetPayPassword(Byte source, Long walletId,String name,String phone,String idNum){
+	protected Map<String, Object> seniorWalletPersonSetPayPassword(Byte source, Long walletId,
+		String name, String phone, String idNum) {
 		Map<String, String> params = new HashMap<>();
 		params.put("access_token", getAccessToken(appId, appSecret));
 		params.put("source", String.valueOf(source));
@@ -311,6 +358,7 @@ public abstract class WalletBaseTest extends BaseTest {
 		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
 		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
 		params.put("sign", sign);
-		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_PERSON_SET_PAY_PASSWORD, params, 1001);
+		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_PERSON_SET_PAY_PASSWORD,
+			params, 1001);
 	}
 }

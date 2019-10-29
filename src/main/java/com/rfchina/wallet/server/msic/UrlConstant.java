@@ -54,6 +54,11 @@ public class UrlConstant {
 	public static final String SENIOR_WALLET_RECHARGE = VERSION + "/m/senior/recharge";
 
 	/**
+	 * 高级钱包-提现
+	 */
+	public static final String SENIOR_WALLET_WITHDRAW = VERSION + "/m/senior/withdraw";
+
+	/**
 	 * 查询支付状态
 	 */
 	public static final String WALLET_APPLY_QUERY = VERSION + "/m/wallet/query_wallet_apply";
