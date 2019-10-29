@@ -30,7 +30,7 @@ public class SeniorWalletSignBalanceProtocolRequest extends  AbstractApiRequest 
 
   @Override
   public Class<?> getResponseModelClass() {
-    return Map.class;
+    return PageVo.class;
   }
 
   @Override

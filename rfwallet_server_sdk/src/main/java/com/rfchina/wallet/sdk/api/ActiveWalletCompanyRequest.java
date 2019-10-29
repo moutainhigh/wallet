@@ -16,7 +16,7 @@ public class ActiveWalletCompanyRequest extends  AbstractApiRequest {
   @ApiModelProperty("access_token")
   private String accessToken ;
 
-  @ApiModelProperty("审核方式，1：运营，2：银企直连，3：通联")
+  @ApiModelProperty("审核方式，1：运营，2：银企直连，4：通联")
   private Long auditType ;
 
   @ApiModelProperty("公司名称")

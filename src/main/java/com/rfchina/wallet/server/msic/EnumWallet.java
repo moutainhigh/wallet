@@ -770,6 +770,7 @@ public class EnumWallet {
 	public enum YunstMethodName implements Valuable<String> {
 		VERIFY_RESULT("verifyResult"),
 		SIGN_CONTRACT("signContract"),
+		SIGN_BALANCE_PROTOCOL("signBalanceProtocol"),
 		CHANGE_BIND_PHONE("updatePhoneByPayPwd"),
 		SET_PAY_PWD("setPayPwd"),
 		PAY("pay"),

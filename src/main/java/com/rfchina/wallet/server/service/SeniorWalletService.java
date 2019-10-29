@@ -372,7 +372,11 @@ public class SeniorWalletService {
 			throw new RfchinaResponseException(EnumResponseCode.COMMON_FAILURE,
 				"未创建云商通用户");
 		}
-		return yunstUserHandler.generateBalanceProtocolUrl(walletChannel.getBizUserId());
+		Tuple<String, String> balanceProtocolReqResult = yunstUserHandler
+			.generateBalanceProtocolUrl(walletChannel.getBizUserId());
+		walletChannel.setBalanceProtocolReqSn(balanceProtocolReqResult.left);
+		walletChannelDao.updateByPrimaryKeySelective(walletChannel);
+		return balanceProtocolReqResult.right;
 	}
 
 	/**

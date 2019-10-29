@@ -68,6 +68,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.mail.internet.MimeMessage;
@@ -516,9 +517,13 @@ public class WalletService {
 			builder.personInfo(walletPerson);
 		}
 
-		WalletCard walletCard = walletCardDao
+		List<WalletCard> walletCardList = walletCardDao
 			.selectByWalletId(walletId, EnumDefBankCard.YES.getValue(),
-				WalletCardSenior.NO.getValue()).get(0);
+				WalletCardSenior.NO.getValue());
+
+		WalletCard walletCard = Objects.nonNull(walletCardList) && !walletCardList.isEmpty()?
+			walletCardDao.selectByWalletId(walletId, EnumDefBankCard.YES.getValue(),
+				WalletCardSenior.NO.getValue()).get(0):null;
 
 		int bankCardCount = walletCardDao
 			.selectCountByWalletId(walletId, EnumWalletCardStatus.BIND.getValue());
