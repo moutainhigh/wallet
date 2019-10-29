@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class YunstNotifyHandler {
-
+	public static final String YUNST_SIGN_SUCCESS = "success";
 	@Autowired
 	private WalletChannelExtDao walletChannelExtDao;
 	@Autowired
@@ -110,7 +110,7 @@ public class YunstNotifyHandler {
 		String bizUserId = walletChannel.getBizUserId();
 		channelNotify.setBizUserId(bizUserId);
 
-		if ("success".equalsIgnoreCase(signStatus)) {
+		if (YUNST_SIGN_SUCCESS.equalsIgnoreCase(signStatus)) {
 			walletChannel
 				.setIsSignContact(WalletChannelSignContract.BALANCE.getValue().byteValue());
 			int effectRows = walletChannelExtDao.updateByPrimaryKeySelective(walletChannel);
