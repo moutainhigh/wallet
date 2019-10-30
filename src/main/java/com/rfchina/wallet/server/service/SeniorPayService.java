@@ -57,6 +57,7 @@ import com.rfchina.wallet.server.msic.EnumWallet.WalletStatus;
 import com.rfchina.wallet.server.service.handler.common.EBankHandler;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBizHandler;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -129,10 +130,10 @@ public class SeniorPayService {
 	public RechargeResp recharge(RechargeReq req) {
 		// 工单记录
 		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> {
-			return walletApplyDao.selectCountByBatchNo(id) == 0;
+			return walletOrderDao.selectCountByBatchNo(id) == 0;
 		});
 		String orderNo = IdGenerator.createBizId(PREFIX_RECHARGE, 19, id -> {
-			return walletRechargeDao.selectCountByOrderNo(id) == 0;
+			return walletOrderDao.selectCountByOrderNo(id) == 0;
 		});
 
 		WalletOrder order = WalletOrder.builder()
@@ -145,6 +146,7 @@ public class SeniorPayService {
 			.progress(GwProgress.WAIT_SEND.getValue())
 			.status(OrderStatus.WAITTING.getValue())
 			.tunnelType(TunnelType.YUNST.getValue())
+			.createTime(new Date())
 			.build();
 		walletOrderDao.insertSelective(order);
 
@@ -159,6 +161,7 @@ public class SeniorPayService {
 			.payeeWalletId(payerWallet.getId())
 			.validateType(BizValidateType.SMS.getValue())
 			.payMethod(payMethod.getMethods())
+			.createTime(new Date())
 			.build();
 		walletRechargeDao.insertSelective(recharge);
 		savePayMethod(recharge.getId(), WalletApplyType.RECHARGE.getValue(), payMethod);
@@ -195,11 +198,10 @@ public class SeniorPayService {
 	public WalletOrder withdraw(WithdrawReq req) {
 		// 工单记录
 		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> {
-			WalletApply walletApply = walletApplyDao.selectByBatchNo(id);
-			return walletApply == null;
+			return walletOrderDao.selectCountByBatchNo(id) == 0;
 		});
 		String orderNo = IdGenerator.createBizId(PREFIX_WITHDRAW, 19, id -> {
-			return walletRechargeDao.selectCountByOrderNo(id) == 0;
+			return walletOrderDao.selectCountByOrderNo(id) == 0;
 		});
 
 		WalletOrder order = WalletOrder.builder()
@@ -212,6 +214,7 @@ public class SeniorPayService {
 			.progress(GwProgress.WAIT_SEND.getValue())
 			.status(OrderStatus.WAITTING.getValue())
 			.tunnelType(TunnelType.YUNST.getValue())
+			.createTime(new Date())
 			.build();
 		walletOrderDao.insertSelective(order);
 
@@ -235,6 +238,7 @@ public class SeniorPayService {
 			.bankAccount(walletCard.getBankAccount())
 			.validateType(BizValidateType.SMS.getValue())
 			.payMethod(ChannelType.BANKCARD.getValue())
+			.createTime(new Date())
 			.build();
 		walletWithdrawDao.insertSelective(withdraw);
 
@@ -260,19 +264,19 @@ public class SeniorPayService {
 			return walletOrderDao.selectCountByOrderNo(id) == 0;
 		});
 		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> {
-			WalletApply walletApply = walletApplyDao.selectByBatchNo(id);
-			return walletApply == null;
+			return walletOrderDao.selectCountByBatchNo(id) == 0;
 		});
 		WalletOrder order = WalletOrder.builder()
 			.orderNo(orderNo)
 			.batchNo(batchNo)
 			.bizNo(req.getBizNo())
-			.walletId(req.getPayerWalletId())
+			.walletId(payerWalletId)
 			.type(WalletApplyType.COLLECT.getValue())
 			.amount(req.getAmount())
 			.progress(GwProgress.WAIT_SEND.getValue())
 			.status(OrderStatus.WAITTING.getValue())
 			.tunnelType(TunnelType.YUNST.getValue())
+			.createTime(new Date())
 			.build();
 		walletOrderDao.insertSelective(order);
 
@@ -282,6 +286,7 @@ public class SeniorPayService {
 			.agentWalletId(agentEntWalletId)
 			.refundLimit(req.getAmount())
 			.payMethod(req.getWalletPayMethod().getMethods())
+			.createTime(new Date())
 			.build();
 		walletCollectDao.insertSelective(collect);
 		savePayMethod(collect.getId(), WalletApplyType.COLLECT.getValue(),
@@ -296,6 +301,7 @@ public class SeniorPayService {
 				.clearAmount(0L)
 				.refundAmount(0L)
 				.status(ClearInfoStatus.WAITING.getValue())
+				.createTime(new Date())
 				.build();
 			walletClearInfoDao.insertSelective(clearInfo);
 			return clearInfo;
@@ -309,22 +315,14 @@ public class SeniorPayService {
 	/**
 	 * 发起代付（加锁）
 	 */
-	@Transactional(propagation = Propagation.REQUIRES_NEW, rollbackFor = Exception.class)
-	public SettleResp agentPay(String collectOrderNo, String bizNo, List<Reciever> receivers) {
-
-		// 检查代收单
-		WalletOrder collect = walletOrderDao.selectByOrderNo(collectOrderNo);
-		Optional.ofNullable(collect)
-			.orElseThrow(() -> new WalletResponseException(EnumResponseCode.COMMON_INVALID_PARAMS,
-				"collectOrderNo"));
+	public SettleResp agentPay(WalletOrder collectOrder, String bizNo, List<Reciever> receivers) {
 
 		// 工单记录
 		String orderNo = IdGenerator.createBizId(PREFIX_AGENT_PAY, 19, id -> {
 			return walletOrderDao.selectCountByOrderNo(id) == 0;
 		});
 		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> {
-			WalletApply walletApply = walletApplyDao.selectByBatchNo(id);
-			return walletApply == null;
+			return walletOrderDao.selectCountByBatchNo(id) == 0;
 		});
 
 		WalletOrder order = WalletOrder.builder()
@@ -337,9 +335,11 @@ public class SeniorPayService {
 			.progress(GwProgress.WAIT_SEND.getValue())
 			.status(OrderStatus.WAITTING.getValue())
 			.tunnelType(TunnelType.YUNST.getValue())
+			.createTime(new Date())
 			.build();
 		walletOrderDao.insertSelective(order);
 
+		WalletCollect collect = walletCollectDao.selectByOrderId(collectOrder.getId());
 		List<WalletClearInfo> clearInfos = walletClearInfoDao.selectByCollectId(collect.getId());
 
 		// 匹配原始分账记录
@@ -363,9 +363,10 @@ public class SeniorPayService {
 		List<WalletClearing> clearings = receivers.stream().map(receiver -> {
 			WalletClearing clearing = WalletClearing.builder()
 				.orderId(order.getId())
-				.collectOrderNo(collect.getOrderNo())
+				.collectOrderNo(collectOrder.getOrderNo())
 				.collectInfoId(infoMap.get(receiver.getWalletId()))
 				.payeeWalletId(receiver.getWalletId())
+				.createTime(new Date())
 				.build();
 			walletClearingDao.insertSelective(clearing);
 			return clearing;
@@ -439,8 +440,7 @@ public class SeniorPayService {
 			return walletOrderDao.selectCountByOrderNo(id) == 0;
 		});
 		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> {
-			WalletApply walletApply = walletApplyDao.selectByBatchNo(id);
-			return walletApply == null;
+			return walletOrderDao.selectCountByBatchNo(id) == 0;
 		});
 
 		WalletOrder order = WalletOrder.builder()
@@ -453,6 +453,7 @@ public class SeniorPayService {
 			.progress(GwProgress.WAIT_SEND.getValue())
 			.status(OrderStatus.WAITTING.getValue())
 			.tunnelType(TunnelType.YUNST.getValue())
+			.createTime(new Date())
 			.build();
 		walletOrderDao.insertSelective(order);
 
@@ -462,6 +463,7 @@ public class SeniorPayService {
 			.collectOrderNo(collect.getOrderNo())
 			.agentWalletId(agentEntWalletId)
 			.collectAmount(collect.getAmount())
+			.createTime(new Date())
 			.build();
 		walletRefundDao.insertSelective(refund);
 
@@ -471,6 +473,7 @@ public class SeniorPayService {
 				.refundId(refund.getId())
 				.payeeWalletId(Long.valueOf(r.getWalletId()))
 				.amount(r.getAmount())
+				.createTime(new Date())
 				.build();
 			walletRefundDetailDao.insertSelective(detail);
 			return detail;

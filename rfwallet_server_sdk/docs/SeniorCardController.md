@@ -13,7 +13,7 @@
 |source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
 |verify_code|是|短信验证码|
 |wallet_id|是|钱包id|
-|pre_bind_ticket|否|信用卡cvv2码|
+|pre_bind_ticket|否|预绑卡票据|
 
 返回数据
 ```

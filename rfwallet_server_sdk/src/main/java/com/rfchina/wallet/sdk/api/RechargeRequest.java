@@ -27,7 +27,7 @@ public class RechargeRequest extends  AbstractApiRequest {
 
   @Override
   public Class<?> getResponseModelClass() {
-    return Map.class;
+    return RechargeResp.class;
   }
 
   @Override

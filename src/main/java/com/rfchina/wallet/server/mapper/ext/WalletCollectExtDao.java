@@ -14,6 +14,6 @@ public interface WalletCollectExtDao extends WalletCollectMapper {
 		"where order_id = #{orderId}"
 	})
 	@ResultMap({"com.rfchina.wallet.domain.mapper.WalletCollectMapper.BaseResultMap"})
-	List<WalletCollect> selectByOrderId(@Param("orderId") Long orderId);
+	WalletCollect selectByOrderId(@Param("orderId") Long orderId);
 
 }

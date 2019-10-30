@@ -199,7 +199,7 @@ public class YunstBizHandler extends EBankHandler {
 			.fee(0L)
 			.validateType(Long.valueOf(recharge.getValidateType()))
 			.frontUrl(null)
-			.backUrl(configService.getYunstRecallPrefix() + UrlConstant.YUNST_RECHARGE_RECALL)
+			.backUrl(configService.getYunstRecallPrefix() + UrlConstant.YUNST_ORDER_RECALL)
 			.orderExpireDatetime(expireTime)
 			.payMethod(getMethodMap(methods, true))
 			.industryCode("1910")
@@ -219,7 +219,7 @@ public class YunstBizHandler extends EBankHandler {
 				order.setTunnelErrCode(resp.getPayCode());
 				order.setTunnelErrMsg(resp.getPayFailMessage());
 			}
-			walletOrderDao.updateByPrimaryKey(order);
+			walletOrderDao.updateByPrimaryKeySelective(order);
 			RechargeResp rechargeResp = BeanUtil.newInstance(order, RechargeResp.class);
 			rechargeResp.setPayInfo(resp.getPayInfo());
 			rechargeResp.setWeChatAPPInfo(resp.getWeChatAPPInfo());
@@ -233,7 +233,7 @@ public class YunstBizHandler extends EBankHandler {
 			log.error("{}", JsonUtil.toJSON(e));
 			order.setTunnelErrCode(e.getBankErrCode());
 			order.setTunnelErrMsg(e.getBankErrMsg());
-			walletOrderDao.updateByPrimaryKey(order);
+			walletOrderDao.updateByPrimaryKeySelective(order);
 			throw e;
 		} catch (Exception e) {
 			log.error("{}", JSON.toJSONString(e));
@@ -286,7 +286,7 @@ public class YunstBizHandler extends EBankHandler {
 			.amount(order.getAmount())
 			.fee(0L)
 			.validateType(Long.valueOf(withdraw.getValidateType()))
-			.backUrl(configService.getYunstRecallPrefix() + UrlConstant.YUNST_WITHDRAW_RECALL)
+			.backUrl(configService.getYunstRecallPrefix() + UrlConstant.YUNST_ORDER_RECALL)
 			.orderExpireDatetime(expireTime)
 			.payMethod(null)
 			.bankCardNo(bankAccount)
@@ -307,13 +307,13 @@ public class YunstBizHandler extends EBankHandler {
 				order.setStatus(OrderStatus.FAIL.getValue());
 				order.setTunnelErrMsg(resp.getPayFailMessage());
 			}
-			walletOrderDao.updateByPrimaryKey(order);
+			walletOrderDao.updateByPrimaryKeySelective(order);
 			return withdraw;
 		} catch (CommonGatewayException e) {
 			log.error("{}", JsonUtil.toJSON(e));
 			order.setTunnelErrCode(e.getBankErrCode());
 			order.setTunnelErrMsg(e.getBankErrMsg());
-			walletOrderDao.updateByPrimaryKey(order);
+			walletOrderDao.updateByPrimaryKeySelective(order);
 			throw e;
 		} catch (Exception e) {
 			log.error("{}", JSON.toJSONString(e));
@@ -351,7 +351,7 @@ public class YunstBizHandler extends EBankHandler {
 			.validateType(collect.getPayMethod() == ChannelType.BALANCE.getValue() ?
 				BizValidateType.PASSWORD.getValue().longValue() : 0L)
 			.frontUrl(null)
-			.backUrl(configService.getYunstRecallPrefix() + UrlConstant.YUNST_COLLECT_RECALL)
+			.backUrl(configService.getYunstRecallPrefix() + UrlConstant.YUNST_ORDER_RECALL)
 			.ordErexpireDatetime(expireTime)
 			.payMethod(getMethodMap(methods, false))
 			.tradeCode(TRADE_CODESTRING_COLLECT)
@@ -372,7 +372,7 @@ public class YunstBizHandler extends EBankHandler {
 				order.setTunnelErrCode(resp.getPayCode());
 				order.setTunnelErrMsg(resp.getPayFailMessage());
 			}
-			walletOrderDao.updateByPrimaryKey(order);
+			walletOrderDao.updateByPrimaryKeySelective(order);
 			WalletCollectResp result = BeanUtil.newInstance(order, WalletCollectResp.class);
 			if (resp != null) {
 				result.setPayInfo(resp.getPayInfo());
@@ -383,7 +383,7 @@ public class YunstBizHandler extends EBankHandler {
 			log.error("{}", JsonUtil.toJSON(e));
 			order.setTunnelErrCode(e.getBankErrCode());
 			order.setTunnelErrMsg(e.getBankErrMsg());
-			walletOrderDao.updateByPrimaryKey(order);
+			walletOrderDao.updateByPrimaryKeySelective(order);
 			throw e;
 		} catch (Exception e) {
 			log.error("{}", JsonUtil.toJSON(e));
@@ -411,7 +411,7 @@ public class YunstBizHandler extends EBankHandler {
 				.collectPayList(Lists.newArrayList(collectPay))
 				.bizUserId(tunnel.getBizUserId())
 				.accountSetNo(configService.getUserAccSet())  // 产品需求代付到余额账户
-				.backUrl(configService.getYunstRecallPrefix() + UrlConstant.YUNST_AGENT_PAY_RECALL)
+				.backUrl(configService.getYunstRecallPrefix() + UrlConstant.YUNST_ORDER_RECALL)
 				.amount(order.getAmount())
 				.fee(0L)
 				.splitRuleList(null)
@@ -429,17 +429,17 @@ public class YunstBizHandler extends EBankHandler {
 					order.setStatus(OrderStatus.FAIL.getValue());
 					order.setTunnelErrMsg(resp.getPayFailMessage());
 				}
-				walletOrderDao.updateByPrimaryKey(order);
+				walletOrderDao.updateByPrimaryKeySelective(order);
 			} catch (CommonGatewayException e) {
 				log.error("{}", JsonUtil.toJSON(e));
 				order.setTunnelErrCode(e.getBankErrCode());
 				order.setTunnelErrMsg(e.getBankErrMsg());
-				walletOrderDao.updateByPrimaryKey(order);
+				walletOrderDao.updateByPrimaryKeySelective(order);
 				throw e;
 			} catch (Exception e) {
 				log.error("", e);
 			}
-			walletClearingDao.updateByPrimaryKey(clearing);
+			walletClearingDao.updateByPrimaryKeySelective(clearing);
 
 		});
 	}
@@ -467,7 +467,7 @@ public class YunstBizHandler extends EBankHandler {
 			.bizUserId(payerChannel.getBizUserId())
 			.refundType(RefundType.D0.getValue())
 			.refundList(refundList)
-			.backUrl(configService.getYunstRecallPrefix() + UrlConstant.YUNST_REFUND_RECALL)
+			.backUrl(configService.getYunstRecallPrefix() + UrlConstant.YUNST_ORDER_RECALL)
 			.amount(details.stream()
 				.collect(Collectors.summingLong(WalletRefundDetail::getAmount)))
 			.couponAmount(0L)
@@ -484,12 +484,12 @@ public class YunstBizHandler extends EBankHandler {
 				order.setStatus(OrderStatus.FAIL.getValue());
 				order.setTunnelErrCode(resp.getPayFailMessage());
 			}
-			walletOrderDao.updateByPrimaryKey(order);
+			walletOrderDao.updateByPrimaryKeySelective(order);
 		} catch (CommonGatewayException e) {
 			log.error("{}", JsonUtil.toJSON(e));
 			order.setTunnelErrCode(e.getBankErrCode());
 			order.setTunnelErrMsg(e.getBankErrMsg());
-			walletOrderDao.updateByPrimaryKey(order);
+			walletOrderDao.updateByPrimaryKeySelective(order);
 			throw e;
 		} catch (Exception e) {
 			log.error("", e);
@@ -520,14 +520,14 @@ public class YunstBizHandler extends EBankHandler {
 //				Date bizTime = DateUtil
 //					.parse(resp.getPayDatetime(), DateUtil.STANDARD_DTAETIME_PATTERN);
 //				walletApply.setBizTime(bizTime);
-//				walletApplyDao.updateByPrimaryKey(walletApply);
+//				walletApplyDao.updateByPrimaryKeySelective(walletApply);
 //
 //				trans.setBizTime(bizTime);
 //				trans.setEndTime(new Date());
 //				gatewayTransService.updateTrans(trans);
 //			} catch (CommonGatewayException e) {
 //				walletApply.setStatus(WalletApplyStatus.WAIT_DEAL.getValue());
-//				walletApplyDao.updateByPrimaryKey(walletApply);
+//				walletApplyDao.updateByPrimaryKeySelective(walletApply);
 //
 //				trans.setErrCode(e.getBankErrCode());
 //				trans.setSysErrMsg(e.getBankErrMsg());
@@ -569,7 +569,7 @@ public class YunstBizHandler extends EBankHandler {
 		if (applyStatus.isEndStatus()) {
 			order.setEndTime(new Date());
 		}
-		walletOrderDao.updateByPrimaryKey(order);
+		walletOrderDao.updateByPrimaryKeySelective(order);
 	}
 
 
@@ -685,8 +685,8 @@ public class YunstBizHandler extends EBankHandler {
 		try {
 			return yunstTpl.execute(req, GetOrderDetailResp.class);
 		} catch (Exception e) {
-			log.error(" error = {} , req = {} ", req, e);
-			throw new RuntimeException();
+			log.error(" error = {} , req = {} ", req, JSON.toJSONString(e));
+			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
 		}
 	}
 

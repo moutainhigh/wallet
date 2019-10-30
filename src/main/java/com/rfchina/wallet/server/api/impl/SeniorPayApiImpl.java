@@ -15,6 +15,7 @@ import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletRefund;
 import com.rfchina.wallet.domain.model.WalletWithdraw;
 import com.rfchina.wallet.server.api.SeniorPayApi;
+import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import com.rfchina.wallet.server.model.ext.AgentPayReq.Reciever;
 import com.rfchina.wallet.server.model.ext.CollectReq;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod;
@@ -44,6 +45,9 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 
 	@Autowired
 	private RedisTemplate redisTemplate;
+
+	@Autowired
+	private WalletOrderExtDao walletOrderDao;
 
 
 	@Log
@@ -94,6 +98,20 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 	@SignVerify
 	@Override
 	public WalletCollectResp collect(String accessToken, CollectReq req) {
+		// 判断收款人记录不重复
+		Set<String> walletSet = req.getRecievers().stream()
+			.map(receiver -> receiver.getWalletId().toString())
+			.collect(Collectors.toSet());
+		if (walletSet.size() != req.getRecievers().size()) {
+			throw new WalletResponseException(EnumWalletResponseCode.COLLECT_RECEIVER_DUPLICATE);
+		}
+		// 判断金额相同
+		Long recAmount = req.getRecievers().stream()
+			.collect(Collectors.summingLong(CollectReq.Reciever::getAmount));
+		if(req.getAmount() != req.getFee() + recAmount){
+			throw new WalletResponseException(EnumWalletResponseCode.COLLECT_AMOUNT_NOT_MATCH);
+		}
+		// 检验支付方式
 		WalletPayMethod payMethod = req.getWalletPayMethod();
 		if (payMethod.getMethods() == 0) {
 			throw new WalletResponseException(EnumResponseCode.COMMON_INVALID_PARAMS,
@@ -115,7 +133,12 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 		if (walletSet.size() != receivers.size()) {
 			throw new WalletResponseException(EnumWalletResponseCode.COLLECT_RECEIVER_DUPLICATE);
 		}
-		seniorPayService.agentPay(collectOrderNo, bizNo, receivers);
+		// 检查代收单
+		WalletOrder collectOrder = walletOrderDao.selectByOrderNo(collectOrderNo);
+		Optional.ofNullable(collectOrder)
+			.orElseThrow(() -> new WalletResponseException(EnumResponseCode.COMMON_INVALID_PARAMS,
+				"collectOrderNo"));
+		seniorPayService.agentPay(collectOrder, bizNo, receivers);
 	}
 
 

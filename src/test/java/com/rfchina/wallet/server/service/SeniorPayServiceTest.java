@@ -8,6 +8,7 @@ import com.rfchina.wallet.domain.model.WalletWithdraw;
 import com.rfchina.wallet.server.SpringBaseTest;
 import com.rfchina.wallet.server.bank.yunst.util.YunstTpl;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import com.rfchina.wallet.server.model.ext.CollectReq;
 import com.rfchina.wallet.server.model.ext.CollectReq.Reciever;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod;
@@ -39,6 +40,10 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	@Autowired
 	private WalletCollectExtDao walletCollectDao;
 
+	@Autowired
+	private WalletOrderExtDao walletOrderDao;
+
+
 	@Spy
 	@Autowired
 	private YunstTpl yunstTpl;
@@ -46,8 +51,20 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	@Autowired
 	private YunstBizHandler yunstBizHandler;
 
-	private Long payerWalletId = 10001L;
+	private Long payerWalletId = 10035L;
 	private Long platWalletId = 10000L;
+
+
+	/**
+	 * 更新订单状态
+	 */
+	@Test
+	public void updateOrderStatus(){
+		String orderNo = "WC20191030371129856";
+		yunstBizHandler.updateOrderStatus(orderNo);
+
+	}
+
 
 	/**
 	 * 充值
@@ -69,7 +86,7 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 
 		RechargeReq req = RechargeReq.builder()
 			.bizNo(String.valueOf(System.currentTimeMillis()))
-			.payerWalletId(10035L)
+			.payerWalletId(payerWalletId)
 			.amount(1L)
 			.fee(0L)
 			.expireTime(null)
@@ -83,7 +100,7 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 
 	@Test
 	public void rechargeConfirm() {
-		seniorPayService.smsConfirm(1000213L,
+		seniorPayService.smsConfirm(14L,
 			"{\"sign\":\"\",\"tphtrxcrtime\":\"\",\"tphtrxid\":0,\"trxflag\":\"trx\",\"trxsn\":\"\"}",
 			"575636", "113.194.30.199");
 	}
@@ -92,7 +109,7 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	public void withdraw() {
 		WithdrawReq req = WithdrawReq.builder()
 			.bizNo(String.valueOf(System.currentTimeMillis()))
-			.payerWalletId(10035L)
+			.payerWalletId(payerWalletId)
 			.cardId(12L)
 			.amount(1L)
 			.fee(0L)
@@ -109,17 +126,6 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 		seniorPayService.smsConfirm(1000207L, "","982604", "113.194.30.199");
 	}
 
-	/**
-	 * 更新订单状态
-	 */
-	@Test
-	public void updateOrderStatus(){
-		String orderNo = "WR20191030789939639";
-//		yunstBizHandler.updateWithdrawStatus(orderNo);
-		yunstBizHandler.updateOrderStatus(orderNo);
-
-	}
-
 
 	/**
 	 * 代收
@@ -131,7 +137,7 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 			.build();
 		CodePay codepay = CodePay.builder()
 			.payType((byte) 41)
-			.authcode("134644764274665020")
+			.authcode("134753097912258779")
 			.amount(1L)
 			.build();
 		Reciever reciever = Reciever.builder()
@@ -151,8 +157,7 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 			.recievers(Arrays.asList(reciever))
 			.walletPayMethod(WalletPayMethod.builder().codePay(codepay).build())
 			.build();
-		WalletCollectResp collect = seniorPayService
-			.collect(req);
+		WalletCollectResp collect = seniorPayService.collect(req);
 		log.info("预代收 {}", collect);
 	}
 
@@ -163,7 +168,8 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 		reciever.setWalletId(platWalletId);
 		reciever.setAmount(1L);
 		reciever.setFeeAmount(0L);
-		SettleResp resp = seniorPayService.agentPay("WC20191021829821028","test"
+		WalletOrder order = walletOrderDao.selectByOrderNo("WC20191030201675783");
+		SettleResp resp = seniorPayService.agentPay(order,String.valueOf(System.currentTimeMillis())
 			, Arrays.asList(reciever));
 		log.info("agent pay {}", resp);
 	}
@@ -174,7 +180,7 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 		refundInfo.setWalletId(platWalletId);
 		refundInfo.setAmount(1L);
 		WalletOrder refund = seniorPayService
-			.refund("WC20191022924053256", "", Arrays.asList(refundInfo));
+			.refund("WC20191030371129856", "", Arrays.asList(refundInfo));
 		log.info("refund {}", refund);
 	}
 

@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class YunstNotifyHandler {
+
 	public static final String YUNST_SIGN_SUCCESS = "success";
 	@Autowired
 	private WalletChannelExtDao walletChannelExtDao;
@@ -155,7 +156,7 @@ public class YunstNotifyHandler {
 	}
 
 
-	public void handleOrderResult(ChannelNotify channelNotify, WalletApplyType type) {
+	public void handleOrderResult(ChannelNotify channelNotify) {
 
 		RecallResp recallResp = JsonUtil.toObject(channelNotify.getContent(), RecallResp.class,
 			objectMapper -> {

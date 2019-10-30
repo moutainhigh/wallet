@@ -16,8 +16,8 @@ public class WithdrawRequest extends  AbstractApiRequest {
   @ApiModelProperty("应用令牌")
   private String accessToken ;
 
-  @ApiModelProperty("充值内容，参考RechargeReq结构体")
-  private String rechargeReq ;
+  @ApiModelProperty("充值内容，参考WithdrawReq结构体")
+  private String withdrawReq ;
 
 
   @Override
@@ -27,7 +27,7 @@ public class WithdrawRequest extends  AbstractApiRequest {
 
   @Override
   public Class<?> getResponseModelClass() {
-    return Map.class;
+    return WalletOrder.class;
   }
 
   @Override
@@ -36,8 +36,8 @@ public class WithdrawRequest extends  AbstractApiRequest {
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
       }
-      if(rechargeReq != null){
-        parameters.put("recharge_req", rechargeReq.toString());
+      if(withdrawReq != null){
+        parameters.put("withdraw_req", withdrawReq.toString());
       }
     return parameters;
   }

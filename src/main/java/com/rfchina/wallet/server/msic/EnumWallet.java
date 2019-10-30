@@ -597,13 +597,14 @@ public class EnumWallet {
 	}
 
 	/**
-	 * 订单状态。1：进行中 2：交易成功 3：交易失败 \n 4：交易关闭（超时或其他）
+	 * 订单状态。 2：进行中，3：交易成功，4：交易失败
 	 */
 	public enum OrderStatus implements Valuable<Byte> {
-		WAITTING((byte) 1, "进行中"),
-		SUCC((byte) 2, "交易成功"),
-		FAIL((byte) 3, "交易失败"),
-		CLOSED((byte) 4, "交易关闭（超时或其他）");
+		WAITTING((byte) 2, "进行中"),
+		SUCC((byte) 3, "交易成功"),
+		FAIL((byte) 4, "交易失败"),
+		CLOSED((byte) 5, "交易关闭（超时或其他）"),
+		;
 
 		private Byte value;
 		private String valueName;

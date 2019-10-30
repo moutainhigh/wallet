@@ -9,10 +9,10 @@ import java.util.ArrayList;
 
     
 /**
-* WalletCollectResp
+* RechargeResp
 */
 @Data
-public class WalletCollectResp  {
+public class RechargeResp  {
     @ApiModelProperty("金额")
     private Long amount ;
 
@@ -34,6 +34,9 @@ public class WalletCollectResp  {
     @ApiModelProperty("过期时间")
     private String expireTime ;
 
+    @ApiModelProperty("扩展参数")
+    private String extendInfo ;
+
     @ApiModelProperty("id")
     private Long id ;
 
@@ -49,17 +52,26 @@ public class WalletCollectResp  {
     @ApiModelProperty("订单号")
     private String orderNo ;
 
-    @ApiModelProperty("扫码支付信息/ JS 支付串信息/微信原生 H5 支付串信息")
+    @ApiModelProperty("密码验证")
+    private Boolean passwordConfirm ;
+
+    @ApiModelProperty("扫码支付信息/ JS支付串信息/ 微信原生H5支付串信息")
     private String payInfo ;
 
     @ApiModelProperty("进度。1：待发送 2：已发送 3：已接收结果")
     private Integer progress ;
+
+    @ApiModelProperty("短信验证")
+    private Boolean smsConfirm ;
 
     @ApiModelProperty("开始时间")
     private String startTime ;
 
     @ApiModelProperty("交易状态。 1: 待发送，2：进行中，3：交易成功，4：交易失败(确切失败)")
     private Integer status ;
+
+    @ApiModelProperty("交易编号")
+    private String tradeNo ;
 
     @ApiModelProperty("通道错误码")
     private String tunnelErrCode ;

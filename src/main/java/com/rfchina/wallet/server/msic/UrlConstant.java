@@ -215,27 +215,8 @@ public class UrlConstant {
 	public static final String YUNST_NOTIFY = VERSION + "/yunst/notify";
 
 	/**
-	 * 云商通充值回调
+	 * 云商通订单回调
 	 */
-	public static final String YUNST_RECHARGE_RECALL = VERSION + "/yunst/recharge_recall";
+	public static final String YUNST_ORDER_RECALL = VERSION + "/yunst/order_recall";
 
-	/**
-	 * 云商通提现回调
-	 */
-	public static final String YUNST_WITHDRAW_RECALL = VERSION + "/yunst/withdraw_recall";
-
-	/**
-	 * 云商通代收回调
-	 */
-	public static final String YUNST_COLLECT_RECALL = VERSION + "/yunst/collect_recall";
-
-	/**
-	 * 云商通代付回调
-	 */
-	public static final String YUNST_AGENT_PAY_RECALL = VERSION + "/yunst/agent_pay_recall";
-
-	/**
-	 * 云商通退款回调
-	 */
-	public static final String YUNST_REFUND_RECALL = VERSION + "/yunst/refund_recall";
 }

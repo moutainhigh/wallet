@@ -20,4 +20,13 @@ public interface WalletOrderExtDao extends WalletOrderMapper {
 		"where order_no = #{orderNo}"
 	})
 	int selectCountByOrderNo(@Param("orderNo") String orderNo);
+
+	/**
+	 * 查询指定状态的批次申请单
+	 */
+	@Select({
+		"select count(1) from rf_wallet_apply",
+		"where batch_no = #{batchNo} "
+	})
+	int selectCountByBatchNo(@Param("batchNo") String batchNo);
 }

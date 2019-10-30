@@ -9,31 +9,31 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 
 
-/** 高级钱包-代付 */
+/** 高级钱包-充值确认 */
 @Builder
-public class AgentPayRequest extends  AbstractApiRequest {
+public class SmsConfirmRequest extends  AbstractApiRequest {
 
   @ApiModelProperty("应用令牌")
   private String accessToken ;
 
-  @ApiModelProperty("代付列表（与代收的分账规则对应），参考AgentPayReq结构体")
-  private String agentPayReq ;
+  @ApiModelProperty("客户ip")
+  private String customerIp ;
 
-  @ApiModelProperty("业务方单号")
-  private String bizNo ;
+  @ApiModelProperty("充值业务令牌")
+  private String ticket ;
 
-  @ApiModelProperty("原代收单号")
-  private String collectOrderNo ;
+  @ApiModelProperty("短信验证码")
+  private String verifyCode ;
 
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/senior/agent_pay";
+    return "/wallet_server/v1/m/senior/sms_confirm";
   }
 
   @Override
   public Class<?> getResponseModelClass() {
-    return SettleResp.class;
+    return Map.class;
   }
 
   @Override
@@ -42,14 +42,14 @@ public class AgentPayRequest extends  AbstractApiRequest {
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
       }
-      if(agentPayReq != null){
-        parameters.put("agent_pay_req", agentPayReq.toString());
+      if(customerIp != null){
+        parameters.put("customer_ip", customerIp.toString());
       }
-      if(bizNo != null){
-        parameters.put("biz_no", bizNo.toString());
+      if(ticket != null){
+        parameters.put("ticket", ticket.toString());
       }
-      if(collectOrderNo != null){
-        parameters.put("collect_order_no", collectOrderNo.toString());
+      if(verifyCode != null){
+        parameters.put("verify_code", verifyCode.toString());
       }
     return parameters;
   }
