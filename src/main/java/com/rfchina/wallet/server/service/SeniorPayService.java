@@ -247,7 +247,7 @@ public class SeniorPayService {
 	/**
 	 * 预代收
 	 */
-	public WalletCollect preCollect(CollectReq req) {
+	public WalletCollectResp collect(CollectReq req) {
 
 		// 定义付款人
 		Long payerWalletId = (req.getPayerWalletId() != null) ? req.getPayerWalletId()
@@ -288,7 +288,7 @@ public class SeniorPayService {
 			req.getWalletPayMethod());
 
 		// 生成清分记录
-		req.getRecievers().forEach(reciever -> {
+		List<WalletClearInfo> clearInfos = req.getRecievers().stream().map(reciever -> {
 			WalletClearInfo clearInfo = WalletClearInfo.builder()
 				.collectId(collect.getId())
 				.payeeWalletId(reciever.getWalletId())
@@ -298,19 +298,11 @@ public class SeniorPayService {
 				.status(ClearInfoStatus.WAITING.getValue())
 				.build();
 			walletClearInfoDao.insertSelective(clearInfo);
-		});
-
-		return collect;
-	}
-
-	/**
-	 * 发起代收
-	 */
-	public WalletCollectResp doCollect(WalletCollect collect) {
-		WalletOrder order = walletOrderDao.selectByPrimaryKey(collect.getOrderId());
+			return clearInfo;
+		}).collect(Collectors.toList());
 
 		EBankHandler handler = handlerHelper.selectByTunnelType(order.getTunnelType());
-		return handler.collect(order, collect);
+		return handler.collect(order, collect, clearInfos);
 	}
 
 

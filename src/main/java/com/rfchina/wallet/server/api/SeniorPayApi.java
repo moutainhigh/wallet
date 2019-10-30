@@ -1,8 +1,6 @@
 package com.rfchina.wallet.server.api;
 
-import com.rfchina.wallet.domain.model.WalletCollect;
 import com.rfchina.wallet.domain.model.WalletOrder;
-import com.rfchina.wallet.domain.model.WalletRefund;
 import com.rfchina.wallet.server.model.ext.AgentPayReq.Reciever;
 import com.rfchina.wallet.server.model.ext.CollectReq;
 import com.rfchina.wallet.server.model.ext.RechargeReq;
@@ -21,9 +19,7 @@ public interface SeniorPayApi {
 
 	WalletOrder withdraw(String accessToken, WithdrawReq req);
 
-	WalletCollect preCollect(String accessToken, CollectReq req);
-
-	WalletCollectResp doCollect(String accessToken, WalletCollect walletCollect);
+	WalletCollectResp collect(String accessToken, CollectReq req);
 
 	void agentPay(String accessToken, String bizNo, String collectOrderNo,
 		List<Reciever> receivers);

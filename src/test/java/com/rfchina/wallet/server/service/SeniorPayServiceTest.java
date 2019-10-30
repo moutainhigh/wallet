@@ -13,11 +13,14 @@ import com.rfchina.wallet.server.model.ext.CollectReq.Reciever;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Balance;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.BankCard;
+import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.CodePay;
+import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.CodePay.CodePayBuilder;
 import com.rfchina.wallet.server.model.ext.RechargeReq;
 import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
 import com.rfchina.wallet.server.model.ext.AgentPayReq;
 import com.rfchina.wallet.server.model.ext.SettleResp;
+import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.model.ext.WithdrawReq;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBizHandler;
@@ -126,6 +129,11 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 		Balance balance = Balance.builder()
 			.amount(1L)
 			.build();
+		CodePay codepay = CodePay.builder()
+			.payType((byte) 41)
+			.authcode("134644764274665020")
+			.amount(1L)
+			.build();
 		Reciever reciever = Reciever.builder()
 			.walletId(platWalletId)
 			.amount(1L)
@@ -141,11 +149,11 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 			.industryCode("1010")
 			.industryName("保险代理")
 			.recievers(Arrays.asList(reciever))
-			.walletPayMethod(WalletPayMethod.builder().balance(balance).build())
+			.walletPayMethod(WalletPayMethod.builder().codePay(codepay).build())
 			.build();
-		WalletCollect collect = seniorPayService.preCollect(req);
+		WalletCollectResp collect = seniorPayService
+			.collect(req);
 		log.info("预代收 {}", collect);
-		seniorPayService.doCollect(collect);
 	}
 
 

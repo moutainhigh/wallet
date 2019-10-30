@@ -83,17 +83,6 @@ public class SeniorPayController {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result);
 	}
 
-	@ApiOperation("高级钱包-定时代收")
-	@PostMapping(UrlConstant.SENIOR_WALLET_COLLECT_ASYNC)
-	public ResponseValue collectAsync(
-		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
-		@ApiParam(value = "代收内容，参考CollectReq结构体", required = true) @RequestParam("collect_req") String collectReq
-	) {
-		CollectReq req = JsonUtil.toObject(collectReq, CollectReq.class, DEF_REQ_OBJ_MAP);
-		seniorPayApi.preCollect(accessToken, req);
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
-	}
-
 	@ApiOperation("高级钱包-即刻代收")
 	@PostMapping(UrlConstant.SENIOR_WALLET_COLLECT_SYNC)
 	public ResponseValue<WalletCollectResp> collectSync(
@@ -101,8 +90,7 @@ public class SeniorPayController {
 		@ApiParam(value = "代收内容，参考CollectReq结构体", required = true) @RequestParam("collect_req") String collectReq
 	) {
 		CollectReq req = JsonUtil.toObject(collectReq, CollectReq.class, DEF_REQ_OBJ_MAP);
-		WalletCollect walletCollect = seniorPayApi.preCollect(accessToken, req);
-		WalletCollectResp result = seniorPayApi.doCollect(accessToken, walletCollect);
+		WalletCollectResp result = seniorPayApi.collect(accessToken, req);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result);
 	}
 

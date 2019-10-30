@@ -18,6 +18,7 @@ import com.rfchina.wallet.domain.model.BankCode;
 import com.rfchina.wallet.domain.model.GatewayTrans;
 import com.rfchina.wallet.domain.model.WalletApply;
 import com.rfchina.wallet.domain.model.WalletCard;
+import com.rfchina.wallet.domain.model.WalletClearInfo;
 import com.rfchina.wallet.domain.model.WalletClearing;
 import com.rfchina.wallet.domain.model.WalletCollect;
 import com.rfchina.wallet.domain.model.WalletOrder;
@@ -563,7 +564,7 @@ public class Handler8800 extends EBankHandler {
 	}
 
 	@Override
-	public WalletCollectResp collect(WalletOrder order, WalletCollect collect) {
+	public WalletCollectResp collect(WalletOrder order, WalletCollect collect, List<WalletClearInfo> clearInfos) {
 		throw new RuntimeException();
 	}
 

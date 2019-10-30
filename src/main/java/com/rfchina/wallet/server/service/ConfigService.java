@@ -148,21 +148,6 @@ public class ConfigService {
 	@Value("${yunst.recall.prefix}")
 	private String yunstRecallPrefix;
 
-	@Value("${yunst.recall.recharge}")
-	private String yunstRechargeRecallUrl;
-
-	@Value("${yunst.recall.withdraw}")
-	private String yunstWithdrawRecallUrl;
-
-	@Value("${yunst.recall.collect}")
-	private String yunstCollectRecallUrl;
-
-	@Value("${yunst.recall.agentPay}")
-	private String yunstAgentPayRecallUrl;
-
-	@Value("${yunst.recall.refund}")
-	private String yunstRefundRecallUrl;
-
 // yunst end
 
 }

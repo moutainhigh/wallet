@@ -93,21 +93,13 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public WalletCollect preCollect(String accessToken, CollectReq req) {
+	public WalletCollectResp collect(String accessToken, CollectReq req) {
 		WalletPayMethod payMethod = req.getWalletPayMethod();
 		if (payMethod.getMethods() == 0) {
 			throw new WalletResponseException(EnumResponseCode.COMMON_INVALID_PARAMS,
 				"walletPayMethod");
 		}
-		return seniorPayService.preCollect(req);
-	}
-
-	@Log
-	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
-	@SignVerify
-	@Override
-	public WalletCollectResp doCollect(String accessToken, WalletCollect walletCollect) {
-		return seniorPayService.doCollect(walletCollect);
+		return seniorPayService.collect(req);
 	}
 
 	@Log
