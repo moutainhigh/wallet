@@ -2,17 +2,14 @@ package com.rfchina.wallet.server.service;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.platform.common.json.ObjectSetter;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.misc.EnumDef;
-import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.model.ChannelNotify;
 import com.rfchina.wallet.server.bank.yunst.response.RecallResp;
 import com.rfchina.wallet.server.bank.yunst.response.RpsResp;
 import com.rfchina.wallet.server.bank.yunst.response.YunstNotify;
 import com.rfchina.wallet.server.mapper.ext.ChannelNotifyExtDao;
-import com.rfchina.wallet.server.model.ext.SLWalletMqMessage;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyType;
 import com.rfchina.wallet.server.msic.EnumWallet.YunstMethodName;
 import com.rfchina.wallet.server.msic.EnumWallet.YunstServiceName;
@@ -138,19 +135,7 @@ public class NotifyService {
 			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		});
 
-		if (WalletApplyType.RECHARGE == type) {
-			yunstBizHandler.updateRechargeStatus(rpsResp.getReturnValue().getBizOrderNo());
-		} else if (WalletApplyType.WITHDRAWAL == type) {
-			yunstBizHandler.updateWithdrawStatus(rpsResp.getReturnValue().getBizOrderNo());
-		}else if (WalletApplyType.COLLECT == type) {
-			yunstBizHandler.updateCollectStatus(rpsResp.getReturnValue().getBizOrderNo());
-		} else if (WalletApplyType.AGENT_PAY == type) {
-			yunstBizHandler.updateAgentPayStatus(rpsResp.getReturnValue().getBizOrderNo());
-		} else if (WalletApplyType.REFUND == type) {
-			yunstBizHandler.updateRefundStatus(rpsResp.getReturnValue().getBizOrderNo());
-		} else {
-			throw new RuntimeException();
-		}
+		yunstBizHandler.updateOrderStatus(rpsResp.getReturnValue().getBizOrderNo());
 	}
 
 

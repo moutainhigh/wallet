@@ -165,16 +165,6 @@ public class YunstNotifyHandler {
 			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		});
 
-		if (WalletApplyType.RECHARGE == type) {
-			yunstBizHandler.updateRechargeStatus(rpsResp.getReturnValue().getBizOrderNo());
-		} else if (WalletApplyType.COLLECT == type) {
-			yunstBizHandler.updateCollectStatus(rpsResp.getReturnValue().getBizOrderNo());
-		} else if (WalletApplyType.AGENT_PAY == type) {
-			yunstBizHandler.updateAgentPayStatus(rpsResp.getReturnValue().getBizOrderNo());
-		} else if (WalletApplyType.REFUND == type) {
-			yunstBizHandler.updateRefundStatus(rpsResp.getReturnValue().getBizOrderNo());
-		} else {
-			throw new RuntimeException();
-		}
+		yunstBizHandler.updateOrderStatus(rpsResp.getReturnValue().getBizOrderNo());
 	}
 }

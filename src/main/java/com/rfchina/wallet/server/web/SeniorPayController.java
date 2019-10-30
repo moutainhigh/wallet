@@ -10,6 +10,7 @@ import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.model.WalletClearing;
 import com.rfchina.wallet.domain.model.WalletCollect;
+import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletRefund;
 import com.rfchina.wallet.server.api.SeniorPayApi;
 import com.rfchina.wallet.server.model.ext.AgentPayReq;
@@ -52,45 +53,45 @@ public class SeniorPayController {
 	) {
 
 		RechargeReq req = JsonUtil.toObject(rechargeReq, RechargeReq.class, DEF_REQ_OBJ_MAP);
-		seniorPayApi.recharge(accessToken, req);
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
+		RechargeResp result = seniorPayApi.recharge(accessToken, req);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result);
 	}
 
 	@ApiOperation("高级钱包-充值确认")
-	@PostMapping(UrlConstant.SENIOR_WALLET_RECHARGE_CONFIRM)
-	public ResponseValue<RechargeResp> rechargeConfirm(
+	@PostMapping(UrlConstant.SENIOR_WALLET_SMS_CONFIRM)
+	public ResponseValue smsConfirm(
 		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
-		@ApiParam(value = "充值业务令牌", required = true) @RequestParam("recharge_ticket") String rechargeTicket,
+		@ApiParam(value = "充值业务令牌", required = true) @RequestParam("ticket") String ticket,
 		@ApiParam(value = "短信验证码", required = true) @RequestParam("verify_code") String verifyCode,
 		@ApiParam(value = "客户ip", required = true) @RequestParam("customer_ip") String customerIp
 	) {
 
-		seniorPayApi.rechargeConfirm(accessToken, rechargeTicket, verifyCode, customerIp);
+		seniorPayApi.smsConfirm(accessToken, ticket, verifyCode, customerIp);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
 
 
 	@ApiOperation("高级钱包-提现")
 	@PostMapping(UrlConstant.SENIOR_WALLET_WITHDRAW)
-	public ResponseValue withdraw(
+	public ResponseValue<WalletOrder> withdraw(
 		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
 		@ApiParam(value = "充值内容，参考WithdrawReq结构体", required = true) @RequestParam("withdraw_req") String withdrawReq
 	) {
 
 		WithdrawReq req = JsonUtil.toObject(withdrawReq, WithdrawReq.class, DEF_REQ_OBJ_MAP);
-		seniorPayApi.withdraw(accessToken, req);
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
+		WalletOrder result = seniorPayApi.withdraw(accessToken, req);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result);
 	}
 
 	@ApiOperation("高级钱包-定时代收")
 	@PostMapping(UrlConstant.SENIOR_WALLET_COLLECT_ASYNC)
-	public ResponseValue<WalletCollect> collectAsync(
+	public ResponseValue collectAsync(
 		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
 		@ApiParam(value = "代收内容，参考CollectReq结构体", required = true) @RequestParam("collect_req") String collectReq
 	) {
 		CollectReq req = JsonUtil.toObject(collectReq, CollectReq.class, DEF_REQ_OBJ_MAP);
-		WalletCollect collect = seniorPayApi.preCollect(accessToken, req);
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, collect);
+		seniorPayApi.preCollect(accessToken, req);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
 
 	@ApiOperation("高级钱包-即刻代收")
@@ -105,58 +106,40 @@ public class SeniorPayController {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result);
 	}
 
-	@ApiOperation("高级钱包-代收结果查询")
-	@PostMapping(UrlConstant.SENIOR_WALLET_COLLECT_QUERY)
-	public ResponseValue<WalletCollect> collectQuery(
-		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
-		@ApiParam(value = "代收单号", required = true) @RequestParam("collect_order_no") String collectOrderNo
-	) {
-		WalletCollect collect = seniorPayApi.queryCollect(accessToken, collectOrderNo);
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, collect);
-	}
-
 	@ApiOperation("高级钱包-代付")
 	@PostMapping(UrlConstant.SENIOR_WALLET_AGENT_PAY)
 	public ResponseValue<SettleResp> agentPay(
 		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
-		@ApiParam(value = "代收单号", required = true) @RequestParam(value = "collect_order_no") String collectOrderNo,
+		@ApiParam(value = "业务方单号", required = true) @RequestParam(value = "biz_no") String bizNo,
+		@ApiParam(value = "原代收单号", required = true) @RequestParam(value = "collect_order_no") String collectOrderNo,
 		@ApiParam(value = "代付列表（与代收的分账规则对应），参考AgentPayReq结构体", required = true) @RequestParam("agent_pay_req") String agentPayReq
 	) {
 		AgentPayReq req = JsonUtil.toObject(agentPayReq, AgentPayReq.class, DEF_REQ_OBJ_MAP);
-		seniorPayApi.agentPay(accessToken, collectOrderNo, req.getReceivers());
+		seniorPayApi.agentPay(accessToken,bizNo, collectOrderNo, req.getReceivers());
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
-	}
-
-	@ApiOperation("高级钱包-代付结果查询")
-	@PostMapping(UrlConstant.SENIOR_WALLET_AGENT_PAY_QUERY)
-	public ResponseValue<WalletClearing> agentPayQuery(
-		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
-		@ApiParam(value = "代付单号", required = true) @RequestParam(value = "pay_order_no") String payOrderNo
-	) {
-		WalletClearing walletClearings = seniorPayApi.agentPayQuery(accessToken, payOrderNo);
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, walletClearings);
 	}
 
 	@ApiOperation("高级钱包-退款")
 	@PostMapping(UrlConstant.SENIOR_WALLET_REFUND)
-	public ResponseValue<WalletRefund> refund(
+	public ResponseValue<WalletOrder> refund(
 		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
+		@ApiParam(value = "业务方单号", required = true) @RequestParam(value = "biz_no") String bizNo,
 		@ApiParam(value = "代收单号", required = true) @RequestParam("collect_order_no") String collectOrderNo,
 		@ApiParam(value = "退款清单，参考List<RefundInfo>结构体", required = true) @RequestParam("refund_list") String refundList
 	) {
 		List<RefundInfo> rList = JsonUtil.toArray(refundList, RefundInfo.class, DEF_REQ_OBJ_MAP);
-		WalletRefund refund = seniorPayApi.refund(accessToken, collectOrderNo, rList);
+		WalletOrder refund = seniorPayApi.refund(accessToken,bizNo, collectOrderNo, rList);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, refund);
 	}
 
-	@ApiOperation("高级钱包-退款结果查询")
-	@PostMapping(UrlConstant.SENIOR_WALLET_REFUND_QUERY)
-	public ResponseValue<WalletRefund> refundQuery(
+	@ApiOperation("高级钱包-订单结果查询")
+	@PostMapping(UrlConstant.SENIOR_WALLET_ORDER_QUERY)
+	public ResponseValue<WalletOrder> orderQuery(
 		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
-		@ApiParam(value = "退款单号", required = true) @RequestParam("refund_order_no") String refundOrderNo
+		@ApiParam(value = "统一订单号", required = true) @RequestParam("order_no") String orderNo
 	) {
-		WalletRefund refund = seniorPayApi.refundQuery(accessToken, refundOrderNo);
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, refund);
+		WalletOrder order = seniorPayApi.orderQuery(accessToken, orderNo);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, order);
 	}
 
 

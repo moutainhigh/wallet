@@ -1,5 +1,6 @@
 package com.rfchina.wallet.server.model.ext;
 
+import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletRecharge;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -7,7 +8,7 @@ import lombok.Data;
 
 @ApiModel
 @Data
-public class RechargeResp extends WalletRecharge {
+public class RechargeResp extends WalletOrder {
 
 	@ApiModelProperty(value = "扫码支付信息/ JS支付串信息/ 微信原生H5支付串信息")
 	private String payInfo;

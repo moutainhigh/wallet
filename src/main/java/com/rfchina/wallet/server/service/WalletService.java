@@ -277,15 +277,15 @@ public class WalletService {
 
 		EBankHandler handler = handlerHelper.selectByWalletLevel(walletLevel);
 
-		if (WalletApplyType.COLLECT.getValue().byteValue() == applyType.byteValue()) {
-			handler.collect(applyId);
-		} else if (WalletApplyType.AGENT_PAY.getValue().byteValue() == applyType.byteValue()) {
-			handler.agentPay(applyId);
-		} else if (WalletApplyType.REFUND.getValue().byteValue() == applyType.byteValue()) {
-			handler.refund(applyId);
-		} else if (WalletApplyType.TRANSFER.getValue().byteValue() == applyType.byteValue()) {
-			handler.transfer(applyId);
-		}
+//		if (WalletApplyType.COLLECT.getValue().byteValue() == applyType.byteValue()) {
+//			handler.collect(applyId);
+//		} else if (WalletApplyType.AGENT_PAY.getValue().byteValue() == applyType.byteValue()) {
+//			handler.agentPay(applyId);
+//		} else if (WalletApplyType.REFUND.getValue().byteValue() == applyType.byteValue()) {
+//			handler.refund(applyId);
+//		} else if (WalletApplyType.TRANSFER.getValue().byteValue() == applyType.byteValue()) {
+//			handler.transfer(applyId);
+//		}
 
 	}
 

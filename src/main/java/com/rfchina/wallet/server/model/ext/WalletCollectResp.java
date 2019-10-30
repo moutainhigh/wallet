@@ -1,11 +1,12 @@
 package com.rfchina.wallet.server.model.ext;
 
 import com.rfchina.wallet.domain.model.WalletCollect;
+import com.rfchina.wallet.domain.model.WalletOrder;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
-public class WalletCollectResp extends WalletCollect {
+public class WalletCollectResp extends WalletOrder {
 
 	@ApiModelProperty(name = "wechat_app_info", value = "微信 APP 支付信息")
 	private String weChatAPPInfo;

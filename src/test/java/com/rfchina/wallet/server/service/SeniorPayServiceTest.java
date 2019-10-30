@@ -1,8 +1,8 @@
 package com.rfchina.wallet.server.service;
 
 import com.rfchina.platform.common.utils.JsonUtil;
-import com.rfchina.wallet.domain.misc.EnumDef.BizValidateType;
 import com.rfchina.wallet.domain.model.WalletCollect;
+import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletRefund;
 import com.rfchina.wallet.domain.model.WalletWithdraw;
 import com.rfchina.wallet.server.SpringBaseTest;
@@ -13,7 +13,6 @@ import com.rfchina.wallet.server.model.ext.CollectReq.Reciever;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Balance;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.BankCard;
-import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.CodePay;
 import com.rfchina.wallet.server.model.ext.RechargeReq;
 import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
@@ -81,9 +80,9 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 
 	@Test
 	public void rechargeConfirm() {
-		seniorPayService.rechargeConfirm(1000204L,
+		seniorPayService.smsConfirm(1000213L,
 			"{\"sign\":\"\",\"tphtrxcrtime\":\"\",\"tphtrxid\":0,\"trxflag\":\"trx\",\"trxsn\":\"\"}",
-			"201722", "113.194.30.199");
+			"575636", "113.194.30.199");
 	}
 
 	@Test
@@ -98,13 +97,13 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 			.industryCode("1010")
 			.industryName("保险代理")
 			.build();
-		WalletWithdraw withdraw = seniorPayService.withdraw(req);
+		WalletOrder withdraw = seniorPayService.withdraw(req);
 		log.info("withdraw.resp = {}", withdraw);
 	}
 
 	@Test
 	public void withdrawConfirm() {
-		seniorPayService.withdrawConfirm(1000207L, "982604", "113.194.30.199");
+		seniorPayService.smsConfirm(1000207L, "","982604", "113.194.30.199");
 	}
 
 	/**
@@ -112,8 +111,9 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	 */
 	@Test
 	public void updateOrderStatus(){
-		String orderNo = "";
-		yunstBizHandler.updateWithdrawStatus(orderNo);
+		String orderNo = "WR20191030789939639";
+//		yunstBizHandler.updateWithdrawStatus(orderNo);
+		yunstBizHandler.updateOrderStatus(orderNo);
 
 	}
 
@@ -124,16 +124,16 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	@Test
 	public void collect() {
 		Balance balance = Balance.builder()
-			.amount(2L)
+			.amount(1L)
 			.build();
 		Reciever reciever = Reciever.builder()
 			.walletId(platWalletId)
-			.amount(2L)
+			.amount(1L)
 			.build();
 		CollectReq req = CollectReq.builder()
 			.payerWalletId(payerWalletId)
 			.bizNo(String.valueOf(System.currentTimeMillis()))
-			.amount(2L)
+			.amount(1L)
 			.note("")
 			.fee(0L)
 			.validateType((byte) 0)
@@ -155,7 +155,7 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 		reciever.setWalletId(platWalletId);
 		reciever.setAmount(1L);
 		reciever.setFeeAmount(0L);
-		SettleResp resp = seniorPayService.agentPay("WC20191021829821028"
+		SettleResp resp = seniorPayService.agentPay("WC20191021829821028","test"
 			, Arrays.asList(reciever));
 		log.info("agent pay {}", resp);
 	}
@@ -165,8 +165,8 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 		RefundInfo refundInfo = new RefundInfo();
 		refundInfo.setWalletId(platWalletId);
 		refundInfo.setAmount(1L);
-		WalletRefund refund = seniorPayService
-			.refund("WC20191022924053256", Arrays.asList(refundInfo));
+		WalletOrder refund = seniorPayService
+			.refund("WC20191022924053256", "", Arrays.asList(refundInfo));
 		log.info("refund {}", refund);
 	}
 

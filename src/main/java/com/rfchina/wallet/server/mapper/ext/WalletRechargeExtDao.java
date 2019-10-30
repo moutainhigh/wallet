@@ -23,11 +23,4 @@ public interface WalletRechargeExtDao extends WalletRechargeMapper {
 	})
 	int selectCountByOrderNo(@Param("orderNo") String orderNo);
 
-	@Select({
-		"select * from rf_wallet_recharge",
-		"where order_no = #{orderNo}",
-		"limit 1"
-	})
-	@ResultMap("com.rfchina.wallet.domain.mapper.WalletRechargeMapper.BaseResultMap")
-	WalletRecharge selectByOrderNo(@Param("orderNo") String orderNo);
 }

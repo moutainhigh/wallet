@@ -207,18 +207,16 @@ public class EnumWallet {
 	}
 
 	/**
-	 * 工单类型，1：财务结算，2：收入，3：支出， 4：充值，5：提现，6：退款，7：扣款，8：代收，9：代付
+	 * 工单类型，1：转帐，2：充值，3：提现，4：代收，5：代付，6：退款，7：消费
 	 */
 	public enum WalletApplyType implements Valuable<Byte> {
 		TRANSFER((byte) 1, "转帐"),
-		INCOME((byte) 2, "收入"),
-		PAY((byte) 3, "支出"),
-		RECHARGE((byte) 4, "充值"),
-		WITHDRAWAL((byte) 5, "提现"),
+		RECHARGE((byte) 2, "充值"),
+		WITHDRAWAL((byte) 3, "提现"),
+		COLLECT((byte) 4, "代收"),
+		AGENT_PAY((byte) 5, "代付"),
 		REFUND((byte) 6, "退款"),
-		DEDUCTION((byte) 7, "扣款"),
-		COLLECT((byte) 8, "代收"),
-		AGENT_PAY((byte) 9, "代付"),
+		CONSUME((byte) 7, "消费"),
 		;
 
 		private Byte value;
@@ -599,18 +597,18 @@ public class EnumWallet {
 	}
 
 	/**
-	 * 代收状态。1：待支付 2：已支付 3：交易失败 \n4：交易关闭（超时或其他）
+	 * 订单状态。1：进行中 2：交易成功 3：交易失败 \n 4：交易关闭（超时或其他）
 	 */
-	public enum CollectStatus implements Valuable<Byte> {
-		WAIT_PAY((byte) 1, "待支付"),
-		SUCC((byte) 2, "已支付"),
+	public enum OrderStatus implements Valuable<Byte> {
+		WAITTING((byte) 1, "进行中"),
+		SUCC((byte) 2, "交易成功"),
 		FAIL((byte) 3, "交易失败"),
 		CLOSED((byte) 4, "交易关闭（超时或其他）");
 
 		private Byte value;
 		private String valueName;
 
-		CollectStatus(Byte value, String valueName) {
+		OrderStatus(Byte value, String valueName) {
 			this.value = value;
 			this.valueName = valueName;
 		}
@@ -813,18 +811,18 @@ public class EnumWallet {
 			return this.value;
 		}
 
-		public CollectStatus toUniStatus() {
+		public OrderStatus toUniStatus() {
 			switch (this) {
 				case SUCC:
-					return CollectStatus.SUCC;
+					return OrderStatus.SUCC;
 				case SUCC_REFUND:
-					return CollectStatus.SUCC;
+					return OrderStatus.SUCC;
 				case FAIL:
-					return CollectStatus.FAIL;
+					return OrderStatus.FAIL;
 				case CLOSED:
-					return CollectStatus.CLOSED;
+					return OrderStatus.CLOSED;
 				default:
-					return CollectStatus.WAIT_PAY;
+					return OrderStatus.WAITTING;
 			}
 		}
 	}

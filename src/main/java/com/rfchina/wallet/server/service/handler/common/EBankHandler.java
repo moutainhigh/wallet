@@ -5,8 +5,10 @@ import com.rfchina.wallet.domain.model.GatewayTrans;
 import com.rfchina.wallet.domain.model.WalletApply;
 import com.rfchina.wallet.domain.model.WalletClearing;
 import com.rfchina.wallet.domain.model.WalletCollect;
+import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletRecharge;
 import com.rfchina.wallet.domain.model.WalletRefund;
+import com.rfchina.wallet.domain.model.WalletRefundDetail;
 import com.rfchina.wallet.domain.model.WalletWithdraw;
 import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
@@ -25,6 +27,8 @@ import java.util.List;
 public abstract class EBankHandler {
 
 	public abstract boolean isSupportWalletLevel(Byte walletLevel);
+
+	public abstract boolean isSupportTunnelType(Byte tunnelType);
 
 	public abstract GatewayMethod getGatewayMethod();
 
@@ -54,27 +58,27 @@ public abstract class EBankHandler {
 	/**
 	 * 代收
 	 */
-	public abstract List<WalletCollectResp> collect(Long applyId);
+	public abstract WalletCollectResp collect(WalletOrder order, WalletCollect collect);
 
 	/**
 	 * 代付
 	 */
-	public abstract List<WalletClearing> agentPay(Long applyId);
+	public abstract void agentPay(WalletOrder order, List<WalletClearing> clearings);
 
 	/**
 	 * 退款
 	 */
-	public abstract List<WalletRefund> refund(Long collectId);
+	public abstract void refund(WalletOrder order, WalletRefund refund, List<WalletRefundDetail> details);
 
 	/**
 	 * 充值
 	 */
-	public abstract List<RechargeResp> recharge(Long applyId);
+	public abstract RechargeResp recharge(WalletOrder order, WalletRecharge recharge);
 
 	/**
 	 * 提现
 	 */
-	public abstract List<WalletWithdraw> withdraw(Long applyId);
+	public abstract WalletWithdraw withdraw(WalletOrder order, WalletWithdraw withdraw);
 
 
 }

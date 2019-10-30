@@ -45,6 +45,16 @@ public interface WalletApplyExtDao extends WalletApplyDao {
 	WalletApply selectByBatchNo(@Param("batchNo") String batchNo);
 
 	/**
+	 * 查询指定状态的批次申请单
+	 */
+	@Select({
+		"select count(1) from rf_wallet_apply",
+		"where batch_no = #{batchNo} "
+	})
+	@ResultMap("com.rfchina.wallet.domain.mapper.WalletApplyMapper.BaseResultMap")
+	int selectCountByBatchNo(@Param("batchNo") String batchNo);
+
+	/**
 	 * 更新尝试次数
 	 */
 	@Update({"update rf_wallet_apply"

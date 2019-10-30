@@ -6,11 +6,8 @@ import lombok.Data;
 @Data
 public class RechargeConfirmVo {
 
-	@ApiModelProperty(name="apply_id", value = "工单id")
-	private Long applyId;
-
-	@ApiModelProperty(name="order_no", value = "订单号")
-	private String orderNo;
+	@ApiModelProperty(name="order_id", value = "订单id")
+	private Long orderId;
 
 	@ApiModelProperty(value = "交易编号")
 	private String tradeNo;
