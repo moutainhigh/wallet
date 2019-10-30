@@ -89,6 +89,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -235,10 +236,35 @@ public class YunstBizHandler extends EBankHandler {
 	/**
 	 * 短信确认支付
 	 */
-	public void smsConfirm(WalletApply walletApply, String tradeNo, String verifyCode, String ip) {
+	public void smsRechargeConfirm(WalletApply walletApply, String tradeNo, String verifyCode, String ip) {
 		List<WalletRecharge> recharges = walletRechargeDao.selectByApplyId(walletApply.getId());
 
 		recharges.forEach(recharge -> {
+			WalletChannel payer = walletChannelDao
+				.selectByWalletId(recharge.getPayerWalletId(), recharge.getTunnelType());
+			SmsPayReq req = SmsPayReq.builder()
+				.bizUserId(payer.getBizUserId())
+				.bizOrderNo(recharge.getOrderNo())
+				.tradeNo(tradeNo)
+				.verificationCode(verifyCode)
+				.consumerIp(ip)
+				.build();
+			try {
+				yunstTpl.execute(req, SmsPayResp.class);
+			} catch (Exception e) {
+				log.error("{}", JSON.toJSONString(e));
+				throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
+			}
+		});
+	}
+
+	/**
+	 * 短信确认支付
+	 */
+	public void smsWithdrawConfirm(WalletApply walletApply, String tradeNo, String verifyCode, String ip) {
+		List<WalletWithdraw> withdraws = walletWithdrawDao.selectByApplyId(walletApply.getId());
+
+		withdraws.forEach(recharge -> {
 			WalletChannel payer = walletChannelDao
 				.selectByWalletId(recharge.getPayerWalletId(), recharge.getTunnelType());
 			SmsPayReq req = SmsPayReq.builder()
@@ -564,8 +590,10 @@ public class YunstBizHandler extends EBankHandler {
 			return;
 		}
 		recharge.setTunnelStatus(String.valueOf(tunnelOrder.getOrderStatus()));
-		recharge.setTunnelSuccTime(
-			DateUtil.parse(tunnelOrder.getPayDatetime(), DateUtil.STANDARD_DTAETIME_PATTERN));
+		Optional.ofNullable(tunnelOrder.getPayDatetime()).ifPresent(paytime -> {
+			recharge.setTunnelSuccTime(
+				DateUtil.parse(paytime, DateUtil.STANDARD_DTAETIME_PATTERN));
+		});
 		recharge.setErrMsg(tunnelOrder.getErrorMessage());
 		YunstOrderStatus orderStatus = EnumUtil
 			.parse(YunstOrderStatus.class, tunnelOrder.getOrderStatus());
@@ -582,27 +610,29 @@ public class YunstBizHandler extends EBankHandler {
 	 * 更新充值状态
 	 */
 	public void updateWithdrawStatus(String orderNo) {
-		WalletRecharge recharge = walletRechargeDao.selectByOrderNo(orderNo);
+		WalletWithdraw withdraw = walletWithdrawDao.selectByOrderNo(orderNo);
 
 		GetOrderDetailResp tunnelOrder = queryOrderDetail(orderNo);
-		if (!recharge.getTunnelOrderNo().equals(tunnelOrder.getOrderNo())) {
-			log.error("渠道单号不匹配， recharge = {} , channelOrderNo = {}", recharge,
+		if (!withdraw.getTunnelOrderNo().equals(tunnelOrder.getOrderNo())) {
+			log.error("渠道单号不匹配， recharge = {} , channelOrderNo = {}", withdraw,
 				tunnelOrder.getBizOrderNo());
 			return;
 		}
-		recharge.setTunnelStatus(String.valueOf(tunnelOrder.getOrderStatus()));
-		recharge.setTunnelSuccTime(
-			DateUtil.parse(tunnelOrder.getPayDatetime(), DateUtil.STANDARD_DTAETIME_PATTERN));
-		recharge.setErrMsg(tunnelOrder.getErrorMessage());
+		withdraw.setTunnelStatus(String.valueOf(tunnelOrder.getOrderStatus()));
+		Optional.ofNullable(tunnelOrder.getPayDatetime()).ifPresent(paytime -> {
+			withdraw.setTunnelSuccTime(
+				DateUtil.parse(paytime, DateUtil.STANDARD_DTAETIME_PATTERN));
+		});
+		withdraw.setErrMsg(tunnelOrder.getErrorMessage());
 		YunstOrderStatus orderStatus = EnumUtil
 			.parse(YunstOrderStatus.class, tunnelOrder.getOrderStatus());
 		CollectStatus applyStatus = orderStatus.toUniStatus();
-		recharge.setStatus(applyStatus.getValue());
-		recharge.setProgress(UniProgress.RECEIVED.getValue());
+		withdraw.setStatus(applyStatus.getValue());
+		withdraw.setProgress(UniProgress.RECEIVED.getValue());
 		if (applyStatus.isEndStatus()) {
-			recharge.setEndTime(new Date());
+			withdraw.setEndTime(new Date());
 		}
-		walletRechargeDao.updateByPrimaryKey(recharge);
+		walletWithdrawDao.updateByPrimaryKey(withdraw);
 	}
 
 	/**
@@ -618,8 +648,10 @@ public class YunstBizHandler extends EBankHandler {
 			return;
 		}
 		collect.setTunnelStatus(String.valueOf(channelOrder.getOrderStatus()));
-		collect.setTunnelSuccTime(
-			DateUtil.parse(channelOrder.getPayDatetime(), DateUtil.STANDARD_DTAETIME_PATTERN));
+		Optional.ofNullable(channelOrder.getPayDatetime()).ifPresent(paytime -> {
+			collect.setTunnelSuccTime(
+				DateUtil.parse(paytime, DateUtil.STANDARD_DTAETIME_PATTERN));
+		});
 		collect.setErrMsg(channelOrder.getErrorMessage());
 		YunstOrderStatus orderStatus = EnumUtil
 			.parse(YunstOrderStatus.class, channelOrder.getOrderStatus());
@@ -645,8 +677,10 @@ public class YunstBizHandler extends EBankHandler {
 			return;
 		}
 		clearing.setTunnelStatus(String.valueOf(channelOrder.getOrderStatus()));
-		clearing.setTunnelSuccTime(
-			DateUtil.parse(channelOrder.getPayDatetime(), DateUtil.STANDARD_DTAETIME_PATTERN));
+		Optional.ofNullable(channelOrder.getPayDatetime()).ifPresent(paytime -> {
+			clearing.setTunnelSuccTime(
+				DateUtil.parse(paytime, DateUtil.STANDARD_DTAETIME_PATTERN));
+		});
 		clearing.setErrMsg(channelOrder.getErrorMessage());
 		YunstOrderStatus orderStatus = EnumUtil
 			.parse(YunstOrderStatus.class, channelOrder.getOrderStatus());
@@ -672,8 +706,10 @@ public class YunstBizHandler extends EBankHandler {
 			return;
 		}
 		refund.setTunnelStatus(String.valueOf(channelOrder.getOrderStatus()));
-		refund.setTunnelSuccTime(
-			DateUtil.parse(channelOrder.getPayDatetime(), DateUtil.STANDARD_DTAETIME_PATTERN));
+		Optional.ofNullable(channelOrder.getPayDatetime()).ifPresent(paytime -> {
+			refund.setTunnelSuccTime(
+				DateUtil.parse(paytime, DateUtil.STANDARD_DTAETIME_PATTERN));
+		});
 		refund.setErrMsg(channelOrder.getErrorMessage());
 		YunstOrderStatus orderStatus = EnumUtil
 			.parse(YunstOrderStatus.class, channelOrder.getOrderStatus());

@@ -13,4 +13,9 @@ public class YunstBizHandlerTest extends SpringBaseTest {
 	public void collect() {
 		yunstBizHandler.collect(1L);
 	}
+
+	@Test
+	public void updateWithdrawStatus() {
+		yunstBizHandler.updateWithdrawStatus("WW20191029975021377");
+	}
 }

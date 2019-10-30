@@ -21,6 +21,7 @@ import com.rfchina.wallet.server.model.ext.AgentPayReq;
 import com.rfchina.wallet.server.model.ext.SettleResp;
 import com.rfchina.wallet.server.model.ext.WithdrawReq;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
+import com.rfchina.wallet.server.service.handler.yunst.YunstBizHandler;
 import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -40,6 +41,9 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	@Autowired
 	private YunstTpl yunstTpl;
 
+	@Autowired
+	private YunstBizHandler yunstBizHandler;
+
 	private Long payerWalletId = 10001L;
 	private Long platWalletId = 10000L;
 
@@ -49,17 +53,17 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	@Test
 	public void recharge() {
 
-//		BankCard bankCard = BankCard.builder()
-//			.payType(CollectPayType.BANKCARD.getValue())
-//			.bankCardNo("6214850201481956")
-//			.amount(1L)
-//			.build();
-
-		CodePay codePay = CodePay.builder()
-			.payType(CollectPayType.CODEPAY.getValue())
-			.authcode("134535230243995898")
+		BankCard bankCard = BankCard.builder()
+			.payType(CollectPayType.BANKCARD.getValue())
+			.bankCardNo("6214850201481956")
 			.amount(1L)
 			.build();
+
+//		CodePay codePay = CodePay.builder()
+//			.payType(CollectPayType.CODEPAY.getValue())
+//			.authcode("134535230243995898")
+//			.amount(1L)
+//			.build();
 
 		RechargeReq req = RechargeReq.builder()
 			.bizNo(String.valueOf(System.currentTimeMillis()))
@@ -69,7 +73,7 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 			.expireTime(null)
 			.industryCode("1010")
 			.industryName("保险代理")
-			.walletPayMethod(WalletPayMethod.builder().codePay(codePay).build())
+			.walletPayMethod(WalletPayMethod.builder().bankCard(bankCard).build())
 			.build();
 		RechargeResp resp = seniorPayService.recharge(req);
 		log.info("recharge.resp = {}", JsonUtil.toJSON(resp));
@@ -77,9 +81,9 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 
 	@Test
 	public void rechargeConfirm() {
-		seniorPayService.rechargeConfirm(1000188L,
+		seniorPayService.rechargeConfirm(1000204L,
 			"{\"sign\":\"\",\"tphtrxcrtime\":\"\",\"tphtrxid\":0,\"trxflag\":\"trx\",\"trxsn\":\"\"}",
-			"767023", "113.194.30.199");
+			"201722", "113.194.30.199");
 	}
 
 	@Test
@@ -95,8 +99,24 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 			.industryName("保险代理")
 			.build();
 		WalletWithdraw withdraw = seniorPayService.withdraw(req);
-		log.info("withdraw.resp = {]", withdraw);
+		log.info("withdraw.resp = {}", withdraw);
 	}
+
+	@Test
+	public void withdrawConfirm() {
+		seniorPayService.withdrawConfirm(1000207L, "982604", "113.194.30.199");
+	}
+
+	/**
+	 * 更新订单状态
+	 */
+	@Test
+	public void updateOrderStatus(){
+		String orderNo = "";
+		yunstBizHandler.updateWithdrawStatus(orderNo);
+
+	}
+
 
 	/**
 	 * 代收

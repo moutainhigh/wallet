@@ -15,4 +15,11 @@ public interface WalletWithdrawExtDao extends WalletWithdrawMapper {
 	})
 	@ResultMap("com.rfchina.wallet.domain.mapper.WalletWithdrawMapper.BaseResultMap")
 	List<WalletWithdraw> selectByApplyId(@Param("applyId") Long applyId);
+
+	@Select({
+		"select * from rf_wallet_withdraw",
+		"where order_no = #{orderNo}"
+	})
+	@ResultMap("com.rfchina.wallet.domain.mapper.WalletWithdrawMapper.BaseResultMap")
+	WalletWithdraw selectByOrderNo(@Param("orderNo") String orderNo);
 }

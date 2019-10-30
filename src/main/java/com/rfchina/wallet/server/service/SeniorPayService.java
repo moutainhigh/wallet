@@ -190,7 +190,19 @@ public class SeniorPayService {
 		// 充值
 		EBankHandler handler = handlerHelper.selectByWalletLevel(walletApply.getWalletLevel());
 		if (handler instanceof YunstBizHandler) {
-			((YunstBizHandler) handler).smsConfirm(walletApply, tradeNo, verifyCode, ip);
+			((YunstBizHandler) handler).smsRechargeConfirm(walletApply, tradeNo, verifyCode, ip);
+		}
+	}
+
+	/**
+	 * 提现确认
+	 */
+	public void withdrawConfirm(Long applyId, String verifyCode, String ip) {
+		WalletApply walletApply = walletApplyDao.selectByPrimaryKey(applyId);
+		// 充值
+		EBankHandler handler = handlerHelper.selectByWalletLevel(walletApply.getWalletLevel());
+		if (handler instanceof YunstBizHandler) {
+			((YunstBizHandler) handler).smsWithdrawConfirm(walletApply, null, verifyCode, ip);
 		}
 	}
 
@@ -595,4 +607,6 @@ public class SeniorPayService {
 	public WalletRefund refundQuery(String refundOrderNo) {
 		return walletRefundDao.selectByOrderNo(refundOrderNo);
 	}
+
+
 }
