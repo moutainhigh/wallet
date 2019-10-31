@@ -50,9 +50,9 @@ public class UrlConstant {
 	public static final String SENIOR_WALLET_SMS_CONFIRM = VERSION + "/m/senior/sms_confirm";
 
 	/**
-	 * 高级钱包-密码确认
+	 * 高级钱包-重发短信
 	 */
-	public static final String SENIOR_WALLET_PASSWORD_CONFIRM = VERSION + "/m/senior/password_confirm";
+	public static final String SENIOR_WALLET_SMS_RETRY = VERSION + "/m/senior/sms_retry";
 
 	/**
 	 * 高级钱包-提现

@@ -286,6 +286,29 @@
 }
 ```
 
+###  高级钱包-重发短信
+
+请求地址: /wallet_server/v1/m/senior/sms_retry
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|应用令牌|
+|ticket|是|业务令牌|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+  
+}
+```
+
 ###  高级钱包-提现
 
 请求地址: /wallet_server/v1/m/senior/withdraw

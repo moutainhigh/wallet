@@ -1,16 +1,13 @@
 package com.rfchina.wallet.server.service.handler.yunst;
 
-import com.alibaba.fastjson.JSON;
 import com.allinpay.yunst.sdk.util.RSAUtil;
 import com.google.common.collect.Lists;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EnumUtil;
-import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.MoneyLogMapper;
-import com.rfchina.wallet.domain.misc.EnumDef.BizValidateType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletLevel;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.GatewayTrans;
@@ -18,9 +15,9 @@ import com.rfchina.wallet.domain.model.MoneyLog;
 import com.rfchina.wallet.domain.model.MoneyLog.MoneyLogBuilder;
 import com.rfchina.wallet.domain.model.WalletApply;
 import com.rfchina.wallet.domain.model.WalletChannel;
-import com.rfchina.wallet.domain.model.WalletClearInfo;
 import com.rfchina.wallet.domain.model.WalletClearing;
 import com.rfchina.wallet.domain.model.WalletCollect;
+import com.rfchina.wallet.domain.model.WalletCollectInfo;
 import com.rfchina.wallet.domain.model.WalletCollectMethod;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletRecharge;
@@ -53,19 +50,21 @@ import com.rfchina.wallet.server.bank.yunst.request.GetOrderDetailReq;
 import com.rfchina.wallet.server.bank.yunst.request.RefundApplyReq;
 import com.rfchina.wallet.server.bank.yunst.request.RefundApplyReq.RefundInfo;
 import com.rfchina.wallet.server.bank.yunst.request.SmsPayReq;
+import com.rfchina.wallet.server.bank.yunst.request.SmsRetryReq;
 import com.rfchina.wallet.server.bank.yunst.request.WithdrawApplyReq;
 import com.rfchina.wallet.server.bank.yunst.response.AgentPayResp;
 import com.rfchina.wallet.server.bank.yunst.response.CollectApplyResp;
 import com.rfchina.wallet.server.bank.yunst.response.GetOrderDetailResp;
 import com.rfchina.wallet.server.bank.yunst.response.RefundApplyResp;
 import com.rfchina.wallet.server.bank.yunst.response.SmsPayResp;
+import com.rfchina.wallet.server.bank.yunst.response.SmsRetryResp;
 import com.rfchina.wallet.server.bank.yunst.response.WithdrawApplyResp;
 import com.rfchina.wallet.server.bank.yunst.util.YunstTpl;
 import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletChannelExtDao;
-import com.rfchina.wallet.server.mapper.ext.WalletClearInfoExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletClearingExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletCollectInfoExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectMethodExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRechargeExtDao;
@@ -77,7 +76,6 @@ import com.rfchina.wallet.server.model.ext.PayTuple;
 import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.model.ext.WithdrawResp;
-import com.rfchina.wallet.server.msic.EnumWallet.ChannelType;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
 import com.rfchina.wallet.server.msic.EnumWallet.DebitType;
 import com.rfchina.wallet.server.msic.EnumWallet.EnumBizTag;
@@ -129,7 +127,7 @@ public class YunstBizHandler extends EBankHandler {
 	private WalletCollectExtDao walletCollectDao;
 
 	@Autowired
-	private WalletClearInfoExtDao walletClearInfoDao;
+	private WalletCollectInfoExtDao walletCollectInfoDao;
 
 	@Autowired
 	private WalletCollectMethodExtDao walletCollectMethodDao;
@@ -240,15 +238,11 @@ public class YunstBizHandler extends EBankHandler {
 			rechargeResp.setPasswordConfirm(false); // 收银宝不支持密码验证
 			return rechargeResp;
 		} catch (CommonGatewayException e) {
-			log.error("网关错误", e);
-			order.setTunnelErrCode(e.getBankErrCode());
-			order.setTunnelErrMsg(e.getBankErrMsg());
-			walletOrderDao.updateByPrimaryKeySelective(order);
-			throw e;
+			dealGatewayError(order, e);
 		} catch (Exception e) {
-			log.error("未定义异常",e);
-			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
+			dealUndefinedError(e);
 		}
+		return null;
 	}
 
 
@@ -301,29 +295,25 @@ public class YunstBizHandler extends EBankHandler {
 			result.setBizUserId(payer.getBizUserId());
 			return result;
 		} catch (CommonGatewayException e) {
-			log.error("网关错误", e);
-			order.setTunnelErrCode(e.getBankErrCode());
-			order.setTunnelErrMsg(e.getBankErrMsg());
-			walletOrderDao.updateByPrimaryKeySelective(order);
-			throw e;
+			dealGatewayError(order, e);
 		} catch (Exception e) {
-			log.error("未定义异常",e);
-			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
+			dealUndefinedError(e);
 		}
+		return null;
 	}
 
 	/**
 	 * 代收
 	 */
 	public WalletCollectResp collect(WalletOrder order, WalletCollect collect,
-		List<WalletClearInfo> clearInfos) {
+		List<WalletCollectInfo> clearInfos) {
 		// 收款人
-		List<RecieveInfo> receives = clearInfos.stream().map(clear -> {
+		List<RecieveInfo> receives = clearInfos.stream().map(info -> {
 			WalletChannel receiver = walletChannelDao
-				.selectByWalletId(clear.getPayeeWalletId(), order.getTunnelType());
+				.selectByWalletId(info.getPayeeWalletId(), order.getTunnelType());
 			return RecieveInfo.builder()
 				.bizUserId(receiver.getBizUserId())
-				.amount(clear.getBudgetAmount())
+				.amount(info.getBudgetAmount())
 				.build();
 		}).collect(Collectors.toList());
 
@@ -372,16 +362,11 @@ public class YunstBizHandler extends EBankHandler {
 			}
 			return result;
 		} catch (CommonGatewayException e) {
-			log.error("网关错误", e);
-			order.setTunnelErrCode(e.getBankErrCode());
-			order.setTunnelErrMsg(e.getBankErrMsg());
-			walletOrderDao.updateByPrimaryKeySelective(order);
-			throw e;
+			dealGatewayError(order, e);
 		} catch (Exception e) {
-			log.error("未定义异常",e);
-			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
+			dealUndefinedError(e);
 		}
-
+		return null;
 	}
 
 
@@ -423,16 +408,17 @@ public class YunstBizHandler extends EBankHandler {
 				}
 				walletOrderDao.updateByPrimaryKeySelective(order);
 			} catch (CommonGatewayException e) {
-				log.error("网关错误", e);
-				order.setTunnelErrCode(e.getBankErrCode());
-				order.setTunnelErrMsg(e.getBankErrMsg());
-				walletOrderDao.updateByPrimaryKeySelective(order);
-				throw e;
+				dealGatewayError(order, e);
 			} catch (Exception e) {
-				log.error("未定义异常",e);
-				throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
+				dealUndefinedError(e);
+				return;
 			}
 		});
+	}
+
+	private void dealUndefinedError(Exception e) {
+		log.error("未定义异常", e);
+		throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
 	}
 
 	/**
@@ -477,16 +463,20 @@ public class YunstBizHandler extends EBankHandler {
 			}
 			walletOrderDao.updateByPrimaryKeySelective(order);
 		} catch (CommonGatewayException e) {
-			log.error("网关错误", e);
-			order.setTunnelErrCode(e.getBankErrCode());
-			order.setTunnelErrMsg(e.getBankErrMsg());
-			walletOrderDao.updateByPrimaryKeySelective(order);
-			throw e;
+			dealGatewayError(order, e);
+			return;
 		} catch (Exception e) {
-			log.error("未定义异常",e);
-			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
+			dealUndefinedError(e);
 		}
 
+	}
+
+	private void dealGatewayError(WalletOrder order, CommonGatewayException e) {
+		log.error("网关错误", e);
+		order.setTunnelErrCode(e.getBankErrCode());
+		order.setTunnelErrMsg(e.getBankErrMsg());
+		walletOrderDao.updateByPrimaryKeySelective(order);
+		throw e;
 	}
 
 
@@ -580,6 +570,9 @@ public class YunstBizHandler extends EBankHandler {
 						.createTime(new Date())
 						.build();
 					moneyLogDao.insertSelective(moneyLog);
+				});
+				clearings.forEach(clearing->{
+					walletCollectInfoDao.accuClearAmount(clearing.getCollectInfoId(),clearing.getAmount());
 				});
 			} else {
 				MoneyLogBuilder builder = MoneyLog.builder()
@@ -721,7 +714,7 @@ public class YunstBizHandler extends EBankHandler {
 		try {
 			return yunstTpl.execute(req, GetOrderDetailResp.class);
 		} catch (Exception e) {
-			log.error(" error = {} , req = {} ", req, JSON.toJSONString(e));
+			log.error("通联-接口异常", e);
 			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
 		}
 	}
@@ -730,7 +723,7 @@ public class YunstBizHandler extends EBankHandler {
 	/**
 	 * 短信确认支付
 	 */
-	public void smsConfirm(WalletOrder order, String tradeNo, String verifyCode, String ip) {
+	public SmsPayResp smsConfirm(WalletOrder order, String tradeNo, String verifyCode, String ip) {
 
 		WalletChannel payer = walletChannelDao
 			.selectByWalletId(order.getWalletId(), order.getTunnelType());
@@ -742,9 +735,26 @@ public class YunstBizHandler extends EBankHandler {
 			.consumerIp(ip)
 			.build();
 		try {
-			yunstTpl.execute(req, SmsPayResp.class);
+			return yunstTpl.execute(req, SmsPayResp.class);
 		} catch (Exception e) {
-			log.error("{}", JSON.toJSONString(e));
+			log.error("通联-接口异常", e);
+			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
+		}
+	}
+
+	/**
+	 * 重发短信
+	 */
+	public SmsRetryResp smsRetry(WalletOrder order) {
+
+		SmsRetryReq req = SmsRetryReq.builder()
+			.bizOrderNo(order.getOrderNo())
+			.build();
+
+		try {
+			return yunstTpl.execute(req, SmsRetryResp.class);
+		} catch (Exception e) {
+			log.error("通联-接口异常", e);
 			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
 		}
 	}

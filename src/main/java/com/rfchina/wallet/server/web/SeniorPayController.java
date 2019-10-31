@@ -131,5 +131,15 @@ public class SeniorPayController {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
 
+	@ApiOperation("高级钱包-重发短信")
+	@PostMapping(UrlConstant.SENIOR_WALLET_SMS_RETRY)
+	public ResponseValue smsRetry(
+		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
+		@ApiParam(value = "业务令牌", required = true) @RequestParam("ticket") String ticket
+	) {
+
+		seniorPayApi.smsRetry(accessToken, ticket);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
+	}
 
 }

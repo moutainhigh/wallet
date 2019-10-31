@@ -3,9 +3,9 @@ package com.rfchina.wallet.server.service.handler.common;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.wallet.domain.model.GatewayTrans;
 import com.rfchina.wallet.domain.model.WalletApply;
-import com.rfchina.wallet.domain.model.WalletClearInfo;
 import com.rfchina.wallet.domain.model.WalletClearing;
 import com.rfchina.wallet.domain.model.WalletCollect;
+import com.rfchina.wallet.domain.model.WalletCollectInfo;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletRecharge;
 import com.rfchina.wallet.domain.model.WalletRefund;
@@ -61,7 +61,8 @@ public abstract class EBankHandler {
 	/**
 	 * 代收
 	 */
-	public WalletCollectResp collect(WalletOrder order, WalletCollect collect, List<WalletClearInfo> clearInfos) {
+	public WalletCollectResp collect(WalletOrder order, WalletCollect collect,
+		List<WalletCollectInfo> clearInfos) {
 		throw new RuntimeException();
 	}
 

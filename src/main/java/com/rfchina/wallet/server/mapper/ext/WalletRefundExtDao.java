@@ -12,10 +12,10 @@ public interface WalletRefundExtDao extends WalletRefundMapper {
 
 	@Select({
 		"select * from rf_wallet_refund",
-		"where apply_id = #{applyId}"
+		"where order_id = #{orderId}"
 	})
 	@ResultMap("com.rfchina.wallet.domain.mapper.WalletRefundMapper.BaseResultMap")
-	List<WalletRefund> selectByApplyId(@Param("applyId") Long applyId);
+	List<WalletRefund> selectByOrderId(@Param("order_id") Long orderId);
 
 
 	@Select({

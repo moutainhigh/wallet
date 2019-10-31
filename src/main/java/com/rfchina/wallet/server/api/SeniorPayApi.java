@@ -29,4 +29,6 @@ public interface SeniorPayApi {
 
 	void smsConfirm(String accessToken, String preBindTicket,
 		String verifyCode, String ip);
+
+	void smsRetry(String accessToken, String ticket);
 }

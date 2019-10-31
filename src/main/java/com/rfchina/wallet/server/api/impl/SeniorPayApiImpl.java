@@ -26,6 +26,7 @@ import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.model.ext.WithdrawReq;
 import com.rfchina.wallet.server.model.ext.WithdrawResp;
+import com.rfchina.wallet.server.msic.EnumWallet.OrderStatus;
 import com.rfchina.wallet.server.service.SeniorPayService;
 import java.util.List;
 import java.util.Optional;
@@ -149,9 +150,7 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 		}
 		// 检查代收单
 		WalletOrder collectOrder = walletOrderDao.selectByOrderNo(collectOrderNo);
-		Optional.ofNullable(collectOrder)
-			.orElseThrow(() -> new WalletResponseException(EnumResponseCode.COMMON_INVALID_PARAMS,
-				"collectOrderNo"));
+		seniorPayService.checkOrder(collectOrder, OrderStatus.SUCC.getValue());
 		seniorPayService.agentPay(collectOrder, bizNo, receivers);
 	}
 
@@ -170,7 +169,10 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 			throw new WalletResponseException(EnumWalletResponseCode.COLLECT_RECEIVER_DUPLICATE);
 		}
 
-		return seniorPayService.refund(collectOrderNo, bizNo, refundList);
+		// 检查代收单
+		WalletOrder collectOrder = walletOrderDao.selectByOrderNo(collectOrderNo);
+		seniorPayService.checkOrder(collectOrder, OrderStatus.SUCC.getValue());
+		return seniorPayService.refund(collectOrder, bizNo, refundList);
 	}
 
 	@Log
@@ -192,6 +194,15 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 		seniorPayService.smsConfirm(vo.getOrderId(), vo.getTradeNo(), verifyCode, ip);
 	}
 
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
+	@Override
+	public void smsRetry(String accessToken, String ticket) {
+		UnifiedConfirmVo vo = getUnifiedConfirmVo(ticket);
+		seniorPayService.smsRetry(vo.getOrderId());
+	}
+
 	private UnifiedConfirmVo getUnifiedConfirmVo(String ticket) {
 		return (UnifiedConfirmVo) redisTemplate.opsForValue()
 			.get(PRE_RECHARGE + ticket);
@@ -200,7 +211,7 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 	private String saveConfirmVo(UnifiedConfirmVo confirmVo) {
 		String ticket = UUID.randomUUID().toString();
 		redisTemplate.opsForValue()
-			.set(PRE_RECHARGE + ticket, confirmVo, 10, TimeUnit.MINUTES);
+			.set(PRE_RECHARGE + ticket, confirmVo, 30, TimeUnit.MINUTES);
 		return ticket;
 	}
 }
