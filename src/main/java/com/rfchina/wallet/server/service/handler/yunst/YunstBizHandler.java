@@ -373,47 +373,45 @@ public class YunstBizHandler extends EBankHandler {
 	/**
 	 * 代付
 	 */
-	public void agentPay(WalletOrder order, List<WalletClearing> clearings) {
+	public void agentPay(WalletOrder order, WalletClearing clearing) {
 
 		// 登记代付数额
-		clearings.forEach(clearing -> {
-			CollectPay collectPay = CollectPay.builder()
-				.bizOrderNo(clearing.getCollectOrderNo())
-				.amount(clearing.getAmount())
-				.build();
-			WalletChannel tunnel = walletChannelExtDao
-				.selectByWalletId(clearing.getPayeeWalletId(), order.getTunnelType());
-			AgentPayReq req = AgentPayReq.builder()
-				.bizOrderNo(order.getOrderNo())
-				.collectPayList(Lists.newArrayList(collectPay))
-				.bizUserId(tunnel.getBizUserId())
-				.accountSetNo(configService.getUserAccSet())  // 产品需求代付到余额账户
-				.backUrl(configService.getYunstRecallPrefix() + UrlConstant.YUNST_ORDER_RECALL)
-				.amount(clearing.getAmount())
-				.fee(0L)
-				.splitRuleList(null)
-				.tradeCode(TRADE_CODESTRING_AGENTPAY)
-				.summary(null)
-				.build();
+		CollectPay collectPay = CollectPay.builder()
+			.bizOrderNo(clearing.getCollectOrderNo())
+			.amount(clearing.getAmount())
+			.build();
+		WalletChannel tunnel = walletChannelExtDao
+			.selectByWalletId(clearing.getPayeeWalletId(), order.getTunnelType());
+		AgentPayReq req = AgentPayReq.builder()
+			.bizOrderNo(order.getOrderNo())
+			.collectPayList(Lists.newArrayList(collectPay))
+			.bizUserId(tunnel.getBizUserId())
+			.accountSetNo(configService.getUserAccSet())  // 产品需求代付到余额账户
+			.backUrl(configService.getYunstRecallPrefix() + UrlConstant.YUNST_ORDER_RECALL)
+			.amount(clearing.getAmount())
+			.fee(0L)
+			.splitRuleList(null)
+			.tradeCode(TRADE_CODESTRING_AGENTPAY)
+			.summary(null)
+			.build();
 
-			order.setProgress(UniProgress.SENDED.getValue());
-			order.setStartTime(new Date());
-			try {
-				AgentPayResp resp = yunstTpl.execute(req, AgentPayResp.class);
-				order.setTunnelOrderNo(resp.getOrderNo());
-				if (StringUtils.isNotBlank(resp.getPayStatus())
-					&& "fail".equals(resp.getPayStatus())) {
-					order.setStatus(OrderStatus.FAIL.getValue());
-					order.setTunnelErrMsg(resp.getPayFailMessage());
-				}
-				walletOrderDao.updateByPrimaryKeySelective(order);
-			} catch (CommonGatewayException e) {
-				dealGatewayError(order, e);
-			} catch (Exception e) {
-				dealUndefinedError(e);
-				return;
+		order.setProgress(UniProgress.SENDED.getValue());
+		order.setStartTime(new Date());
+		try {
+			AgentPayResp resp = yunstTpl.execute(req, AgentPayResp.class);
+			order.setTunnelOrderNo(resp.getOrderNo());
+			if (StringUtils.isNotBlank(resp.getPayStatus())
+				&& "fail".equals(resp.getPayStatus())) {
+				order.setStatus(OrderStatus.FAIL.getValue());
+				order.setTunnelErrMsg(resp.getPayFailMessage());
 			}
-		});
+			walletOrderDao.updateByPrimaryKeySelective(order);
+		} catch (CommonGatewayException e) {
+			dealGatewayError(order, e);
+		} catch (Exception e) {
+			dealUndefinedError(e);
+			return;
+		}
 	}
 
 	private void dealUndefinedError(Exception e) {
@@ -571,8 +569,9 @@ public class YunstBizHandler extends EBankHandler {
 						.build();
 					moneyLogDao.insertSelective(moneyLog);
 				});
-				clearings.forEach(clearing->{
-					walletCollectInfoDao.accuClearAmount(clearing.getCollectInfoId(),clearing.getAmount());
+				clearings.forEach(clearing -> {
+					walletCollectInfoDao
+						.accuClearAmount(clearing.getCollectInfoId(), clearing.getAmount());
 				});
 			} else {
 				MoneyLogBuilder builder = MoneyLog.builder()

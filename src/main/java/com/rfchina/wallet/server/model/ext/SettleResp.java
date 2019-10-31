@@ -19,7 +19,7 @@ public class SettleResp {
 	@ApiModelProperty(value = "订单")
 	private WalletOrder order;
 
-	@ApiModelProperty(value = "分帐列表")
-	private List<WalletClearing> clearings;
+	@ApiModelProperty(value = "分帐记录")
+	private WalletClearing clearing;
 
 }

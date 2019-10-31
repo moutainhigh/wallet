@@ -69,7 +69,7 @@ public abstract class EBankHandler {
 	/**
 	 * 代付
 	 */
-	public void agentPay(WalletOrder order, List<WalletClearing> clearings) {
+	public void agentPay(WalletOrder order, WalletClearing clearings) {
 		throw new RuntimeException();
 	}
 

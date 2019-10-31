@@ -10,7 +10,7 @@
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
 |access_token|是|应用令牌|
-|agent_pay_req|是|代付列表（与代收的分账规则对应），参考AgentPayReq结构体|
+|agent_pay_req|是|代付列表（与代收的分账规则对应），参考AgentPayReq.Reciever结构体|
 |biz_no|是|业务方单号|
 |collect_order_no|是|原代收单号|
 
@@ -20,7 +20,7 @@
   "code": 1001,//状态码
   "msg": ""//消息
    , "data":  {
-    clearings: [ {
+    clearing:{
     amount:""  , //金额
     collect_info_id:""  , //分帐id
     collect_order_no:""  , //代收单号
@@ -28,7 +28,7 @@
     id:""  , //id
     order_id:""  , //订单id
     payee_wallet_id:""   //收款人钱包id
-}  ]  , 
+}  , 
     order:{
     amount:""  , //金额
     batch_no:""  , //钱包批次号

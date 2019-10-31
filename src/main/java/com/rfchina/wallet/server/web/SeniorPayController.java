@@ -88,10 +88,10 @@ public class SeniorPayController {
 		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
 		@ApiParam(value = "业务方单号", required = true) @RequestParam(value = "biz_no") String bizNo,
 		@ApiParam(value = "原代收单号", required = true) @RequestParam(value = "collect_order_no") String collectOrderNo,
-		@ApiParam(value = "代付列表（与代收的分账规则对应），参考AgentPayReq结构体", required = true) @RequestParam("agent_pay_req") String agentPayReq
+		@ApiParam(value = "代付列表（与代收的分账规则对应），参考AgentPayReq.Reciever结构体", required = true) @RequestParam("agent_pay_req") String agentPayReq
 	) {
-		AgentPayReq req = JsonUtil.toObject(agentPayReq, AgentPayReq.class, DEF_REQ_OBJ_MAP);
-		seniorPayApi.agentPay(accessToken, bizNo, collectOrderNo, req.getReceivers());
+		AgentPayReq.Reciever reciever = JsonUtil.toObject(agentPayReq, AgentPayReq.Reciever.class, DEF_REQ_OBJ_MAP);
+		seniorPayApi.agentPay(accessToken, bizNo, collectOrderNo, reciever);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
 

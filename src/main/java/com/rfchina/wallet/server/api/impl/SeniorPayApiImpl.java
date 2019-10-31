@@ -140,18 +140,11 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 	@SignVerify
 	@Override
 	public void agentPay(String accessToken, String bizNo, String collectOrderNo,
-		List<Reciever> receivers) {
-		// 判断收款人记录不重复
-		Set<String> walletSet = receivers.stream()
-			.map(receiver -> receiver.getWalletId().toString())
-			.collect(Collectors.toSet());
-		if (walletSet.size() != receivers.size()) {
-			throw new WalletResponseException(EnumWalletResponseCode.COLLECT_RECEIVER_DUPLICATE);
-		}
+		Reciever receiver) {
 		// 检查代收单
 		WalletOrder collectOrder = walletOrderDao.selectByOrderNo(collectOrderNo);
 		seniorPayService.checkOrder(collectOrder, OrderStatus.SUCC.getValue());
-		seniorPayService.agentPay(collectOrder, bizNo, receivers);
+		seniorPayService.agentPay(collectOrder, bizNo, receiver);
 	}
 
 

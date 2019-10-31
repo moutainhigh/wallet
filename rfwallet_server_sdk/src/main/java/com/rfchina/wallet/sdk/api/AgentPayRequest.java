@@ -16,7 +16,7 @@ public class AgentPayRequest extends  AbstractApiRequest {
   @ApiModelProperty("应用令牌")
   private String accessToken ;
 
-  @ApiModelProperty("代付列表（与代收的分账规则对应），参考AgentPayReq结构体")
+  @ApiModelProperty("代付列表（与代收的分账规则对应），参考AgentPayReq.Reciever结构体")
   private String agentPayReq ;
 
   @ApiModelProperty("业务方单号")
