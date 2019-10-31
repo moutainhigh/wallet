@@ -57,11 +57,11 @@ public class SeniorPayController {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result);
 	}
 
-	@ApiOperation("高级钱包-充值确认")
+	@ApiOperation("高级钱包-短信确认")
 	@PostMapping(UrlConstant.SENIOR_WALLET_SMS_CONFIRM)
 	public ResponseValue smsConfirm(
 		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
-		@ApiParam(value = "充值业务令牌", required = true) @RequestParam("ticket") String ticket,
+		@ApiParam(value = "业务令牌", required = true) @RequestParam("ticket") String ticket,
 		@ApiParam(value = "短信验证码", required = true) @RequestParam("verify_code") String verifyCode,
 		@ApiParam(value = "客户ip", required = true) @RequestParam("customer_ip") String customerIp
 	) {
@@ -69,6 +69,20 @@ public class SeniorPayController {
 		seniorPayApi.smsConfirm(accessToken, ticket, verifyCode, customerIp);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
+
+	@ApiOperation("高级钱包-充值确认")
+	@PostMapping(UrlConstant.SENIOR_WALLET_PASSWORD_CONFIRM)
+	public ResponseValue passWordConfirm(
+		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
+		@ApiParam(value = "业务令牌", required = true) @RequestParam("ticket") String ticket,
+		@ApiParam(value = "回调url", required = true) @RequestParam("jump_url") String jumpUrl,
+		@ApiParam(value = "客户ip", required = true) @RequestParam("customer_ip") String customerIp
+	) {
+
+		seniorPayApi.smsConfirm(accessToken, ticket, jumpUrl, customerIp);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
+	}
+
 
 
 	@ApiOperation("高级钱包-提现")

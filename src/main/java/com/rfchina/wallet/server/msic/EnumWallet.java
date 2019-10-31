@@ -207,10 +207,10 @@ public class EnumWallet {
 	}
 
 	/**
-	 * 工单类型，1：转帐，2：充值，3：提现，4：代收，5：代付，6：退款，7：消费
+	 * 工单类型，1：财务结算，2：充值，3：提现，4：代收，5：代付，6：退款，7：消费
 	 */
-	public enum WalletApplyType implements Valuable<Byte> {
-		TRANSFER((byte) 1, "转帐"),
+	public enum OrderType implements Valuable<Byte> {
+		SETTLE((byte) 1, "财务结算"),
 		RECHARGE((byte) 2, "充值"),
 		WITHDRAWAL((byte) 3, "提现"),
 		COLLECT((byte) 4, "代收"),
@@ -222,7 +222,7 @@ public class EnumWallet {
 		private Byte value;
 		private String valueName;
 
-		WalletApplyType(Byte value, String valueName) {
+		OrderType(Byte value, String valueName) {
 			this.value = value;
 			this.valueName = valueName;
 		}
@@ -941,6 +941,56 @@ public class EnumWallet {
 			return this.value;
 		}
 
+	}
+
+	/**
+	 * 业务标签
+	 */
+	public enum EnumBizTag implements Valuable<Byte> {
+		REFUND((byte) 1, "已退款"),
+		RECORD((byte) 2, "已记账");
+
+		private Byte value;
+		private String valueName;
+
+		EnumBizTag(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return this.value;
+		}
+
+		public boolean contains(Byte bizTag) {
+			return (this.value.byteValue() & bizTag.byteValue()) > 0;
+		}
+
+		public byte and(Byte bizTag){
+			return (byte)(this.value.byteValue() | bizTag.byteValue());
+		}
+	}
+
+	/**
+	 * 借贷
+	 */
+	public enum DebitType implements Valuable<Byte> {
+		DEBIT((byte) 1, "记入借方"),
+		CREDIT((byte) 2, "记入贷方");
+
+		private Byte value;
+		private String valueName;
+
+		DebitType(byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return this.value;
+		}
 	}
 
 }

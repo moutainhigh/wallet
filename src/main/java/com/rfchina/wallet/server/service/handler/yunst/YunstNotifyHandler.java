@@ -18,7 +18,6 @@ import com.rfchina.wallet.server.bank.yunst.response.YunstNotify;
 import com.rfchina.wallet.server.mapper.ext.WalletChannelExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletVerifyHisExtDao;
 import com.rfchina.wallet.server.model.ext.SLWalletMqMessage;
-import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyType;
 import java.util.Date;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;

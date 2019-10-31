@@ -3,7 +3,6 @@ package com.rfchina.wallet.server.web;
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.ResponseValue;
 import com.rfchina.wallet.domain.model.ChannelNotify;
-import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyType;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import com.rfchina.wallet.server.service.NotifyService;
 import com.rfchina.wallet.server.service.handler.yunst.YunstNotifyHandler;

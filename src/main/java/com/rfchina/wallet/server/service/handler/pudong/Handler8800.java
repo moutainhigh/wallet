@@ -563,28 +563,5 @@ public class Handler8800 extends EBankHandler {
 		throw new RuntimeException();
 	}
 
-	@Override
-	public WalletCollectResp collect(WalletOrder order, WalletCollect collect, List<WalletClearInfo> clearInfos) {
-		throw new RuntimeException();
-	}
 
-	@Override
-	public void agentPay(WalletOrder order, List<WalletClearing> clearings) {
-		throw new RuntimeException();
-	}
-
-	@Override
-	public void refund(WalletOrder order, WalletRefund refund, List<WalletRefundDetail> details) {
-		throw new RuntimeException();
-	}
-
-	@Override
-	public RechargeResp recharge(WalletOrder order, WalletRecharge recharge) {
-		throw new RuntimeException();
-	}
-
-	@Override
-	public WalletWithdraw withdraw(WalletOrder order, WalletWithdraw withdraw) {
-		throw new RuntimeException();
-	}
 }

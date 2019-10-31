@@ -8,10 +8,13 @@ import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EnumUtil;
 import com.rfchina.platform.common.utils.JsonUtil;
+import com.rfchina.wallet.domain.mapper.MoneyLogMapper;
 import com.rfchina.wallet.domain.misc.EnumDef.BizValidateType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletLevel;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.GatewayTrans;
+import com.rfchina.wallet.domain.model.MoneyLog;
+import com.rfchina.wallet.domain.model.MoneyLog.MoneyLogBuilder;
 import com.rfchina.wallet.domain.model.WalletApply;
 import com.rfchina.wallet.domain.model.WalletChannel;
 import com.rfchina.wallet.domain.model.WalletClearInfo;
@@ -74,15 +77,17 @@ import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.msic.EnumWallet.ChannelType;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
+import com.rfchina.wallet.server.msic.EnumWallet.DebitType;
+import com.rfchina.wallet.server.msic.EnumWallet.EnumBizTag;
 import com.rfchina.wallet.server.msic.EnumWallet.EnumYunstCardPro;
 import com.rfchina.wallet.server.msic.EnumWallet.EnumYunstDeviceType;
 import com.rfchina.wallet.server.msic.EnumWallet.EnumYunstWithdrawType;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.OrderStatus;
+import com.rfchina.wallet.server.msic.EnumWallet.OrderType;
 import com.rfchina.wallet.server.msic.EnumWallet.RefundType;
 import com.rfchina.wallet.server.msic.EnumWallet.TunnelType;
 import com.rfchina.wallet.server.msic.EnumWallet.UniProgress;
-import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyType;
 import com.rfchina.wallet.server.msic.EnumWallet.YunstOrderStatus;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import com.rfchina.wallet.server.service.ConfigService;
@@ -151,6 +156,9 @@ public class YunstBizHandler extends EBankHandler {
 	@Autowired
 	private WalletOrderExtDao walletOrderDao;
 
+	@Autowired
+	private MoneyLogMapper moneyLogDao;
+
 
 	public boolean isSupportWalletLevel(Byte walletLevel) {
 		return EnumWalletLevel.SENIOR.getValue().byteValue() == walletLevel;
@@ -183,7 +191,7 @@ public class YunstBizHandler extends EBankHandler {
 	 */
 	public RechargeResp recharge(WalletOrder order, WalletRecharge recharge) {
 		List<WalletCollectMethod> methods = walletCollectMethodDao
-			.selectByCollectId(recharge.getId(), WalletApplyType.RECHARGE.getValue());
+			.selectByCollectId(recharge.getId(), OrderType.RECHARGE.getValue());
 
 		// 支付人
 		WalletChannel payer = walletChannelDao
@@ -235,28 +243,6 @@ public class YunstBizHandler extends EBankHandler {
 			order.setTunnelErrMsg(e.getBankErrMsg());
 			walletOrderDao.updateByPrimaryKeySelective(order);
 			throw e;
-		} catch (Exception e) {
-			log.error("{}", JSON.toJSONString(e));
-			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
-		}
-	}
-
-	/**
-	 * 短信确认支付
-	 */
-	public void smsConfirm(WalletOrder order, String tradeNo, String verifyCode, String ip) {
-
-		WalletChannel payer = walletChannelDao
-			.selectByWalletId(order.getWalletId(), order.getTunnelType());
-		SmsPayReq req = SmsPayReq.builder()
-			.bizUserId(payer.getBizUserId())
-			.bizOrderNo(order.getOrderNo())
-			.tradeNo(tradeNo)
-			.verificationCode(verifyCode)
-			.consumerIp(ip)
-			.build();
-		try {
-			yunstTpl.execute(req, SmsPayResp.class);
 		} catch (Exception e) {
 			log.error("{}", JSON.toJSONString(e));
 			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
@@ -324,7 +310,8 @@ public class YunstBizHandler extends EBankHandler {
 	/**
 	 * 代收
 	 */
-	public WalletCollectResp collect(WalletOrder order, WalletCollect collect, List<WalletClearInfo> clearInfos) {
+	public WalletCollectResp collect(WalletOrder order, WalletCollect collect,
+		List<WalletClearInfo> clearInfos) {
 		// 收款人
 		List<RecieveInfo> receives = clearInfos.stream().map(clear -> {
 			WalletChannel receiver = walletChannelDao
@@ -336,7 +323,7 @@ public class YunstBizHandler extends EBankHandler {
 		}).collect(Collectors.toList());
 
 		List<WalletCollectMethod> methods = walletCollectMethodDao
-			.selectByCollectId(collect.getId(), WalletApplyType.COLLECT.getValue());
+			.selectByCollectId(collect.getId(), OrderType.COLLECT.getValue());
 
 		WalletChannel payer = walletChannelDao
 			.selectByWalletId(order.getWalletId(), order.getTunnelType());
@@ -377,6 +364,7 @@ public class YunstBizHandler extends EBankHandler {
 			if (resp != null) {
 				result.setPayInfo(resp.getPayInfo());
 				result.setWeChatAPPInfo(resp.getWeChatAPPInfo());
+				result.setTradeNo(resp.getTradeNo());
 			}
 			return result;
 		} catch (CommonGatewayException e) {
@@ -402,7 +390,7 @@ public class YunstBizHandler extends EBankHandler {
 		clearings.forEach(clearing -> {
 			CollectPay collectPay = CollectPay.builder()
 				.bizOrderNo(clearing.getCollectOrderNo())
-				.amount(order.getAmount())
+				.amount(clearing.getAmount())
 				.build();
 			WalletChannel tunnel = walletChannelExtDao
 				.selectByWalletId(clearing.getPayeeWalletId(), order.getTunnelType());
@@ -412,7 +400,7 @@ public class YunstBizHandler extends EBankHandler {
 				.bizUserId(tunnel.getBizUserId())
 				.accountSetNo(configService.getUserAccSet())  // 产品需求代付到余额账户
 				.backUrl(configService.getYunstRecallPrefix() + UrlConstant.YUNST_ORDER_RECALL)
-				.amount(order.getAmount())
+				.amount(clearing.getAmount())
 				.fee(0L)
 				.splitRuleList(null)
 				.tradeCode(TRADE_CODESTRING_AGENTPAY)
@@ -570,6 +558,48 @@ public class YunstBizHandler extends EBankHandler {
 			order.setEndTime(new Date());
 		}
 		walletOrderDao.updateByPrimaryKeySelective(order);
+
+		// 记录到流水
+		if (OrderStatus.SUCC.getValue().byteValue() == order.getStatus()
+			&& (order.getBizTag() == null || !EnumBizTag.RECORD.contains(order.getBizTag()))) {
+			if (order.getType().byteValue() == OrderType.AGENT_PAY.getValue()) {
+				List<WalletClearing> clearings = walletClearingDao
+					.selectByCollectOrderNo(order.getOrderNo());
+				clearings.forEach(clearing -> {
+					MoneyLog moneyLog = MoneyLog.builder()
+						.walletId(clearing.getPayeeWalletId())
+						.orderId(order.getId())
+						.orderType(order.getType())
+						.type(DebitType.DEBIT.getValue())
+						.debitAmount(clearing.getAmount())
+						.creditAmount(0L)
+						.createTime(new Date())
+						.build();
+					moneyLogDao.insertSelective(moneyLog);
+				});
+			} else {
+				MoneyLogBuilder builder = MoneyLog.builder()
+					.walletId(order.getWalletId())
+					.orderId(order.getId())
+					.orderType(order.getType())
+					.createTime(new Date());
+				if (order.getType().byteValue() == OrderType.RECHARGE.getValue()
+					|| order.getType().byteValue() == OrderType.REFUND.getValue()) {
+					builder.type(DebitType.DEBIT.getValue());
+					builder.debitAmount(order.getAmount());
+					builder.creditAmount(0L);
+				} else if (order.getType().byteValue() == OrderType.WITHDRAWAL.getValue()
+					|| order.getType().byteValue() == OrderType.COLLECT.getValue()
+					|| order.getType().byteValue() == OrderType.CONSUME.getValue()) {
+					builder.type(DebitType.CREDIT.getValue());
+					builder.debitAmount(0L);
+					builder.creditAmount(order.getAmount());
+				}
+				moneyLogDao.insertSelective(builder.build());
+			}
+			order.setBizTag(EnumBizTag.RECORD.and(order.getBizTag()));
+			walletOrderDao.updateByPrimaryKeySelective(order);
+		}
 	}
 
 
@@ -686,6 +716,29 @@ public class YunstBizHandler extends EBankHandler {
 			return yunstTpl.execute(req, GetOrderDetailResp.class);
 		} catch (Exception e) {
 			log.error(" error = {} , req = {} ", req, JSON.toJSONString(e));
+			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
+		}
+	}
+
+
+	/**
+	 * 短信确认支付
+	 */
+	public void smsConfirm(WalletOrder order, String tradeNo, String verifyCode, String ip) {
+
+		WalletChannel payer = walletChannelDao
+			.selectByWalletId(order.getWalletId(), order.getTunnelType());
+		SmsPayReq req = SmsPayReq.builder()
+			.bizUserId(payer.getBizUserId())
+			.bizOrderNo(order.getOrderNo())
+			.tradeNo(tradeNo)
+			.verificationCode(verifyCode)
+			.consumerIp(ip)
+			.build();
+		try {
+			yunstTpl.execute(req, SmsPayResp.class);
+		} catch (Exception e) {
+			log.error("{}", JSON.toJSONString(e));
 			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
 		}
 	}

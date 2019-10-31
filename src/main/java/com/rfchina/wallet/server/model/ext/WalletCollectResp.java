@@ -13,4 +13,7 @@ public class WalletCollectResp extends WalletOrder {
 
 	@ApiModelProperty(name = "pay_info", value = "扫码支付信息/ JS 支付串信息/微信原生 H5 支付串信息")
 	private String payInfo;
+
+	@ApiModelProperty(name = "trade_no", value = "交易编号")
+	private String tradeNo;
 }

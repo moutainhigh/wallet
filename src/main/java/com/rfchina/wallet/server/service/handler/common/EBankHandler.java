@@ -56,30 +56,40 @@ public abstract class EBankHandler {
 	 */
 	public abstract Tuple<GatewayMethod, PayTuple> transfer(Long applyId);
 
+
 	/**
 	 * 代收
 	 */
-	public abstract WalletCollectResp collect(WalletOrder order, WalletCollect collect, List<WalletClearInfo> clearInfos);
+	public WalletCollectResp collect(WalletOrder order, WalletCollect collect, List<WalletClearInfo> clearInfos) {
+		throw new RuntimeException();
+	}
 
 	/**
 	 * 代付
 	 */
-	public abstract void agentPay(WalletOrder order, List<WalletClearing> clearings);
+	public void agentPay(WalletOrder order, List<WalletClearing> clearings) {
+		throw new RuntimeException();
+	}
 
 	/**
 	 * 退款
 	 */
-	public abstract void refund(WalletOrder order, WalletRefund refund, List<WalletRefundDetail> details);
+	public void refund(WalletOrder order, WalletRefund refund, List<WalletRefundDetail> details) {
+		throw new RuntimeException();
+	}
 
 	/**
 	 * 充值
 	 */
-	public abstract RechargeResp recharge(WalletOrder order, WalletRecharge recharge);
+	public RechargeResp recharge(WalletOrder order, WalletRecharge recharge) {
+		throw new RuntimeException();
+	}
 
 	/**
 	 * 提现
 	 */
-	public abstract WalletWithdraw withdraw(WalletOrder order, WalletWithdraw withdraw);
-
+	public WalletWithdraw withdraw(WalletOrder order, WalletWithdraw withdraw) {
+		throw new RuntimeException();
+	}
 
 }

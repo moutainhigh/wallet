@@ -8,18 +8,13 @@ import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
-import com.rfchina.wallet.domain.model.Wallet;
-import com.rfchina.wallet.domain.model.WalletClearing;
-import com.rfchina.wallet.domain.model.WalletCollect;
 import com.rfchina.wallet.domain.model.WalletOrder;
-import com.rfchina.wallet.domain.model.WalletRefund;
-import com.rfchina.wallet.domain.model.WalletWithdraw;
 import com.rfchina.wallet.server.api.SeniorPayApi;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import com.rfchina.wallet.server.model.ext.AgentPayReq.Reciever;
 import com.rfchina.wallet.server.model.ext.CollectReq;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod;
-import com.rfchina.wallet.server.model.ext.RechargeConfirmVo;
+import com.rfchina.wallet.server.model.ext.UnifiedConfirmVo;
 import com.rfchina.wallet.server.model.ext.RechargeReq;
 import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
@@ -60,26 +55,12 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 				"payerWalletId"));
 
 		RechargeResp resp = seniorPayService.recharge(req);
-		RechargeConfirmVo vo = BeanUtil.newInstance(resp, RechargeConfirmVo.class);
 
-		String ticket = UUID.randomUUID().toString();
-		redisTemplate.opsForValue()
-			.set(PRE_RECHARGE + ticket, vo, 10, TimeUnit.MINUTES);
-
+		UnifiedConfirmVo confirmVo = BeanUtil.newInstance(resp, UnifiedConfirmVo.class);
+		saveConfirmVo(confirmVo);
 		return resp;
 	}
 
-	@Log
-	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
-	@SignVerify
-	@Override
-	public void smsConfirm(String accessToken, String ticket,
-		String verifyCode, String ip) {
-
-		RechargeConfirmVo vo = (RechargeConfirmVo) redisTemplate.opsForValue()
-			.get(PRE_RECHARGE + ticket);
-		seniorPayService.smsConfirm(vo.getOrderId(), vo.getTradeNo(), verifyCode, ip);
-	}
 
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
@@ -90,7 +71,11 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 			.orElseThrow(() -> new WalletResponseException(EnumResponseCode.COMMON_MISSING_PARAMS,
 				"payerWalletId"));
 
-		return seniorPayService.withdraw(req);
+		WalletOrder withdraw = seniorPayService.withdraw(req);
+
+		UnifiedConfirmVo confirmVo = BeanUtil.newInstance(withdraw, UnifiedConfirmVo.class);
+		saveConfirmVo(confirmVo);
+		return withdraw;
 	}
 
 	@Log
@@ -108,7 +93,7 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 		// 判断金额相同
 		Long recAmount = req.getRecievers().stream()
 			.collect(Collectors.summingLong(CollectReq.Reciever::getAmount));
-		if(req.getAmount() != req.getFee() + recAmount){
+		if (req.getAmount() != req.getFee() + recAmount) {
 			throw new WalletResponseException(EnumWalletResponseCode.COLLECT_AMOUNT_NOT_MATCH);
 		}
 		// 检验支付方式
@@ -117,7 +102,12 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 			throw new WalletResponseException(EnumResponseCode.COMMON_INVALID_PARAMS,
 				"walletPayMethod");
 		}
-		return seniorPayService.collect(req);
+		// 发起代收
+		WalletCollectResp collect = seniorPayService.collect(req);
+		// 生成票据
+		UnifiedConfirmVo confirmVo = BeanUtil.newInstance(collect, UnifiedConfirmVo.class);
+		saveConfirmVo(confirmVo);
+		return collect;
 	}
 
 	@Log
@@ -146,7 +136,7 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public WalletOrder refund(String accessToken,String bizNo, String collectOrderNo,
+	public WalletOrder refund(String accessToken, String bizNo, String collectOrderNo,
 		List<RefundInfo> refundList) {
 		// 判断退款申请不重复
 		Set<String> walletIdSet = refundList.stream()
@@ -156,7 +146,7 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 			throw new WalletResponseException(EnumWalletResponseCode.COLLECT_RECEIVER_DUPLICATE);
 		}
 
-		return seniorPayService.refund(collectOrderNo,bizNo, refundList);
+		return seniorPayService.refund(collectOrderNo, bizNo, refundList);
 	}
 
 	@Log
@@ -165,5 +155,27 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 	@Override
 	public WalletOrder orderQuery(String accessToken, String orderNo) {
 		return seniorPayService.orderQuery(orderNo);
+	}
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
+	@Override
+	public void smsConfirm(String accessToken, String ticket,
+		String verifyCode, String ip) {
+
+		UnifiedConfirmVo vo = getUnifiedConfirmVo(ticket);
+		seniorPayService.smsConfirm(vo.getOrderId(), vo.getTradeNo(), verifyCode, ip);
+	}
+
+	private UnifiedConfirmVo getUnifiedConfirmVo(String ticket) {
+		return (UnifiedConfirmVo) redisTemplate.opsForValue()
+			.get(PRE_RECHARGE + ticket);
+	}
+
+	private void saveConfirmVo(UnifiedConfirmVo confirmVo) {
+		String ticket = UUID.randomUUID().toString();
+		redisTemplate.opsForValue()
+			.set(PRE_RECHARGE + ticket, confirmVo, 10, TimeUnit.MINUTES);
 	}
 }

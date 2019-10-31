@@ -10,7 +10,7 @@ import com.rfchina.wallet.server.bank.yunst.response.RecallResp;
 import com.rfchina.wallet.server.bank.yunst.response.RpsResp;
 import com.rfchina.wallet.server.bank.yunst.response.YunstNotify;
 import com.rfchina.wallet.server.mapper.ext.ChannelNotifyExtDao;
-import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyType;
+import com.rfchina.wallet.server.msic.EnumWallet.OrderType;
 import com.rfchina.wallet.server.msic.EnumWallet.YunstMethodName;
 import com.rfchina.wallet.server.msic.EnumWallet.YunstServiceName;
 import com.rfchina.wallet.server.service.handler.yunst.YunstNotifyHandler;
@@ -125,7 +125,7 @@ public class NotifyService {
 		};
 	}
 
-	public void handleOrderResult(ChannelNotify channelNotify, WalletApplyType type) {
+	public void handleOrderResult(ChannelNotify channelNotify, OrderType type) {
 
 		RecallResp recallResp = JsonUtil.toObject(channelNotify.getContent(), RecallResp.class,
 			objectMapper -> {
