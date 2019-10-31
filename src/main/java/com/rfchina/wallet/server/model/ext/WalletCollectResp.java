@@ -16,4 +16,7 @@ public class WalletCollectResp extends WalletOrder {
 
 	@ApiModelProperty(name = "trade_no", value = "交易编号")
 	private String tradeNo;
+
+	@ApiModelProperty(value = "业务票据")
+	private String ticket;
 }

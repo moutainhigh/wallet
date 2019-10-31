@@ -1,13 +1,18 @@
 package com.rfchina.wallet.server.api.impl;
 
+import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.passport.token.EnumTokenType;
 import com.rfchina.passport.token.TokenVerify;
 import com.rfchina.platform.common.annotation.Log;
 import com.rfchina.platform.common.annotation.SignVerify;
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.utils.BeanUtil;
+import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
+import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
+import com.rfchina.wallet.domain.misc.EnumDef.BizValidateType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
+import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.server.api.SeniorPayApi;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
@@ -20,6 +25,7 @@ import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.model.ext.WithdrawReq;
+import com.rfchina.wallet.server.model.ext.WithdrawResp;
 import com.rfchina.wallet.server.service.SeniorPayService;
 import java.util.List;
 import java.util.Optional;
@@ -44,20 +50,30 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 	@Autowired
 	private WalletOrderExtDao walletOrderDao;
 
+	@Autowired
+	private WalletCardDao walletCardDao;
+
 
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public RechargeResp recharge(String accessToken, RechargeReq req) {
-		Optional.ofNullable(req.getPayerWalletId())
-			.orElseThrow(() -> new WalletResponseException(EnumResponseCode.COMMON_MISSING_PARAMS,
-				"payerWalletId"));
+	public RechargeResp recharge(String accessToken, Long walletId, Long cardId,Long amount) {
 
-		RechargeResp resp = seniorPayService.recharge(req);
+		WalletCard walletCard = walletCardDao.selectByPrimaryKey(cardId);
+		if (walletCard == null) {
+			throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_NOT_EXISTS);
+		}
+		if (walletId.longValue() != walletCard.getWalletId().longValue()) {
+			throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_NOT_AUTH);
+		}
+
+		RechargeResp resp = seniorPayService.recharge(walletId,walletCard,amount);
 
 		UnifiedConfirmVo confirmVo = BeanUtil.newInstance(resp, UnifiedConfirmVo.class);
-		saveConfirmVo(confirmVo);
+		String ticket = saveConfirmVo(confirmVo);
+		resp.setTicket(ticket);
+
 		return resp;
 	}
 
@@ -66,15 +82,21 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public WalletOrder withdraw(String accessToken, WithdrawReq req) {
-		Optional.ofNullable(req.getPayerWalletId())
-			.orElseThrow(() -> new WalletResponseException(EnumResponseCode.COMMON_MISSING_PARAMS,
-				"payerWalletId"));
+	public WithdrawResp withdraw(String accessToken, Long walletId, Long cardId,Long amount) {
+		WalletCard walletCard = walletCardDao.selectByPrimaryKey(cardId);
+		if (walletCard == null) {
+			throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_NOT_EXISTS);
+		}
+		if (walletId.longValue() != walletCard.getWalletId().longValue()) {
+			throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_NOT_AUTH);
+		}
 
-		WalletOrder withdraw = seniorPayService.withdraw(req);
+		WithdrawResp withdraw = seniorPayService.withdraw(walletId,walletCard,amount);
 
 		UnifiedConfirmVo confirmVo = BeanUtil.newInstance(withdraw, UnifiedConfirmVo.class);
-		saveConfirmVo(confirmVo);
+		String ticket = saveConfirmVo(confirmVo);
+		withdraw.setTicket(ticket);
+
 		return withdraw;
 	}
 
@@ -106,7 +128,9 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 		WalletCollectResp collect = seniorPayService.collect(req);
 		// 生成票据
 		UnifiedConfirmVo confirmVo = BeanUtil.newInstance(collect, UnifiedConfirmVo.class);
-		saveConfirmVo(confirmVo);
+		String ticket = saveConfirmVo(confirmVo);
+		collect.setTicket(ticket);
+
 		return collect;
 	}
 
@@ -173,9 +197,10 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 			.get(PRE_RECHARGE + ticket);
 	}
 
-	private void saveConfirmVo(UnifiedConfirmVo confirmVo) {
+	private String saveConfirmVo(UnifiedConfirmVo confirmVo) {
 		String ticket = UUID.randomUUID().toString();
 		redisTemplate.opsForValue()
 			.set(PRE_RECHARGE + ticket, confirmVo, 10, TimeUnit.MINUTES);
+		return ticket;
 	}
 }

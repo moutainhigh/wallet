@@ -154,7 +154,7 @@ public class SeniorWalletTest extends WalletBaseTest {
 		Map<String, Object> result = postAndValidateSpecCode(BASE_URL,
 			UrlConstant.WALLET_SENIOR_PRE_BIND_BANK_CARD, params,
 			1001);
-		log.info("", result);
+		log.info("{}", result);
 	}
 
 	/**

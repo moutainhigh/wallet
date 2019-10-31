@@ -16,8 +16,14 @@ public class WithdrawRequest extends  AbstractApiRequest {
   @ApiModelProperty("应用令牌")
   private String accessToken ;
 
-  @ApiModelProperty("充值内容，参考WithdrawReq结构体")
-  private String withdrawReq ;
+  @ApiModelProperty("金额")
+  private Long amount ;
+
+  @ApiModelProperty("银行卡id")
+  private Long cardId ;
+
+  @ApiModelProperty("钱包id")
+  private Long walletId ;
 
 
   @Override
@@ -27,7 +33,7 @@ public class WithdrawRequest extends  AbstractApiRequest {
 
   @Override
   public Class<?> getResponseModelClass() {
-    return WalletOrder.class;
+    return WithdrawResp.class;
   }
 
   @Override
@@ -36,8 +42,14 @@ public class WithdrawRequest extends  AbstractApiRequest {
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
       }
-      if(withdrawReq != null){
-        parameters.put("withdraw_req", withdrawReq.toString());
+      if(amount != null){
+        parameters.put("amount", amount.toString());
+      }
+      if(cardId != null){
+        parameters.put("card_id", cardId.toString());
+      }
+      if(walletId != null){
+        parameters.put("wallet_id", walletId.toString());
       }
     return parameters;
   }

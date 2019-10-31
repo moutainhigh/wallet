@@ -22,6 +22,9 @@ public class WalletCollectResp  {
     @ApiModelProperty("业务凭证号")
     private String bizNo ;
 
+    @ApiModelProperty("业务标识。1: 有退款 2: 已记流水")
+    private Integer bizTag ;
+
     @ApiModelProperty("创建日期")
     private String createTime ;
 
@@ -40,9 +43,6 @@ public class WalletCollectResp  {
     @ApiModelProperty("1:未锁 2：锁定")
     private Integer locked ;
 
-    @ApiModelProperty("最大尝试次数")
-    private Integer maxTryTimes ;
-
     @ApiModelProperty("1:已通知技术 2:已通知业务")
     private Integer notified ;
 
@@ -58,8 +58,14 @@ public class WalletCollectResp  {
     @ApiModelProperty("开始时间")
     private String startTime ;
 
-    @ApiModelProperty("交易状态。 1: 待发送，2：进行中，3：交易成功，4：交易失败(确切失败)")
+    @ApiModelProperty("交易状态。 2：进行中，3：交易成功，4：交易失败")
     private Integer status ;
+
+    @ApiModelProperty("业务票据")
+    private String ticket ;
+
+    @ApiModelProperty("交易编号")
+    private String tradeNo ;
 
     @ApiModelProperty("通道错误码")
     private String tunnelErrCode ;

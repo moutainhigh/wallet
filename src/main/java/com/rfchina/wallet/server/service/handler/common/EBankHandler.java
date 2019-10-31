@@ -16,6 +16,7 @@ import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.PayTuple;
 import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
+import com.rfchina.wallet.server.model.ext.WithdrawResp;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import java.util.List;
 
@@ -88,7 +89,7 @@ public abstract class EBankHandler {
 	/**
 	 * 提现
 	 */
-	public WalletWithdraw withdraw(WalletOrder order, WalletWithdraw withdraw) {
+	public WithdrawResp withdraw(WalletOrder order, WalletWithdraw withdraw) {
 		throw new RuntimeException();
 	}
 

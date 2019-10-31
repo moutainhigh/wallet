@@ -13,6 +13,9 @@ import java.util.ArrayList;
 */
 @Data
 public class WalletClearing  {
+    @ApiModelProperty("金额")
+    private Long amount ;
+
     @ApiModelProperty("分帐id")
     private Long collectInfoId ;
 

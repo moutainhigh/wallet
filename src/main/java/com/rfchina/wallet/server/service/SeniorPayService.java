@@ -1,11 +1,13 @@
 package com.rfchina.wallet.server.service;
 
 import com.rfchina.biztools.generate.IdGenerator;
+import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.platform.common.utils.EnumUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
 import com.rfchina.wallet.domain.misc.EnumDef.BizValidateType;
+import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletCardStatus;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletCard;
@@ -43,6 +45,7 @@ import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
 import com.rfchina.wallet.server.model.ext.SettleResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.model.ext.WithdrawReq;
+import com.rfchina.wallet.server.model.ext.WithdrawResp;
 import com.rfchina.wallet.server.msic.EnumWallet.ChannelType;
 import com.rfchina.wallet.server.msic.EnumWallet.ClearInfoStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.ClearingStatus;
@@ -70,7 +73,7 @@ public class SeniorPayService {
 	public static final String PREFIX_AGENT_PAY = "WO";
 	public static final String PREFIX_COLLECT = "WC";
 	public static final String PREFIX_RECHARGE = "WR";
-	public static final String PREFIX_WITHDRAW = "WW";
+	public static final String PREFIX_WITHDRAW = "WD";
 
 	@Autowired
 	private HandlerHelper handlerHelper;
@@ -123,7 +126,14 @@ public class SeniorPayService {
 	/**
 	 * 充值
 	 */
-	public RechargeResp recharge(RechargeReq req) {
+	public RechargeResp recharge(Long walletId, WalletCard walletCard, Long amount) {
+		// 检查钱包
+		Wallet payerWallet = walletDao.selectByPrimaryKey(walletId);
+		checkWalletStatus(payerWallet);
+
+		// 检查银行卡状态
+		checkCard(walletCard, payerWallet);
+
 		// 工单记录
 		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> {
 			return walletOrderDao.selectCountByBatchNo(id) == 0;
@@ -135,10 +145,10 @@ public class SeniorPayService {
 		WalletOrder order = WalletOrder.builder()
 			.orderNo(orderNo)
 			.batchNo(batchNo)
-			.bizNo(req.getBizNo())
-			.walletId(req.getPayerWalletId())
+			.bizNo(IdGenerator.createBizId(PREFIX_RECHARGE, 19, (id) -> true))
+			.walletId(walletId)
 			.type(OrderType.RECHARGE.getValue())
-			.amount(req.getAmount())
+			.amount(amount)
 			.progress(GwProgress.WAIT_SEND.getValue())
 			.status(OrderStatus.WAITTING.getValue())
 			.tunnelType(TunnelType.YUNST.getValue())
@@ -146,11 +156,15 @@ public class SeniorPayService {
 			.build();
 		walletOrderDao.insertSelective(order);
 
-		// 充值记录
-		WalletPayMethod payMethod = req.getWalletPayMethod();
-		Wallet payerWallet = walletDao.selectByPrimaryKey(req.getPayerWalletId());
-		checkWalletStatus(payerWallet);
+		// 支付方式
+		BankCard bankCard = new BankCard();
+		bankCard.setBankCardNo(walletCard.getBankAccount());
+		bankCard.setAmount(amount);
+		bankCard.setPayType(CollectPayType.BANKCARD.getValue());
+		WalletPayMethod payMethod = new WalletPayMethod();
+		payMethod.setBankCard(bankCard);
 
+		// 充值记录
 		WalletRecharge recharge = WalletRecharge.builder()
 			.orderId(order.getId())
 			.payerWalletId(payerWallet.getId())
@@ -167,18 +181,19 @@ public class SeniorPayService {
 		return handler.recharge(order, recharge);
 	}
 
-	private void checkWalletStatus(Wallet payerWallet) {
-		Optional.ofNullable(payerWallet)
-			.filter(wallet -> wallet.getStatus() == WalletStatus.ACTIVE.getValue())
-			.orElseThrow(
-				() -> new WalletResponseException(EnumWalletResponseCode.WALLET_STATUS_ERROR));
-	}
 
 
 	/**
 	 * 提现
 	 */
-	public WalletOrder withdraw(WithdrawReq req) {
+	public WithdrawResp withdraw(Long walletId, WalletCard walletCard, Long amount) {
+		// 检查钱包状态
+		Wallet payerWallet = walletDao.selectByPrimaryKey(walletId);
+		checkWalletStatus(payerWallet);
+
+		// 检查银行卡状态
+		checkCard(walletCard, payerWallet);
+
 		// 工单记录
 		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> {
 			return walletOrderDao.selectCountByBatchNo(id) == 0;
@@ -190,10 +205,10 @@ public class SeniorPayService {
 		WalletOrder order = WalletOrder.builder()
 			.orderNo(orderNo)
 			.batchNo(batchNo)
-			.bizNo(req.getBizNo())
-			.walletId(req.getPayerWalletId())
+			.bizNo(IdGenerator.createBizId(PREFIX_WITHDRAW, 19, (id) -> true))
+			.walletId(walletId)
 			.type(OrderType.WITHDRAWAL.getValue())
-			.amount(req.getAmount())
+			.amount(amount)
 			.progress(GwProgress.WAIT_SEND.getValue())
 			.status(OrderStatus.WAITTING.getValue())
 			.tunnelType(TunnelType.YUNST.getValue())
@@ -201,20 +216,7 @@ public class SeniorPayService {
 			.build();
 		walletOrderDao.insertSelective(order);
 
-		// 检查钱包状态
-		Wallet payerWallet = walletDao.selectByPrimaryKey(req.getPayerWalletId());
-		checkWalletStatus(payerWallet);
-
-		// 检查银行卡状态
-		WalletCard walletCard = walletCardDao.selectByPrimaryKey(req.getCardId());
-		Optional.ofNullable(walletCard)
-			.filter(card -> card.getWalletId().longValue() == payerWallet.getId().longValue()
-				&& card.getStatus().byteValue() == 1)
-			.orElseThrow(
-				() -> new WalletResponseException(EnumWalletResponseCode.BANK_CARD_STATUS_ERROR));
-
 		// 充值记录
-
 		WalletWithdraw withdraw = WalletWithdraw.builder()
 			.orderId(order.getId())
 			.cardId(walletCard.getId())
@@ -227,8 +229,7 @@ public class SeniorPayService {
 
 		// 充值
 		EBankHandler handler = handlerHelper.selectByTunnelType(order.getTunnelType());
-		handler.withdraw(order, withdraw);
-		return order;
+		return handler.withdraw(order, withdraw);
 	}
 
 	/**
@@ -531,6 +532,21 @@ public class SeniorPayService {
 		if (handler instanceof YunstBizHandler) {
 			((YunstBizHandler) handler).smsConfirm(order, tradeNo, verifyCode, ip);
 		}
+	}
+
+	private void checkCard(WalletCard walletCard, Wallet payerWallet) {
+		Optional.ofNullable(walletCard)
+			.filter(card -> card.getWalletId().longValue() == payerWallet.getId().longValue()
+				&& card.getStatus().byteValue() == EnumWalletCardStatus.BIND.getValue().byteValue())
+			.orElseThrow(
+				() -> new WalletResponseException(EnumWalletResponseCode.BANK_CARD_STATUS_ERROR));
+	}
+
+	private void checkWalletStatus(Wallet payerWallet) {
+		Optional.ofNullable(payerWallet)
+			.filter(wallet -> wallet.getStatus() == WalletStatus.ACTIVE.getValue())
+			.orElseThrow(
+				() -> new WalletResponseException(EnumWalletResponseCode.WALLET_STATUS_ERROR));
 	}
 
 }

@@ -9,9 +9,9 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 
 
-/** 高级钱包-短信确认 */
+/** 高级钱包-充值确认 */
 @Builder
-public class SmsConfirmRequest extends  AbstractApiRequest {
+public class PassWordConfirmRequest extends  AbstractApiRequest {
 
   @ApiModelProperty("应用令牌")
   private String accessToken ;
@@ -19,16 +19,16 @@ public class SmsConfirmRequest extends  AbstractApiRequest {
   @ApiModelProperty("客户ip")
   private String customerIp ;
 
+  @ApiModelProperty("回调url")
+  private String jumpUrl ;
+
   @ApiModelProperty("业务令牌")
   private String ticket ;
-
-  @ApiModelProperty("短信验证码")
-  private String verifyCode ;
 
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/senior/sms_confirm";
+    return "/wallet_server/v1/m/senior/password_confirm";
   }
 
   @Override
@@ -45,11 +45,11 @@ public class SmsConfirmRequest extends  AbstractApiRequest {
       if(customerIp != null){
         parameters.put("customer_ip", customerIp.toString());
       }
+      if(jumpUrl != null){
+        parameters.put("jump_url", jumpUrl.toString());
+      }
       if(ticket != null){
         parameters.put("ticket", ticket.toString());
-      }
-      if(verifyCode != null){
-        parameters.put("verify_code", verifyCode.toString());
       }
     return parameters;
   }

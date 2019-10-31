@@ -28,4 +28,7 @@ public class RechargeResp extends WalletOrder {
 	@ApiModelProperty(value = "交易编号")
 	private String tradeNo;
 
+	@ApiModelProperty(value = "业务票据")
+	private String ticket;
+
 }

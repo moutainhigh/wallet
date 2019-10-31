@@ -9,10 +9,10 @@ import java.util.ArrayList;
 
     
 /**
-* WalletOrder
+* WithdrawResp
 */
 @Data
-public class WalletOrder  {
+public class WithdrawResp  {
     @ApiModelProperty("金额")
     private Long amount ;
 
@@ -24,6 +24,9 @@ public class WalletOrder  {
 
     @ApiModelProperty("业务标识。1: 有退款 2: 已记流水")
     private Integer bizTag ;
+
+    @ApiModelProperty("商户系统用户标识")
+    private String bizUserId ;
 
     @ApiModelProperty("创建日期")
     private String createTime ;
@@ -57,6 +60,9 @@ public class WalletOrder  {
 
     @ApiModelProperty("交易状态。 2：进行中，3：交易成功，4：交易失败")
     private Integer status ;
+
+    @ApiModelProperty("业务票据")
+    private String ticket ;
 
     @ApiModelProperty("通道错误码")
     private String tunnelErrCode ;

@@ -1,6 +1,8 @@
 package com.rfchina.wallet.server.service;
 
 import com.rfchina.platform.common.utils.JsonUtil;
+import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
+import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletCollect;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletRefund;
@@ -43,6 +45,9 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	@Autowired
 	private WalletOrderExtDao walletOrderDao;
 
+	@Autowired
+	private WalletCardDao walletCardDao;
+
 
 	@Spy
 	@Autowired
@@ -53,6 +58,7 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 
 	private Long payerWalletId = 10035L;
 	private Long platWalletId = 10000L;
+	private Long cardId = 12L;
 
 
 	/**
@@ -71,30 +77,8 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	 */
 	@Test
 	public void recharge() {
-
-		BankCard bankCard = BankCard.builder()
-			.payType(CollectPayType.BANKCARD.getValue())
-			.bankCardNo("6214850201481956")
-			.amount(1L)
-			.build();
-
-//		CodePay codePay = CodePay.builder()
-//			.payType(CollectPayType.CODEPAY.getValue())
-//			.authcode("134535230243995898")
-//			.amount(1L)
-//			.build();
-
-		RechargeReq req = RechargeReq.builder()
-			.bizNo(String.valueOf(System.currentTimeMillis()))
-			.payerWalletId(payerWalletId)
-			.amount(1L)
-			.fee(0L)
-			.expireTime(null)
-			.industryCode("1010")
-			.industryName("保险代理")
-			.walletPayMethod(WalletPayMethod.builder().bankCard(bankCard).build())
-			.build();
-		RechargeResp resp = seniorPayService.recharge(req);
+		WalletCard walletCard = walletCardDao.selectByPrimaryKey(cardId);
+		RechargeResp resp = seniorPayService.recharge(payerWalletId, walletCard, 1L);
 		log.info("recharge.resp = {}", JsonUtil.toJSON(resp));
 	}
 
@@ -107,25 +91,10 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 
 	@Test
 	public void withdraw() {
-		WithdrawReq req = WithdrawReq.builder()
-			.bizNo(String.valueOf(System.currentTimeMillis()))
-			.payerWalletId(payerWalletId)
-			.cardId(12L)
-			.amount(1L)
-			.fee(0L)
-			.expireTime(null)
-			.industryCode("1010")
-			.industryName("保险代理")
-			.build();
-		WalletOrder withdraw = seniorPayService.withdraw(req);
+		WalletCard walletCard = walletCardDao.selectByPrimaryKey(cardId);
+		WalletOrder withdraw = seniorPayService.withdraw(payerWalletId, walletCard, 1L);
 		log.info("withdraw.resp = {}", withdraw);
 	}
-
-	@Test
-	public void withdrawConfirm() {
-		seniorPayService.smsConfirm(1000207L, "", "982604", "113.194.30.199");
-	}
-
 
 	/**
 	 * 代收

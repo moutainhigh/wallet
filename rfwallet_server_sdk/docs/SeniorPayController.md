@@ -21,6 +21,7 @@
   "msg": ""//消息
    , "data":  {
     clearings: [ {
+    amount:""  , //金额
     collect_info_id:""  , //分帐id
     collect_order_no:""  , //代收单号
     create_time:""  , //创建日期
@@ -32,18 +33,18 @@
     amount:""  , //金额
     batch_no:""  , //钱包批次号
     biz_no:""  , //业务凭证号
+    biz_tag:""  , //业务标识。1: 有退款 2: 已记流水
     create_time:""  , //创建日期
     curr_try_times:""  , //当前尝试次数
     end_time:""  , //结束时间
     expire_time:""  , //过期时间
     id:""  , //id
     locked:""  , //1:未锁 2：锁定
-    max_try_times:""  , //最大尝试次数
     notified:""  , //1:已通知技术 2:已通知业务
     order_no:""  , //订单号
     progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
     start_time:""  , //开始时间
-    status:""  , //交易状态。 1: 待发送，2：进行中，3：交易成功，4：交易失败(确切失败)
+    status:""  , //交易状态。 2：进行中，3：交易成功，4：交易失败
     tunnel_err_code:""  , //通道错误码
     tunnel_err_msg:""  , //系统错误信息
     tunnel_order_no:""  , //渠道订单号
@@ -80,19 +81,21 @@
     amount:""  , //金额
     batch_no:""  , //钱包批次号
     biz_no:""  , //业务凭证号
+    biz_tag:""  , //业务标识。1: 有退款 2: 已记流水
     create_time:""  , //创建日期
     curr_try_times:""  , //当前尝试次数
     end_time:""  , //结束时间
     expire_time:""  , //过期时间
     id:""  , //id
     locked:""  , //1:未锁 2：锁定
-    max_try_times:""  , //最大尝试次数
     notified:""  , //1:已通知技术 2:已通知业务
     order_no:""  , //订单号
     pay_info:""  , //扫码支付信息/ JS 支付串信息/微信原生 H5 支付串信息
     progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
     start_time:""  , //开始时间
-    status:""  , //交易状态。 1: 待发送，2：进行中，3：交易成功，4：交易失败(确切失败)
+    status:""  , //交易状态。 2：进行中，3：交易成功，4：交易失败
+    ticket:""  , //业务票据
+    trade_no:""  , //交易编号
     tunnel_err_code:""  , //通道错误码
     tunnel_err_msg:""  , //系统错误信息
     tunnel_order_no:""  , //渠道订单号
@@ -129,18 +132,18 @@
     amount:""  , //金额
     batch_no:""  , //钱包批次号
     biz_no:""  , //业务凭证号
+    biz_tag:""  , //业务标识。1: 有退款 2: 已记流水
     create_time:""  , //创建日期
     curr_try_times:""  , //当前尝试次数
     end_time:""  , //结束时间
     expire_time:""  , //过期时间
     id:""  , //id
     locked:""  , //1:未锁 2：锁定
-    max_try_times:""  , //最大尝试次数
     notified:""  , //1:已通知技术 2:已通知业务
     order_no:""  , //订单号
     progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
     start_time:""  , //开始时间
-    status:""  , //交易状态。 1: 待发送，2：进行中，3：交易成功，4：交易失败(确切失败)
+    status:""  , //交易状态。 2：进行中，3：交易成功，4：交易失败
     tunnel_err_code:""  , //通道错误码
     tunnel_err_msg:""  , //系统错误信息
     tunnel_order_no:""  , //渠道订单号
@@ -165,7 +168,9 @@
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
 |access_token|是|应用令牌|
-|recharge_req|是|充值内容，参考RechargeReq结构体|
+|amount|是|金额|
+|card_id|是|银行卡id|
+|wallet_id|是|钱包id|
 
 返回数据
 ```
@@ -176,6 +181,7 @@
     amount:""  , //金额
     batch_no:""  , //钱包批次号
     biz_no:""  , //业务凭证号
+    biz_tag:""  , //业务标识。1: 有退款 2: 已记流水
     create_time:""  , //创建日期
     curr_try_times:""  , //当前尝试次数
     end_time:""  , //结束时间
@@ -183,7 +189,6 @@
     extend_info:""  , //扩展参数
     id:""  , //id
     locked:""  , //1:未锁 2：锁定
-    max_try_times:""  , //最大尝试次数
     notified:""  , //1:已通知技术 2:已通知业务
     order_no:""  , //订单号
     password_confirm:""  , //密码验证
@@ -191,7 +196,8 @@
     progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
     sms_confirm:""  , //短信验证
     start_time:""  , //开始时间
-    status:""  , //交易状态。 1: 待发送，2：进行中，3：交易成功，4：交易失败(确切失败)
+    status:""  , //交易状态。 2：进行中，3：交易成功，4：交易失败
+    ticket:""  , //业务票据
     trade_no:""  , //交易编号
     tunnel_err_code:""  , //通道错误码
     tunnel_err_msg:""  , //系统错误信息
@@ -231,18 +237,18 @@
     amount:""  , //金额
     batch_no:""  , //钱包批次号
     biz_no:""  , //业务凭证号
+    biz_tag:""  , //业务标识。1: 有退款 2: 已记流水
     create_time:""  , //创建日期
     curr_try_times:""  , //当前尝试次数
     end_time:""  , //结束时间
     expire_time:""  , //过期时间
     id:""  , //id
     locked:""  , //1:未锁 2：锁定
-    max_try_times:""  , //最大尝试次数
     notified:""  , //1:已通知技术 2:已通知业务
     order_no:""  , //订单号
     progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
     start_time:""  , //开始时间
-    status:""  , //交易状态。 1: 待发送，2：进行中，3：交易成功，4：交易失败(确切失败)
+    status:""  , //交易状态。 2：进行中，3：交易成功，4：交易失败
     tunnel_err_code:""  , //通道错误码
     tunnel_err_msg:""  , //系统错误信息
     tunnel_order_no:""  , //渠道订单号
@@ -255,7 +261,7 @@
 }
 ```
 
-###  高级钱包-充值确认
+###  高级钱包-短信确认
 
 请求地址: /wallet_server/v1/m/senior/sms_confirm
 
@@ -268,7 +274,7 @@
 |:-- |:-- |:--   |
 |access_token|是|应用令牌|
 |customer_ip|是|客户ip|
-|ticket|是|充值业务令牌|
+|ticket|是|业务令牌|
 |verify_code|是|短信验证码|
 
 返回数据
@@ -292,7 +298,9 @@
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
 |access_token|是|应用令牌|
-|withdraw_req|是|充值内容，参考WithdrawReq结构体|
+|amount|是|金额|
+|card_id|是|银行卡id|
+|wallet_id|是|钱包id|
 
 返回数据
 ```
@@ -303,18 +311,20 @@
     amount:""  , //金额
     batch_no:""  , //钱包批次号
     biz_no:""  , //业务凭证号
+    biz_tag:""  , //业务标识。1: 有退款 2: 已记流水
+    biz_user_id:""  , //商户系统用户标识
     create_time:""  , //创建日期
     curr_try_times:""  , //当前尝试次数
     end_time:""  , //结束时间
     expire_time:""  , //过期时间
     id:""  , //id
     locked:""  , //1:未锁 2：锁定
-    max_try_times:""  , //最大尝试次数
     notified:""  , //1:已通知技术 2:已通知业务
     order_no:""  , //订单号
     progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
     start_time:""  , //开始时间
-    status:""  , //交易状态。 1: 待发送，2：进行中，3：交易成功，4：交易失败(确切失败)
+    status:""  , //交易状态。 2：进行中，3：交易成功，4：交易失败
+    ticket:""  , //业务票据
     tunnel_err_code:""  , //通道错误码
     tunnel_err_msg:""  , //系统错误信息
     tunnel_order_no:""  , //渠道订单号
