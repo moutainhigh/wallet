@@ -2,10 +2,13 @@ package com.rfchina.wallet.server.service;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.platform.common.json.ObjectSetter;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.misc.EnumDef;
+import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.model.ChannelNotify;
+import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.server.bank.yunst.response.RecallResp;
 import com.rfchina.wallet.server.bank.yunst.response.RpsResp;
 import com.rfchina.wallet.server.bank.yunst.response.YunstNotify;
@@ -22,7 +25,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBizHandler;
-
 
 
 @Slf4j
@@ -79,11 +81,11 @@ public class NotifyService {
 					yunstNotifyHandler.handleSignContractResult(channelNotify, rtnVal);
 				}
 			} else if (YunstMethodName.SIGN_BALANCE_PROTOCOL.getValue().equals(methodName)) {
-					String rtnValJson = JsonUtil.toJSON(yunstNotify.getReturnValue());
-					YunstNotify.BalanceContractResult rtnVal = JsonUtil
-						.toObject(rtnValJson, YunstNotify.BalanceContractResult.class,
-							getObjectMapper());
-					yunstNotifyHandler.handleSignBalanceContractResult(channelNotify, rtnVal);
+				String rtnValJson = JsonUtil.toJSON(yunstNotify.getReturnValue());
+				YunstNotify.BalanceContractResult rtnVal = JsonUtil
+					.toObject(rtnValJson, YunstNotify.BalanceContractResult.class,
+						getObjectMapper());
+				yunstNotifyHandler.handleSignBalanceContractResult(channelNotify, rtnVal);
 
 			} else {
 				log.error("云商通回调,未知method参数:{}", methodName);
@@ -117,7 +119,6 @@ public class NotifyService {
 	}
 
 
-
 	private ObjectSetter<ObjectMapper> getObjectMapper() {
 		return objectMapper -> {
 			objectMapper.setTimeZone(TimeZone.getDefault());
@@ -125,7 +126,8 @@ public class NotifyService {
 		};
 	}
 
-	public void handleOrderResult(ChannelNotify channelNotify, OrderType type) {
+	@PostMq(routingKey = MqConstant.ORDER_STATUS_CHANGE)
+	public WalletOrder handleOrderResult(ChannelNotify channelNotify, OrderType type) {
 
 		RecallResp recallResp = JsonUtil.toObject(channelNotify.getContent(), RecallResp.class,
 			objectMapper -> {
@@ -135,7 +137,8 @@ public class NotifyService {
 			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		});
 
-		yunstBizHandler.updateOrderStatus(rpsResp.getReturnValue().getBizOrderNo());
+		return yunstBizHandler.updateOrderStatus(rpsResp.getReturnValue().getBizOrderNo());
+
 	}
 
 

@@ -59,8 +59,8 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	 * 更新订单状态
 	 */
 	@Test
-	public void updateOrderStatus(){
-		String orderNo = "WC20191030371129856";
+	public void updateOrderStatus() {
+		String orderNo = "WC20191031310537642";
 		yunstBizHandler.updateOrderStatus(orderNo);
 
 	}
@@ -123,7 +123,7 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 
 	@Test
 	public void withdrawConfirm() {
-		seniorPayService.smsConfirm(1000207L, "","982604", "113.194.30.199");
+		seniorPayService.smsConfirm(1000207L, "", "982604", "113.194.30.199");
 	}
 
 
@@ -135,11 +135,11 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 		Balance balance = Balance.builder()
 			.amount(1L)
 			.build();
-		CodePay codepay = CodePay.builder()
-			.payType((byte) 41)
-			.authcode("134753097912258779")
-			.amount(1L)
-			.build();
+//		CodePay codepay = CodePay.builder()
+//			.payType((byte) 41)
+//			.authcode("134753097912258779")
+//			.amount(1L)
+//			.build();
 		Reciever reciever = Reciever.builder()
 			.walletId(platWalletId)
 			.amount(1L)
@@ -155,10 +155,10 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 			.industryCode("1010")
 			.industryName("保险代理")
 			.recievers(Arrays.asList(reciever))
-			.walletPayMethod(WalletPayMethod.builder().codePay(codepay).build())
+			.walletPayMethod(WalletPayMethod.builder().balance(balance).build())
 			.build();
 		WalletCollectResp collect = seniorPayService.collect(req);
-		log.info("预代收 {}", collect);
+		log.info("预代收 {}", JsonUtil.toJSON(collect));
 	}
 
 
@@ -169,8 +169,9 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 		reciever.setAmount(1L);
 		reciever.setFeeAmount(0L);
 		WalletOrder order = walletOrderDao.selectByOrderNo("WC20191030201675783");
-		SettleResp resp = seniorPayService.agentPay(order,String.valueOf(System.currentTimeMillis())
-			, Arrays.asList(reciever));
+		SettleResp resp = seniorPayService
+			.agentPay(order, String.valueOf(System.currentTimeMillis())
+				, Arrays.asList(reciever));
 		log.info("agent pay {}", resp);
 	}
 

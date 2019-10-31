@@ -8,6 +8,7 @@ import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EnumUtil;
 import com.rfchina.platform.common.utils.JsonUtil;
+import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.MoneyLogMapper;
 import com.rfchina.wallet.domain.misc.EnumDef.BizValidateType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletLevel;
@@ -533,14 +534,14 @@ public class YunstBizHandler extends EBankHandler {
 	/**
 	 * 更新充值状态
 	 */
-	public void updateOrderStatus(String orderNo) {
+	public WalletOrder updateOrderStatus(String orderNo) {
 		WalletOrder order = walletOrderDao.selectByOrderNo(orderNo);
 
 		GetOrderDetailResp tunnelOrder = queryOrderDetail(orderNo);
 		if (!order.getTunnelOrderNo().equals(tunnelOrder.getOrderNo())) {
 			log.error("渠道单号不匹配， recharge = {} , channelOrderNo = {}", order,
 				tunnelOrder.getBizOrderNo());
-			return;
+			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_STATUS_QUERY_ERROR);
 		}
 		// 通道状态与时间
 		order.setTunnelStatus(String.valueOf(tunnelOrder.getOrderStatus()));
@@ -600,6 +601,8 @@ public class YunstBizHandler extends EBankHandler {
 			order.setBizTag(EnumBizTag.RECORD.and(order.getBizTag()));
 			walletOrderDao.updateByPrimaryKeySelective(order);
 		}
+
+		return order;
 	}
 
 
