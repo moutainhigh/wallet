@@ -71,7 +71,6 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 
 	}
 
-
 	/**
 	 * 充值
 	 */
@@ -101,14 +100,20 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	 */
 	@Test
 	public void collect() {
-		Balance balance = Balance.builder()
-			.amount(1L)
-			.build();
-//		CodePay codepay = CodePay.builder()
-//			.payType((byte) 41)
-//			.authcode("134753097912258779")
+//		Balance balance = Balance.builder()
 //			.amount(1L)
 //			.build();
+		CodePay codePay = CodePay.builder()
+			.payType((byte) 41)
+			.authcode("134753097912258779")
+			.amount(1L)
+			.build();
+//		BankCard bankCard = BankCard.builder()
+//			.payType(CollectPayType.BANKCARD.getValue())
+//			.bankCardNo("6214850201481956")
+//			.amount(1L)
+//			.build();
+
 		Reciever reciever = Reciever.builder()
 			.walletId(platWalletId)
 			.amount(1L)
@@ -124,7 +129,7 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 			.industryCode("1010")
 			.industryName("保险代理")
 			.recievers(Arrays.asList(reciever))
-			.walletPayMethod(WalletPayMethod.builder().balance(balance).build())
+			.walletPayMethod(WalletPayMethod.builder().codePay(codePay).build())
 			.build();
 		WalletCollectResp collect = seniorPayService.collect(req);
 		log.info("预代收 {}", JsonUtil.toJSON(collect));

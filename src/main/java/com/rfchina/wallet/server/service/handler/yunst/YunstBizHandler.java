@@ -340,8 +340,7 @@ public class YunstBizHandler extends EBankHandler {
 			.recieverList(receives)
 			.amount(order.getAmount())
 			.fee(0L)
-			.validateType(collect.getPayMethod() == ChannelType.BALANCE.getValue() ?
-				BizValidateType.PASSWORD.getValue().longValue() : 0L)
+			.validateType(collect.getValidateType().longValue())
 			.frontUrl(null)
 			.backUrl(configService.getYunstRecallPrefix() + UrlConstant.YUNST_ORDER_RECALL)
 			.ordErexpireDatetime(expireTime)

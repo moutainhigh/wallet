@@ -182,7 +182,6 @@ public class SeniorPayService {
 	}
 
 
-
 	/**
 	 * 提现
 	 */
@@ -265,11 +264,16 @@ public class SeniorPayService {
 		walletOrderDao.insertSelective(order);
 
 		// 生成代收单
+		Byte validateType =
+			req.getWalletPayMethod().getBalance() != null ? BizValidateType.PASSWORD.getValue()
+				: (req.getWalletPayMethod().getBankCard() != null ? BizValidateType.SMS.getValue()
+					: 0);
 		WalletCollect collect = WalletCollect.builder()
 			.orderId(order.getId())
 			.agentWalletId(agentEntWalletId)
 			.refundLimit(req.getAmount())
 			.payMethod(req.getWalletPayMethod().getMethods())
+			.validateType(validateType)
 			.createTime(new Date())
 			.build();
 		walletCollectDao.insertSelective(collect);
