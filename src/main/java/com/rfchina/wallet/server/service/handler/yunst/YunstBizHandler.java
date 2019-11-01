@@ -591,14 +591,12 @@ public class YunstBizHandler extends EBankHandler {
 					builder.creditAmount(order.getAmount());
 				}
 				if (order.getType().byteValue() == OrderType.REFUND.getValue()) {
-					List<WalletRefund> refunds = walletRefundDao.selectByOrderId(order.getId());
-					refunds.forEach(refund->{
-						List<WalletRefundDetail> details = walletRefundDetailDao
-							.selectByRefundId(refund.getId());
-						details.forEach(detail -> {
+					WalletRefund refund = walletRefundDao.selectByOrderId(order.getId());
+					List<WalletRefundDetail> details = walletRefundDetailDao
+						.selectByRefundId(refund.getId());
+					details.forEach(detail -> {
 						walletCollectInfoDao
 							.accuRefundAmount(detail.getCollectInfoId(), detail.getAmount());
-						});
 					});
 
 				}

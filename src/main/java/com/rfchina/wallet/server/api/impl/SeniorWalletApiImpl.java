@@ -99,14 +99,14 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 		return walletChannel;
 	}
 
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
 	@Override
-	public String seniorWalletPersonChangeBindPhone(String accessToken, Byte source,
-		Integer channelType,
-		Long walletId, String realName, String idNo, String oldPhone) {
+	public String personChangeBindPhone(String accessToken,
+		Long walletId, String realName, String idNo, String oldPhone, String jumpUrl) {
 		try {
 			return seniorWalletService
-				.seniorWalletPersonChangeBindPhone(walletId, realName, idNo,
-					oldPhone);
+				.personChangeBindPhone(walletId, realName, idNo, oldPhone, jumpUrl);
 		} catch (Exception e) {
 			log.error("高级钱包返回个人修改手机页面链接失败, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,

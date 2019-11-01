@@ -178,8 +178,8 @@ public class SeniorWalletService {
 	/**
 	 * 高级钱包个人修改绑定手机
 	 */
-	public String seniorWalletPersonChangeBindPhone(Long walletId, String realName, String idNo,
-		String mobile) throws Exception {
+	public String personChangeBindPhone(Long walletId, String realName, String idNo,
+		String mobile,String jumpUrl) throws Exception {
 		WalletChannel walletChannel = walletChannelDao
 			.selectByChannelTypeAndWalletId(ChannelType.YUNST.getValue().intValue(), walletId);
 		if (walletChannel == null) {
@@ -188,7 +188,7 @@ public class SeniorWalletService {
 				"未创建云商通用户");
 		}
 		return yunstUserHandler.modifyPhone(walletChannel.getBizUserId(), realName, mobile,
-			EnumDef.EnumIdType.ID_CARD.getValue().longValue(), idNo);
+			EnumDef.EnumIdType.ID_CARD.getValue().longValue(), idNo, jumpUrl);
 	}
 
 	/**

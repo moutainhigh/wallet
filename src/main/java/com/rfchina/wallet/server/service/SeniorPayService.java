@@ -282,7 +282,6 @@ public class SeniorPayService {
 				.budgetAmount(reciever.getAmount())
 				.clearAmount(0L)
 				.refundAmount(0L)
-//				.status(OrderStatus.WAITTING.getValue())
 				.createTime(new Date())
 				.build();
 			walletCollectInfoDao.insertSelective(clearInfo);
@@ -325,7 +324,7 @@ public class SeniorPayService {
 			.selectByCollectId(collectOrder.getId());
 
 		// 匹配原始分账记录
-		WalletCollectInfo clearInfo = collectInfos.stream()
+		WalletCollectInfo collectInfo = collectInfos.stream()
 			.filter(
 				clear -> clear.getPayeeWalletId().longValue() == receiver.getWalletId().longValue())
 			.findFirst()
@@ -333,8 +332,8 @@ public class SeniorPayService {
 				EnumWalletResponseCode.AGENT_PAY_RECEIVER_NOT_MATCH));
 
 		// 代付金额不超过剩余代付
-		if (clearInfo.getBudgetAmount() < clearInfo.getClearAmount()
-			+ clearInfo.getRefundAmount() + receiver.getAmount()) {
+		if (collectInfo.getBudgetAmount() < collectInfo.getClearAmount()
+			+ collectInfo.getRefundAmount() + receiver.getAmount()) {
 			throw new WalletResponseException(
 				EnumWalletResponseCode.AGENT_PAY_AMOUNT_OVER_LIMIT);
 		}
@@ -342,7 +341,7 @@ public class SeniorPayService {
 		WalletClearing clearing = WalletClearing.builder()
 			.orderId(order.getId())
 			.collectOrderNo(collectOrder.getOrderNo())
-			.collectInfoId(clearInfo.getId())
+			.collectInfoId(collectInfo.getId())
 			.payeeWalletId(receiver.getWalletId())
 			.amount(receiver.getAmount())
 			.createTime(new Date())

@@ -103,7 +103,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 委托扣款协议签约(生成前端H5 url)
 	 */
-	public Tuple<String,String> generateBalanceProtocolUrl(String bizUserId) throws Exception {
+	public Tuple<String, String> generateBalanceProtocolUrl(String bizUserId) throws Exception {
 		String protocolReqSn = UUID.randomUUID().toString().replaceAll("-", "");
 		YunstBalanceProtocolReq req = YunstBalanceProtocolReq.builder$()
 			.protocolReqSn(protocolReqSn)
@@ -117,7 +117,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 		String res = yunstTpl.signRequest(req);
 		String webParamUrl = configService.getYunstSignBalanceProtocolUrl() + "?" + res;
 		log.info("webParamUrl: " + webParamUrl);
-		return new Tuple<>(protocolReqSn,webParamUrl);
+		return new Tuple<>(protocolReqSn, webParamUrl);
 	}
 
 	/**
@@ -156,15 +156,14 @@ public class YunstUserHandler extends YunstBaseHandler {
 	 * 修改绑定手机
 	 */
 	public String modifyPhone(String bizUserId, String realName, String oldPhone,
-		Long identityType,
-		String identityNo) throws Exception {
+		Long identityType, String identityNo, String jumpUrl) throws Exception {
 		YunstChangeBindPhoneReq req = YunstChangeBindPhoneReq.builder$()
 			.bizUserId(bizUserId)
 			.name(realName)
 			.identityType(identityType)
 			.identityNo(RSAUtil.encrypt(identityNo))
 			.oldPhone(oldPhone)
-			.jumpUrl(configService.getYunstResultJumpUrl())
+			.jumpUrl(configService.getYunstJumpUrlPrefix() + jumpUrl)
 			.backUrl(configService.getYunstNotifybackUrl())
 			.build();
 
@@ -295,7 +294,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 	}
 
 	/**
-	 *查询余额
+	 * 查询余额
 	 */
 	public YunstQueryBalanceResult queryBalance(String bizUserId) throws Exception {
 		YunstQueryBalanceReq req = YunstQueryBalanceReq.builder$().bizUserId(bizUserId)

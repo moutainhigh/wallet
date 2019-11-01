@@ -1,10 +1,15 @@
 package com.rfchina.wallet.server.web;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.ResponseValue;
+import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.model.ChannelNotify;
+import com.rfchina.wallet.server.bank.yunst.response.RecallResp;
+import com.rfchina.wallet.server.bank.yunst.response.RpsResp;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import com.rfchina.wallet.server.service.NotifyService;
+import com.rfchina.wallet.server.service.handler.yunst.YunstBizHandler;
 import com.rfchina.wallet.server.service.handler.yunst.YunstNotifyHandler;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +26,8 @@ public class NotifyController {
 	private NotifyService notifyService;
 	@Autowired
 	private YunstNotifyHandler yunstNotifyHandler;
+	@Autowired
+	private YunstBizHandler yunstBizHandler;
 
 	@RequestMapping(value = UrlConstant.YUNST_NOTIFY)
 	@SuppressWarnings("unchecked")
@@ -45,7 +52,15 @@ public class NotifyController {
 				entry -> entry.getValue().length > 0 ? entry.getValue()[0] : null));
 
 		ChannelNotify channelNotify = notifyService.yunstNotify(params);
-		yunstNotifyHandler.handleOrderResult(channelNotify);
+		RecallResp recallResp = JsonUtil.toObject(channelNotify.getContent(), RecallResp.class,
+			objectMapper -> {
+				objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			});
+		RpsResp rpsResp = JsonUtil.toObject(recallResp.getRps(), RpsResp.class, objectMapper -> {
+			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		});
+
+		yunstBizHandler.updateOrderStatus(rpsResp.getReturnValue().getBizOrderNo());
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS.getValue(),
 			"Receive Yunst recharge recall");

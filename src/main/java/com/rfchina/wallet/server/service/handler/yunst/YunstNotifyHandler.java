@@ -154,17 +154,4 @@ public class YunstNotifyHandler {
 		}
 	}
 
-
-	public void handleOrderResult(ChannelNotify channelNotify) {
-
-		RecallResp recallResp = JsonUtil.toObject(channelNotify.getContent(), RecallResp.class,
-			objectMapper -> {
-				objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-			});
-		RpsResp rpsResp = JsonUtil.toObject(recallResp.getRps(), RpsResp.class, objectMapper -> {
-			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		});
-
-		yunstBizHandler.updateOrderStatus(rpsResp.getReturnValue().getBizOrderNo());
-	}
 }

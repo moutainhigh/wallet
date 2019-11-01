@@ -115,6 +115,9 @@ public class ConfigService {
 	@Value("${yunst.jumpUrl}")
 	private String yunstResultJumpUrl;
 
+	@Value("${yunst.jumpUrl.prefix}")
+	private String yunstJumpUrlPrefix;
+
 	@Value("${yunst.notify.backUrl}")
 	private String yunstNotifybackUrl;
 
