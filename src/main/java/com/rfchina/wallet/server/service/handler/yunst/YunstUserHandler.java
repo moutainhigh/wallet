@@ -67,10 +67,10 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 会员电子协议签约(生成前端H5 url)
 	 */
-	public String generateSignContractUrl(String bizUserId) throws Exception {
+	public String generateSignContractUrl(String bizUserId, String jumpUrl){
 		YunstSignContractReq req = YunstSignContractReq.builder$()
 			.bizUserId(bizUserId)
-			.jumpUrl(configService.getYunstResultJumpUrl())
+			.jumpUrl(configService.getYunstResultJumpUrl() + jumpUrl)
 			.backUrl(configService.getYunstNotifybackUrl())
 			.source(TERMINAL_TYPE)
 			.build();
@@ -84,14 +84,14 @@ public class YunstUserHandler extends YunstBaseHandler {
 	 * 设置支付密码(个人)
 	 */
 	public String generatePersonSetPayPasswordUrl(String bizUserId, String phone,
-		String name, Long identityType, String identityNo) throws Exception {
+		String name, Long identityType, String identityNo, String jumpUrl) throws Exception {
 		YunstSetPayPwdReq req = YunstSetPayPwdReq.builder$()
 			.bizUserId(bizUserId)
 			.name(name)
 			.phone(phone)
 			.identityType(identityType)
 			.identityNo(RSAUtil.encrypt(identityNo))
-			.jumpUrl(configService.getYunstResultJumpUrl())
+			.jumpUrl(configService.getYunstResultJumpUrl() + jumpUrl)
 			.backUrl(configService.getYunstNotifybackUrl())
 			.build();
 		String res = yunstTpl.signRequest(req);
@@ -103,14 +103,14 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 委托扣款协议签约(生成前端H5 url)
 	 */
-	public Tuple<String, String> generateBalanceProtocolUrl(String bizUserId) throws Exception {
+	public Tuple<String, String> generateBalanceProtocolUrl(String bizUserId, String jumpUrl){
 		String protocolReqSn = UUID.randomUUID().toString().replaceAll("-", "");
 		YunstBalanceProtocolReq req = YunstBalanceProtocolReq.builder$()
 			.protocolReqSn(protocolReqSn)
 			.payerId(bizUserId)
 			.receiverId(configService.getYunstReceiverId())
 			.protocolName(configService.getYunstBalanceProtocolName())
-			.jumpUrl(configService.getYunstResultJumpUrl())
+			.jumpUrl(configService.getYunstResultJumpUrl() + jumpUrl)
 			.backUrl(configService.getYunstNotifybackUrl())
 			.source(TERMINAL_TYPE)
 			.build();

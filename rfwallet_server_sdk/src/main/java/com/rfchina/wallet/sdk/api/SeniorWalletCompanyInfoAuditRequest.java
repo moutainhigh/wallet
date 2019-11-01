@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 
 
-/** 高级钱包商家资料审核（通道） */
+/** 高级钱包-商家资料审核（通道） */
 @Builder
 public class SeniorWalletCompanyInfoAuditRequest extends  AbstractApiRequest {
 
@@ -24,9 +24,6 @@ public class SeniorWalletCompanyInfoAuditRequest extends  AbstractApiRequest {
 
   @ApiModelProperty("企业信息(json)")
   private String companyBasicInfo ;
-
-  @ApiModelProperty("钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户")
-  private Integer source ;
 
   @ApiModelProperty("钱包id")
   private Long walletId ;
@@ -56,9 +53,6 @@ public class SeniorWalletCompanyInfoAuditRequest extends  AbstractApiRequest {
       }
       if(companyBasicInfo != null){
         parameters.put("company_basic_info", companyBasicInfo.toString());
-      }
-      if(source != null){
-        parameters.put("source", source.toString());
       }
       if(walletId != null){
         parameters.put("wallet_id", walletId.toString());

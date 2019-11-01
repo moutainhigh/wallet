@@ -9,15 +9,12 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 
 
-/** 高级钱包个人用户修改手机 */
+/** 高级钱包-个人用户修改手机 */
 @Builder
-public class SeniorWalletPersonChangeBindPhoneRequest extends  AbstractApiRequest {
+public class PersonChangeBindPhoneRequest extends  AbstractApiRequest {
 
   @ApiModelProperty("access_token")
   private String accessToken ;
-
-  @ApiModelProperty("渠道类型 1:浦发银企直连,2:通联云商通")
-  private Integer channelType ;
 
   @ApiModelProperty("身份证号")
   private String idNo ;
@@ -28,11 +25,11 @@ public class SeniorWalletPersonChangeBindPhoneRequest extends  AbstractApiReques
   @ApiModelProperty("姓名")
   private String realName ;
 
-  @ApiModelProperty("钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户")
-  private Integer source ;
-
   @ApiModelProperty("钱包id")
   private Long walletId ;
+
+  @ApiModelProperty("前端回跳地址")
+  private String jumpUrl ;
 
 
   @Override
@@ -51,9 +48,6 @@ public class SeniorWalletPersonChangeBindPhoneRequest extends  AbstractApiReques
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
       }
-      if(channelType != null){
-        parameters.put("channel_type", channelType.toString());
-      }
       if(idNo != null){
         parameters.put("id_no", idNo.toString());
       }
@@ -63,11 +57,11 @@ public class SeniorWalletPersonChangeBindPhoneRequest extends  AbstractApiReques
       if(realName != null){
         parameters.put("real_name", realName.toString());
       }
-      if(source != null){
-        parameters.put("source", source.toString());
-      }
       if(walletId != null){
         parameters.put("wallet_id", walletId.toString());
+      }
+      if(jumpUrl != null){
+        parameters.put("jump_url", jumpUrl.toString());
       }
     return parameters;
   }

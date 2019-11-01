@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 
 
-/** 高级钱包个人设置支付密码 */
+/** 高级钱包-个人设置支付密码 */
 @Builder
 public class SeniorWalletPersonSetPayPasswordRequest extends  AbstractApiRequest {
 
@@ -19,14 +19,14 @@ public class SeniorWalletPersonSetPayPasswordRequest extends  AbstractApiRequest
   @ApiModelProperty("身份证")
   private String identityNo ;
 
+  @ApiModelProperty("前端跳转地址")
+  private String jumpUrl ;
+
   @ApiModelProperty("姓名")
   private String name ;
 
   @ApiModelProperty("绑定手机")
   private String phone ;
-
-  @ApiModelProperty("钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户")
-  private Integer source ;
 
   @ApiModelProperty("钱包id")
   private Long walletId ;
@@ -51,14 +51,14 @@ public class SeniorWalletPersonSetPayPasswordRequest extends  AbstractApiRequest
       if(identityNo != null){
         parameters.put("identity_no", identityNo.toString());
       }
+      if(jumpUrl != null){
+        parameters.put("jump_url", jumpUrl.toString());
+      }
       if(name != null){
         parameters.put("name", name.toString());
       }
       if(phone != null){
         parameters.put("phone", phone.toString());
-      }
-      if(source != null){
-        parameters.put("source", source.toString());
       }
       if(walletId != null){
         parameters.put("wallet_id", walletId.toString());
