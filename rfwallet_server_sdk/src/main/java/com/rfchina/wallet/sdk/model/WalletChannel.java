@@ -16,6 +16,9 @@ public class WalletChannel  {
     @ApiModelProperty("银行余额")
     private Long balance ;
 
+    @ApiModelProperty("扣款协议请求流水号")
+    private String balanceProtocolReqSn ;
+
     @ApiModelProperty("业务用户标识")
     private String bizUserId ;
 

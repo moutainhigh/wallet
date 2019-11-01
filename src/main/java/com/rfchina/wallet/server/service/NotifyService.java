@@ -8,9 +8,12 @@ import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.model.ChannelNotify;
+import com.rfchina.wallet.domain.model.WalletOrder;
+import com.rfchina.wallet.server.bank.yunst.response.RecallResp;
+import com.rfchina.wallet.server.bank.yunst.response.RpsResp;
 import com.rfchina.wallet.server.bank.yunst.response.YunstNotify;
 import com.rfchina.wallet.server.mapper.ext.ChannelNotifyExtDao;
-import com.rfchina.wallet.server.model.ext.SLWalletMqMessage;
+import com.rfchina.wallet.server.msic.EnumWallet.OrderType;
 import com.rfchina.wallet.server.msic.EnumWallet.YunstMethodName;
 import com.rfchina.wallet.server.msic.EnumWallet.YunstServiceName;
 import com.rfchina.wallet.server.service.handler.yunst.YunstNotifyHandler;
@@ -21,6 +24,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.rfchina.wallet.server.service.handler.yunst.YunstBizHandler;
+
 
 @Slf4j
 @Service
@@ -31,6 +36,8 @@ public class NotifyService {
 	private ChannelNotifyExtDao channelNotifyDao;
 	@Autowired
 	private YunstNotifyHandler yunstNotifyHandler;
+	@Autowired
+	private YunstBizHandler yunstBizHandler;
 
 
 	public ChannelNotify yunstNotify(Map<String, String> params) {
@@ -74,11 +81,11 @@ public class NotifyService {
 					yunstNotifyHandler.handleSignContractResult(channelNotify, rtnVal);
 				}
 			} else if (YunstMethodName.SIGN_BALANCE_PROTOCOL.getValue().equals(methodName)) {
-					String rtnValJson = JsonUtil.toJSON(yunstNotify.getReturnValue());
-					YunstNotify.BalanceContractResult rtnVal = JsonUtil
-						.toObject(rtnValJson, YunstNotify.BalanceContractResult.class,
-							getObjectMapper());
-					yunstNotifyHandler.handleSignBalanceContractResult(channelNotify, rtnVal);
+				String rtnValJson = JsonUtil.toJSON(yunstNotify.getReturnValue());
+				YunstNotify.BalanceContractResult rtnVal = JsonUtil
+					.toObject(rtnValJson, YunstNotify.BalanceContractResult.class,
+						getObjectMapper());
+				yunstNotifyHandler.handleSignBalanceContractResult(channelNotify, rtnVal);
 
 			} else {
 				log.error("云商通回调,未知method参数:{}", methodName);
@@ -112,7 +119,6 @@ public class NotifyService {
 	}
 
 
-
 	private ObjectSetter<ObjectMapper> getObjectMapper() {
 		return objectMapper -> {
 			objectMapper.setTimeZone(TimeZone.getDefault());
@@ -120,37 +126,20 @@ public class NotifyService {
 		};
 	}
 
-//	public static void main(String[] args) {
-//		String s = "{\"returnValue\":{\"result\":2,\"checkTime\":\"2019-09-25 14:56:09\",\"bizUserId\":\"SILI001\"},\"method\":\"verifyResult\",\"service\":\"MemberService\"}";
-//
-//		System.out.println(s);
-//		YunstNotify yunstNotify = JsonUtil.toObject(s, YunstNotify.class, objectMapper -> {
-//			objectMapper.setTimeZone(TimeZone.getDefault());
-//			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-//		});
-//		System.out.println(yunstNotify);
-//		String s2 = JsonUtil.toJSON(yunstNotify.getReturnValue());
-//		System.out.println(s2);
-//		YunstNotify.CompanyAuditResult result = JsonUtil
-//			.toObject(s2, YunstNotify.CompanyAuditResult.class, objectMapper -> {
-//				objectMapper.setTimeZone(TimeZone.getDefault());
-//				objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-//			});
-//		System.out.println(result);
-//	}
+	@PostMq(routingKey = MqConstant.ORDER_STATUS_CHANGE)
+	public WalletOrder handleOrderResult(ChannelNotify channelNotify, OrderType type) {
 
+		RecallResp recallResp = JsonUtil.toObject(channelNotify.getContent(), RecallResp.class,
+			objectMapper -> {
+				objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			});
+		RpsResp rpsResp = JsonUtil.toObject(recallResp.getRps(), RpsResp.class, objectMapper -> {
+			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		});
 
-
-	public void t1(){
-		this.handleVerfiyResultMq();
-	}
-
-	private void t2(){
+		return yunstBizHandler.updateOrderStatus(rpsResp.getReturnValue().getBizOrderNo());
 
 	}
 
-	@PostMq(routingKey = MqConstant.WALLET_SENIOR_COMPANY_AUDIT)
-	public SLWalletMqMessage handleVerfiyResultMq(){
-		return SLWalletMqMessage.builder().isPass(true).checkTime("2010-10-01 00:01:01").walletId(21L).failReason("123").build();
-	}
+
 }

@@ -24,10 +24,6 @@ public class UrlConstant {
 	 * 高级钱包-代收
 	 */
 	public static final String SENIOR_WALLET_COLLECT_SYNC = VERSION + "/m/senior/collect_sync";
-	/**
-	 * 高级钱包-代收查询
-	 */
-	public static final String SENIOR_WALLET_COLLECT_QUERY = VERSION + "/m/senior/collect_query";
 
 	/**
 	 * 高级钱包-清算
@@ -35,23 +31,28 @@ public class UrlConstant {
 	public static final String SENIOR_WALLET_AGENT_PAY = VERSION + "/m/senior/agent_pay";
 
 	/**
-	 * 高级钱包-清算结果查询
-	 */
-	public static final String SENIOR_WALLET_AGENT_PAY_QUERY = VERSION + "/m/senior/agent_pay_query";
-
-	/**
 	 * 高级钱包-退款
 	 */
 	public static final String SENIOR_WALLET_REFUND = VERSION + "/m/senior/refund";
 	/**
-	 * 高级钱包-退款结果查询
+	 * 高级钱包-订单结果查询
 	 */
-	public static final String SENIOR_WALLET_REFUND_QUERY = VERSION + "/m/senior/refund_query";
+	public static final String SENIOR_WALLET_ORDER_QUERY = VERSION + "/m/senior/order_query";
 
 	/**
 	 * 高级钱包-充值
 	 */
 	public static final String SENIOR_WALLET_RECHARGE = VERSION + "/m/senior/recharge";
+
+	/**
+	 * 高级钱包-短信确认
+	 */
+	public static final String SENIOR_WALLET_SMS_CONFIRM = VERSION + "/m/senior/sms_confirm";
+
+	/**
+	 * 高级钱包-重发短信
+	 */
+	public static final String SENIOR_WALLET_SMS_RETRY = VERSION + "/m/senior/sms_retry";
 
 	/**
 	 * 高级钱包-提现
@@ -219,22 +220,8 @@ public class UrlConstant {
 	public static final String YUNST_NOTIFY = VERSION + "/yunst/notify";
 
 	/**
-	 * 云商通充值回调
+	 * 云商通订单回调
 	 */
-	public static final String YUNST_RECHARGE_RECALL = VERSION + "/yunst/recharge_recall";
+	public static final String YUNST_ORDER_RECALL = VERSION + "/yunst/order_recall";
 
-	/**
-	 * 云商通代收回调
-	 */
-	public static final String YUNST_COLLECT_RECALL = VERSION + "/yunst/collect_recall";
-
-	/**
-	 * 云商通代付回调
-	 */
-	public static final String YUNST_AGENT_PAY_RECALL = VERSION + "/yunst/agent_pay_recall";
-
-	/**
-	 * 云商通退款回调
-	 */
-	public static final String YUNST_REFUND_RECALL = VERSION + "/yunst/refund_recall";
 }

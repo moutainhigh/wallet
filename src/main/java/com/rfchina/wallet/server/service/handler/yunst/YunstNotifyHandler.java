@@ -18,7 +18,6 @@ import com.rfchina.wallet.server.bank.yunst.response.YunstNotify;
 import com.rfchina.wallet.server.mapper.ext.WalletChannelExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletVerifyHisExtDao;
 import com.rfchina.wallet.server.model.ext.SLWalletMqMessage;
-import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyType;
 import java.util.Date;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +27,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class YunstNotifyHandler {
+
 	public static final String YUNST_SIGN_SUCCESS = "success";
 	@Autowired
 	private WalletChannelExtDao walletChannelExtDao;
@@ -155,7 +155,7 @@ public class YunstNotifyHandler {
 	}
 
 
-	public void handleOrderResult(ChannelNotify channelNotify, WalletApplyType type) {
+	public void handleOrderResult(ChannelNotify channelNotify) {
 
 		RecallResp recallResp = JsonUtil.toObject(channelNotify.getContent(), RecallResp.class,
 			objectMapper -> {
@@ -165,16 +165,6 @@ public class YunstNotifyHandler {
 			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		});
 
-		if (WalletApplyType.RECHARGE == type) {
-			yunstBizHandler.updateRechargeStatus(rpsResp.getReturnValue().getBizOrderNo());
-		} else if (WalletApplyType.COLLECT == type) {
-			yunstBizHandler.updateCollectStatus(rpsResp.getReturnValue().getBizOrderNo());
-		} else if (WalletApplyType.AGENT_PAY == type) {
-			yunstBizHandler.updateAgentPayStatus(rpsResp.getReturnValue().getBizOrderNo());
-		} else if (WalletApplyType.REFUND == type) {
-			yunstBizHandler.updateRefundStatus(rpsResp.getReturnValue().getBizOrderNo());
-		} else {
-			throw new RuntimeException();
-		}
+		yunstBizHandler.updateOrderStatus(rpsResp.getReturnValue().getBizOrderNo());
 	}
 }

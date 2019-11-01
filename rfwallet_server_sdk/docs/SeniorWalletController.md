@@ -64,6 +64,7 @@
   "msg": ""//消息
    , "data":  {
     balance:""  , //银行余额
+    balance_protocol_req_sn:""  , //扣款协议请求流水号
     biz_user_id:""  , //业务用户标识
     channel_type:""  , //渠道类型。1: 浦发银企直连，2：通联云商通
     channel_user_id:""  , //银行用户标识
@@ -109,6 +110,7 @@
   "msg": ""//消息
    , "data":  {
     balance:""  , //银行余额
+    balance_protocol_req_sn:""  , //扣款协议请求流水号
     biz_user_id:""  , //业务用户标识
     channel_type:""  , //渠道类型。1: 浦发银企直连，2：通联云商通
     channel_user_id:""  , //银行用户标识
@@ -391,6 +393,7 @@
   "msg": ""//消息
    , "data":  {
     balance:""  , //银行余额
+    balance_protocol_req_sn:""  , //扣款协议请求流水号
     biz_user_id:""  , //业务用户标识
     channel_type:""  , //渠道类型。1: 浦发银企直连，2：通联云商通
     channel_user_id:""  , //银行用户标识
@@ -434,6 +437,7 @@
   "msg": ""//消息
    , "data":  {
     balance:""  , //银行余额
+    balance_protocol_req_sn:""  , //扣款协议请求流水号
     biz_user_id:""  , //业务用户标识
     channel_type:""  , //渠道类型。1: 浦发银企直连，2：通联云商通
     channel_user_id:""  , //银行用户标识

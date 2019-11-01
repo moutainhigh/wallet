@@ -1,30 +1,33 @@
 package com.rfchina.wallet.server.api;
 
-import com.rfchina.wallet.domain.model.WalletClearing;
-import com.rfchina.wallet.domain.model.WalletCollect;
-import com.rfchina.wallet.domain.model.WalletRefund;
+import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.server.model.ext.AgentPayReq.Reciever;
 import com.rfchina.wallet.server.model.ext.CollectReq;
 import com.rfchina.wallet.server.model.ext.RechargeReq;
+import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
+import com.rfchina.wallet.server.model.ext.WithdrawReq;
+import com.rfchina.wallet.server.model.ext.WithdrawResp;
 import java.util.List;
 
 public interface SeniorPayApi {
 
-	void recharge(String accessToken, RechargeReq req);
+	RechargeResp recharge(String accessToken, Long walletId, Long cardId, Long amount);
 
-	WalletCollect preCollect(String accessToken, CollectReq req);
+	WithdrawResp withdraw(String accessToken, Long walletId, Long cardId, Long amount);
 
-	WalletCollectResp doCollect(String accessToken, WalletCollect walletCollect);
+	WalletCollectResp collect(String accessToken, CollectReq req);
 
-	WalletCollect queryCollect(String accessToken, String collectOrderNo);
+	void agentPay(String accessToken, String bizNo, String collectOrderNo, Reciever receivers);
 
-	void agentPay(String accessToken, String collectOrderNo, List<Reciever> receivers);
+	WalletOrder refund(String accessToken, String bizNo, String collectOrderNo,
+		List<RefundInfo> rList);
 
-	WalletClearing agentPayQuery(String accessToken, String payOrderNo);
+	WalletOrder orderQuery(String accessToken, String orderNo);
 
-	WalletRefund refund(String accessToken, String collectOrderNo, List<RefundInfo> rList);
+	void smsConfirm(String accessToken, String preBindTicket,
+		String verifyCode, String ip);
 
-	WalletRefund refundQuery(String accessToken, String refundOrderNo);
+	void smsRetry(String accessToken, String ticket);
 }

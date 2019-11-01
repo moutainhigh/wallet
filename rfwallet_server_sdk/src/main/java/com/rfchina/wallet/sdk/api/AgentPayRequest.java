@@ -16,10 +16,13 @@ public class AgentPayRequest extends  AbstractApiRequest {
   @ApiModelProperty("应用令牌")
   private String accessToken ;
 
-  @ApiModelProperty("代付列表（与代收的分账规则对应），参考AgentPayReq结构体")
+  @ApiModelProperty("代付列表（与代收的分账规则对应），参考AgentPayReq.Reciever结构体")
   private String agentPayReq ;
 
-  @ApiModelProperty("代收单号")
+  @ApiModelProperty("业务方单号")
+  private String bizNo ;
+
+  @ApiModelProperty("原代收单号")
   private String collectOrderNo ;
 
 
@@ -41,6 +44,9 @@ public class AgentPayRequest extends  AbstractApiRequest {
       }
       if(agentPayReq != null){
         parameters.put("agent_pay_req", agentPayReq.toString());
+      }
+      if(bizNo != null){
+        parameters.put("biz_no", bizNo.toString());
       }
       if(collectOrderNo != null){
         parameters.put("collect_order_no", collectOrderNo.toString());

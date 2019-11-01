@@ -5,12 +5,18 @@ import com.rfchina.wallet.domain.model.GatewayTrans;
 import com.rfchina.wallet.domain.model.WalletApply;
 import com.rfchina.wallet.domain.model.WalletClearing;
 import com.rfchina.wallet.domain.model.WalletCollect;
+import com.rfchina.wallet.domain.model.WalletCollectInfo;
+import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletRecharge;
 import com.rfchina.wallet.domain.model.WalletRefund;
+import com.rfchina.wallet.domain.model.WalletRefundDetail;
+import com.rfchina.wallet.domain.model.WalletWithdraw;
 import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.PayTuple;
+import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
+import com.rfchina.wallet.server.model.ext.WithdrawResp;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import java.util.List;
 
@@ -23,6 +29,8 @@ import java.util.List;
 public abstract class EBankHandler {
 
 	public abstract boolean isSupportWalletLevel(Byte walletLevel);
+
+	public abstract boolean isSupportTunnelType(Byte tunnelType);
 
 	public abstract GatewayMethod getGatewayMethod();
 
@@ -49,27 +57,41 @@ public abstract class EBankHandler {
 	 */
 	public abstract Tuple<GatewayMethod, PayTuple> transfer(Long applyId);
 
+
 	/**
 	 * 代收
 	 */
-	public abstract List<WalletCollectResp> collect(Long applyId);
+	public WalletCollectResp collect(WalletOrder order, WalletCollect collect,
+		List<WalletCollectInfo> clearInfos) {
+		throw new RuntimeException();
+	}
 
 	/**
 	 * 代付
 	 */
-	public abstract List<WalletClearing> agentPay(Long applyId);
+	public void agentPay(WalletOrder order, WalletClearing clearings) {
+		throw new RuntimeException();
+	}
 
 	/**
 	 * 退款
-	 * @return
 	 */
-	public abstract List<WalletRefund> refund(Long collectId);
+	public void refund(WalletOrder order, WalletRefund refund, List<WalletRefundDetail> details) {
+		throw new RuntimeException();
+	}
 
 	/**
 	 * 充值
-	 * @return
 	 */
-	public abstract List<WalletRecharge> recharge(Long applyId);
+	public RechargeResp recharge(WalletOrder order, WalletRecharge recharge) {
+		throw new RuntimeException();
+	}
 
+	/**
+	 * 提现
+	 */
+	public WithdrawResp withdraw(WalletOrder order, WalletWithdraw withdraw) {
+		throw new RuntimeException();
+	}
 
 }

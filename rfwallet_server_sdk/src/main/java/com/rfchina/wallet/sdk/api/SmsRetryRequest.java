@@ -9,31 +9,25 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 
 
-/** 高级钱包-退款 */
+/** 高级钱包-重发短信 */
 @Builder
-public class RefundRequest extends  AbstractApiRequest {
+public class SmsRetryRequest extends  AbstractApiRequest {
 
   @ApiModelProperty("应用令牌")
   private String accessToken ;
 
-  @ApiModelProperty("业务方单号")
-  private String bizNo ;
-
-  @ApiModelProperty("代收单号")
-  private String collectOrderNo ;
-
-  @ApiModelProperty("退款清单，参考List<RefundInfo>结构体")
-  private String refundList ;
+  @ApiModelProperty("业务令牌")
+  private String ticket ;
 
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/senior/refund";
+    return "/wallet_server/v1/m/senior/sms_retry";
   }
 
   @Override
   public Class<?> getResponseModelClass() {
-    return WalletOrder.class;
+    return Map.class;
   }
 
   @Override
@@ -42,14 +36,8 @@ public class RefundRequest extends  AbstractApiRequest {
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
       }
-      if(bizNo != null){
-        parameters.put("biz_no", bizNo.toString());
-      }
-      if(collectOrderNo != null){
-        parameters.put("collect_order_no", collectOrderNo.toString());
-      }
-      if(refundList != null){
-        parameters.put("refund_list", refundList.toString());
+      if(ticket != null){
+        parameters.put("ticket", ticket.toString());
       }
     return parameters;
   }

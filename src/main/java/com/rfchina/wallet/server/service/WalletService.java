@@ -57,7 +57,7 @@ import com.rfchina.wallet.server.model.ext.WalletInfoResp.WalletInfoRespBuilder;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.NotifyType;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyStatus;
-import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyType;
+import com.rfchina.wallet.server.msic.EnumWallet.OrderType;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletType;
 import com.rfchina.wallet.server.service.handler.common.EBankHandler;
@@ -270,22 +270,22 @@ public class WalletService {
 		Byte walletLevel = walletApply.getWalletLevel();
 		Byte applyType = walletApply.getType();
 
-		if (WalletApplyType.TRANSFER.getValue().byteValue() == applyType.byteValue()) {
+		if (OrderType.SETTLE.getValue().byteValue() == applyType.byteValue()) {
 			doTunnelTransfer(walletApply);
 			return;
 		}
 
 		EBankHandler handler = handlerHelper.selectByWalletLevel(walletLevel);
 
-		if (WalletApplyType.COLLECT.getValue().byteValue() == applyType.byteValue()) {
-			handler.collect(applyId);
-		} else if (WalletApplyType.AGENT_PAY.getValue().byteValue() == applyType.byteValue()) {
-			handler.agentPay(applyId);
-		} else if (WalletApplyType.REFUND.getValue().byteValue() == applyType.byteValue()) {
-			handler.refund(applyId);
-		} else if (WalletApplyType.TRANSFER.getValue().byteValue() == applyType.byteValue()) {
-			handler.transfer(applyId);
-		}
+//		if (OrderType.COLLECT.getValue().byteValue() == applyType.byteValue()) {
+//			handler.collect(applyId);
+//		} else if (OrderType.AGENT_PAY.getValue().byteValue() == applyType.byteValue()) {
+//			handler.agentPay(applyId);
+//		} else if (OrderType.REFUND.getValue().byteValue() == applyType.byteValue()) {
+//			handler.refund(applyId);
+//		} else if (OrderType.SETTLE.getValue().byteValue() == applyType.byteValue()) {
+//			handler.transfer(applyId);
+//		}
 
 	}
 

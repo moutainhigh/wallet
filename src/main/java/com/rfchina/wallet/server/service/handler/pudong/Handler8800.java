@@ -18,10 +18,6 @@ import com.rfchina.wallet.domain.model.BankCode;
 import com.rfchina.wallet.domain.model.GatewayTrans;
 import com.rfchina.wallet.domain.model.WalletApply;
 import com.rfchina.wallet.domain.model.WalletCard;
-import com.rfchina.wallet.domain.model.WalletClearing;
-import com.rfchina.wallet.domain.model.WalletCollect;
-import com.rfchina.wallet.domain.model.WalletRecharge;
-import com.rfchina.wallet.domain.model.WalletRefund;
 import com.rfchina.wallet.server.bank.pudong.builder.EBankQuery48Builder;
 import com.rfchina.wallet.server.bank.pudong.builder.EBankQuery49Builder;
 import com.rfchina.wallet.server.bank.pudong.builder.PubPayQueryBuilder;
@@ -46,7 +42,6 @@ import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.PayTuple;
-import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.LancherType;
 import com.rfchina.wallet.server.msic.EnumWallet.RemitLocation;
@@ -54,6 +49,7 @@ import com.rfchina.wallet.server.msic.EnumWallet.SysFlag;
 import com.rfchina.wallet.server.msic.EnumWallet.TransStatus8804;
 import com.rfchina.wallet.server.msic.EnumWallet.TransStatusDO48;
 import com.rfchina.wallet.server.msic.EnumWallet.TransStatusDO49;
+import com.rfchina.wallet.server.msic.EnumWallet.TunnelType;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyStatus;
 import com.rfchina.wallet.server.service.CacheService;
 import com.rfchina.wallet.server.service.ConfigService;
@@ -123,6 +119,11 @@ public class Handler8800 extends EBankHandler {
 	@Override
 	public boolean isSupportWalletLevel(Byte walletType) {
 		return EnumWalletLevel.JUNIOR.getValue().byteValue() == walletType;
+	}
+
+	@Override
+	public boolean isSupportTunnelType(Byte tunnelType) {
+		return TunnelType.PUDONG.getValue().byteValue() == tunnelType.byteValue();
 	}
 
 	@Override
@@ -551,23 +552,5 @@ public class Handler8800 extends EBankHandler {
 		throw new RuntimeException();
 	}
 
-	@Override
-	public List<WalletCollectResp> collect(Long applyId) {
-		throw new RuntimeException();
-	}
 
-	@Override
-	public List<WalletClearing> agentPay(Long applyId) {
-		throw new RuntimeException();
-	}
-
-	@Override
-	public List<WalletRefund> refund(Long collectId) {
-		throw new RuntimeException();
-	}
-
-	@Override
-	public List<WalletRecharge> recharge(Long applyId) {
-		throw new RuntimeException();
-	}
 }

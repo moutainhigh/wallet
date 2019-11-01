@@ -9,10 +9,10 @@ import java.util.ArrayList;
 
     
 /**
-* WalletCollectResp
+* WithdrawResp
 */
 @Data
-public class WalletCollectResp  {
+public class WithdrawResp  {
     @ApiModelProperty("金额")
     private Long amount ;
 
@@ -24,6 +24,9 @@ public class WalletCollectResp  {
 
     @ApiModelProperty("业务标识。1: 有退款 2: 已记流水")
     private Integer bizTag ;
+
+    @ApiModelProperty("商户系统用户标识")
+    private String bizUserId ;
 
     @ApiModelProperty("创建日期")
     private String createTime ;
@@ -49,9 +52,6 @@ public class WalletCollectResp  {
     @ApiModelProperty("订单号")
     private String orderNo ;
 
-    @ApiModelProperty("扫码支付信息/ JS 支付串信息/微信原生 H5 支付串信息")
-    private String payInfo ;
-
     @ApiModelProperty("进度。1：待发送 2：已发送 3：已接收结果")
     private Integer progress ;
 
@@ -63,9 +63,6 @@ public class WalletCollectResp  {
 
     @ApiModelProperty("业务票据")
     private String ticket ;
-
-    @ApiModelProperty("交易编号")
-    private String tradeNo ;
 
     @ApiModelProperty("通道错误码")
     private String tunnelErrCode ;
@@ -90,9 +87,6 @@ public class WalletCollectResp  {
 
     @ApiModelProperty("钱包id")
     private Long walletId ;
-
-    @ApiModelProperty("微信 APP 支付信息")
-    private String weChatAPPInfo ;
 
 
 }

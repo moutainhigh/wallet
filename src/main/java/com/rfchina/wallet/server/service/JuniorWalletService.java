@@ -14,8 +14,8 @@ import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.model.ext.PayInReq;
 import com.rfchina.wallet.server.model.ext.PayInResp;
+import com.rfchina.wallet.server.msic.EnumWallet.OrderType;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyStatus;
-import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyType;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
 
 import java.util.Date;
@@ -79,7 +79,7 @@ public class JuniorWalletService {
 
 			WalletApply walletApply = WalletApply.builder()
 				.walletId(payInReq.getWalletId())
-				.type(WalletApplyType.TRANSFER.getValue())
+				.type(OrderType.SETTLE.getValue())
 				.amount(payInReq.getAmount())
 				.payerAccount(cmpAcctNo)
 				.batchNo(payInReq.getBatchNo())

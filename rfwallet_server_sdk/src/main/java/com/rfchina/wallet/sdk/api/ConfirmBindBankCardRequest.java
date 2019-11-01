@@ -25,7 +25,7 @@ public class ConfirmBindBankCardRequest extends  AbstractApiRequest {
   @ApiModelProperty("钱包id")
   private Long walletId ;
 
-  @ApiModelProperty("信用卡cvv2码")
+  @ApiModelProperty("预绑卡票据")
   private String preBindTicket ;
 
 

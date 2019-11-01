@@ -44,4 +44,18 @@ public class HandlerHelper {
 			"type = " + walletLevel);
 	}
 
+	public EBankHandler selectByTunnelType(Byte tunnelType) {
+		EBankHandler currHandler = rootHandler;
+
+		while (currHandler != null) {
+			if (currHandler.isSupportWalletLevel(tunnelType)) {
+				return currHandler;
+			}
+			currHandler = currHandler.getNext();
+		}
+
+		throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_HANDLER_NOT_FOUND,
+			"type = " + tunnelType);
+	}
+
 }

@@ -207,24 +207,22 @@ public class EnumWallet {
 	}
 
 	/**
-	 * 工单类型，1：财务结算，2：收入，3：支出， 4：充值，5：提现，6：退款，7：扣款，8：代收，9：代付
+	 * 工单类型，1：财务结算，2：充值，3：提现，4：代收，5：代付，6：退款，7：消费
 	 */
-	public enum WalletApplyType implements Valuable<Byte> {
-		TRANSFER((byte) 1, "转帐"),
-		INCOME((byte) 2, "收入"),
-		PAY((byte) 3, "支出"),
-		RECHARGE((byte) 4, "充值"),
-		WITHDRAWAL((byte) 5, "提现"),
+	public enum OrderType implements Valuable<Byte> {
+		SETTLE((byte) 1, "财务结算"),
+		RECHARGE((byte) 2, "充值"),
+		WITHDRAWAL((byte) 3, "提现"),
+		COLLECT((byte) 4, "代收"),
+		AGENT_PAY((byte) 5, "代付"),
 		REFUND((byte) 6, "退款"),
-		DEDUCTION((byte) 7, "扣款"),
-		COLLECT((byte) 8, "代收"),
-		AGENT_PAY((byte) 9, "代付"),
+		CONSUME((byte) 7, "消费"),
 		;
 
 		private Byte value;
 		private String valueName;
 
-		WalletApplyType(Byte value, String valueName) {
+		OrderType(Byte value, String valueName) {
 			this.value = value;
 			this.valueName = valueName;
 		}
@@ -599,18 +597,19 @@ public class EnumWallet {
 	}
 
 	/**
-	 * 代收状态。1：待支付 2：已支付 3：交易失败 \n4：交易关闭（超时或其他）
+	 * 订单状态。 2：进行中，3：交易成功，4：交易失败
 	 */
-	public enum CollectStatus implements Valuable<Byte> {
-		WAIT_PAY((byte) 1, "待支付"),
-		SUCC((byte) 2, "已支付"),
-		FAIL((byte) 3, "交易失败"),
-		CLOSED((byte) 4, "交易关闭（超时或其他）");
+	public enum OrderStatus implements Valuable<Byte> {
+		WAITTING((byte) 2, "进行中"),
+		SUCC((byte) 3, "交易成功"),
+		FAIL((byte) 4, "交易失败"),
+		CLOSED((byte) 5, "交易关闭（超时或其他）"),
+		;
 
 		private Byte value;
 		private String valueName;
 
-		CollectStatus(Byte value, String valueName) {
+		OrderStatus(Byte value, String valueName) {
 			this.value = value;
 			this.valueName = valueName;
 		}
@@ -813,18 +812,18 @@ public class EnumWallet {
 			return this.value;
 		}
 
-		public CollectStatus toUniStatus() {
+		public OrderStatus toUniStatus() {
 			switch (this) {
 				case SUCC:
-					return CollectStatus.SUCC;
+					return OrderStatus.SUCC;
 				case SUCC_REFUND:
-					return CollectStatus.SUCC;
+					return OrderStatus.SUCC;
 				case FAIL:
-					return CollectStatus.FAIL;
+					return OrderStatus.FAIL;
 				case CLOSED:
-					return CollectStatus.CLOSED;
+					return OrderStatus.CLOSED;
 				default:
-					return CollectStatus.WAIT_PAY;
+					return OrderStatus.WAITTING;
 			}
 		}
 	}
@@ -852,37 +851,6 @@ public class EnumWallet {
 		}
 
 	}
-
-//	/**
-//	 * 代收状态。1：待支付 2：支付成功 3：交易失败 4：交易关闭（超时或其他）
-//	 */
-//	public enum UniBizStatus implements Valuable<Byte> {
-//		WAIT((byte) 1, "待支付"),
-//		SUCC((byte) 2, "支付成功"),
-//		FAIL((byte) 3, "交易失败"),
-//		CLOSED((byte) 4, "交易关闭（超时或其他）"),
-//		;
-//
-//		private Byte value;
-//		private String valueName;
-//
-//		UniBizStatus(Byte value, String valueName) {
-//			this.value = value;
-//			this.valueName = valueName;
-//		}
-//
-//		@Override
-//		public Byte getValue() {
-//			return this.value;
-//		}
-//
-//		public boolean isEndStatus() {
-//			return this.value.byteValue() == SUCC.getValue().byteValue()
-//				|| this.value.byteValue() == FAIL.getValue().byteValue()
-//				|| this.value.byteValue() == CLOSED.getValue().byteValue();
-//		}
-//
-//	}
 
 	/**
 	 * 通联sdk返回枚举
@@ -927,4 +895,102 @@ public class EnumWallet {
 		}
 
 	}
+
+
+	/**
+	 * 通联银行卡/账户属性
+	 */
+	public enum EnumYunstCardPro implements Valuable<Long> {
+		PERSON(0L, "个人银行卡"),
+		ENTERPRICE(1L, "企业对公账户");
+
+		private Long value;
+		private String valueName;
+
+		EnumYunstCardPro(Long value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Long getValue() {
+			return this.value;
+		}
+
+	}
+
+	/**
+	 * 通联提现方式 D0：D+0 到账 D1：D+1 到账 T1customized：T+1 到账，仅工作日代付 D0customized：D+0 到账，根据平台资金头寸付款 默认为 D0
+	 */
+	public enum EnumYunstWithdrawType implements Valuable<String> {
+		D0("D0", "D+0 到账"),
+		D1("D1", "D+1 到账"),
+		T1_CUSTOMIZED("T1customized", "T+1 到账，仅工作日代付"),
+		D0_CUSTOMIZED("D0customized", "D+0 到账，根据平台资金头寸付款");
+
+		private String value;
+		private String valueName;
+
+		EnumYunstWithdrawType(String value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public String getValue() {
+			return this.value;
+		}
+
+	}
+
+	/**
+	 * 业务标签
+	 */
+	public enum EnumBizTag implements Valuable<Byte> {
+		REFUND((byte) 1, "已退款"),
+		RECORD((byte) 2, "已记账");
+
+		private Byte value;
+		private String valueName;
+
+		EnumBizTag(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return this.value;
+		}
+
+		public boolean contains(Byte bizTag) {
+			return (this.value.byteValue() & bizTag.byteValue()) > 0;
+		}
+
+		public byte and(Byte bizTag){
+			return (byte)(this.value.byteValue() | bizTag.byteValue());
+		}
+	}
+
+	/**
+	 * 借贷
+	 */
+	public enum DebitType implements Valuable<Byte> {
+		DEBIT((byte) 1, "记入借方"),
+		CREDIT((byte) 2, "记入贷方");
+
+		private Byte value;
+		private String valueName;
+
+		DebitType(byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return this.value;
+		}
+	}
+
 }

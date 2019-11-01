@@ -13,11 +13,11 @@ import java.util.ArrayList;
 */
 @Data
 public class SettleResp  {
-    @ApiModelProperty("分帐列表")
-    private List<WalletClearing> clearings ;
+    @ApiModelProperty("分帐记录")
+    private WalletClearing clearing ;
 
-    @ApiModelProperty("代收单")
-    private WalletCollect collect ;
+    @ApiModelProperty("订单")
+    private WalletOrder order ;
 
 
 }
