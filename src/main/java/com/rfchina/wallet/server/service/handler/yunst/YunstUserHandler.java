@@ -4,6 +4,7 @@ import com.allinpay.yunst.sdk.util.RSAUtil;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.JsonUtil;
+import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.server.bank.yunst.request.YunstApplyBindBankCardReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstBalanceProtocolReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstBindBankCardReq;
@@ -29,6 +30,7 @@ import com.rfchina.wallet.server.bank.yunst.response.result.YunstSendVerificatio
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstSetCompanyInfoResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstUnBindBankCardResult;
 import com.rfchina.wallet.server.bank.yunst.util.YunstTpl;
+import com.rfchina.wallet.server.msic.EnumWallet.YunstIdType;
 import java.util.TimeZone;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -155,12 +157,13 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 修改绑定手机
 	 */
-	public String modifyPhone(String bizUserId, String realName, String oldPhone,
-		Long identityType, String identityNo, String jumpUrl) throws Exception {
+	public String modifyPhone(String bizUserId, String realName, String oldPhone, String identityNo,
+		String jumpUrl) throws Exception {
+
 		YunstChangeBindPhoneReq req = YunstChangeBindPhoneReq.builder$()
 			.bizUserId(bizUserId)
 			.name(realName)
-			.identityType(identityType)
+			.identityType(YunstIdType.ID_CARD.getValue())
 			.identityNo(RSAUtil.encrypt(identityNo))
 			.oldPhone(oldPhone)
 			.jumpUrl(configService.getYunstJumpUrlPrefix() + jumpUrl)

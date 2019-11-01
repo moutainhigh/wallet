@@ -10,14 +10,18 @@ import com.rfchina.platform.common.misc.ResponseCode;
 import com.rfchina.platform.common.utils.RegexUtil;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
 import com.rfchina.wallet.domain.misc.EnumDef;
+import com.rfchina.wallet.domain.misc.EnumDef.ChannelType;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletChannel;
+import com.rfchina.wallet.domain.model.WalletPerson;
 import com.rfchina.wallet.server.api.SeniorWalletApi;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.CompanyInfoResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.PersonInfoResult;
 import com.rfchina.wallet.server.mapper.ext.WalletChannelExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
 import com.rfchina.wallet.server.service.SeniorWalletService;
+import com.rfchina.wallet.server.service.VerifyService;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBaseHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +39,12 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 
 	@Autowired
 	private WalletChannelExtDao walletChannelDao;
+
+	@Autowired
+	private WalletPersonExtDao walletPersonDao;
+
+	@Autowired
+	private VerifyService verifyService;
 
 
 	@Log
@@ -102,11 +112,14 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public String personChangeBindPhone(String accessToken,
-		Long walletId, String realName, String idNo, String oldPhone, String jumpUrl) {
+	public String personChangeBindPhone(String accessToken, Long walletId, String jumpUrl) {
+
 		try {
-			return seniorWalletService
-				.personChangeBindPhone(walletId, realName, idNo, oldPhone, jumpUrl);
+			verifyService.checkSeniorWallet(walletId);
+			WalletChannel channel = verifyService.checkChannel(walletId, ChannelType.YUNST);
+			WalletPerson walletPerson = walletPersonDao.selectByWalletId(walletId);
+
+			return seniorWalletService.personChangeBindPhone(walletPerson, channel, jumpUrl);
 		} catch (Exception e) {
 			log.error("高级钱包返回个人修改手机页面链接失败, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,

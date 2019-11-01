@@ -172,10 +172,7 @@ public class UrlConstant {
 	 * 高级钱包绑定手机
 	 */
 	public static final String WALLET_SENIOR_BIND_PHONE = VERSION + "/m/wallet/senior_bind_phone";
-	/**
-	 * 高级钱包个人修改绑定手机
-	 */
-	public static final String WALLET_SENIOR_PERSON_CHANGE_BIND_PHONE = VERSION + "/m/wallet/senior_person_change_bind_phone";
+
 	/**
 	 * 高级钱包商家资料审核（通道）
 	 */
@@ -193,6 +190,10 @@ public class UrlConstant {
 	 * 高级钱包个人设置支付密码
 	 */
 	public static final String WALLET_SENIOR_PERSON_SET_PAY_PASSWORD = VERSION + "/m/wallet/senior_person_set_paypassword";
+	/**
+	 * 高级钱包-修改绑定手机
+	 */
+	public static final String WALLET_SENIOR_CHANGE_BIND_PHONE = VERSION + "/m/senior/change_bind_phone";
 	/**
 	 * 高级钱包-预绑定银行卡
 	 */

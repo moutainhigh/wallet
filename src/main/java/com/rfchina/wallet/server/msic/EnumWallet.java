@@ -993,4 +993,27 @@ public class EnumWallet {
 		}
 	}
 
+
+	/**
+	 * 证件类型
+	 */
+	public enum YunstIdType implements Valuable<Long> {
+		/**
+		 * 身份证
+		 */
+		ID_CARD(1L),
+		;
+
+		private Long value;
+
+		YunstIdType(Long value) {
+			this.value = value;
+		}
+
+		@Override
+		public Long getValue() {
+			return value;
+		}
+	}
+
 }

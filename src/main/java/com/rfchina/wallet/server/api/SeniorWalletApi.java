@@ -43,12 +43,8 @@ public interface SeniorWalletApi {
 	 * 高级钱包个人修改绑定手机认证
 	 *
 	 * @param walletId 必填, 钱包id
-	 * @param realName 必填, 真实姓名
-	 * @param idNo 必填, 身份证
-	 * @param oldPhone 必填, 电话
 	 */
-	String personChangeBindPhone(String accessToken, Long walletId, String realName, String idNo,
-		String oldPhone, String jumpUrl);
+	String personChangeBindPhone(String accessToken, Long walletId, String jumpUrl);
 
 	/**
 	 * 高级钱包绑定手机

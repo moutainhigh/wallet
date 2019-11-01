@@ -8,15 +8,14 @@ import com.rfchina.platform.common.exception.RfchinaResponseException;
 import com.rfchina.platform.common.misc.ResponseCode;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
-import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumIdType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletCardType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletChannel;
 import com.rfchina.wallet.server.api.SeniorCardApi;
-import com.rfchina.wallet.server.bank.yunst.response.result.ApplyBindBankCardResp;
 import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
+import com.rfchina.wallet.server.bank.yunst.response.result.ApplyBindBankCardResp;
 import com.rfchina.wallet.server.mapper.ext.WalletChannelExtDao;
 import com.rfchina.wallet.server.model.ext.PreBindCardVo;
 import com.rfchina.wallet.server.msic.EnumWallet.TunnelType;
@@ -63,8 +62,8 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 	public String preBindBandCard(String accessToken, Long walletId, Byte source,
 		String cardNo, String realName, String phone, String identityNo, String validate,
 		String cvv2) {
-		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
-		verifyService.checkWallet(walletId, wallet);
+
+		verifyService.checkSeniorWallet(walletId);
 		WalletChannel walletChannel = walletChannelDao
 			.selectByWalletId(walletId, TunnelType.YUNST.getValue());
 
@@ -115,8 +114,7 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 	public Long confirmBindCard(String accessToken, Long walletId, Byte source,
 		String verifyCode, String preBindTicket) {
 
-		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
-		verifyService.checkWallet(walletId, wallet);
+		Wallet wallet = verifyService.checkSeniorWallet(walletId);
 
 		PreBindCardVo preBindCardVo = (PreBindCardVo) redisTemplate.opsForValue()
 			.get(PRE_BINDCARD + preBindTicket);
@@ -157,8 +155,8 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 	@SignVerify
 	@Override
 	public Long unBindCard(String accessToken, Long walletId, Byte source, String cardNo) {
-		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
-		verifyService.checkWallet(walletId, wallet);
+
+		verifyService.checkSeniorWallet(walletId);
 		WalletChannel walletChannel = walletChannelDao
 			.selectByWalletId(walletId, TunnelType.YUNST.getValue());
 		try {

@@ -74,20 +74,16 @@ public class SeniorWalletController {
 					smsCodeType));
 	}
 
-	@ApiOperation("高级钱包-个人用户修改手机")
-	@PostMapping(UrlConstant.WALLET_SENIOR_PERSON_CHANGE_BIND_PHONE)
-	public ResponseValue<PageVo> personChangeBindPhone(
+	@ApiOperation("高级钱包-用户修改手机")
+	@PostMapping(UrlConstant.WALLET_SENIOR_CHANGE_BIND_PHONE)
+	public ResponseValue<PageVo> changeBindPhone(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
-		@ApiParam(value = "姓名", required = true) @RequestParam("real_name") String realName,
-		@ApiParam(value = "身份证号", required = true) @RequestParam("id_no") String idNo,
-		@ApiParam(value = "手机号码", required = true) @RequestParam("old_phone") String oldPhone,
 		@ApiParam(value = "前端回跳地址") @RequestParam(value = "jump_url", required = false) String jumpUrl) {
 
-		String tongLianUrl = seniorWalletApi
-			.personChangeBindPhone(accessToken, walletId, realName, idNo, oldPhone, jumpUrl);
-		PageVo pageVo = PageVo.builder().url(tongLianUrl).build();
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, pageVo);
+		String redirectUrl = seniorWalletApi.personChangeBindPhone(accessToken, walletId, jumpUrl);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
+			PageVo.builder().url(redirectUrl).build());
 	}
 
 	@ApiOperation("高级钱包-企业用户绑定手机")

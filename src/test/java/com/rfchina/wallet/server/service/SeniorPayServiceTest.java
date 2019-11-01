@@ -57,6 +57,7 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	private YunstBizHandler yunstBizHandler;
 
 	private Long payerWalletId = 10035L;
+	private Long payeeWalletId = 10035L;
 	private Long platWalletId = 10000L;
 	private Long cardId = 12L;
 
@@ -139,10 +140,10 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	@Test
 	public void agentPay() {
 		AgentPayReq.Reciever reciever = new AgentPayReq.Reciever();
-		reciever.setWalletId(platWalletId);
+		reciever.setWalletId(payeeWalletId);
 		reciever.setAmount(1L);
 		reciever.setFeeAmount(0L);
-		WalletOrder order = walletOrderDao.selectByOrderNo("WC20191030201675783");
+		WalletOrder order = walletOrderDao.selectByOrderNo("WC20191101089285121");
 		SettleResp resp = seniorPayService
 			.agentPay(order, String.valueOf(System.currentTimeMillis())
 				, reciever);

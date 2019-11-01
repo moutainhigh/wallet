@@ -87,7 +87,7 @@ public class YunstHandlerTest extends SpringBaseTest {
 		String identityNo = new IdCardGenerator().generate();
 		YunstPersonSetRealNameResult result3 = yunstUserHandler.personCertification(member.left.getBizUserId(), realName, identityType, identityNo);
 		logStack(result3);
-		String url = yunstUserHandler.modifyPhone(member.left.getBizUserId(), realName,tel,identityType, identityNo);
+		String url = yunstUserHandler.modifyPhone(member.left.getBizUserId(), realName,tel, identityNo,"");
 		logStack(url);
 		assertNotNull(url);
 	}

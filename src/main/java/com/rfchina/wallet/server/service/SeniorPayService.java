@@ -6,7 +6,6 @@ import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
 import com.rfchina.wallet.domain.misc.EnumDef.BizValidateType;
-import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletCardStatus;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletCard;
@@ -49,13 +48,11 @@ import com.rfchina.wallet.server.msic.EnumWallet.GwProgress;
 import com.rfchina.wallet.server.msic.EnumWallet.OrderStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.OrderType;
 import com.rfchina.wallet.server.msic.EnumWallet.TunnelType;
-import com.rfchina.wallet.server.msic.EnumWallet.WalletStatus;
 import com.rfchina.wallet.server.service.handler.common.EBankHandler;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBizHandler;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -114,6 +111,9 @@ public class SeniorPayService {
 	@Autowired
 	private WalletOrderExtDao walletOrderDao;
 
+	@Autowired
+	private VerifyService verifyService;
+
 	private Long anonyPayerWalletId = 10001L;
 	private Long agentEntWalletId = 10000L;
 
@@ -121,12 +121,11 @@ public class SeniorPayService {
 	 * 充值
 	 */
 	public RechargeResp recharge(Long walletId, WalletCard walletCard, Long amount) {
-		// 检查钱包
-		Wallet payerWallet = walletDao.selectByPrimaryKey(walletId);
-		checkWalletStatus(payerWallet);
 
+		// 检查钱包
+		Wallet payerWallet = verifyService.checkSeniorWallet(walletId);
 		// 检查银行卡状态
-		checkCard(walletCard, payerWallet);
+		verifyService.checkCard(walletCard, payerWallet);
 
 		// 工单记录
 		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> {
@@ -180,12 +179,11 @@ public class SeniorPayService {
 	 * 提现
 	 */
 	public WithdrawResp withdraw(Long walletId, WalletCard walletCard, Long amount) {
-		// 检查钱包状态
-		Wallet payerWallet = walletDao.selectByPrimaryKey(walletId);
-		checkWalletStatus(payerWallet);
 
+		// 检查钱包
+		Wallet payerWallet = verifyService.checkSeniorWallet(walletId);
 		// 检查银行卡状态
-		checkCard(walletCard, payerWallet);
+		verifyService.checkCard(walletCard, payerWallet);
 
 		// 工单记录
 		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> {
@@ -233,8 +231,7 @@ public class SeniorPayService {
 		// 定义付款人
 		Long payerWalletId = (req.getPayerWalletId() != null) ? req.getPayerWalletId()
 			: anonyPayerWalletId;
-		Wallet payerWallet = walletDao.selectByPrimaryKey(payerWalletId);
-		checkWalletStatus(payerWallet);
+		verifyService.checkSeniorWallet(payerWalletId);
 
 		// 工单记录
 		String orderNo = IdGenerator.createBizId(PREFIX_COLLECT, 19, id -> {
@@ -306,7 +303,7 @@ public class SeniorPayService {
 			return walletOrderDao.selectCountByBatchNo(id) == 0;
 		});
 
-		WalletOrder order = WalletOrder.builder()
+		WalletOrder payOrder = WalletOrder.builder()
 			.orderNo(orderNo)
 			.batchNo(batchNo)
 			.bizNo(bizNo)
@@ -318,10 +315,12 @@ public class SeniorPayService {
 			.tunnelType(TunnelType.YUNST.getValue())
 			.createTime(new Date())
 			.build();
-		walletOrderDao.insertSelective(order);
+		walletOrderDao.insertSelective(payOrder);
 
+		// 代收明细
+		WalletCollect walletCollect = walletCollectDao.selectByOrderId(collectOrder.getId());
 		List<WalletCollectInfo> collectInfos = walletCollectInfoDao
-			.selectByCollectId(collectOrder.getId());
+			.selectByCollectId(walletCollect.getId());
 
 		// 匹配原始分账记录
 		WalletCollectInfo collectInfo = collectInfos.stream()
@@ -339,7 +338,7 @@ public class SeniorPayService {
 		}
 
 		WalletClearing clearing = WalletClearing.builder()
-			.orderId(order.getId())
+			.orderId(payOrder.getId())
 			.collectOrderNo(collectOrder.getOrderNo())
 			.collectInfoId(collectInfo.getId())
 			.payeeWalletId(receiver.getWalletId())
@@ -349,11 +348,11 @@ public class SeniorPayService {
 		walletClearingDao.insertSelective(clearing);
 
 		// 代付给每个收款人
-		EBankHandler handler = handlerHelper.selectByTunnelType(order.getTunnelType());
-		handler.agentPay(order, clearing);
+		EBankHandler handler = handlerHelper.selectByTunnelType(payOrder.getTunnelType());
+		handler.agentPay(payOrder, clearing);
 
 		return SettleResp.builder()
-			.order(order)
+			.order(payOrder)
 			.clearing(clearing)
 			.build();
 
@@ -431,10 +430,11 @@ public class SeniorPayService {
 			.build();
 		walletRefundDao.insertSelective(refund);
 
-		// 记录退款明细
+		// 代收明细
 		WalletCollect walletCollect = walletCollectDao.selectByOrderId(collectOrder.getId());
 		List<WalletCollectInfo> collectInfos = walletCollectInfoDao
 			.selectByCollectId(walletCollect.getId());
+		// 记录退款明细
 		List<WalletRefundDetail> details = refundList.stream().map(r -> {
 			// 核对清分记录
 			WalletCollectInfo collectInfo = collectInfos.stream()
@@ -524,8 +524,7 @@ public class SeniorPayService {
 	 */
 	public void smsConfirm(Long orderId, String tradeNo, String verifyCode, String ip) {
 
-		WalletOrder order = walletOrderDao.selectByPrimaryKey(orderId);
-		checkOrder(order, OrderStatus.WAITTING.getValue());
+		WalletOrder order = verifyService.checkOrder(orderId, OrderStatus.WAITTING.getValue());
 		EBankHandler handler = handlerHelper.selectByTunnelType(order.getTunnelType());
 		if (handler instanceof YunstBizHandler) {
 			((YunstBizHandler) handler).smsConfirm(order, tradeNo, verifyCode, ip);
@@ -538,34 +537,12 @@ public class SeniorPayService {
 	 */
 	public void smsRetry(Long orderId) {
 
-		WalletOrder order = walletOrderDao.selectByPrimaryKey(orderId);
-		checkOrder(order, OrderStatus.WAITTING.getValue());
+		WalletOrder order = verifyService.checkOrder(orderId, OrderStatus.WAITTING.getValue());
 		EBankHandler handler = handlerHelper.selectByTunnelType(order.getTunnelType());
 		if (handler instanceof YunstBizHandler) {
 			((YunstBizHandler) handler).smsRetry(order);
 		}
 	}
 
-	public void checkOrder(WalletOrder order, Byte expectStatus) {
-		Optional.ofNullable(order)
-			.filter(o -> o.getStatus().byteValue() == expectStatus.byteValue())
-			.orElseThrow(
-				() -> new WalletResponseException(EnumWalletResponseCode.ORDER_STATUS_ERROR));
-	}
-
-	private void checkCard(WalletCard walletCard, Wallet payerWallet) {
-		Optional.ofNullable(walletCard)
-			.filter(card -> card.getWalletId().longValue() == payerWallet.getId().longValue()
-				&& card.getStatus().byteValue() == EnumWalletCardStatus.BIND.getValue().byteValue())
-			.orElseThrow(
-				() -> new WalletResponseException(EnumWalletResponseCode.BANK_CARD_STATUS_ERROR));
-	}
-
-	private void checkWalletStatus(Wallet payerWallet) {
-		Optional.ofNullable(payerWallet)
-			.filter(wallet -> wallet.getStatus() == WalletStatus.ACTIVE.getValue())
-			.orElseThrow(
-				() -> new WalletResponseException(EnumWalletResponseCode.WALLET_STATUS_ERROR));
-	}
 
 }

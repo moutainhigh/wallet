@@ -178,17 +178,11 @@ public class SeniorWalletService {
 	/**
 	 * 高级钱包个人修改绑定手机
 	 */
-	public String personChangeBindPhone(Long walletId, String realName, String idNo,
-		String mobile,String jumpUrl) throws Exception {
-		WalletChannel walletChannel = walletChannelDao
-			.selectByChannelTypeAndWalletId(ChannelType.YUNST.getValue().intValue(), walletId);
-		if (walletChannel == null) {
-			log.error("未创建云商通用户: walletId:{}", walletId);
-			throw new RfchinaResponseException(EnumResponseCode.COMMON_FAILURE,
-				"未创建云商通用户");
-		}
-		return yunstUserHandler.modifyPhone(walletChannel.getBizUserId(), realName, mobile,
-			EnumDef.EnumIdType.ID_CARD.getValue().longValue(), idNo, jumpUrl);
+	public String personChangeBindPhone(WalletPerson person, WalletChannel channel, String jumpUrl)
+		throws Exception {
+
+		return yunstUserHandler.modifyPhone(channel.getBizUserId(), person.getName(),
+			channel.getSecurityTel(), person.getIdNo(), jumpUrl);
 	}
 
 	/**
@@ -255,7 +249,7 @@ public class SeniorWalletService {
 					throw new RfchinaResponseException(
 						EnumResponseCode.COMMON_FAILURE, "更新个人钱包个人信息表失败");
 				}
-			}else {
+			} else {
 				walletPerson.setIdType(EnumDef.EnumIdType.ID_CARD.getValue().byteValue());
 				walletPerson.setIdNo(idNo);
 				walletPerson.setRealLevel(EnumDef.EnumUserRealType.ID_CARD.getValue().byteValue());
