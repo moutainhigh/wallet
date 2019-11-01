@@ -191,21 +191,25 @@ public class UrlConstant {
 	 */
 	public static final String WALLET_SENIOR_PERSON_SET_PAY_PASSWORD = VERSION + "/m/wallet/senior_person_set_paypassword";
 	/**
+	 * 高级钱包-修改支付密码
+	 */
+	public static final String WALLET_SENIOR_RESET_PAY_PWD = VERSION + "/m/senior/wallet/reset_pay_pwd";
+	/**
 	 * 高级钱包-修改绑定手机
 	 */
-	public static final String WALLET_SENIOR_CHANGE_BIND_PHONE = VERSION + "/m/senior/change_bind_phone";
+	public static final String WALLET_SENIOR_RESET_SECURITY_TEL = VERSION + "/m/senior/wallet/reset_security_tel";
 	/**
 	 * 高级钱包-预绑定银行卡
 	 */
-	public static final String WALLET_SENIOR_PRE_BIND_BANK_CARD = VERSION + "/m/senior/pre_bind_bank_card";
+	public static final String WALLET_SENIOR_PRE_BIND_BANK_CARD = VERSION + "/m/senior/card/pre_bind_bank_card";
 	/**
 	 * 高级钱包-确认绑定银行卡
 	 */
-	public static final String WALLET_SENIOR_CONFIRM_BIND_CARD = VERSION + "/m/senior/confirm_bind_card";
+	public static final String WALLET_SENIOR_CONFIRM_BIND_CARD = VERSION + "/m/senior/card/confirm_bind_card";
 	/**
 	 * 高级钱包-解绑银行卡
 	 */
-	public static final String WALLET_SENIOR_UNBIND_CARD = VERSION + "/m/senior/unbind_card";
+	public static final String WALLET_SENIOR_UNBIND_CARD = VERSION + "/m/senior/card/unbind_card";
 	/**
 	 * 高级钱包个人信息
 	 */

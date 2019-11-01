@@ -1,7 +1,5 @@
 package com.rfchina.wallet.server.service;
 
-import static org.junit.Assert.*;
-
 import com.rfchina.wallet.domain.model.WalletChannel;
 import com.rfchina.wallet.domain.model.WalletPerson;
 import com.rfchina.wallet.server.SpringBaseTest;
@@ -34,7 +32,7 @@ public class SeniorWalletServiceTest extends SpringBaseTest {
 			.selectByWalletId(payerWalletId, TunnelType.YUNST.getValue());
 
 		String url = seniorWalletService
-			.personChangeBindPhone(walletPerson, channel, "http://www.163.com");
+			.resetSecurityTel(walletPerson, channel, "http://www.163.com");
 		log.info("changeBindPhone url = ", url);
 	}
 }

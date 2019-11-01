@@ -1,6 +1,6 @@
 ###  高级钱包-确认绑定银行卡
 
-请求地址: /wallet_server/v1/m/senior/confirm_bind_card
+请求地址: /wallet_server/v1/m/senior/card/confirm_bind_card
 
 请求类型: POST
 
@@ -26,7 +26,7 @@
 
 ###  高级钱包-预绑定银行卡
 
-请求地址: /wallet_server/v1/m/senior/pre_bind_bank_card
+请求地址: /wallet_server/v1/m/senior/card/pre_bind_bank_card
 
 请求类型: POST
 
@@ -56,7 +56,7 @@
 
 ###  高级钱包-解绑银行卡
 
-请求地址: /wallet_server/v1/m/senior/unbind_card
+请求地址: /wallet_server/v1/m/senior/card/unbind_card
 
 请求类型: POST
 

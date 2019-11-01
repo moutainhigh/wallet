@@ -4,12 +4,14 @@ import com.allinpay.yunst.sdk.util.RSAUtil;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.JsonUtil;
-import com.rfchina.wallet.domain.misc.EnumDef;
+import com.rfchina.wallet.domain.model.WalletChannel;
+import com.rfchina.wallet.domain.model.WalletPerson;
+import com.rfchina.wallet.server.bank.yunst.request.ResetPayPwdReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstApplyBindBankCardReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstBalanceProtocolReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstBindBankCardReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstBindPhoneReq;
-import com.rfchina.wallet.server.bank.yunst.request.YunstChangeBindPhoneReq;
+import com.rfchina.wallet.server.bank.yunst.request.UpdatePhoneByPayPwdReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstCreateMemberReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstGetMemberInfoReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstPersonSetRealNameReq;
@@ -69,7 +71,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 会员电子协议签约(生成前端H5 url)
 	 */
-	public String generateSignContractUrl(String bizUserId, String jumpUrl){
+	public String generateSignContractUrl(String bizUserId, String jumpUrl) {
 		YunstSignContractReq req = YunstSignContractReq.builder$()
 			.bizUserId(bizUserId)
 			.jumpUrl(configService.getYunstResultJumpUrl() + jumpUrl)
@@ -103,9 +105,32 @@ public class YunstUserHandler extends YunstBaseHandler {
 	}
 
 	/**
+	 * 设置支付密码(个人)
+	 */
+	public String resetPayPwd(WalletPerson person, WalletChannel channel, String jumpUrl) {
+
+		String encryptIdNo = null;
+		try {
+			encryptIdNo = RSAUtil.encrypt(person.getIdNo());
+		} catch (Exception e) {
+			log.error("身份证加密错误", e);
+		}
+		ResetPayPwdReq req = ResetPayPwdReq.builder()
+			.bizUserId(channel.getBizUserId())
+			.name(person.getName())
+			.phone(channel.getSecurityTel())
+			.identityType(YunstIdType.ID_CARD.getValue())
+			.identityNo(encryptIdNo)
+			.jumpUrl(configService.getYunstJumpUrlPrefix() + jumpUrl)
+			.backUrl(configService.getYunstNotifybackUrl())
+			.build();
+		return yunstTpl.signRequest(req);
+	}
+
+	/**
 	 * 委托扣款协议签约(生成前端H5 url)
 	 */
-	public Tuple<String, String> generateBalanceProtocolUrl(String bizUserId, String jumpUrl){
+	public Tuple<String, String> generateBalanceProtocolUrl(String bizUserId, String jumpUrl) {
 		String protocolReqSn = UUID.randomUUID().toString().replaceAll("-", "");
 		YunstBalanceProtocolReq req = YunstBalanceProtocolReq.builder$()
 			.protocolReqSn(protocolReqSn)
@@ -157,23 +182,26 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 修改绑定手机
 	 */
-	public String modifyPhone(String bizUserId, String realName, String oldPhone, String identityNo,
-		String jumpUrl) throws Exception {
+	public String resetSecurityTel(String bizUserId, String realName, String oldPhone,
+		String identityNo, String jumpUrl)  {
 
-		YunstChangeBindPhoneReq req = YunstChangeBindPhoneReq.builder$()
+		String encryptIdNo = null;
+		try {
+			encryptIdNo = RSAUtil.encrypt(identityNo);
+		} catch (Exception e) {
+			log.error("身份证加密错误", e);
+		}
+		UpdatePhoneByPayPwdReq req = UpdatePhoneByPayPwdReq.builder()
 			.bizUserId(bizUserId)
 			.name(realName)
 			.identityType(YunstIdType.ID_CARD.getValue())
-			.identityNo(RSAUtil.encrypt(identityNo))
+			.identityNo(encryptIdNo)
 			.oldPhone(oldPhone)
 			.jumpUrl(configService.getYunstJumpUrlPrefix() + jumpUrl)
 			.backUrl(configService.getYunstNotifybackUrl())
 			.build();
 
-		String res = yunstTpl.signRequest(req);
-		String webParamUrl = configService.getYunstPersonChangeBindPhoneUrl() + "?" + res;
-		log.info("webParamUrl: " + webParamUrl);
-		return webParamUrl;
+		return yunstTpl.signRequest(req);
 	}
 
 	/**

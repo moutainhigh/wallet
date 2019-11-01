@@ -43,7 +43,7 @@ public class PreBindBankCardRequest extends  AbstractApiRequest {
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/senior/pre_bind_bank_card";
+    return "/wallet_server/v1/m/senior/card/pre_bind_bank_card";
   }
 
   @Override

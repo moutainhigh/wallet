@@ -188,7 +188,8 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 		String verifyCode, String ip) {
 
 		UnifiedConfirmVo vo = getUnifiedConfirmVo(ticket);
-		seniorPayService.smsConfirm(vo.getOrderId(), vo.getTradeNo(), verifyCode, ip);
+		WalletOrder order = verifyService.checkOrder(vo.getOrderId(), OrderStatus.WAITTING.getValue());
+		seniorPayService.smsConfirm(order, vo.getTradeNo(), verifyCode, ip);
 	}
 
 	@Log
@@ -197,7 +198,8 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 	@Override
 	public void smsRetry(String accessToken, String ticket) {
 		UnifiedConfirmVo vo = getUnifiedConfirmVo(ticket);
-		seniorPayService.smsRetry(vo.getOrderId());
+		WalletOrder order = verifyService.checkOrder(vo.getOrderId(), OrderStatus.WAITTING.getValue());
+		seniorPayService.smsRetry(order);
 	}
 
 	private UnifiedConfirmVo getUnifiedConfirmVo(String ticket) {

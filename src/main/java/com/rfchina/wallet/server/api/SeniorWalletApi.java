@@ -1,5 +1,9 @@
 package com.rfchina.wallet.server.api;
 
+import com.rfchina.passport.token.EnumTokenType;
+import com.rfchina.passport.token.TokenVerify;
+import com.rfchina.platform.common.annotation.Log;
+import com.rfchina.platform.common.annotation.SignVerify;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletChannel;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
@@ -44,7 +48,7 @@ public interface SeniorWalletApi {
 	 *
 	 * @param walletId 必填, 钱包id
 	 */
-	String personChangeBindPhone(String accessToken, Long walletId, String jumpUrl);
+	String resetSecurityTel(String accessToken, Long walletId, String jumpUrl);
 
 	/**
 	 * 高级钱包绑定手机
@@ -109,6 +113,11 @@ public interface SeniorWalletApi {
 	 */
 	String personSetPayPassword(String accessToken, Long walletId, String phone,
 		String name, String identityNo, String jumpUrl);
+
+	/**
+	 * 重置支付密码
+	 */
+	String resetPayPwd(String accessToken, Long walletId, String jumpUrl);
 
 	/**
 	 * 高级钱包获取企业用户信息

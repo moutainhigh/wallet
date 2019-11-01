@@ -23,7 +23,6 @@ import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletSource;
 import com.rfchina.wallet.server.service.SeniorWalletService;
 import com.rfchina.wallet.server.service.VerifyService;
-import com.rfchina.wallet.server.service.handler.yunst.YunstBaseHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -113,19 +112,12 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public String personChangeBindPhone(String accessToken, Long walletId, String jumpUrl) {
+	public String resetSecurityTel(String accessToken, Long walletId, String jumpUrl) {
 
-		try {
-			verifyService.checkSeniorWallet(walletId);
-			WalletChannel channel = verifyService.checkChannel(walletId, ChannelType.YUNST);
-			WalletPerson walletPerson = walletPersonDao.selectByWalletId(walletId);
-
-			return seniorWalletService.personChangeBindPhone(walletPerson, channel, jumpUrl);
-		} catch (Exception e) {
-			log.error("高级钱包返回个人修改手机页面链接失败, walletId: {}", walletId);
-			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
-				"高级钱包返回个人修改手机页面链接失败");
-		}
+		verifyService.checkSeniorWallet(walletId);
+		WalletChannel channel = verifyService.checkChannel(walletId, ChannelType.YUNST);
+		WalletPerson walletPerson = walletPersonDao.selectByWalletId(walletId);
+		return seniorWalletService.resetSecurityTel(walletPerson, channel, jumpUrl);
 	}
 
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
@@ -210,9 +202,9 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public String signMemberProtocol(String accessToken,  Long walletId,String jumpUrl) {
+	public String signMemberProtocol(String accessToken, Long walletId, String jumpUrl) {
 		try {
-			return seniorWalletService.signMemberProtocol(walletId,jumpUrl);
+			return seniorWalletService.signMemberProtocol(walletId, jumpUrl);
 		} catch (Exception e) {
 			log.error("高级钱包返回会员签约协议页面链接失败, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
@@ -234,6 +226,15 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
 				"高级钱包返回个人设置支付密码页面链接失败");
 		}
+	}
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
+	@Override
+	public String resetPayPwd(String accessToken, Long walletId, String jumpUrl) {
+		verifyService.checkSeniorWallet(walletId);
+		return seniorWalletService.resetTunnelPayPwd(walletId, jumpUrl);
 	}
 
 	@Log

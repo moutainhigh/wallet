@@ -84,7 +84,8 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 
 	@Test
 	public void rechargeConfirm() {
-		seniorPayService.smsConfirm(14L,
+		WalletOrder order = walletOrderDao.selectByPrimaryKey(14L);
+		seniorPayService.smsConfirm(order,
 			"{\"sign\":\"\",\"tphtrxcrtime\":\"\",\"tphtrxid\":0,\"trxflag\":\"trx\",\"trxsn\":\"\"}",
 			"575636", "113.194.30.199");
 	}

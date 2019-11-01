@@ -1,6 +1,6 @@
-###  高级钱包-个人用户修改手机
+###  高级钱包-修改支付密码
 
-请求地址: /wallet_server/v1/m/wallet/senior_person_change_bind_phone
+请求地址: /wallet_server/v1/m/senior/wallet/reset_pay_pwd
 
 请求类型: POST
 
@@ -10,9 +10,32 @@
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
 |access_token|是|access_token|
-|id_no|是|身份证号|
-|old_phone|是|手机号码|
-|real_name|是|姓名|
+|jump_url|是|前端跳转地址|
+|wallet_id|是|钱包id|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+   , "data":  {
+    url:""   //
+}  
+}
+```
+
+###  高级钱包-修改手机
+
+请求地址: /wallet_server/v1/m/senior/wallet/reset_security_tel
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
 |wallet_id|是|钱包id|
 |jump_url|否|前端回跳地址|
 
