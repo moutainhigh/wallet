@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 
 
-/** 高级钱包企业用户绑定手机 */
+/** 高级钱包-企业用户绑定手机 */
 @Builder
 public class SeniorWalletBindPhoneRequest extends  AbstractApiRequest {
 
@@ -21,9 +21,6 @@ public class SeniorWalletBindPhoneRequest extends  AbstractApiRequest {
 
   @ApiModelProperty("手机号码")
   private String mobile ;
-
-  @ApiModelProperty("钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户")
-  private Integer source ;
 
   @ApiModelProperty("短信验证码")
   private String verifyCode ;
@@ -53,9 +50,6 @@ public class SeniorWalletBindPhoneRequest extends  AbstractApiRequest {
       }
       if(mobile != null){
         parameters.put("mobile", mobile.toString());
-      }
-      if(source != null){
-        parameters.put("source", source.toString());
       }
       if(verifyCode != null){
         parameters.put("verify_code", verifyCode.toString());

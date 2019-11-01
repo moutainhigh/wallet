@@ -361,7 +361,7 @@ public class SeniorWalletService {
 	/**
 	 * 高级钱包扣款协议地址
 	 */
-	public String signBalanceProtocol(Long walletId) throws Exception {
+	public String signBalanceProtocol(Long walletId, String jumpUrl){
 		WalletChannel walletChannel = walletChannelDao
 			.selectByChannelTypeAndWalletId(ChannelType.YUNST.getValue().intValue(), walletId);
 		if (walletChannel == null) {
@@ -370,7 +370,7 @@ public class SeniorWalletService {
 				"未创建云商通用户");
 		}
 		Tuple<String, String> balanceProtocolReqResult = yunstUserHandler
-			.generateBalanceProtocolUrl(walletChannel.getBizUserId());
+			.generateBalanceProtocolUrl(walletChannel.getBizUserId(),jumpUrl);
 		walletChannel.setBalanceProtocolReqSn(balanceProtocolReqResult.left);
 		walletChannelDao.updateByPrimaryKeySelective(walletChannel);
 		return balanceProtocolReqResult.right;
@@ -379,7 +379,7 @@ public class SeniorWalletService {
 	/**
 	 * 高级钱包会员协议地址
 	 */
-	public String signMemberProtocol(Long walletId) throws Exception {
+	public String signMemberProtocol(Long walletId, String jumpUrl){
 		WalletChannel walletChannel = walletChannelDao
 			.selectByChannelTypeAndWalletId(ChannelType.YUNST.getValue().intValue(), walletId);
 		if (walletChannel == null) {
@@ -387,14 +387,14 @@ public class SeniorWalletService {
 			throw new RfchinaResponseException(EnumResponseCode.COMMON_FAILURE,
 				"未创建云商通用户");
 		}
-		return yunstUserHandler.generateSignContractUrl(walletChannel.getBizUserId());
+		return yunstUserHandler.generateSignContractUrl(walletChannel.getBizUserId(),jumpUrl);
 	}
 
 	/**
 	 * 高级钱包会员协议地址
 	 */
 	public String setPersonPayPassword(Long walletId, String phone,
-		String name, String identityNo) throws Exception {
+		String name, String identityNo, String jumpUrl) throws Exception {
 		WalletChannel walletChannel = walletChannelDao
 			.selectByChannelTypeAndWalletId(ChannelType.YUNST.getValue().intValue(), walletId);
 		if (walletChannel == null) {
@@ -404,7 +404,7 @@ public class SeniorWalletService {
 		}
 		return yunstUserHandler
 			.generatePersonSetPayPasswordUrl(walletChannel.getBizUserId(), phone, name,
-				EnumDef.EnumIdType.ID_CARD.getValue().longValue(), identityNo);
+				EnumDef.EnumIdType.ID_CARD.getValue().longValue(), identityNo, jumpUrl);
 	}
 
 	/**

@@ -92,15 +92,13 @@ public class SeniorWalletController {
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = true, example = "1") @RequestParam("channel_type")
 			Integer channelType,
-		@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2")
-		@RequestParam("source") Byte source,
 		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
 		@ApiParam(value = "手机号码", required = true) @RequestParam("mobile") String mobile,
 		@ApiParam(value = "短信验证码", required = true) @RequestParam("verify_code") String verifyCode) {
 
 		return new ResponseValue<Wallet>(EnumResponseCode.COMMON_SUCCESS,
 			seniorWalletApi
-				.seniorWalletBindPhone(accessToken, source, channelType, walletId, mobile,
+				.seniorWalletBindPhone(accessToken, channelType, walletId, mobile,
 					verifyCode));
 	}
 
@@ -110,16 +108,15 @@ public class SeniorWalletController {
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = true, example = "1") @RequestParam("channel_type")
 			Integer channelType,
-		@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2")
-		@RequestParam("source") Byte source,
 		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
 		@ApiParam(value = "姓名", required = true) @RequestParam("real_name") String realName,
 		@ApiParam(value = "身份证号", required = true) @RequestParam("id_no") String idNo,
 		@ApiParam(value = "手机号码", required = true) @RequestParam("mobile") String mobile,
-		@ApiParam(value = "短信验证码", required = true) @RequestParam("verify_code") String verifyCode) {
+		@ApiParam(value = "短信验证码", required = true) @RequestParam("verify_code") String verifyCode,
+		@ApiParam(value = "前端跳转地址", required = true) @RequestParam("jump_url") String jumpUrl) {
 		String tongLianUrl = seniorWalletApi
-			.seniorWalletPersonAuthentication(accessToken, source, channelType, walletId,
-				realName, idNo, mobile, verifyCode);
+			.seniorWalletPersonAuthentication(accessToken, channelType, walletId,
+				realName, idNo, mobile, verifyCode, jumpUrl);
 		PageVo pageVo = PageVo.builder().url(tongLianUrl).build();
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, pageVo);
 	}
@@ -130,14 +127,12 @@ public class SeniorWalletController {
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = true, example = "1") @RequestParam("channel_type")
 			Integer channelType,
-		@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2")
-		@RequestParam("source") Byte source,
 		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
 		@ApiParam(value = "审核方式", required = true) @RequestParam("audit_type") Integer auditType,
 		@ApiParam(value = "企业信息(json)", required = true) @RequestParam("company_basic_info")
 			String companyBasicInfo) {
 		WalletChannel walletChannel = seniorWalletApi
-			.seniorWalletCompanyAudit(accessToken, source, channelType, auditType, walletId,
+			.seniorWalletCompanyAudit(accessToken, channelType, auditType, walletId,
 				JsonUtil.toObject(companyBasicInfo, YunstSetCompanyInfoReq.CompanyBasicInfo.class,
 					objectMapper -> {
 						objectMapper.setTimeZone(TimeZone.getDefault());
@@ -151,10 +146,9 @@ public class SeniorWalletController {
 	@PostMapping(UrlConstant.WALLET_SENIOR_MEMBER_PROTOCOL)
 	public ResponseValue<PageVo> seniorWalletSignMemberProtocol(
 		@RequestParam("access_token") String accessToken,
-		@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2")
-		@RequestParam("source") Byte source,
-		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId) {
-		String tongLianUrl = seniorWalletApi.signMemberProtocol(accessToken, source, walletId);
+		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+		@ApiParam(value = "前端跳转地址", required = true) @RequestParam("jump_url") String jumpUrl) {
+		String tongLianUrl = seniorWalletApi.signMemberProtocol(accessToken, walletId, jumpUrl);
 		PageVo pageVo = PageVo.builder().url(tongLianUrl).build();
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, pageVo);
 	}
@@ -163,10 +157,9 @@ public class SeniorWalletController {
 	@PostMapping(UrlConstant.WALLET_SENIOR_BANLACE_PROTOCOL)
 	public ResponseValue<PageVo> seniorWalletSignBalanceProtocol(
 		@RequestParam("access_token") String accessToken,
-		@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2")
-		@RequestParam("source") Byte source,
-		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId) {
-		String tongLianUrl = seniorWalletApi.signBalanceProtocol(accessToken, source, walletId);
+		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+		@ApiParam(value = "前端跳转地址", required = true) @RequestParam("jump_url") String jumpUrl) {
+		String tongLianUrl = seniorWalletApi.signBalanceProtocol(accessToken, walletId, jumpUrl);
 		PageVo pageVo = PageVo.builder().url(tongLianUrl).build();
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, pageVo);
 	}
@@ -175,14 +168,13 @@ public class SeniorWalletController {
 	@PostMapping(UrlConstant.WALLET_SENIOR_PERSON_SET_PAY_PASSWORD)
 	public ResponseValue<PageVo> seniorWalletPersonSetPayPassword(
 		@RequestParam("access_token") String accessToken,
-		@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2")
-		@RequestParam("source") Byte source,
 		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
 		@ApiParam(value = "绑定手机", required = true) @RequestParam("phone") String phone,
 		@ApiParam(value = "姓名", required = true) @RequestParam("name") String name,
-		@ApiParam(value = "身份证", required = true) @RequestParam("identity_no") String identityNo) {
+		@ApiParam(value = "身份证", required = true) @RequestParam("identity_no") String identityNo,
+		@ApiParam(value = "前端跳转地址", required = true) @RequestParam("jump_url") String jumpUrl) {
 		String tongLianUrl = seniorWalletApi
-			.personSetPayPassword(accessToken, source, walletId, phone, name, identityNo);
+			.personSetPayPassword(accessToken, walletId, phone, name, identityNo, jumpUrl);
 		PageVo pageVo = PageVo.builder().url(tongLianUrl).build();
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, pageVo);
 	}
@@ -191,12 +183,10 @@ public class SeniorWalletController {
 	@PostMapping(UrlConstant.WALLET_SENIOR_PERSON_INFO)
 	public ResponseValue<YunstMemberInfoResult.PersonInfoResult> seniorWalletPersonInfo(
 		@RequestParam("access_token") String accessToken,
-		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
-		@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2")
-		@RequestParam("source") Byte source) {
+		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId) {
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
-			seniorWalletApi.seniorWalletGetPersonInfo(accessToken, walletId, source));
+			seniorWalletApi.seniorWalletGetPersonInfo(accessToken, walletId));
 	}
 
 
@@ -204,11 +194,9 @@ public class SeniorWalletController {
 	@PostMapping(UrlConstant.WALLET_SENIOR_COMPANY_INFO)
 	public ResponseValue<YunstMemberInfoResult.CompanyInfoResult> seniorWalletCompanyInfo(
 		@RequestParam("access_token") String accessToken,
-		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
-		@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2")
-		@RequestParam("source") Byte source) {
+		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId) {
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
-			seniorWalletApi.seniorWalletGetCompanyInfo(accessToken, walletId, source));
+			seniorWalletApi.seniorWalletGetCompanyInfo(accessToken, walletId));
 	}
 }

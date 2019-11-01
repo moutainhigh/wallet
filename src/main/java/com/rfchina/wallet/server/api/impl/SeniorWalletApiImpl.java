@@ -20,6 +20,7 @@ import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResul
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.PersonInfoResult;
 import com.rfchina.wallet.server.mapper.ext.WalletChannelExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
+import com.rfchina.wallet.server.msic.EnumWallet.WalletSource;
 import com.rfchina.wallet.server.service.SeniorWalletService;
 import com.rfchina.wallet.server.service.VerifyService;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBaseHandler;
@@ -130,7 +131,7 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public Wallet seniorWalletBindPhone(String accessToken, Byte source, Integer channelType,
+	public Wallet seniorWalletBindPhone(String accessToken, Integer channelType,
 		Long walletId, String mobile, String verifyCode) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		if (wallet == null) {
@@ -153,10 +154,10 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public String seniorWalletPersonAuthentication(String accessToken, Byte source,
-		Integer channelType, Long walletId,
-		String realName, String idNo, @ParamValid(pattern = RegexUtil.REGEX_MOBILE) String mobile,
-		String verifyCode) {
+	public String seniorWalletPersonAuthentication(String accessToken, Integer channelType,
+		Long walletId, String realName, String idNo,
+		@ParamValid(pattern = RegexUtil.REGEX_MOBILE) String mobile,
+		String verifyCode, String jumpUrl) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		if (wallet == null) {
 			log.error("高级钱包个人认证失败, 查无此钱包, walletId: {}", walletId);
@@ -167,7 +168,7 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 			seniorWalletService
 				.seniorWalletPersonAuth(channelType, walletId, realName, idNo, mobile,
 					verifyCode);
-			return seniorWalletService.signMemberProtocol(walletId);
+			return seniorWalletService.signMemberProtocol(walletId, jumpUrl);
 		} catch (Exception e) {
 			log.error("高级钱包个人认证失败, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
@@ -179,24 +180,23 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public WalletChannel seniorWalletCompanyAudit(String accessToken, Byte source,
-		Integer channelType,
-		Integer auditType,
-		Long walletId, YunstSetCompanyInfoReq.CompanyBasicInfo companyBasicInfo) {
+	public WalletChannel seniorWalletCompanyAudit(String accessToken, Integer channelType,
+		Integer auditType, Long walletId,
+		YunstSetCompanyInfoReq.CompanyBasicInfo companyBasicInfo) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		if (wallet == null) {
 			log.error("高级钱包企业信息审核失败, 查无此钱包, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
 				"高级钱包企业信息审核失败, 查无此钱包");
 		}
-		String transformBizUserId = YunstBaseHandler.transferToYunstBizUserFormat(walletId, source);
 		WalletChannel walletChannel = walletChannelDao
 			.selectByChannelTypeAndWalletId(channelType, walletId);
 		if (walletChannel == null) {
-			log.info("未创建高级钱包用户: bizUserId:{}", transformBizUserId);
-			walletChannel = seniorWalletService.createSeniorWallet(channelType, walletId, source);
+			log.info("未创建高级钱包用户: walletId:{}", walletId);
+			walletChannel = seniorWalletService
+				.createSeniorWallet(channelType, walletId, WalletSource.FHT_CORP.getValue());
 			if (walletChannel == null) {
-				log.error("高级钱包企业信息审核失败, 创建云商通用户失败, bizUserId:{}", transformBizUserId);
+				log.error("高级钱包企业信息审核失败, 创建云商通用户失败, walletId:{}", walletId);
 				throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
 					"高级钱包企业信息审核失败, 创建云商通用户失败");
 			}
@@ -210,9 +210,9 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public String signMemberProtocol(String accessToken, Byte source, Long walletId) {
+	public String signMemberProtocol(String accessToken,  Long walletId,String jumpUrl) {
 		try {
-			return seniorWalletService.signMemberProtocol(walletId);
+			return seniorWalletService.signMemberProtocol(walletId,jumpUrl);
 		} catch (Exception e) {
 			log.error("高级钱包返回会员签约协议页面链接失败, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
@@ -224,11 +224,11 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public String personSetPayPassword(String accessToken, Byte source, Long walletId, String phone,
-		String name, String identityNo) {
+	public String personSetPayPassword(String accessToken, Long walletId, String phone,
+		String name, String identityNo, String jumpUrl) {
 		try {
 			return seniorWalletService
-				.setPersonPayPassword(walletId, phone, name, identityNo);
+				.setPersonPayPassword(walletId, phone, name, identityNo, jumpUrl);
 		} catch (Exception e) {
 			log.error("高级钱包返回个人设置支付密码页面链接失败, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
@@ -240,9 +240,9 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public String signBalanceProtocol(String accessToken, Byte source, Long walletId) {
+	public String signBalanceProtocol(String accessToken, Long walletId, String jumpUrl) {
 		try {
-			return seniorWalletService.signBalanceProtocol(walletId);
+			return seniorWalletService.signBalanceProtocol(walletId, jumpUrl);
 		} catch (Exception e) {
 			log.error("高级钱包返回扣款协议链接失败, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
@@ -255,8 +255,7 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public CompanyInfoResult seniorWalletGetCompanyInfo(String accessToken, Long walletId,
-		Byte source) {
+	public CompanyInfoResult seniorWalletGetCompanyInfo(String accessToken, Long walletId) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		if (wallet == null) {
 			log.error("高级钱包获取企业用户信息失败, 查无此钱包, walletId: {}", walletId);
@@ -282,8 +281,7 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public PersonInfoResult seniorWalletGetPersonInfo(String accessToken, Long walletId,
-		Byte source) {
+	public PersonInfoResult seniorWalletGetPersonInfo(String accessToken, Long walletId) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		if (wallet == null) {
 			log.error("高级钱包获取个人用户信息失败, 查无此钱包, walletId: {}", walletId);

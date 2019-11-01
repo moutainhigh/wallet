@@ -9,15 +9,12 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 
 
-/** 高级钱包个人信息 */
+/** 高级钱包-个人信息 */
 @Builder
 public class SeniorWalletPersonInfoRequest extends  AbstractApiRequest {
 
   @ApiModelProperty("access_token")
   private String accessToken ;
-
-  @ApiModelProperty("钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户")
-  private Integer source ;
 
   @ApiModelProperty("钱包id")
   private Long walletId ;
@@ -38,9 +35,6 @@ public class SeniorWalletPersonInfoRequest extends  AbstractApiRequest {
     Map<String, String> parameters = new HashMap<>(2);
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
-      }
-      if(source != null){
-        parameters.put("source", source.toString());
       }
       if(walletId != null){
         parameters.put("wallet_id", walletId.toString());
