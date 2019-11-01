@@ -19,7 +19,15 @@ public interface WalletCollectInfoExtDao extends WalletCollectInfoMapper {
 
 	@Update({
 		"update rf_wallet_collect_info",
-		"set clear_amount = clear_amount + #{amount}"
+		"set clear_amount = clear_amount + #{amount}",
+		"where id = #{collectInfoId}"
 	})
-	int accuClearAmount(Long collectInfoId, Long amount);
+	int accuClearAmount(@Param("collectInfoId") Long collectInfoId, @Param("amount") Long amount);
+
+	@Update({
+		"update rf_wallet_collect_info",
+		"set refund_amount = refund_amount + #{amount}",
+		"where id = #{collectInfoId}"
+	})
+	int accuRefundAmount(@Param("collectInfoId") Long collectInfoId, @Param("amount") Long amount);
 }

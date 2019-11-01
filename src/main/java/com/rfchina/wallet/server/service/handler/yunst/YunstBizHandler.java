@@ -555,8 +555,7 @@ public class YunstBizHandler extends EBankHandler {
 		if (OrderStatus.SUCC.getValue().byteValue() == order.getStatus()
 			&& (order.getBizTag() == null || !EnumBizTag.RECORD.contains(order.getBizTag()))) {
 			if (order.getType().byteValue() == OrderType.AGENT_PAY.getValue()) {
-				List<WalletClearing> clearings = walletClearingDao
-					.selectByCollectOrderNo(order.getOrderNo());
+				List<WalletClearing> clearings = walletClearingDao.selectByOrderId(order.getId());
 				clearings.forEach(clearing -> {
 					MoneyLog moneyLog = MoneyLog.builder()
 						.walletId(clearing.getPayeeWalletId())
@@ -590,6 +589,18 @@ public class YunstBizHandler extends EBankHandler {
 					builder.type(DebitType.CREDIT.getValue());
 					builder.debitAmount(0L);
 					builder.creditAmount(order.getAmount());
+				}
+				if (order.getType().byteValue() == OrderType.REFUND.getValue()) {
+					List<WalletRefund> refunds = walletRefundDao.selectByOrderId(order.getId());
+					refunds.forEach(refund->{
+						List<WalletRefundDetail> details = walletRefundDetailDao
+							.selectByRefundId(refund.getId());
+						details.forEach(detail -> {
+						walletCollectInfoDao
+							.accuRefundAmount(detail.getCollectInfoId(), detail.getAmount());
+						});
+					});
+
 				}
 				moneyLogDao.insertSelective(builder.build());
 			}
