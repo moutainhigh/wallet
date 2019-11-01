@@ -549,7 +549,7 @@ public class SeniorPayService {
 
 	public void checkOrder(WalletOrder order, Byte expectStatus) {
 		Optional.ofNullable(order)
-			.filter(o -> o.getStatus().byteValue() == OrderStatus.WAITTING.getValue())
+			.filter(o -> o.getStatus().byteValue() == expectStatus.byteValue())
 			.orElseThrow(
 				() -> new WalletResponseException(EnumWalletResponseCode.ORDER_STATUS_ERROR));
 	}
