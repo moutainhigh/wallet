@@ -145,7 +145,7 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 		WalletOrder order = walletOrderDao.selectByOrderNo("WC20191030201675783");
 		SettleResp resp = seniorPayService
 			.agentPay(order, String.valueOf(System.currentTimeMillis())
-				, Arrays.asList(reciever));
+				, reciever);
 		log.info("agent pay {}", resp);
 	}
 
@@ -154,8 +154,10 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 		RefundInfo refundInfo = new RefundInfo();
 		refundInfo.setWalletId(platWalletId);
 		refundInfo.setAmount(1L);
+		WalletOrder collectOrder = walletOrderDao.selectByOrderNo("WC20191101684530808");
 		WalletOrder refund = seniorPayService
-			.refund("WC20191030371129856", "", Arrays.asList(refundInfo));
+			.refund(collectOrder, String.valueOf(System.currentTimeMillis()),
+				Arrays.asList(refundInfo));
 		log.info("refund {}", refund);
 	}
 

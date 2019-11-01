@@ -44,8 +44,6 @@ import com.rfchina.wallet.server.model.ext.SettleResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.model.ext.WithdrawResp;
 import com.rfchina.wallet.server.msic.EnumWallet.ChannelType;
-import com.rfchina.wallet.server.msic.EnumWallet.ClearInfoStatus;
-import com.rfchina.wallet.server.msic.EnumWallet.ClearingStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
 import com.rfchina.wallet.server.msic.EnumWallet.GwProgress;
 import com.rfchina.wallet.server.msic.EnumWallet.OrderStatus;
@@ -57,7 +55,6 @@ import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBizHandler;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -285,7 +282,7 @@ public class SeniorPayService {
 				.budgetAmount(reciever.getAmount())
 				.clearAmount(0L)
 				.refundAmount(0L)
-				.status(ClearInfoStatus.WAITING.getValue())
+//				.status(OrderStatus.WAITTING.getValue())
 				.createTime(new Date())
 				.build();
 			walletCollectInfoDao.insertSelective(clearInfo);
@@ -324,9 +321,8 @@ public class SeniorPayService {
 			.build();
 		walletOrderDao.insertSelective(order);
 
-		WalletCollect collect = walletCollectDao.selectByOrderId(collectOrder.getId());
 		List<WalletCollectInfo> collectInfos = walletCollectInfoDao
-			.selectByCollectId(collect.getId());
+			.selectByCollectId(collectOrder.getId());
 
 		// 匹配原始分账记录
 		WalletCollectInfo clearInfo = collectInfos.stream()
@@ -377,7 +373,7 @@ public class SeniorPayService {
 			.map(clearing -> {
 				WalletOrder order = walletOrderDao.selectByPrimaryKey(clearing.getOrderId());
 				boolean accumulate =
-					ClearingStatus.FAIL.getValue().byteValue() != order.getStatus().byteValue();
+					OrderStatus.FAIL.getValue().byteValue() != order.getStatus().byteValue();
 				return accumulate ? order.getAmount() : 0L;
 			})
 			.collect(Collectors.summingLong(Long::valueOf));
@@ -388,16 +384,15 @@ public class SeniorPayService {
 			.map(refund -> {
 				WalletOrder order = walletOrderDao.selectByPrimaryKey(refund.getOrderId());
 				boolean accumulate =
-					ClearingStatus.FAIL.getValue().byteValue() != order.getStatus().byteValue();
+					OrderStatus.FAIL.getValue().byteValue() != order.getStatus().byteValue();
 				return accumulate ? order.getAmount() : 0L;
 			})
 			.collect(Collectors.summingLong(Long::valueOf));
 		// 不能超过可退金额
 		Long applyValue = refundList.stream()
 			.collect(Collectors.summingLong(RefundInfo::getAmount));
-		WalletOrder collect = walletOrderDao.selectByOrderNo(collectOrder.getOrderNo());
 		if (clearedValue.longValue() + refundedValue.longValue()
-			+ applyValue.longValue() > collect.getAmount().longValue()) {
+			+ applyValue.longValue() > collectOrder.getAmount().longValue()) {
 			throw new WalletResponseException(EnumWalletResponseCode.REFUND_AMOUNT_OVER_LIMIT);
 		}
 
@@ -413,7 +408,7 @@ public class SeniorPayService {
 			.orderNo(orderNo)
 			.batchNo(batchNo)
 			.bizNo(bizNo)
-			.walletId(collect.getWalletId())
+			.walletId(collectOrder.getWalletId())
 			.type(OrderType.REFUND.getValue())
 			.amount(refundList.stream().collect(Collectors.summingLong(RefundInfo::getAmount)))
 			.progress(GwProgress.WAIT_SEND.getValue())
@@ -426,16 +421,17 @@ public class SeniorPayService {
 		// 记录退款单
 		WalletRefund refund = WalletRefund.builder()
 			.orderId(order.getId())
-			.collectOrderNo(collect.getOrderNo())
+			.collectOrderNo(collectOrder.getOrderNo())
 			.agentWalletId(agentEntWalletId)
-			.collectAmount(collect.getAmount())
+			.collectAmount(collectOrder.getAmount())
 			.createTime(new Date())
 			.build();
 		walletRefundDao.insertSelective(refund);
 
 		// 记录退款明细
+		WalletCollect walletCollect = walletCollectDao.selectByOrderId(collectOrder.getId());
 		List<WalletCollectInfo> collectInfos = walletCollectInfoDao
-			.selectByCollectId(collect.getId());
+			.selectByCollectId(walletCollect.getId());
 		List<WalletRefundDetail> details = refundList.stream().map(r -> {
 			// 核对清分记录
 			WalletCollectInfo collectInfo = collectInfos.stream()

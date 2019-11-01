@@ -658,72 +658,72 @@ public class EnumWallet {
 		}
 	}
 
-	/**
-	 * 清算业务状态。1：待清算 2：已清算
-	 */
-	public enum ClearingStatus implements Valuable<Byte> {
-		WAITING((byte) 1, "未清算"),
-		CLEARED((byte) 2, "已清算"),
-		FAIL((byte) 3, "交易失败"),
-		;
+//	/**
+//	 * 清算业务状态。1：待清算 2：已清算
+//	 */
+//	public enum ClearingStatus implements Valuable<Byte> {
+//		WAITING((byte) 1, "未清算"),
+//		CLEARED((byte) 2, "已清算"),
+//		FAIL((byte) 3, "交易失败"),
+//		;
+//
+//		private Byte value;
+//		private String valueName;
+//
+//		ClearingStatus(Byte value, String valueName) {
+//			this.value = value;
+//			this.valueName = valueName;
+//		}
+//
+//		@Override
+//		public Byte getValue() {
+//			return value;
+//		}
+//	}
 
-		private Byte value;
-		private String valueName;
+//	/**
+//	 * 分帐状态。1：未清算 2：部分清算 3：已清算
+//	 */
+//	public enum ClearInfoStatus implements Valuable<Byte> {
+//		WAITING((byte) 1, "未清算"),
+//		PARTAL((byte) 2, "部分清算"),
+//		FINISH((byte) 3, "已清算");
+//
+//		private Byte value;
+//		private String valueName;
+//
+//		ClearInfoStatus(Byte value, String valueName) {
+//			this.value = value;
+//			this.valueName = valueName;
+//		}
+//
+//		@Override
+//		public Byte getValue() {
+//			return value;
+//		}
+//	}
 
-		ClearingStatus(Byte value, String valueName) {
-			this.value = value;
-			this.valueName = valueName;
-		}
-
-		@Override
-		public Byte getValue() {
-			return value;
-		}
-	}
-
-	/**
-	 * 分帐状态。1：未清算 2：部分清算 3：已清算
-	 */
-	public enum ClearInfoStatus implements Valuable<Byte> {
-		WAITING((byte) 1, "未清算"),
-		PARTAL((byte) 2, "部分清算"),
-		FINISH((byte) 3, "已清算");
-
-		private Byte value;
-		private String valueName;
-
-		ClearInfoStatus(Byte value, String valueName) {
-			this.value = value;
-			this.valueName = valueName;
-		}
-
-		@Override
-		public Byte getValue() {
-			return value;
-		}
-	}
-
-	/**
-	 * 退款状态。1：未退款 2：已退款 3:交易失败
-	 */
-	public enum RefundStatus implements Valuable<Byte> {
-		WAITING((byte) 1, "未退款"),
-		REFUNDED((byte) 2, "已退款"),
-		FAIL((byte) 3, "交易失败");
-
-		private Byte value;
-		private String valueName;
-
-		RefundStatus(Byte value, String valueName) {
-			this.value = value;
-			this.valueName = valueName;
-		}
-
-		@Override
-		public Byte getValue() {
-			return value;
-		}
-	}
+//	/**
+//	 * 退款状态。1：未退款 2：已退款 3:交易失败
+//	 */
+//	public enum RefundStatus implements Valuable<Byte> {
+//		WAITING((byte) 1, "未退款"),
+//		REFUNDED((byte) 2, "已退款"),
+//		FAIL((byte) 3, "交易失败");
+//
+//		private Byte value;
+//		private String valueName;
+//
+//		RefundStatus(Byte value, String valueName) {
+//			this.value = value;
+//			this.valueName = valueName;
+//		}
+//
+//		@Override
+//		public Byte getValue() {
+//			return value;
+//		}
+//	}
 
 	/**
 	 * 退款方式
