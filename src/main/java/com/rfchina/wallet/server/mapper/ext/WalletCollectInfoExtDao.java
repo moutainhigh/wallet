@@ -11,14 +11,14 @@ import org.apache.ibatis.annotations.Update;
 public interface WalletCollectInfoExtDao extends WalletCollectInfoMapper {
 
 	@Select({
-		"select * from rf_wallet_clear_info",
+		"select * from rf_wallet_collect_info",
 		"where collect_id = #{collectId}"
 	})
 	@ResultMap("com.rfchina.wallet.domain.mapper.WalletCollectInfoMapper.BaseResultMap")
 	List<WalletCollectInfo> selectByCollectId(@Param("collectId") Long collectId);
 
 	@Update({
-		"update rf_wallet_clear_info",
+		"update rf_wallet_collect_info",
 		"set clear_amount = clear_amount + #{amount}"
 	})
 	int accuClearAmount(Long collectInfoId, Long amount);

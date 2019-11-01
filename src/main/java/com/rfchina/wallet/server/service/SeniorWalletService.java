@@ -107,12 +107,7 @@ public class SeniorWalletService {
 				"开通高级钱包失败-插入渠道信息");
 		}
 		wallet.setLevel(EnumDef.EnumWalletLevel.SENIOR.getValue());
-		effectRows = walletDao.updateByPrimaryKeySelective(wallet);
-		if (effectRows != 1) {
-			log.error("更新钱包等级失败, walletId: {}", walletId);
-			throw new RfchinaResponseException(EnumResponseCode.COMMON_FAILURE,
-				"更新钱包等级失败");
-		}
+		walletDao.updateByPrimaryKeySelective(wallet);
 		return walletChannel;
 	}
 
@@ -260,6 +255,14 @@ public class SeniorWalletService {
 					throw new RfchinaResponseException(
 						EnumResponseCode.COMMON_FAILURE, "更新个人钱包个人信息表失败");
 				}
+			}else {
+				walletPerson.setIdType(EnumDef.EnumIdType.ID_CARD.getValue().byteValue());
+				walletPerson.setIdNo(idNo);
+				walletPerson.setRealLevel(EnumDef.EnumUserRealType.ID_CARD.getValue().byteValue());
+				walletPerson.setTel(mobile);
+				walletPerson.setLastUpdTime(curDate);
+
+				walletPersonDao.updateByPrimaryKeySelective(walletPerson);
 			}
 
 			walletDao.updateActiveStatus(walletId,
