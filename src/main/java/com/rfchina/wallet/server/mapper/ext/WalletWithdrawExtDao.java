@@ -9,11 +9,5 @@ import org.apache.ibatis.annotations.Select;
 
 public interface WalletWithdrawExtDao extends WalletWithdrawMapper {
 
-	@Select({
-		"select * from rf_wallet_withdraw",
-		"where apply_id = #{applyId}"
-	})
-	@ResultMap("com.rfchina.wallet.domain.mapper.WalletWithdrawMapper.BaseResultMap")
-	List<WalletWithdraw> selectByApplyId(@Param("applyId") Long applyId);
 
 }

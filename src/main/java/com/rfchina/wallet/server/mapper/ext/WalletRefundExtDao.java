@@ -15,15 +15,8 @@ public interface WalletRefundExtDao extends WalletRefundMapper {
 		"where order_id = #{orderId}"
 	})
 	@ResultMap("com.rfchina.wallet.domain.mapper.WalletRefundMapper.BaseResultMap")
-	List<WalletRefund> selectByOrderId(@Param("order_id") Long orderId);
+	List<WalletRefund> selectByOrderId(@Param("orderId") Long orderId);
 
-
-	@Select({
-		"select * from rf_wallet_refund",
-		"where collect_id = #{collectId}"
-	})
-	@ResultMap("com.rfchina.wallet.domain.mapper.WalletRefundMapper.BaseResultMap")
-	List<WalletRefund> selectByCollectId(@Param("collectId") Long collectId);
 
 	@Select({
 		"select * from rf_wallet_refund",

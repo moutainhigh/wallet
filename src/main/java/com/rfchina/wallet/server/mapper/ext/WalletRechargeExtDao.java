@@ -10,17 +10,4 @@ import org.apache.ibatis.annotations.Select;
 
 public interface WalletRechargeExtDao extends WalletRechargeMapper {
 
-	@Select({
-		"select * from rf_wallet_recharge",
-		"where apply_id = #{applyId}"
-	})
-	@ResultMap("com.rfchina.wallet.domain.mapper.WalletRechargeMapper.BaseResultMap")
-	List<WalletRecharge> selectByApplyId(@Param("applyId") Long applyId);
-
-	@Select({
-		"select count(1) from rf_wallet_recharge",
-		"where order_no = #{orderNo}"
-	})
-	int selectCountByOrderNo(@Param("orderNo") String orderNo);
-
 }

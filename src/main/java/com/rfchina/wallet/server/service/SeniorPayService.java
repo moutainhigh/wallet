@@ -360,12 +360,7 @@ public class SeniorPayService {
 
 	}
 
-
-	/**
-	 * 退款
-	 */
-	public WalletOrder refund(WalletOrder collectOrder, String bizNo, List<RefundInfo> refundList) {
-
+	private Long getCollectSpand(WalletOrder collectOrder) {
 		// 在途和已清算金额总额
 		List<WalletClearing> histClearings = walletClearingDao
 			.selectByCollectOrderNo(collectOrder.getOrderNo());
@@ -388,11 +383,20 @@ public class SeniorPayService {
 				return accumulate ? order.getAmount() : 0L;
 			})
 			.collect(Collectors.summingLong(Long::valueOf));
+
+		return clearedValue + refundedValue;
+	}
+
+	/**
+	 * 退款
+	 */
+	public WalletOrder refund(WalletOrder collectOrder, String bizNo, List<RefundInfo> refundList) {
+
 		// 不能超过可退金额
+		Long histValue = getCollectSpand(collectOrder);
 		Long applyValue = refundList.stream()
 			.collect(Collectors.summingLong(RefundInfo::getAmount));
-		if (clearedValue.longValue() + refundedValue.longValue()
-			+ applyValue.longValue() > collectOrder.getAmount().longValue()) {
+		if (histValue.longValue() + applyValue.longValue() > collectOrder.getAmount().longValue()) {
 			throw new WalletResponseException(EnumWalletResponseCode.REFUND_AMOUNT_OVER_LIMIT);
 		}
 
