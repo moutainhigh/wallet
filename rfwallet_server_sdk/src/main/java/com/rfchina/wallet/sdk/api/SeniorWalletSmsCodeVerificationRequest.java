@@ -34,7 +34,7 @@ public class SeniorWalletSmsCodeVerificationRequest extends  AbstractApiRequest 
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/wallet/senior_sms_verify_code";
+    return "/wallet_server/v1/m/senior/wallet/sms_verify_code";
   }
 
   @Override

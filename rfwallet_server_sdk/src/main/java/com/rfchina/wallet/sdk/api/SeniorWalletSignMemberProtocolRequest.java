@@ -25,7 +25,7 @@ public class SeniorWalletSignMemberProtocolRequest extends  AbstractApiRequest {
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/wallet/senior_member_protocol";
+    return "/wallet_server/v1/m/senior/wallet/member_protocol";
   }
 
   @Override

@@ -22,7 +22,7 @@ public class SeniorWalletCompanyInfoRequest extends  AbstractApiRequest {
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/wallet/senior_company_info";
+    return "/wallet_server/v1/m/senior/wallet/company_info";
   }
 
   @Override

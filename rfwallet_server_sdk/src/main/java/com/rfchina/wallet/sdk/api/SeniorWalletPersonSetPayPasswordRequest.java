@@ -34,7 +34,7 @@ public class SeniorWalletPersonSetPayPasswordRequest extends  AbstractApiRequest
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/wallet/senior_person_set_paypassword";
+    return "/wallet_server/v1/m/senior/wallet/person_set_paypassword";
   }
 
   @Override

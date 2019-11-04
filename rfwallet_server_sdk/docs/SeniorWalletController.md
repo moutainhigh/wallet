@@ -52,7 +52,7 @@
 
 ###  高级钱包-企业用户绑定手机
 
-请求地址: /wallet_server/v1/m/wallet/senior_bind_phone
+请求地址: /wallet_server/v1/m/senior/wallet/bind_phone
 
 请求类型: POST
 
@@ -95,7 +95,7 @@
 
 ###  高级钱包渠道信息
 
-请求地址: /wallet_server/v1/m/wallet/channel_info
+请求地址: /wallet_server/v1/m/senior/wallet/channel_info
 
 请求类型: POST
 
@@ -138,7 +138,7 @@
 
 ###  高级钱包-商家资料审核（通道）
 
-请求地址: /wallet_server/v1/m/wallet/senior_company_info_audit
+请求地址: /wallet_server/v1/m/senior/wallet/company_info_audit
 
 请求类型: POST
 
@@ -183,7 +183,7 @@
 
 ###  高级钱包-企业信息
 
-请求地址: /wallet_server/v1/m/wallet/senior_company_info
+请求地址: /wallet_server/v1/m/senior/wallet/company_info
 
 请求类型: POST
 
@@ -233,7 +233,7 @@
 
 ###  高级钱包-个人认证
 
-请求地址: /wallet_server/v1/m/wallet/senior_person_authentication
+请求地址: /wallet_server/v1/m/senior/wallet/person_authentication
 
 请求类型: POST
 
@@ -264,7 +264,7 @@
 
 ###  高级钱包-个人信息
 
-请求地址: /wallet_server/v1/m/wallet/senior_person_info
+请求地址: /wallet_server/v1/m/senior/wallet/person_info
 
 请求类型: POST
 
@@ -307,7 +307,7 @@
 
 ###  高级钱包-个人设置支付密码
 
-请求地址: /wallet_server/v1/m/wallet/senior_person_set_paypassword
+请求地址: /wallet_server/v1/m/senior/wallet/person_set_paypassword
 
 请求类型: POST
 
@@ -336,7 +336,7 @@
 
 ###  高级钱包-委托代扣协议
 
-请求地址: /wallet_server/v1/m/wallet/senior_balance_protocol
+请求地址: /wallet_server/v1/m/senior/wallet/balance_protocol
 
 请求类型: POST
 
@@ -362,7 +362,7 @@
 
 ###  高级钱包-会员协议
 
-请求地址: /wallet_server/v1/m/wallet/senior_member_protocol
+请求地址: /wallet_server/v1/m/senior/wallet/member_protocol
 
 请求类型: POST
 
@@ -388,7 +388,7 @@
 
 ###  高级钱包认证验证码
 
-请求地址: /wallet_server/v1/m/wallet/senior_sms_verify_code
+请求地址: /wallet_server/v1/m/senior/wallet/sms_verify_code
 
 请求类型: POST
 

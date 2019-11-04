@@ -31,7 +31,7 @@ public class SeniorWalletBindPhoneRequest extends  AbstractApiRequest {
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/wallet/senior_bind_phone";
+    return "/wallet_server/v1/m/senior/wallet/bind_phone";
   }
 
   @Override
