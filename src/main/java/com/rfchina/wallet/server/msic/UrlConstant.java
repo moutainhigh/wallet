@@ -155,7 +155,7 @@ public class UrlConstant {
 	/**
 	 * 升级高级钱包渠道信息
 	 */
-	public static final String WALLET_CHANNEL_INFO = VERSION + "/m/wallet/channel_info";
+	public static final String WALLET_CHANNEL_INFO = VERSION + "/m/senior/wallet/channel_info";
 	/**
 	 * 升级高级钱包
 	 */
@@ -163,33 +163,33 @@ public class UrlConstant {
 	/**
 	 * 高级钱包认证验证码
 	 */
-	public static final String WALLET_SENIOR_SMS_VERIFY_CODE = VERSION + "/m/wallet/senior_sms_verify_code";
+	public static final String WALLET_SENIOR_SMS_VERIFY_CODE = VERSION + "/m/senior/wallet/sms_verify_code";
 	/**
 	 * 高级钱包个人认证
 	 */
-	public static final String WALLET_SENIOR_PERSON_AUTHENTICATION = VERSION + "/m/wallet/senior_person_authentication";
+	public static final String WALLET_SENIOR_PERSON_AUTHENTICATION = VERSION + "/m/senior/wallet/person_authentication";
 	/**
 	 * 高级钱包绑定手机
 	 */
-	public static final String WALLET_SENIOR_BIND_PHONE = VERSION + "/m/wallet/senior_bind_phone";
+	public static final String WALLET_SENIOR_BIND_PHONE = VERSION + "/m/senior/wallet/bind_phone";
 
 	/**
 	 * 高级钱包商家资料审核（通道）
 	 */
-	public static final String WALLET_SENIOR_COMPANY_INFO_AUDIT = VERSION + "/m/wallet/senior_company_info_audit";
+	public static final String WALLET_SENIOR_COMPANY_INFO_AUDIT = VERSION + "/m/senior/wallet/company_info_audit";
 
 	/**
 	 * 高级钱包会员协议
 	 */
-	public static final String WALLET_SENIOR_MEMBER_PROTOCOL = VERSION + "/m/wallet/senior_member_protocol";
+	public static final String WALLET_SENIOR_MEMBER_PROTOCOL = VERSION + "/m/senior/wallet/member_protocol";
 	/**
 	 * 高级钱包代扣协议（企业,个人商家）
 	 */
-	public static final String WALLET_SENIOR_BANLACE_PROTOCOL = VERSION + "/m/wallet/senior_balance_protocol";
+	public static final String WALLET_SENIOR_BANLACE_PROTOCOL = VERSION + "/m/senior/wallet/balance_protocol";
 	/**
 	 * 高级钱包个人设置支付密码
 	 */
-	public static final String WALLET_SENIOR_PERSON_SET_PAY_PASSWORD = VERSION + "/m/wallet/senior_person_set_paypassword";
+	public static final String WALLET_SENIOR_PERSON_SET_PAY_PASSWORD = VERSION + "/m/senior/wallet/person_set_paypassword";
 	/**
 	 * 高级钱包-修改支付密码
 	 */
@@ -213,11 +213,11 @@ public class UrlConstant {
 	/**
 	 * 高级钱包个人信息
 	 */
-	public static final String WALLET_SENIOR_PERSON_INFO = VERSION + "/m/wallet/senior_person_info";
+	public static final String WALLET_SENIOR_PERSON_INFO = VERSION + "/m/senior/wallet/person_info";
 	/**
 	 * 高级钱包企业信息
 	 */
-	public static final String WALLET_SENIOR_COMPANY_INFO= VERSION + "/m/wallet/senior_company_info";
+	public static final String WALLET_SENIOR_COMPANY_INFO= VERSION + "/m/senior/wallet/company_info";
 
 	/**
 	 * 云商通统一回调
