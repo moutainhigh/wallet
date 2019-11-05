@@ -233,7 +233,7 @@ public class SeniorWalletService {
 			walletVerifyHisExtDao.insertSelective(
 				WalletVerifyHis.builder().walletId(walletId)
 					.refId(walletChannel.getId()).type(
-					WalletVerifyRefType.PERSON.getValue().byteValue()).verifyType(
+					WalletVerifyRefType.PERSON.getValue().byteValue()).verifyChannel(
 					WalletVerifyChannel.TONGLIAN.getValue().byteValue()).verifyType(
 					WalletVerifyType.TWO_FACTOR.getValue().byteValue())
 					.verifyTime(curDate).createTime(curDate).build());
@@ -311,7 +311,7 @@ public class SeniorWalletService {
 								WalletVerifyHis.builder().walletId(walletId)
 									.refId(walletChannel.getId()).type(
 									WalletVerifyRefType.COMPANY.getValue().byteValue())
-									.verifyType(
+									.verifyChannel(
 										WalletVerifyChannel.TONGLIAN.getValue().byteValue())
 									.verifyType(
 										WalletVerifyType.COMPANY_VERIFY.getValue().byteValue())
