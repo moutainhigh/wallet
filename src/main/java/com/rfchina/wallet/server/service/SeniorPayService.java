@@ -2,6 +2,7 @@ package com.rfchina.wallet.server.service;
 
 import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.platform.common.utils.EnumUtil;
+import com.rfchina.platform.common.utils.HttpFile;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
@@ -48,16 +49,23 @@ import com.rfchina.wallet.server.msic.EnumWallet.GwProgress;
 import com.rfchina.wallet.server.msic.EnumWallet.OrderStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.OrderType;
 import com.rfchina.wallet.server.msic.EnumWallet.TunnelType;
+import com.rfchina.wallet.server.msic.EnumWallet.YunstFileType;
 import com.rfchina.wallet.server.service.handler.common.EBankHandler;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBizHandler;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class SeniorPayService {
 
@@ -175,7 +183,6 @@ public class SeniorPayService {
 		return handler.recharge(rechargeOrder, recharge);
 	}
 
-
 	/**
 	 * 提现
 	 */
@@ -290,7 +297,6 @@ public class SeniorPayService {
 		return handler.collect(collectOrder, collect, collectInfos);
 	}
 
-
 	/**
 	 * 发起代付（加锁）
 	 */
@@ -358,7 +364,6 @@ public class SeniorPayService {
 			.build();
 
 	}
-
 
 	/**
 	 * 退款
@@ -522,10 +527,12 @@ public class SeniorPayService {
 		walletCollectMethodDao.insertSelective(builder.build());
 	}
 
+	/**
+	 * 订单查询
+	 */
 	public WalletOrder orderQuery(String orderNo) {
 		return walletOrderDao.selectByOrderNo(orderNo);
 	}
-
 
 	/**
 	 * 短信确认
@@ -538,7 +545,6 @@ public class SeniorPayService {
 		}
 	}
 
-
 	/**
 	 * 🔁重发短信
 	 */
@@ -548,6 +554,28 @@ public class SeniorPayService {
 		if (handler instanceof YunstBizHandler) {
 			((YunstBizHandler) handler).smsRetry(order);
 		}
+	}
+
+	/**
+	 * 对账
+	 */
+	public String balance(Date date) {
+		EBankHandler handler = handlerHelper.selectByTunnelType(TunnelType.YUNST.getValue());
+		if (handler instanceof YunstBizHandler) {
+			String url = ((YunstBizHandler) handler).balanceUrl(date, YunstFileType.DETAIL);
+			String tempUrl = configService.getStorageDir();
+			try {
+				HttpFile.download(url, tempUrl);
+			} catch (Exception e) {
+				log.error("文件下载错误", e);
+			}
+//			Files.readAllLines(Paths.get(tempUrl)).forEach(line -> {
+//
+//			});
+			return url;
+		}
+
+		return null;
 	}
 
 

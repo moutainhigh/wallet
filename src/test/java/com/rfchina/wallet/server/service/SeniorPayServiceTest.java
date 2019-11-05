@@ -1,5 +1,6 @@
 package com.rfchina.wallet.server.service;
 
+import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.model.WalletCard;
@@ -27,7 +28,15 @@ import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.model.ext.WithdrawReq;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBizHandler;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
+import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.mockito.Spy;
@@ -164,4 +173,16 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	}
 
 
+	@Test
+	public void balance() {
+		String url = seniorPayService.balance(DateUtil.addDate2(new Date(), -3));
+		log.info("balance url = {}", url);
+	}
+
+	@Test
+	public void balance1() throws Exception {
+		String uri = "http://test.allinpay.com/checkfile/merchantCheck/2019/11/1902271423530473681_20191101_1_allinpay.txt";
+		URL url = new URL(uri);
+		Files.copy(url.openStream(), Paths.get("./test"), StandardCopyOption.REPLACE_EXISTING);
+	}
 }

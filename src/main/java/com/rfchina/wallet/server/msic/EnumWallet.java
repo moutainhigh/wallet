@@ -967,8 +967,8 @@ public class EnumWallet {
 			return (this.value.byteValue() & bizTag.byteValue()) > 0;
 		}
 
-		public byte and(Byte bizTag){
-			return (byte)(this.value.byteValue() | bizTag.byteValue());
+		public byte and(Byte bizTag) {
+			return (byte) (this.value.byteValue() | bizTag.byteValue());
 		}
 	}
 
@@ -1016,4 +1016,28 @@ public class EnumWallet {
 		}
 	}
 
+	/**
+	 * 文件类型
+	 */
+	public enum YunstFileType implements Valuable<Long> {
+		/**
+		 * 身份证
+		 */
+		DETAIL(1L, "明细"),
+		SUMMARY(2L, "汇总"),
+		;
+
+		private Long value;
+		private String valueName;
+
+		YunstFileType(Long value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Long getValue() {
+			return this.value;
+		}
+	}
 }

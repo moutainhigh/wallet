@@ -42,7 +42,7 @@ public class VerifyService {
 		opt.orElseThrow(
 			() -> new WalletResponseException(EnumWalletResponseCode.WALLET_ACCOUNT_NOT_EXIST));
 
-		opt.filter(w -> w.getLevel() != EnumDef.EnumWalletLevel.SENIOR.getValue().byteValue())
+		opt.filter(w -> w.getLevel() == EnumDef.EnumWalletLevel.SENIOR.getValue().byteValue())
 			.orElseThrow(
 				() -> new WalletResponseException(EnumWalletResponseCode.WALLET_LEVEL_ERROR));
 

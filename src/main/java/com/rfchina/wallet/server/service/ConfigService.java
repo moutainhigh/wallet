@@ -151,6 +151,9 @@ public class ConfigService {
 	@Value("${yunst.recall.prefix}")
 	private String yunstRecallPrefix;
 
+	@Value("${wallet.storage.dir}")
+	private String storageDir;
+
 // yunst end
 
 }

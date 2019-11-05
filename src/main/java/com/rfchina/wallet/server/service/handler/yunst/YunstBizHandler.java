@@ -46,6 +46,7 @@ import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMe
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod.Wechat.WechatPublic;
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.RecieveInfo;
 import com.rfchina.wallet.server.bank.yunst.request.DepositApplyReq;
+import com.rfchina.wallet.server.bank.yunst.request.GetCheckAccountFileReq;
 import com.rfchina.wallet.server.bank.yunst.request.GetOrderDetailReq;
 import com.rfchina.wallet.server.bank.yunst.request.RefundApplyReq;
 import com.rfchina.wallet.server.bank.yunst.request.RefundApplyReq.RefundInfo;
@@ -54,6 +55,7 @@ import com.rfchina.wallet.server.bank.yunst.request.SmsRetryReq;
 import com.rfchina.wallet.server.bank.yunst.request.WithdrawApplyReq;
 import com.rfchina.wallet.server.bank.yunst.response.AgentPayResp;
 import com.rfchina.wallet.server.bank.yunst.response.CollectApplyResp;
+import com.rfchina.wallet.server.bank.yunst.response.GetCheckAccountFileResp;
 import com.rfchina.wallet.server.bank.yunst.response.GetOrderDetailResp;
 import com.rfchina.wallet.server.bank.yunst.response.RefundApplyResp;
 import com.rfchina.wallet.server.bank.yunst.response.SmsPayResp;
@@ -88,6 +90,7 @@ import com.rfchina.wallet.server.msic.EnumWallet.OrderType;
 import com.rfchina.wallet.server.msic.EnumWallet.RefundType;
 import com.rfchina.wallet.server.msic.EnumWallet.TunnelType;
 import com.rfchina.wallet.server.msic.EnumWallet.UniProgress;
+import com.rfchina.wallet.server.msic.EnumWallet.YunstFileType;
 import com.rfchina.wallet.server.msic.EnumWallet.YunstOrderStatus;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import com.rfchina.wallet.server.service.ConfigService;
@@ -767,4 +770,18 @@ public class YunstBizHandler extends EBankHandler {
 		}
 	}
 
+
+	public String balanceUrl(Date date, YunstFileType fileType) {
+		GetCheckAccountFileReq req = GetCheckAccountFileReq.builder()
+			.date(DateUtil.formatDate(date, DateUtil.SHORT_DTAE_PATTERN))
+			.fileType(fileType.getValue())
+			.build();
+		try {
+			GetCheckAccountFileResp resp = yunstTpl.execute(req, GetCheckAccountFileResp.class);
+			return resp.getUrl();
+		} catch (Exception e) {
+			log.error("通联-接口异常", e);
+			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
+		}
+	}
 }
