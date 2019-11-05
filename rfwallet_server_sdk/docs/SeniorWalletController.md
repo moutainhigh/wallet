@@ -317,10 +317,7 @@
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
 |access_token|是|access_token|
-|identity_no|是|身份证|
 |jump_url|是|前端跳转地址|
-|name|是|姓名|
-|phone|是|绑定手机|
 |wallet_id|是|钱包id|
 
 返回数据

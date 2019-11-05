@@ -216,11 +216,10 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public String personSetPayPassword(String accessToken, Long walletId, String phone,
-		String name, String identityNo, String jumpUrl) {
+	public String personSetPayPassword(String accessToken, Long walletId,  String jumpUrl) {
 		try {
 			return seniorWalletService
-				.setPersonPayPassword(walletId, phone, name, identityNo, jumpUrl);
+				.setPersonPayPassword(walletId, jumpUrl);
 		} catch (Exception e) {
 			log.error("高级钱包返回个人设置支付密码页面链接失败, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,

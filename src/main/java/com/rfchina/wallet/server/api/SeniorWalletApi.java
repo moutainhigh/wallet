@@ -1,9 +1,5 @@
 package com.rfchina.wallet.server.api;
 
-import com.rfchina.passport.token.EnumTokenType;
-import com.rfchina.passport.token.TokenVerify;
-import com.rfchina.platform.common.annotation.Log;
-import com.rfchina.platform.common.annotation.SignVerify;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletChannel;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
@@ -40,8 +36,7 @@ public interface SeniorWalletApi {
 	 * @param walletId 必填, 短信验证码类型
 	 */
 	WalletChannel seniorWalletSmsCodeVerification(String accessToken, Byte source,
-		Integer channelType, Long walletId,
-		String mobile, Integer smsCodeType);
+		Integer channelType, Long walletId, String mobile, Integer smsCodeType);
 
 	/**
 	 * 高级钱包个人修改绑定手机认证
@@ -106,13 +101,9 @@ public interface SeniorWalletApi {
 	 * 高级钱包个人设置支付密码地址
 	 *
 	 * @param walletId 必填, 钱包id
-	 * @param phone 必填, 绑定手机
-	 * @param name 必填,姓名
-	 * @param identityNo 必填,身份证号
 	 * @param jumpUrl 必填,前端跳转地址
 	 */
-	String personSetPayPassword(String accessToken, Long walletId, String phone,
-		String name, String identityNo, String jumpUrl);
+	String personSetPayPassword(String accessToken, Long walletId, String jumpUrl);
 
 	/**
 	 * 重置支付密码
