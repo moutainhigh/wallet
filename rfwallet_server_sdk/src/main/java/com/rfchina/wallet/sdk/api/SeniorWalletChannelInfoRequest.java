@@ -25,7 +25,7 @@ public class SeniorWalletChannelInfoRequest extends  AbstractApiRequest {
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/wallet/channel_info";
+    return "/wallet_server/v1/m/senior/wallet/channel_info";
   }
 
   @Override

@@ -169,12 +169,9 @@ public class SeniorWalletController {
 	public ResponseValue<PageVo> seniorWalletPersonSetPayPassword(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
-		@ApiParam(value = "绑定手机", required = true) @RequestParam("phone") String phone,
-		@ApiParam(value = "姓名", required = true) @RequestParam("name") String name,
-		@ApiParam(value = "身份证", required = true) @RequestParam("identity_no") String identityNo,
 		@ApiParam(value = "前端跳转地址", required = true) @RequestParam("jump_url") String jumpUrl) {
 		String tongLianUrl = seniorWalletApi
-			.personSetPayPassword(accessToken, walletId, phone, name, identityNo, jumpUrl);
+			.personSetPayPassword(accessToken, walletId, jumpUrl);
 		PageVo pageVo = PageVo.builder().url(tongLianUrl).build();
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, pageVo);
 	}

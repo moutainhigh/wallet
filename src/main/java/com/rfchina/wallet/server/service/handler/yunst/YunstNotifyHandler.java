@@ -1,8 +1,6 @@
 package com.rfchina.wallet.server.service.handler.yunst;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.rfchina.platform.common.utils.DateUtil;
-import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletChannelSetPayPwd;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletChannelSignContract;
@@ -12,8 +10,6 @@ import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyType;
 import com.rfchina.wallet.domain.model.ChannelNotify;
 import com.rfchina.wallet.domain.model.WalletChannel;
 import com.rfchina.wallet.domain.model.WalletVerifyHis;
-import com.rfchina.wallet.server.bank.yunst.response.RecallResp;
-import com.rfchina.wallet.server.bank.yunst.response.RpsResp;
 import com.rfchina.wallet.server.bank.yunst.response.YunstNotify;
 import com.rfchina.wallet.server.mapper.ext.WalletChannelExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletVerifyHisExtDao;
@@ -58,7 +54,7 @@ public class YunstNotifyHandler {
 			walletVerifyHisExtDao.insertSelective(
 				WalletVerifyHis.builder().walletId(walletChannel.getWalletId())
 					.refId(walletChannel.getId()).type(
-					WalletVerifyRefType.COMPANY.getValue().byteValue()).verifyType(
+					WalletVerifyRefType.COMPANY.getValue().byteValue()).verifyChannel(
 					WalletVerifyChannel.TONGLIAN.getValue().byteValue()).verifyType(
 					WalletVerifyType.COMPANY_VERIFY.getValue().byteValue())
 					.verifyTime(DateUtil.parse(checkTime, DateUtil.STANDARD_DTAETIME_PATTERN))

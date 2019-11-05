@@ -233,7 +233,7 @@ public class SeniorWalletService {
 			walletVerifyHisExtDao.insertSelective(
 				WalletVerifyHis.builder().walletId(walletId)
 					.refId(walletChannel.getId()).type(
-					WalletVerifyRefType.PERSON.getValue().byteValue()).verifyType(
+					WalletVerifyRefType.PERSON.getValue().byteValue()).verifyChannel(
 					WalletVerifyChannel.TONGLIAN.getValue().byteValue()).verifyType(
 					WalletVerifyType.TWO_FACTOR.getValue().byteValue())
 					.verifyTime(curDate).createTime(curDate).build());
@@ -311,7 +311,7 @@ public class SeniorWalletService {
 								WalletVerifyHis.builder().walletId(walletId)
 									.refId(walletChannel.getId()).type(
 									WalletVerifyRefType.COMPANY.getValue().byteValue())
-									.verifyType(
+									.verifyChannel(
 										WalletVerifyChannel.TONGLIAN.getValue().byteValue())
 									.verifyType(
 										WalletVerifyType.COMPANY_VERIFY.getValue().byteValue())
@@ -398,10 +398,9 @@ public class SeniorWalletService {
 	}
 
 	/**
-	 * 高级钱包会员协议地址
+	 * 高级钱包个人会员这只支付密码地址
 	 */
-	public String setPersonPayPassword(Long walletId, String phone,
-		String name, String identityNo, String jumpUrl) throws Exception {
+	public String setPersonPayPassword(Long walletId, String jumpUrl) throws Exception {
 		WalletChannel walletChannel = walletChannelDao
 			.selectByChannelTypeAndWalletId(ChannelType.YUNST.getValue().intValue(), walletId);
 		if (walletChannel == null) {
@@ -409,9 +408,11 @@ public class SeniorWalletService {
 			throw new RfchinaResponseException(EnumResponseCode.COMMON_FAILURE,
 				"未创建云商通用户");
 		}
+		WalletPerson person = walletPersonDao.selectByWalletId(walletId);
 		return yunstUserHandler
-			.generatePersonSetPayPasswordUrl(walletChannel.getBizUserId(), phone, name,
-				EnumDef.EnumIdType.ID_CARD.getValue().longValue(), identityNo, jumpUrl);
+			.generatePersonSetPayPasswordUrl(walletChannel.getBizUserId(),
+				walletChannel.getSecurityTel(), person.getName(),
+				EnumDef.EnumIdType.ID_CARD.getValue().longValue(), person.getIdNo(), jumpUrl);
 	}
 
 	/**
