@@ -7,12 +7,21 @@ import com.rfchina.platform.common.annotation.SignVerify;
 import com.rfchina.platform.common.exception.RfchinaResponseException;
 import com.rfchina.platform.common.misc.ResponseCode;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
+import com.rfchina.wallet.domain.mapper.ext.BankCodeDao;
+import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
+import com.rfchina.wallet.domain.mapper.ext.WalletPersonDao;
+import com.rfchina.wallet.domain.misc.EnumDef.EnumDefBankCard;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumIdType;
+import com.rfchina.wallet.domain.misc.EnumDef.EnumPublicAccount;
+import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletCardStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletCardType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
+import com.rfchina.wallet.domain.model.BankCode;
 import com.rfchina.wallet.domain.model.Wallet;
+import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletChannel;
+import com.rfchina.wallet.domain.model.WalletPerson;
 import com.rfchina.wallet.server.api.SeniorCardApi;
 import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
 import com.rfchina.wallet.server.bank.yunst.response.result.ApplyBindBankCardResp;
@@ -51,6 +60,15 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 
 	@Autowired
 	private WalletChannelExtDao walletChannelDao;
+
+	@Autowired
+	private BankCodeDao bankCodeDao;
+
+	@Autowired
+	private WalletPersonDao walletPersonDao;
+
+	@Autowired
+	private WalletCardDao walletCardDao;
 
 	/**
 	 * 高级钱包-预绑定银行卡
@@ -114,7 +132,7 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 	public Long confirmBindCard(String accessToken, Long walletId, Byte source,
 		String verifyCode, String preBindTicket) {
 
-		Wallet wallet = verifyService.checkSeniorWallet(walletId);
+		verifyService.checkSeniorWallet(walletId);
 
 		PreBindCardVo preBindCardVo = (PreBindCardVo) redisTemplate.opsForValue()
 			.get(PRE_BINDCARD + preBindTicket);
@@ -140,6 +158,27 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 			log.error("高级钱包银行卡确认绑定失败, walletId: {}", walletId);
 			throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_INFO_INVALID);
 		}
+
+		// 登记绑定卡
+		BankCode bankCode = bankCodeDao.selectByBankCode(preBindCardVo.getBankCode());
+		WalletPerson walletPerson = walletPersonDao.selectByWalletId(walletId);
+		int cardCount = walletCardDao
+			.selectCountByWalletId(walletId, EnumWalletCardStatus.BIND.getValue());
+
+		WalletCard walletCard = WalletCard.builder().walletId(walletId)
+			.bankCode(bankCode != null ? bankCode.getBankCode() : null)
+			.bankName(bankCode != null ? bankCode.getClassName() : null)
+			.depositBank(bankCode != null ? bankCode.getBankName() : null)
+			.bankAccount(preBindCardVo.getCardNo())
+			.depositName(walletPerson.getName())
+			.isPublic(EnumPublicAccount.NO.getValue().byteValue())
+			.isDef(cardCount == 0 ? EnumDefBankCard.YES.getValue().byteValue()
+				: EnumDefBankCard.NO.getValue().byteValue())
+			.status(EnumWalletCardStatus.BIND.getValue().byteValue())
+			.cardType(preBindCardVo.getCardType())
+			.build();
+		walletCardDao.insertSelective(walletCard);
+
 		return walletId;
 	}
 

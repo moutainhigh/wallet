@@ -6,6 +6,7 @@ import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EnumUtil;
+import com.rfchina.platform.common.utils.HttpFile;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.MoneyLogMapper;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletLevel;
@@ -96,6 +97,10 @@ import com.rfchina.wallet.server.msic.UrlConstant;
 import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.GatewayTransService;
 import com.rfchina.wallet.server.service.handler.common.EBankHandler;
+import java.io.BufferedReader;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -776,12 +781,35 @@ public class YunstBizHandler extends EBankHandler {
 			.date(DateUtil.formatDate(date, DateUtil.SHORT_DTAE_PATTERN))
 			.fileType(fileType.getValue())
 			.build();
+
+		String resourceUrl = null;
 		try {
 			GetCheckAccountFileResp resp = yunstTpl.execute(req, GetCheckAccountFileResp.class);
-			return resp.getUrl();
+			resourceUrl = resp.getUrl();
 		} catch (Exception e) {
 			log.error("通联-接口异常", e);
 			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
 		}
+
+		String tempUrl = configService.getStorageDir();
+		String fileUrl = null;
+		try {
+			URL url = new URL(resourceUrl);
+			fileUrl = tempUrl + url.getFile();
+			HttpFile.download(url, fileUrl);
+		} catch (Exception e) {
+			log.error("文件下载错误", e);
+		}
+
+		try {
+			try(BufferedReader reader = Files.newBufferedReader(Paths.get(fileUrl))){
+
+				reader.readLine();
+
+			}
+		}catch (Exception e){
+
+		}
+		return null;
 	}
 }
