@@ -28,9 +28,6 @@ public class PreBindBankCardRequest extends  AbstractApiRequest {
   @ApiModelProperty("姓名")
   private String realName ;
 
-  @ApiModelProperty("钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户")
-  private Integer source ;
-
   @ApiModelProperty("钱包id")
   private Long walletId ;
 
@@ -68,9 +65,6 @@ public class PreBindBankCardRequest extends  AbstractApiRequest {
       }
       if(realName != null){
         parameters.put("real_name", realName.toString());
-      }
-      if(source != null){
-        parameters.put("source", source.toString());
       }
       if(walletId != null){
         parameters.put("wallet_id", walletId.toString());

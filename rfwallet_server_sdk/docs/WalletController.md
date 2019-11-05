@@ -191,7 +191,7 @@
     last_upd_time:""  , //钱包信息最后更新日期
     status:""  , //绑定状态: 1:已绑定，2：已解绑
     telephone:""  , //预留手机号
-    verify_channel:""  , //验证渠道。1:安全验证服务，2：通联快捷支付,3 : 升级通联快捷支付
+    verify_channel:""  , //验证渠道。1:安全验证服务，2：通联快捷支付
     verify_time:""  , //验证时间
     wallet_id:""   //钱包ID
 }  
@@ -368,7 +368,7 @@
     last_upd_time:""  , //钱包信息最后更新日期
     status:""  , //绑定状态: 1:已绑定，2：已解绑
     telephone:""  , //预留手机号
-    verify_channel:""  , //验证渠道。1:安全验证服务，2：通联快捷支付,3 : 升级通联快捷支付
+    verify_channel:""  , //验证渠道。1:安全验证服务，2：通联快捷支付
     verify_time:""  , //验证时间
     wallet_id:""   //钱包ID
 }  , 
@@ -450,7 +450,7 @@
     last_upd_time:""  , //钱包信息最后更新日期
     status:""  , //绑定状态: 1:已绑定，2：已解绑
     telephone:""  , //预留手机号
-    verify_channel:""  , //验证渠道。1:安全验证服务，2：通联快捷支付,3 : 升级通联快捷支付
+    verify_channel:""  , //验证渠道。1:安全验证服务，2：通联快捷支付
     verify_time:""  , //验证时间
     wallet_id:""   //钱包ID
 }  , 

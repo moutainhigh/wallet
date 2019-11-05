@@ -16,14 +16,8 @@ public class UnBindBankCardRequest extends  AbstractApiRequest {
   @ApiModelProperty("access_token")
   private String accessToken ;
 
-  @ApiModelProperty("银行卡号")
-  private String cardNo ;
-
-  @ApiModelProperty("来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户")
-  private Integer source ;
-
-  @ApiModelProperty("钱包id")
-  private Long walletId ;
+  @ApiModelProperty("银行卡id")
+  private Long cardId ;
 
 
   @Override
@@ -42,14 +36,8 @@ public class UnBindBankCardRequest extends  AbstractApiRequest {
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
       }
-      if(cardNo != null){
-        parameters.put("card_no", cardNo.toString());
-      }
-      if(source != null){
-        parameters.put("source", source.toString());
-      }
-      if(walletId != null){
-        parameters.put("wallet_id", walletId.toString());
+      if(cardId != null){
+        parameters.put("card_id", cardId.toString());
       }
     return parameters;
   }

@@ -52,7 +52,7 @@ public class WalletCard  {
     @ApiModelProperty("预留手机号")
     private String telephone ;
 
-    @ApiModelProperty("验证渠道。1:安全验证服务，2：通联快捷支付,3 : 升级通联快捷支付")
+    @ApiModelProperty("验证渠道。1:安全验证服务，2：通联快捷支付")
     private Integer verifyChannel ;
 
     @ApiModelProperty("验证时间")

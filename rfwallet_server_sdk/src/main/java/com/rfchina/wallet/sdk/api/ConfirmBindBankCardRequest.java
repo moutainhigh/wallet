@@ -16,9 +16,6 @@ public class ConfirmBindBankCardRequest extends  AbstractApiRequest {
   @ApiModelProperty("access_token")
   private String accessToken ;
 
-  @ApiModelProperty("钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户")
-  private Integer source ;
-
   @ApiModelProperty("短信验证码")
   private String verifyCode ;
 
@@ -44,9 +41,6 @@ public class ConfirmBindBankCardRequest extends  AbstractApiRequest {
     Map<String, String> parameters = new HashMap<>(2);
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
-      }
-      if(source != null){
-        parameters.put("source", source.toString());
       }
       if(verifyCode != null){
         parameters.put("verify_code", verifyCode.toString());

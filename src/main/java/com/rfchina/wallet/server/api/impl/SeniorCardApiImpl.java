@@ -77,7 +77,7 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public String preBindBandCard(String accessToken, Long walletId, Byte source,
+	public String preBindBandCard(String accessToken, Long walletId,
 		String cardNo, String realName, String phone, String identityNo, String validate,
 		String cvv2) {
 
@@ -129,7 +129,7 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public Long confirmBindCard(String accessToken, Long walletId, Byte source,
+	public void confirmBindCard(String accessToken, Long walletId,
 		String verifyCode, String preBindTicket) {
 
 		verifyService.checkSeniorWallet(walletId);
@@ -178,33 +178,25 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 			.cardType(preBindCardVo.getCardType())
 			.build();
 		walletCardDao.insertSelective(walletCard);
-
-		return walletId;
 	}
 
 	/**
 	 * 解绑银行卡
-	 *
-	 * @param walletId 必填, 钱包id
-	 * @param source 必填, 钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户
-	 * @param cardNo 必填, 卡号
 	 */
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public Long unBindCard(String accessToken, Long walletId, Byte source, String cardNo) {
-
-		verifyService.checkSeniorWallet(walletId);
+	public void unBindCard(String accessToken, Long cardId) {
+		WalletCard walletCard = walletCardDao.selectByPrimaryKey(cardId);
 		WalletChannel walletChannel = walletChannelDao
-			.selectByWalletId(walletId, TunnelType.YUNST.getValue());
+			.selectByWalletId(walletCard.getWalletId(), TunnelType.YUNST.getValue());
 		try {
-			yunstUserHandler.unbindBankCard(walletChannel.getBizUserId(), cardNo);
+			yunstUserHandler.unbindBankCard(walletChannel.getBizUserId(), walletCard.getBankAccount());
 		} catch (Exception e) {
-			log.error("高级钱包银行卡解绑失败, walletId: {}", walletId);
-			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE);
+			log.error("高级钱包银行卡解绑失败, cardId: {}", cardId);
+			throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_UNBIND_ERROR);
 		}
-		return walletId;
 	}
 
 }
