@@ -34,6 +34,22 @@ public class SeniorCardApiImplTest extends SpringBaseTest {
 	}
 
 	@Test
+	public void preBindBandCard2() {
+		String resp = seniorCardApi
+			.preBindBandCard(null, 10054L, WalletSource.USER.getValue(), "6222023602016631699",
+				"刘裕", "15088069541", "44011119911012183X", null, null);
+		log.info("预绑卡 {}", resp);
+
+	}
+
+	@Test
+	public void confirmBindCard2() {
+		seniorCardApi.confirmBindCard(null, 10054L, WalletSource.USER.getValue(),
+			"132506", "78d4b700-b4df-418d-be22-7a95a0fdd522");
+	}
+
+	@Test
 	public void unBindCard() {
+		seniorCardApi.unBindCard(null, 10054L, WalletSource.USER.getValue(), "6222023602016631699");
 	}
 }

@@ -105,7 +105,7 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 				.build();
 			String preBindTicket = UUID.randomUUID().toString();
 			redisTemplate.opsForValue()
-				.set(PRE_BINDCARD + preBindTicket, preBindCardVo, 10, TimeUnit.MINUTES);
+				.set(PRE_BINDCARD + preBindTicket, preBindCardVo, 15, TimeUnit.MINUTES);
 			return preBindTicket;
 		} catch (CommonGatewayException e) {
 			String errMsg = e.getBankErrMsg();
