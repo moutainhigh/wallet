@@ -99,7 +99,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 			.backUrl(configService.getYunstNotifybackUrl())
 			.build();
 		String res = yunstTpl.signRequest(req);
-		String webParamUrl = configService.getYunstSignContractUrl() + "?" + res;
+		String webParamUrl = configService.getYunstSetPayPasswordUrl() + "?" + res;
 		log.info("webParamUrl: " + webParamUrl);
 		return webParamUrl;
 	}

@@ -113,7 +113,7 @@ public class YunstHandlerTest extends SpringBaseTest {
 		String identityNo = new IdCardGenerator().generate();
 		YunstPersonSetRealNameResult result = yunstUserHandler.personCertification(member.left.getBizUserId(), realName, identityType, identityNo);
 		logStack(result);
-		String url = yunstUserHandler.generateSignContractUrl(member.left.getBizUserId());
+		String url = yunstUserHandler.generateSignContractUrl(member.left.getBizUserId(),"/#/success");
 		logStack(url);
 	}
 
@@ -128,7 +128,7 @@ public class YunstHandlerTest extends SpringBaseTest {
 		String identityNo = new IdCardGenerator().generate();
 		YunstPersonSetRealNameResult result = yunstUserHandler.personCertification(member.left.getBizUserId(), realName, identityType, identityNo);
 		logStack(result);
-		Tuple<String, String> url = yunstUserHandler.generateBalanceProtocolUrl(member.left.getBizUserId());
+		Tuple<String, String> url = yunstUserHandler.generateBalanceProtocolUrl(member.left.getBizUserId(),"/#/success");
 		logStack(url);
 	}
 
@@ -194,7 +194,8 @@ public class YunstHandlerTest extends SpringBaseTest {
 		Tuple<YunstCreateMemberResult, YunstBaseHandler.YunstMemberType> member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
 		assertNotNull(member);
 		logStack(member);
-		String result = yunstUserHandler.generateSignContractUrl(member.left.getBizUserId());
+		String result = yunstUserHandler.generateSignContractUrl(member.left.getBizUserId(),"/#/success");
+//		String result = yunstUserHandler.generateSignContractUrl("WU10053","/#/success");
 		logStack(result);
 	}
 
