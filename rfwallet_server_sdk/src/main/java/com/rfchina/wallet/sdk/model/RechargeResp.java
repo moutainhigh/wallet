@@ -61,6 +61,9 @@ public class RechargeResp  {
     @ApiModelProperty("进度。1：待发送 2：已发送 3：已接收结果")
     private Integer progress ;
 
+    @ApiModelProperty("密码确认时输入参数")
+    private String signedParams ;
+
     @ApiModelProperty("短信验证")
     private Boolean smsConfirm ;
 

@@ -19,6 +19,12 @@ public class CollectSyncRequest extends  AbstractApiRequest {
   @ApiModelProperty("代收内容，参考CollectReq结构体")
   private String collectReq ;
 
+  @ApiModelProperty("客户Ip")
+  private String customerIp ;
+
+  @ApiModelProperty("跳转地址")
+  private String jumpUrl ;
+
 
   @Override
   public String getApiUrl() {
@@ -38,6 +44,12 @@ public class CollectSyncRequest extends  AbstractApiRequest {
       }
       if(collectReq != null){
         parameters.put("collect_req", collectReq.toString());
+      }
+      if(customerIp != null){
+        parameters.put("customer_ip", customerIp.toString());
+      }
+      if(jumpUrl != null){
+        parameters.put("jump_url", jumpUrl.toString());
       }
     return parameters;
   }

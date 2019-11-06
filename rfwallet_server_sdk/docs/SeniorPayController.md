@@ -71,6 +71,8 @@
 |:-- |:-- |:--   |
 |access_token|是|应用令牌|
 |collect_req|是|代收内容，参考CollectReq结构体|
+|customer_ip|否|客户Ip|
+|jump_url|否|跳转地址|
 
 返回数据
 ```
@@ -92,6 +94,7 @@
     order_no:""  , //订单号
     pay_info:""  , //扫码支付信息/ JS 支付串信息/微信原生 H5 支付串信息
     progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
+    signed_params:""  , //密码确认时输入参数
     start_time:""  , //开始时间
     status:""  , //交易状态。 2：进行中，3：交易成功，4：交易失败
     ticket:""  , //业务票据
@@ -170,6 +173,8 @@
 |access_token|是|应用令牌|
 |amount|是|金额|
 |card_id|是|银行卡id|
+|customer_ip|是|客户Ip|
+|jump_url|是|跳转地址|
 |wallet_id|是|钱包id|
 
 返回数据
@@ -194,6 +199,7 @@
     password_confirm:""  , //密码验证
     pay_info:""  , //扫码支付信息/ JS支付串信息/ 微信原生H5支付串信息
     progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
+    signed_params:""  , //密码确认时输入参数
     sms_confirm:""  , //短信验证
     start_time:""  , //开始时间
     status:""  , //交易状态。 2：进行中，3：交易成功，4：交易失败

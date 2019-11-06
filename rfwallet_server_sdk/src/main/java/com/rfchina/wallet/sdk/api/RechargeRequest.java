@@ -22,6 +22,12 @@ public class RechargeRequest extends  AbstractApiRequest {
   @ApiModelProperty("银行卡id")
   private Long cardId ;
 
+  @ApiModelProperty("客户Ip")
+  private String customerIp ;
+
+  @ApiModelProperty("跳转地址")
+  private String jumpUrl ;
+
   @ApiModelProperty("钱包id")
   private Long walletId ;
 
@@ -47,6 +53,12 @@ public class RechargeRequest extends  AbstractApiRequest {
       }
       if(cardId != null){
         parameters.put("card_id", cardId.toString());
+      }
+      if(customerIp != null){
+        parameters.put("customer_ip", customerIp.toString());
+      }
+      if(jumpUrl != null){
+        parameters.put("jump_url", jumpUrl.toString());
       }
       if(walletId != null){
         parameters.put("wallet_id", walletId.toString());
