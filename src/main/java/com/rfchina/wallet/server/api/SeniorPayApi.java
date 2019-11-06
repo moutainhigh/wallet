@@ -13,11 +13,13 @@ import java.util.List;
 
 public interface SeniorPayApi {
 
-	RechargeResp recharge(String accessToken, Long walletId, Long cardId, Long amount);
+	RechargeResp recharge(String accessToken, Long walletId, Long cardId, Long amount,
+		String jumpUrl,String customerIp);
 
 	WithdrawResp withdraw(String accessToken, Long walletId, Long cardId, Long amount);
 
-	WalletCollectResp collect(String accessToken, CollectReq req);
+	WalletCollectResp collect(String accessToken, CollectReq req, String jumpUrl,
+		String customerIp);
 
 	void agentPay(String accessToken, String bizNo, String collectOrderNo, Reciever receivers);
 

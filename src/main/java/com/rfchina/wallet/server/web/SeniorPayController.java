@@ -52,10 +52,13 @@ public class SeniorPayController {
 		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
 		@ApiParam(value = "银行卡id", required = true) @RequestParam("card_id") Long cardId,
-		@ApiParam(value = "金额", required = true) @RequestParam("amount") Long amount
+		@ApiParam(value = "金额", required = true) @RequestParam("amount") Long amount,
+		@ApiParam(value = "跳转地址", required = true) @RequestParam("jump_url") String jumpUrl,
+		@ApiParam(value = "客户Ip", required = true) @RequestParam("customer_ip") String customerIp
 	) {
 
-		RechargeResp result = seniorPayApi.recharge(accessToken, walletId, cardId, amount);
+		RechargeResp result = seniorPayApi
+			.recharge(accessToken, walletId, cardId, amount, jumpUrl, customerIp);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result);
 	}
 
@@ -75,10 +78,12 @@ public class SeniorPayController {
 	@PostMapping(UrlConstant.SENIOR_WALLET_COLLECT_SYNC)
 	public ResponseValue<WalletCollectResp> collectSync(
 		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
-		@ApiParam(value = "代收内容，参考CollectReq结构体", required = true) @RequestParam("collect_req") String collectReq
+		@ApiParam(value = "代收内容，参考CollectReq结构体", required = true) @RequestParam("collect_req") String collectReq,
+		@ApiParam(value = "跳转地址", required = false) @RequestParam(value = "jump_url", required = false) String jumpUrl,
+		@ApiParam(value = "客户Ip", required = false) @RequestParam(value = "customer_ip", required = false) String customerIp
 	) {
 		CollectReq req = JsonUtil.toObject(collectReq, CollectReq.class, DEF_REQ_OBJ_MAP);
-		WalletCollectResp result = seniorPayApi.collect(accessToken, req);
+		WalletCollectResp result = seniorPayApi.collect(accessToken, req, jumpUrl, customerIp);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result);
 	}
 
@@ -90,7 +95,8 @@ public class SeniorPayController {
 		@ApiParam(value = "原代收单号", required = true) @RequestParam(value = "collect_order_no") String collectOrderNo,
 		@ApiParam(value = "代付列表（与代收的分账规则对应），参考AgentPayReq.Reciever结构体", required = true) @RequestParam("agent_pay_req") String agentPayReq
 	) {
-		AgentPayReq.Reciever reciever = JsonUtil.toObject(agentPayReq, AgentPayReq.Reciever.class, DEF_REQ_OBJ_MAP);
+		AgentPayReq.Reciever reciever = JsonUtil
+			.toObject(agentPayReq, AgentPayReq.Reciever.class, DEF_REQ_OBJ_MAP);
 		seniorPayApi.agentPay(accessToken, bizNo, collectOrderNo, reciever);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}

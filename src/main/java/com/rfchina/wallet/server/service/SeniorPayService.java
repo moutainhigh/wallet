@@ -10,6 +10,7 @@ import com.rfchina.wallet.domain.misc.EnumDef.BizValidateType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletCard;
+import com.rfchina.wallet.domain.model.WalletChannel;
 import com.rfchina.wallet.domain.model.WalletClearing;
 import com.rfchina.wallet.domain.model.WalletCollect;
 import com.rfchina.wallet.domain.model.WalletCollectInfo;
@@ -21,6 +22,7 @@ import com.rfchina.wallet.domain.model.WalletRefund;
 import com.rfchina.wallet.domain.model.WalletRefundDetail;
 import com.rfchina.wallet.domain.model.WalletWithdraw;
 import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletChannelExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletClearingExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectInfoExtDao;
@@ -123,13 +125,17 @@ public class SeniorPayService {
 	@Autowired
 	private VerifyService verifyService;
 
+	@Autowired
+	private WalletChannelExtDao walletChannelDao;
+
 	private Long anonyPayerWalletId = 10001L;
 	private Long agentEntWalletId = 10000L;
 
 	/**
 	 * 充值
 	 */
-	public RechargeResp recharge(Long walletId, WalletCard walletCard, Long amount) {
+	public RechargeResp recharge(Long walletId, WalletCard walletCard, Long amount, String jumpUrl,
+		String customerIp) {
 
 		// 检查钱包
 		Wallet payerWallet = verifyService.checkSeniorWallet(walletId);
@@ -169,8 +175,6 @@ public class SeniorPayService {
 		// 充值记录
 		WalletRecharge recharge = WalletRecharge.builder()
 			.orderId(rechargeOrder.getId())
-			.payerWalletId(payerWallet.getId())
-			.payeeWalletId(payerWallet.getId())
 			.validateType(BizValidateType.SMS.getValue())
 			.payMethod(payMethod.getMethods())
 			.createTime(new Date())
@@ -178,9 +182,19 @@ public class SeniorPayService {
 		walletRechargeDao.insertSelective(recharge);
 		savePayMethod(recharge.getId(), OrderType.RECHARGE.getValue(), payMethod);
 
+		// 支付人
+		WalletChannel payer = walletChannelDao
+			.selectByWalletId(walletId, rechargeOrder.getTunnelType());
+
 		// 充值
 		EBankHandler handler = handlerHelper.selectByTunnelType(rechargeOrder.getTunnelType());
-		return handler.recharge(rechargeOrder, recharge);
+		RechargeResp result = handler.recharge(rechargeOrder, recharge, payer);
+
+		String signedParams = ((YunstBizHandler) handler)
+			.passwordConfirm(rechargeOrder, payer, jumpUrl, customerIp);
+		result.setSignedParams(signedParams);
+
+		return result;
 	}
 
 	/**
@@ -234,7 +248,7 @@ public class SeniorPayService {
 	/**
 	 * 预代收
 	 */
-	public WalletCollectResp collect(CollectReq req) {
+	public WalletCollectResp collect(CollectReq req, String jumpUrl, String customerIp) {
 
 		// 定义付款人
 		Long payerWalletId = (req.getPayerWalletId() != null) ? req.getPayerWalletId()
@@ -293,8 +307,18 @@ public class SeniorPayService {
 			return clearInfo;
 		}).collect(Collectors.toList());
 
+		WalletChannel payer = walletChannelDao
+			.selectByWalletId(collectOrder.getWalletId(), collectOrder.getTunnelType());
+
 		EBankHandler handler = handlerHelper.selectByTunnelType(collectOrder.getTunnelType());
-		return handler.collect(collectOrder, collect, collectInfos);
+		WalletCollectResp result = handler.collect(collectOrder, collect, collectInfos, payer);
+		if (collect.getValidateType().byteValue() == BizValidateType.PASSWORD.getValue()) {
+			String signedParams = ((YunstBizHandler) handler)
+				.passwordConfirm(collectOrder, payer, jumpUrl, customerIp);
+			result.setSignedParams(signedParams);
+		}
+
+		return result;
 	}
 
 	/**
@@ -562,17 +586,7 @@ public class SeniorPayService {
 	public String balance(Date date) {
 		EBankHandler handler = handlerHelper.selectByTunnelType(TunnelType.YUNST.getValue());
 		if (handler instanceof YunstBizHandler) {
-			String url = ((YunstBizHandler) handler).balanceUrl(date, YunstFileType.DETAIL);
-			String tempUrl = configService.getStorageDir();
-			try {
-				HttpFile.download(url, tempUrl);
-			} catch (Exception e) {
-				log.error("文件下载错误", e);
-			}
-//			Files.readAllLines(Paths.get(tempUrl)).forEach(line -> {
-//
-//			});
-			return url;
+			((YunstBizHandler) handler).balanceUrl(date, YunstFileType.DETAIL);
 		}
 
 		return null;

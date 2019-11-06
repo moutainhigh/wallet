@@ -63,7 +63,8 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public RechargeResp recharge(String accessToken, Long walletId, Long cardId, Long amount) {
+	public RechargeResp recharge(String accessToken, Long walletId, Long cardId, Long amount,
+		String jumpUrl, String customerIp) {
 
 		WalletCard walletCard = walletCardDao.selectByPrimaryKey(cardId);
 		if (walletCard == null) {
@@ -73,7 +74,8 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 			throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_NOT_AUTH);
 		}
 
-		RechargeResp resp = seniorPayService.recharge(walletId, walletCard, amount);
+		RechargeResp resp = seniorPayService
+			.recharge(walletId, walletCard, amount, jumpUrl, customerIp);
 
 		UnifiedConfirmVo confirmVo = BeanUtil.newInstance(resp, UnifiedConfirmVo.class);
 		String ticket = saveConfirmVo(confirmVo);
@@ -109,7 +111,8 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public WalletCollectResp collect(String accessToken, CollectReq req) {
+	public WalletCollectResp collect(String accessToken, CollectReq req, String jumpUrl,
+		String customerIp) {
 		// 判断收款人记录不重复
 		Set<String> walletSet = req.getRecievers().stream()
 			.map(receiver -> receiver.getWalletId().toString())
@@ -130,7 +133,7 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 				"walletPayMethod");
 		}
 		// 发起代收
-		WalletCollectResp collect = seniorPayService.collect(req);
+		WalletCollectResp collect = seniorPayService.collect(req, jumpUrl, customerIp);
 		// 生成票据
 		UnifiedConfirmVo confirmVo = BeanUtil.newInstance(collect, UnifiedConfirmVo.class);
 		String ticket = saveConfirmVo(confirmVo);
@@ -188,7 +191,8 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 		String verifyCode, String ip) {
 
 		UnifiedConfirmVo vo = getUnifiedConfirmVo(ticket);
-		WalletOrder order = verifyService.checkOrder(vo.getOrderId(), OrderStatus.WAITTING.getValue());
+		WalletOrder order = verifyService
+			.checkOrder(vo.getOrderId(), OrderStatus.WAITTING.getValue());
 		seniorPayService.smsConfirm(order, vo.getTradeNo(), verifyCode, ip);
 	}
 
@@ -198,7 +202,8 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 	@Override
 	public void smsRetry(String accessToken, String ticket) {
 		UnifiedConfirmVo vo = getUnifiedConfirmVo(ticket);
-		WalletOrder order = verifyService.checkOrder(vo.getOrderId(), OrderStatus.WAITTING.getValue());
+		WalletOrder order = verifyService
+			.checkOrder(vo.getOrderId(), OrderStatus.WAITTING.getValue());
 		seniorPayService.smsRetry(order);
 	}
 

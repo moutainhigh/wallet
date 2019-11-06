@@ -3,6 +3,7 @@ package com.rfchina.wallet.server.service.handler.pudong;
 import com.alibaba.fastjson.JSON;
 import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.biztools.mq.PostMq;
+import com.rfchina.platform.biztool.mapper.string.StringObject;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.platform.common.utils.DateUtil;
@@ -36,7 +37,6 @@ import com.rfchina.wallet.server.bank.pudong.domain.response.PubPayQueryRespBody
 import com.rfchina.wallet.server.bank.pudong.domain.response.PubPayQueryRespBody.PayResult;
 import com.rfchina.wallet.server.bank.pudong.domain.response.PubPayRespBody;
 import com.rfchina.wallet.server.bank.pudong.domain.util.ExceptionUtil;
-import com.rfchina.wallet.server.bank.pudong.domain.util.StringObject;
 import com.rfchina.wallet.server.mapper.ext.BankCodeExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;

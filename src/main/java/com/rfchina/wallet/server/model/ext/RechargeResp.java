@@ -31,4 +31,6 @@ public class RechargeResp extends WalletOrder {
 	@ApiModelProperty(value = "业务票据")
 	private String ticket;
 
+	@ApiModelProperty(name = "signed_params", value = "密码确认时输入参数")
+	private String signedParams;
 }

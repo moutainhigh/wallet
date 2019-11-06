@@ -1,7 +1,7 @@
 package com.rfchina.wallet.server.bank.pudong.domain.response;
 
+import com.rfchina.platform.biztool.mapper.string.StringIndex;
 import com.rfchina.wallet.server.bank.pudong.domain.request.PriPayReq;
-import com.rfchina.wallet.server.bank.pudong.domain.util.StringIndex;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;

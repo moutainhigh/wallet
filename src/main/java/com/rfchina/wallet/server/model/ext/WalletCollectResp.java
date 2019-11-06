@@ -1,6 +1,5 @@
 package com.rfchina.wallet.server.model.ext;
 
-import com.rfchina.wallet.domain.model.WalletCollect;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -19,4 +18,8 @@ public class WalletCollectResp extends WalletOrder {
 
 	@ApiModelProperty(value = "业务票据")
 	private String ticket;
+
+	@ApiModelProperty(name = "signed_params", value = "密码确认时输入参数")
+	private String signedParams;
+
 }

@@ -30,6 +30,11 @@ public class SeniorCardApiImplTest extends SpringApiTest {
 	}
 
 	@Test
+	public void unBindCard() {
+		seniorCardApi.unBindCard(super.accessToken, 12L);
+	}
+
+	@Test
 	public void preBindBandCard2() {
 		String resp = seniorCardApi
 			.preBindBandCard(super.accessToken, 10054L, "6222023602016631699",
@@ -45,7 +50,7 @@ public class SeniorCardApiImplTest extends SpringApiTest {
 	}
 
 	@Test
-	public void unBindCard() {
+	public void unBindCard2() {
 		seniorCardApi.unBindCard(super.accessToken, 10054L);
 	}
 }

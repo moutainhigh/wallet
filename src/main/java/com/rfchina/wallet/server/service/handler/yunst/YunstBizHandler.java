@@ -2,6 +2,7 @@ package com.rfchina.wallet.server.service.handler.yunst;
 
 import com.allinpay.yunst.sdk.util.RSAUtil;
 import com.google.common.collect.Lists;
+import com.rfchina.platform.biztool.mapper.string.StringObject;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.platform.common.utils.DateUtil;
@@ -49,12 +50,14 @@ import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.RecieveInfo;
 import com.rfchina.wallet.server.bank.yunst.request.DepositApplyReq;
 import com.rfchina.wallet.server.bank.yunst.request.GetCheckAccountFileReq;
 import com.rfchina.wallet.server.bank.yunst.request.GetOrderDetailReq;
+import com.rfchina.wallet.server.bank.yunst.request.PwdConfirmReq;
 import com.rfchina.wallet.server.bank.yunst.request.RefundApplyReq;
 import com.rfchina.wallet.server.bank.yunst.request.RefundApplyReq.RefundInfo;
 import com.rfchina.wallet.server.bank.yunst.request.SmsPayReq;
 import com.rfchina.wallet.server.bank.yunst.request.SmsRetryReq;
 import com.rfchina.wallet.server.bank.yunst.request.WithdrawApplyReq;
 import com.rfchina.wallet.server.bank.yunst.response.AgentPayResp;
+import com.rfchina.wallet.server.bank.yunst.response.CheckAccount;
 import com.rfchina.wallet.server.bank.yunst.response.CollectApplyResp;
 import com.rfchina.wallet.server.bank.yunst.response.GetCheckAccountFileResp;
 import com.rfchina.wallet.server.bank.yunst.response.GetOrderDetailResp;
@@ -197,13 +200,12 @@ public class YunstBizHandler extends EBankHandler {
 	/**
 	 * 充值
 	 */
-	public RechargeResp recharge(WalletOrder order, WalletRecharge recharge) {
+	public RechargeResp recharge(WalletOrder order, WalletRecharge recharge,
+		WalletChannel payer) {
+
 		List<WalletCollectMethod> methods = walletCollectMethodDao
 			.selectByCollectId(recharge.getId(), OrderType.RECHARGE.getValue());
 
-		// 支付人
-		WalletChannel payer = walletChannelDao
-			.selectByWalletId(recharge.getPayerWalletId(), order.getTunnelType());
 		// 超时时间
 		String expireTime = order.getExpireTime() != null ? DateUtil
 			.formatDate(order.getExpireTime(), DateUtil.STANDARD_DTAETIME_PATTERN) : null;
@@ -314,7 +316,7 @@ public class YunstBizHandler extends EBankHandler {
 	 * 代收
 	 */
 	public WalletCollectResp collect(WalletOrder order, WalletCollect collect,
-		List<WalletCollectInfo> clearInfos) {
+		List<WalletCollectInfo> clearInfos, WalletChannel payer) {
 		// 收款人
 		List<RecieveInfo> receives = clearInfos.stream().map(info -> {
 			WalletChannel receiver = walletChannelDao
@@ -328,8 +330,6 @@ public class YunstBizHandler extends EBankHandler {
 		List<WalletCollectMethod> methods = walletCollectMethodDao
 			.selectByCollectId(collect.getId(), OrderType.COLLECT.getValue());
 
-		WalletChannel payer = walletChannelDao
-			.selectByWalletId(order.getWalletId(), order.getTunnelType());
 		String expireTime = order.getExpireTime() != null ? DateUtil
 			.formatDate(order.getExpireTime(), DateUtil.STANDARD_DTAETIME_PATTERN) : null;
 		CollectApplyReq req = CollectApplyReq.builder()
@@ -368,6 +368,7 @@ public class YunstBizHandler extends EBankHandler {
 				result.setWeChatAPPInfo(resp.getWeChatAPPInfo());
 				result.setTradeNo(resp.getTradeNo());
 			}
+
 			return result;
 		} catch (CommonGatewayException e) {
 			dealGatewayError(order, e);
@@ -776,13 +777,31 @@ public class YunstBizHandler extends EBankHandler {
 	}
 
 
+	/**
+	 * 短信确认支付
+	 */
+	public String passwordConfirm(WalletOrder order, WalletChannel channel, String jumpUrl,
+		String consumerIp) {
+
+		PwdConfirmReq req = PwdConfirmReq.builder()
+			.bizOrderNo(order.getOrderNo())
+			.bizUserId(channel.getBizUserId())
+			.jumpUrl(jumpUrl)
+			.consumerIp(consumerIp)
+			.build();
+		return yunstTpl.signRequest(req);
+	}
+
+
 	public String balanceUrl(Date date, YunstFileType fileType) {
+		String resourceUrl = null;
+		String tempUrl = configService.getStorageDir();
+		String fileUrl = null;
+		// 获取文件地址
 		GetCheckAccountFileReq req = GetCheckAccountFileReq.builder()
 			.date(DateUtil.formatDate(date, DateUtil.SHORT_DTAE_PATTERN))
 			.fileType(fileType.getValue())
 			.build();
-
-		String resourceUrl = null;
 		try {
 			GetCheckAccountFileResp resp = yunstTpl.execute(req, GetCheckAccountFileResp.class);
 			resourceUrl = resp.getUrl();
@@ -790,9 +809,7 @@ public class YunstBizHandler extends EBankHandler {
 			log.error("通联-接口异常", e);
 			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
 		}
-
-		String tempUrl = configService.getStorageDir();
-		String fileUrl = null;
+		// 下载文件
 		try {
 			URL url = new URL(resourceUrl);
 			fileUrl = tempUrl + url.getFile();
@@ -800,14 +817,21 @@ public class YunstBizHandler extends EBankHandler {
 		} catch (Exception e) {
 			log.error("文件下载错误", e);
 		}
-
+		// 解析文件
 		try {
-			try(BufferedReader reader = Files.newBufferedReader(Paths.get(fileUrl))){
+			List<CheckAccount> tempList = Lists.newArrayList();
+			try (BufferedReader reader = Files.newBufferedReader(Paths.get(fileUrl))) {
+				String line = reader.readLine();
+				CheckAccount check = StringObject.parseStringObject(line, CheckAccount.class, "|");
+				tempList.add(check);
+				if (tempList.size() >= 100) {
 
-				reader.readLine();
-
+					tempList.clear();
+				}
 			}
-		}catch (Exception e){
+			if (tempList.size() > 0) {
+			}
+		} catch (Exception e) {
 
 		}
 		return null;

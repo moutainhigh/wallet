@@ -13,7 +13,7 @@ public class YunstBizHandlerTest extends SpringBaseTest {
 
 	@Test
 	public void updateOrderStatus(){
-		yunstBizHandler.updateOrderStatus("WC20191105682221394");
+		yunstBizHandler.updateOrderStatus("WC20191106379163003");
 	}
 
 

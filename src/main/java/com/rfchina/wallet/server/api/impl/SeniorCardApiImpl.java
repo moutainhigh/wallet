@@ -193,6 +193,8 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 			.selectByWalletId(walletCard.getWalletId(), TunnelType.YUNST.getValue());
 		try {
 			yunstUserHandler.unbindBankCard(walletChannel.getBizUserId(), walletCard.getBankAccount());
+			walletCard.setStatus(EnumWalletCardStatus.UNBIND.getValue().byteValue());
+			walletCardDao.updateByPrimaryKeySelective(walletCard);
 		} catch (Exception e) {
 			log.error("高级钱包银行卡解绑失败, cardId: {}", cardId);
 			throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_UNBIND_ERROR);

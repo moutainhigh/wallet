@@ -87,7 +87,7 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	@Test
 	public void recharge() {
 		WalletCard walletCard = walletCardDao.selectByPrimaryKey(cardId);
-		RechargeResp resp = seniorPayService.recharge(payerWalletId, walletCard, 1L);
+		RechargeResp resp = seniorPayService.recharge(payerWalletId, walletCard, 1L,"","");
 		log.info("recharge.resp = {}", JsonUtil.toJSON(resp));
 	}
 
@@ -142,7 +142,7 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 			.recievers(Arrays.asList(reciever))
 			.walletPayMethod(WalletPayMethod.builder().codePay(codePay).build())
 			.build();
-		WalletCollectResp collect = seniorPayService.collect(req);
+		WalletCollectResp collect = seniorPayService.collect(req,"","");
 		log.info("预代收 {}", JsonUtil.toJSON(collect));
 	}
 
