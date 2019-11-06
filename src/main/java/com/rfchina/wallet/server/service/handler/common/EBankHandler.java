@@ -92,7 +92,8 @@ public abstract class EBankHandler {
 	/**
 	 * 提现
 	 */
-	public WithdrawResp withdraw(WalletOrder order, WalletWithdraw withdraw) {
+	public WithdrawResp withdraw(WalletOrder order, WalletWithdraw withdraw,
+		WalletChannel payer) {
 		throw new RuntimeException();
 	}
 

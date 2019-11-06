@@ -259,10 +259,8 @@ public class YunstBizHandler extends EBankHandler {
 	/**
 	 * 提现
 	 */
-	public WithdrawResp withdraw(WalletOrder order, WalletWithdraw withdraw) {
+	public WithdrawResp withdraw(WalletOrder order, WalletWithdraw withdraw, WalletChannel payer) {
 
-		WalletChannel payer = walletChannelDao
-			.selectByWalletId(order.getWalletId(), order.getTunnelType());
 		String expireTime = order.getExpireTime() != null ? DateUtil
 			.formatDate(order.getExpireTime(), DateUtil.STANDARD_DTAETIME_PATTERN) : null;
 		String bankAccount = null;

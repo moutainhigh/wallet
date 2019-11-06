@@ -68,9 +68,12 @@ public class SeniorPayController {
 		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
 		@ApiParam(value = "银行卡id", required = true) @RequestParam("card_id") Long cardId,
-		@ApiParam(value = "金额", required = true) @RequestParam("amount") Long amount) {
+		@ApiParam(value = "金额", required = true) @RequestParam("amount") Long amount,
+		@ApiParam(value = "跳转地址", required = true) @RequestParam(value = "jump_url") String jumpUrl,
+		@ApiParam(value = "客户Ip", required = true) @RequestParam(value = "customer_ip") String customerIp
+	) {
 
-		WithdrawResp result = seniorPayApi.withdraw(accessToken, walletId, cardId, amount);
+		WithdrawResp result = seniorPayApi.withdraw(accessToken, walletId, cardId, amount, jumpUrl,customerIp);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result);
 	}
 
@@ -97,8 +100,8 @@ public class SeniorPayController {
 	) {
 		AgentPayReq.Reciever reciever = JsonUtil
 			.toObject(agentPayReq, AgentPayReq.Reciever.class, DEF_REQ_OBJ_MAP);
-		seniorPayApi.agentPay(accessToken, bizNo, collectOrderNo, reciever);
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
+		SettleResp settleResp = seniorPayApi.agentPay(accessToken, bizNo, collectOrderNo, reciever);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, settleResp);
 	}
 
 	@ApiOperation("高级钱包-退款")

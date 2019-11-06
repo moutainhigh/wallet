@@ -4,34 +4,22 @@ import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.model.WalletCard;
-import com.rfchina.wallet.domain.model.WalletCollect;
 import com.rfchina.wallet.domain.model.WalletOrder;
-import com.rfchina.wallet.domain.model.WalletRefund;
-import com.rfchina.wallet.domain.model.WalletWithdraw;
 import com.rfchina.wallet.server.SpringBaseTest;
 import com.rfchina.wallet.server.bank.yunst.util.YunstTpl;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
+import com.rfchina.wallet.server.model.ext.AgentPayReq;
 import com.rfchina.wallet.server.model.ext.CollectReq;
 import com.rfchina.wallet.server.model.ext.CollectReq.Reciever;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod;
-import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Balance;
-import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.BankCard;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.CodePay;
-import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.CodePay.CodePayBuilder;
-import com.rfchina.wallet.server.model.ext.RechargeReq;
 import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
-import com.rfchina.wallet.server.model.ext.AgentPayReq;
 import com.rfchina.wallet.server.model.ext.SettleResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
-import com.rfchina.wallet.server.model.ext.WithdrawReq;
-import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBizHandler;
-import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -87,7 +75,7 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	@Test
 	public void recharge() {
 		WalletCard walletCard = walletCardDao.selectByPrimaryKey(cardId);
-		RechargeResp resp = seniorPayService.recharge(payerWalletId, walletCard, 1L,"","");
+		RechargeResp resp = seniorPayService.recharge(payerWalletId, walletCard, 1L, "", "");
 		log.info("recharge.resp = {}", JsonUtil.toJSON(resp));
 	}
 
@@ -102,7 +90,7 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	@Test
 	public void withdraw() {
 		WalletCard walletCard = walletCardDao.selectByPrimaryKey(cardId);
-		WalletOrder withdraw = seniorPayService.withdraw(payerWalletId, walletCard, 1L);
+		WalletOrder withdraw = seniorPayService.withdraw(payerWalletId, walletCard, 1L, "test", "0.0.0.0");
 		log.info("withdraw.resp = {}", withdraw);
 	}
 
@@ -142,7 +130,7 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 			.recievers(Arrays.asList(reciever))
 			.walletPayMethod(WalletPayMethod.builder().codePay(codePay).build())
 			.build();
-		WalletCollectResp collect = seniorPayService.collect(req,"","");
+		WalletCollectResp collect = seniorPayService.collect(req, "", "");
 		log.info("预代收 {}", JsonUtil.toJSON(collect));
 	}
 

@@ -200,7 +200,8 @@ public class SeniorPayService {
 	/**
 	 * 提现
 	 */
-	public WithdrawResp withdraw(Long walletId, WalletCard walletCard, Long amount) {
+	public WithdrawResp withdraw(Long walletId, WalletCard walletCard, Long amount, String jumpUrl,
+		String customerIp) {
 
 		// 检查钱包
 		Wallet payerWallet = verifyService.checkSeniorWallet(walletId);
@@ -240,9 +241,17 @@ public class SeniorPayService {
 			.build();
 		walletWithdrawDao.insertSelective(withdraw);
 
+		// 提现人
+		WalletChannel payer = walletChannelDao
+			.selectByWalletId(withdrawOrder.getWalletId(), withdrawOrder.getTunnelType());
 		// 充值
 		EBankHandler handler = handlerHelper.selectByTunnelType(withdrawOrder.getTunnelType());
-		return handler.withdraw(withdrawOrder, withdraw);
+		WithdrawResp result = handler.withdraw(withdrawOrder, withdraw, payer);
+
+		String signedParams = ((YunstBizHandler) handler)
+			.passwordConfirm(withdrawOrder, payer, jumpUrl, customerIp);
+		result.setSignedParams(signedParams);
+		return result;
 	}
 
 	/**
