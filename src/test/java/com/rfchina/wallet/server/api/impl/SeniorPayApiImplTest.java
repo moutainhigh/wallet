@@ -101,4 +101,9 @@ public class SeniorPayApiImplTest extends SpringApiTest {
 		WalletCollectResp resp = seniorPayApi.deduction(super.accessToken, req, null, null);
 		log.info("Deduction resp = {}", JsonUtil.toJSON(resp));
 	}
+
+	@Test
+	public void smsConfirm() {
+		seniorPayApi.smsConfirm(super.accessToken,"021013e9-12a5-4267-9caa-e485d9972038","669805","192.168.197.28");
+	}
 }

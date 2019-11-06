@@ -74,6 +74,7 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 			.recharge(walletId, walletCard, amount, jumpUrl, customerIp);
 
 		UnifiedConfirmVo confirmVo = BeanUtil.newInstance(resp, UnifiedConfirmVo.class);
+		confirmVo.setOrderId(resp.getId());
 		String ticket = saveConfirmVo(confirmVo);
 		resp.setTicket(ticket);
 
@@ -99,6 +100,7 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 			.withdraw(walletId, walletCard, amount, jumpUrl, customerIp);
 
 		UnifiedConfirmVo confirmVo = BeanUtil.newInstance(withdraw, UnifiedConfirmVo.class);
+		confirmVo.setOrderId(withdraw.getId());
 		String ticket = saveConfirmVo(confirmVo);
 		withdraw.setTicket(ticket);
 
@@ -134,6 +136,7 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 		WalletCollectResp collect = seniorPayService.collect(req, jumpUrl, customerIp);
 		// 生成票据
 		UnifiedConfirmVo confirmVo = BeanUtil.newInstance(collect, UnifiedConfirmVo.class);
+		confirmVo.setOrderId(collect.getId());
 		String ticket = saveConfirmVo(confirmVo);
 		collect.setTicket(ticket);
 
