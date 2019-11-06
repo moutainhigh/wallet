@@ -16,6 +16,7 @@ import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import com.rfchina.wallet.server.model.ext.AgentPayReq.Reciever;
 import com.rfchina.wallet.server.model.ext.CollectReq;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod;
+import com.rfchina.wallet.server.model.ext.DeductionReq;
 import com.rfchina.wallet.server.model.ext.SettleResp;
 import com.rfchina.wallet.server.model.ext.UnifiedConfirmVo;
 import com.rfchina.wallet.server.model.ext.RechargeResp;
@@ -170,6 +171,29 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 		WalletOrder collectOrder = verifyService
 			.checkOrder(collectOrderNo, OrderStatus.SUCC.getValue());
 		return seniorPayService.refund(collectOrder, bizNo, refundList);
+	}
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
+	@Override
+	public WalletCollectResp deduction(String accessToken, DeductionReq req, String jumpUrl,
+		String customerIp) {
+
+		// 检验支付方式
+		WalletPayMethod payMethod = req.getWalletPayMethod();
+		if (payMethod.getMethods() == 0) {
+			throw new WalletResponseException(EnumResponseCode.COMMON_INVALID_PARAMS,
+				"walletPayMethod");
+		}
+		// 发起消费
+		WalletCollectResp collect = seniorPayService.deduction(req, jumpUrl, customerIp);
+		// 生成票据
+		UnifiedConfirmVo confirmVo = BeanUtil.newInstance(collect, UnifiedConfirmVo.class);
+		String ticket = saveConfirmVo(confirmVo);
+		collect.setTicket(ticket);
+
+		return collect;
 	}
 
 	@Log

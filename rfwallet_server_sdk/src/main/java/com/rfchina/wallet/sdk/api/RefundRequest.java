@@ -28,7 +28,7 @@ public class RefundRequest extends  AbstractApiRequest {
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/senior/refund";
+    return "/wallet_server/v1/m/senior/pay/refund";
   }
 
   @Override

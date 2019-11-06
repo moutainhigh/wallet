@@ -21,6 +21,7 @@ import com.rfchina.wallet.domain.model.WalletClearing;
 import com.rfchina.wallet.domain.model.WalletCollect;
 import com.rfchina.wallet.domain.model.WalletCollectInfo;
 import com.rfchina.wallet.domain.model.WalletCollectMethod;
+import com.rfchina.wallet.domain.model.WalletConsume;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletRecharge;
 import com.rfchina.wallet.domain.model.WalletRefund;
@@ -47,6 +48,7 @@ import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMe
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod.Wechat.ScanWeixin;
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod.Wechat.WechatPublic;
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.RecieveInfo;
+import com.rfchina.wallet.server.bank.yunst.request.ConsumeApplyReq;
 import com.rfchina.wallet.server.bank.yunst.request.DepositApplyReq;
 import com.rfchina.wallet.server.bank.yunst.request.GetCheckAccountFileReq;
 import com.rfchina.wallet.server.bank.yunst.request.GetOrderDetailReq;
@@ -72,6 +74,7 @@ import com.rfchina.wallet.server.mapper.ext.WalletClearingExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectInfoExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectMethodExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletConsumeExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRechargeExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRefundDetailExtDao;
@@ -122,6 +125,9 @@ public class YunstBizHandler extends EBankHandler {
 
 	public static final String TRADE_CODESTRING_COLLECT = "3001";
 	public static final String TRADE_CODESTRING_AGENTPAY = "4001";
+	public static final String INDUSTRY_CODE = "1910";
+	public static final String INDUSTRY_NAME = "其他";
+
 	@Autowired
 	private YunstTpl yunstTpl;
 
@@ -142,6 +148,9 @@ public class YunstBizHandler extends EBankHandler {
 
 	@Autowired
 	private WalletCollectMethodExtDao walletCollectMethodDao;
+
+	@Autowired
+	private WalletConsumeExtDao walletConsumeDao;
 
 	@Autowired
 	private WalletChannelExtDao walletChannelExtDao;
@@ -220,8 +229,8 @@ public class YunstBizHandler extends EBankHandler {
 			.backUrl(configService.getYunstRecallPrefix() + UrlConstant.YUNST_ORDER_RECALL)
 			.orderExpireDatetime(expireTime)
 			.payMethod(getMethodMap(methods, true))
-			.industryCode("1910")
-			.industryName("其他")
+			.industryCode(INDUSTRY_CODE)
+			.industryName(INDUSTRY_NAME)
 			.source(EnumYunstDeviceType.MOBILE.getValue())
 			.build();
 		// 发起时间
@@ -282,8 +291,8 @@ public class YunstBizHandler extends EBankHandler {
 			.bankCardNo(bankAccount)
 			.bankCardPro(EnumYunstCardPro.PERSON.getValue())
 			.withdrawType(EnumYunstWithdrawType.D0.getValue())
-			.industryCode("1910")
-			.industryName("其他")
+			.industryCode(INDUSTRY_CODE)
+			.industryName(INDUSTRY_NAME)
 			.source(EnumYunstDeviceType.MOBILE.getValue())
 			.build();
 
@@ -342,8 +351,8 @@ public class YunstBizHandler extends EBankHandler {
 			.ordErexpireDatetime(expireTime)
 			.payMethod(getMethodMap(methods, false))
 			.tradeCode(TRADE_CODESTRING_COLLECT)
-			.industryCode("1910")
-			.industryName("其他")
+			.industryCode(INDUSTRY_CODE)
+			.industryName(INDUSTRY_NAME)
 			.source(1L)
 			.build();
 
@@ -476,6 +485,60 @@ public class YunstBizHandler extends EBankHandler {
 
 	}
 
+	/**
+	 * 退款
+	 */
+	public WalletCollectResp consume(WalletOrder order, WalletConsume consume, WalletChannel payer,
+		WalletChannel payee, List<WalletCollectMethod> methods) {
+
+		String expireTime = order.getExpireTime() != null ? DateUtil
+			.formatDate(order.getExpireTime(), DateUtil.STANDARD_DTAETIME_PATTERN) : null;
+		ConsumeApplyReq req = ConsumeApplyReq.builder()
+			.payerId(payer.getBizUserId())
+			.recieverId(payee.getBizUserId())
+			.bizOrderNo(order.getOrderNo())
+			.amount(order.getAmount())
+			.fee(0L)
+			.validateType(consume.getValidateType().longValue())
+			.frontUrl(null)
+			.backUrl(configService.getYunstRecallPrefix() + UrlConstant.YUNST_ORDER_RECALL)
+			.orderExpireDatetime(expireTime)
+			.payMethod(getMethodMap(methods, false))
+			.industryCode(INDUSTRY_CODE)
+			.industryName(INDUSTRY_NAME)
+			.source(1L)
+			.build();
+
+		order.setProgress(UniProgress.SENDED.getValue());
+		order.setStartTime(new Date());
+		CollectApplyResp resp = null;
+		try {
+			resp = yunstTpl.execute(req, CollectApplyResp.class);
+			order.setTunnelOrderNo(resp.getOrderNo());
+			if (StringUtils.isNotBlank(resp.getPayStatus())
+				&& "fail".equals(resp.getPayStatus())) {
+				order.setStatus(OrderStatus.FAIL.getValue());
+				order.setTunnelErrCode(resp.getPayCode());
+				order.setTunnelErrMsg(resp.getPayFailMessage());
+			}
+			walletOrderDao.updateByPrimaryKeySelective(order);
+			WalletCollectResp result = BeanUtil.newInstance(order, WalletCollectResp.class);
+			if (resp != null) {
+				result.setPayInfo(resp.getPayInfo());
+				result.setWeChatAPPInfo(resp.getWeChatAPPInfo());
+				result.setTradeNo(resp.getTradeNo());
+			}
+
+			return result;
+		} catch (CommonGatewayException e) {
+			dealGatewayError(order, e);
+		} catch (Exception e) {
+			dealUndefinedError(e);
+		}
+		return null;
+	}
+
+
 	private void dealGatewayError(WalletOrder order, CommonGatewayException e) {
 		log.error("网关错误", e);
 		order.setTunnelErrCode(e.getBankErrCode());
@@ -556,11 +619,13 @@ public class YunstBizHandler extends EBankHandler {
 		if (applyStatus.isEndStatus()) {
 			order.setEndTime(new Date());
 		}
+		order.setBizTag(EnumBizTag.RECORD.and(order.getBizTag()));
 		walletOrderDao.updateByPrimaryKeySelective(order);
 
 		// 记录到流水
 		if (OrderStatus.SUCC.getValue().byteValue() == order.getStatus()
 			&& (order.getBizTag() == null || !EnumBizTag.RECORD.contains(order.getBizTag()))) {
+
 			if (order.getType().byteValue() == OrderType.AGENT_PAY.getValue()) {
 				List<WalletClearing> clearings = walletClearingDao.selectByOrderId(order.getId());
 				clearings.forEach(clearing -> {
@@ -592,7 +657,8 @@ public class YunstBizHandler extends EBankHandler {
 					builder.creditAmount(0L);
 				} else if (order.getType().byteValue() == OrderType.WITHDRAWAL.getValue()
 					|| order.getType().byteValue() == OrderType.COLLECT.getValue()
-					|| order.getType().byteValue() == OrderType.CONSUME.getValue()) {
+					|| order.getType().byteValue() == OrderType.CONSUME.getValue()
+					|| order.getType().byteValue() == OrderType.DEDUCTION.getValue()) {
 					builder.type(DebitType.CREDIT.getValue());
 					builder.debitAmount(0L);
 					builder.creditAmount(order.getAmount());
@@ -609,8 +675,6 @@ public class YunstBizHandler extends EBankHandler {
 				}
 				moneyLogDao.insertSelective(builder.build());
 			}
-			order.setBizTag(EnumBizTag.RECORD.and(order.getBizTag()));
-			walletOrderDao.updateByPrimaryKeySelective(order);
 		}
 
 		return order;

@@ -19,45 +19,47 @@ public class UrlConstant {
 	/**
 	 * 高级钱包-代收
 	 */
-	public static final String SENIOR_WALLET_COLLECT_ASYNC = VERSION + "/m/senior/collect_async";
-	/**
-	 * 高级钱包-代收
-	 */
-	public static final String SENIOR_WALLET_COLLECT_SYNC = VERSION + "/m/senior/collect_sync";
+	public static final String SENIOR_WALLET_COLLECT_SYNC = VERSION + "/m/senior/pay/collect_sync";
 
 	/**
 	 * 高级钱包-清算
 	 */
-	public static final String SENIOR_WALLET_AGENT_PAY = VERSION + "/m/senior/agent_pay";
+	public static final String SENIOR_WALLET_AGENT_PAY = VERSION + "/m/senior/pay/agent_pay";
 
 	/**
 	 * 高级钱包-退款
 	 */
-	public static final String SENIOR_WALLET_REFUND = VERSION + "/m/senior/refund";
+	public static final String SENIOR_WALLET_REFUND = VERSION + "/m/senior/pay/refund";
+
+	/**
+	 * 高级钱包-代扣
+	 */
+	public static final String SENIOR_WALLET_DEDUCTION = VERSION + "/m/senior/pay/deduction";
+
 	/**
 	 * 高级钱包-订单结果查询
 	 */
-	public static final String SENIOR_WALLET_ORDER_QUERY = VERSION + "/m/senior/order_query";
+	public static final String SENIOR_WALLET_ORDER_QUERY = VERSION + "/m/senior/pay/order_query";
 
 	/**
 	 * 高级钱包-充值
 	 */
-	public static final String SENIOR_WALLET_RECHARGE = VERSION + "/m/senior/recharge";
+	public static final String SENIOR_WALLET_RECHARGE = VERSION + "/m/senior/pay/recharge";
 
 	/**
 	 * 高级钱包-短信确认
 	 */
-	public static final String SENIOR_WALLET_SMS_CONFIRM = VERSION + "/m/senior/sms_confirm";
+	public static final String SENIOR_WALLET_SMS_CONFIRM = VERSION + "/m/senior/pay/sms_confirm";
 
 	/**
 	 * 高级钱包-重发短信
 	 */
-	public static final String SENIOR_WALLET_SMS_RETRY = VERSION + "/m/senior/sms_retry";
+	public static final String SENIOR_WALLET_SMS_RETRY = VERSION + "/m/senior/pay/sms_retry";
 
 	/**
 	 * 高级钱包-提现
 	 */
-	public static final String SENIOR_WALLET_WITHDRAW = VERSION + "/m/senior/withdraw";
+	public static final String SENIOR_WALLET_WITHDRAW = VERSION + "/m/senior/pay/withdraw";
 
 	/**
 	 * 查询支付状态

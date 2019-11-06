@@ -1,7 +1,5 @@
 package com.rfchina.wallet.server.api.impl;
 
-import static org.junit.Assert.*;
-
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.server.SpringApiTest;
 import com.rfchina.wallet.server.api.SeniorPayApi;
@@ -9,7 +7,9 @@ import com.rfchina.wallet.server.model.ext.AgentPayReq;
 import com.rfchina.wallet.server.model.ext.CollectReq;
 import com.rfchina.wallet.server.model.ext.CollectReq.Reciever;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod;
+import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Balance;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.CodePay;
+import com.rfchina.wallet.server.model.ext.DeductionReq;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
@@ -79,5 +79,26 @@ public class SeniorPayApiImplTest extends SpringApiTest {
 		reciever.setFeeAmount(0L);
 		seniorPayApi.agentPay(super.accessToken, String.valueOf(System.currentTimeMillis()),
 			collectOrderNo, reciever);
+	}
+
+	@Test
+	public void deduction() {
+
+		Balance balance = Balance.builder()
+			.amount(1L)
+			.build();
+		DeductionReq req = DeductionReq.builder()
+			.payerWalletId(payeeWalletId)
+			.bizNo(String.valueOf(System.currentTimeMillis()))
+			.amount(1L)
+			.note("")
+			.fee(0L)
+			.expireTime(null)
+			.industryCode("1010")
+			.industryName("保险代理")
+			.walletPayMethod(WalletPayMethod.builder().balance(balance).build())
+			.build();
+		WalletCollectResp resp = seniorPayApi.deduction(super.accessToken, req, null, null);
+		log.info("Deduction resp = {}", JsonUtil.toJSON(resp));
 	}
 }

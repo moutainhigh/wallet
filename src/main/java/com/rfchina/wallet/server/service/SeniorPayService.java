@@ -2,7 +2,6 @@ package com.rfchina.wallet.server.service;
 
 import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.platform.common.utils.EnumUtil;
-import com.rfchina.platform.common.utils.HttpFile;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
@@ -16,6 +15,7 @@ import com.rfchina.wallet.domain.model.WalletCollect;
 import com.rfchina.wallet.domain.model.WalletCollectInfo;
 import com.rfchina.wallet.domain.model.WalletCollectMethod;
 import com.rfchina.wallet.domain.model.WalletCollectMethod.WalletCollectMethodBuilder;
+import com.rfchina.wallet.domain.model.WalletConsume;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletRecharge;
 import com.rfchina.wallet.domain.model.WalletRefund;
@@ -27,6 +27,7 @@ import com.rfchina.wallet.server.mapper.ext.WalletClearingExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectInfoExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectMethodExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletConsumeExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRechargeExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRefundDetailExtDao;
@@ -40,6 +41,7 @@ import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Balance;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.BankCard;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.CodePay;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Wechat;
+import com.rfchina.wallet.server.model.ext.DeductionReq;
 import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
 import com.rfchina.wallet.server.model.ext.SettleResp;
@@ -55,10 +57,7 @@ import com.rfchina.wallet.server.msic.EnumWallet.YunstFileType;
 import com.rfchina.wallet.server.service.handler.common.EBankHandler;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBizHandler;
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +75,7 @@ public class SeniorPayService {
 	public static final String PREFIX_COLLECT = "WC";
 	public static final String PREFIX_RECHARGE = "WR";
 	public static final String PREFIX_WITHDRAW = "WD";
+	public static final String PREFIX_DEDUCTION = "WS";
 
 	@Autowired
 	private HandlerHelper handlerHelper;
@@ -127,6 +127,9 @@ public class SeniorPayService {
 
 	@Autowired
 	private WalletChannelExtDao walletChannelDao;
+
+	@Autowired
+	private WalletConsumeExtDao walletConsumeDao;
 
 	private Long anonyPayerWalletId = 10001L;
 	private Long agentEntWalletId = 10000L;
@@ -366,7 +369,7 @@ public class SeniorPayService {
 			.orderNo(orderNo)
 			.batchNo(batchNo)
 			.bizNo(bizNo)
-			.walletId(null)
+			.walletId(receiver.getWalletId())
 			.type(OrderType.AGENT_PAY.getValue())
 			.amount(receiver.getAmount())
 			.progress(GwProgress.WAIT_SEND.getValue())
@@ -486,6 +489,68 @@ public class SeniorPayService {
 		return refundOrder;
 	}
 
+
+	/**
+	 * 预代收
+	 */
+	public WalletCollectResp deduction(DeductionReq req, String jumpUrl, String customerIp) {
+
+		// 定义付款人
+		Long payerWalletId = (req.getPayerWalletId() != null) ? req.getPayerWalletId()
+			: anonyPayerWalletId;
+		verifyService.checkSeniorWallet(payerWalletId);
+
+		// 工单记录
+		String orderNo = IdGenerator.createBizId(PREFIX_DEDUCTION, 19, id -> {
+			return walletOrderDao.selectCountByOrderNo(id) == 0;
+		});
+		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> {
+			return walletOrderDao.selectCountByBatchNo(id) == 0;
+		});
+		WalletOrder consumeOrder = WalletOrder.builder()
+			.orderNo(orderNo)
+			.batchNo(batchNo)
+			.bizNo(req.getBizNo())
+			.walletId(payerWalletId)
+			.type(OrderType.DEDUCTION.getValue())
+			.amount(req.getAmount())
+			.progress(GwProgress.WAIT_SEND.getValue())
+			.status(OrderStatus.WAITTING.getValue())
+			.tunnelType(TunnelType.YUNST.getValue())
+			.createTime(new Date())
+			.build();
+		walletOrderDao.insertSelective(consumeOrder);
+
+		// 生成代收单
+		WalletConsume consume = WalletConsume.builder()
+			.orderId(consumeOrder.getId())
+			.payeeWalletId(agentEntWalletId)
+			.validateType(BizValidateType.NONE.getValue())
+			.createTime(new Date())
+			.build();
+		walletConsumeDao.insertSelective(consume);
+		WalletCollectMethod method = savePayMethod(consume.getId(),
+			OrderType.DEDUCTION.getValue(),
+			req.getWalletPayMethod());
+
+		WalletChannel payer = walletChannelDao
+			.selectByWalletId(consumeOrder.getWalletId(), consumeOrder.getTunnelType());
+		WalletChannel payee = walletChannelDao
+			.selectByWalletId(consume.getPayeeWalletId(), consumeOrder.getTunnelType());
+
+		EBankHandler handler = handlerHelper.selectByTunnelType(consumeOrder.getTunnelType());
+		WalletCollectResp result = handler.consume(consumeOrder, consume, payer, payee,
+			Arrays.asList(method));
+		if (consume.getValidateType().byteValue() == BizValidateType.PASSWORD.getValue()) {
+			String signedParams = ((YunstBizHandler) handler)
+				.passwordConfirm(consumeOrder, payer, jumpUrl, customerIp);
+			result.setSignedParams(signedParams);
+		}
+
+		return result;
+	}
+
+
 	private Long getCollectSpand(WalletOrder collectOrder) {
 		// 在途和已清算金额总额
 		List<WalletClearing> histClearings = walletClearingDao
@@ -516,7 +581,8 @@ public class SeniorPayService {
 	/**
 	 * 保存支付方式
 	 */
-	private void savePayMethod(Long collectId, Byte type, WalletPayMethod payMethod) {
+	private WalletCollectMethod savePayMethod(Long collectId, Byte type,
+		WalletPayMethod payMethod) {
 		// 支付方式
 		WalletCollectMethodBuilder builder = WalletCollectMethod.builder()
 			.refId(collectId)
@@ -557,7 +623,9 @@ public class SeniorPayService {
 				.amount(bankCard.getAmount())
 				.openId(bankCard.getBankCardNo());
 		}
-		walletCollectMethodDao.insertSelective(builder.build());
+		WalletCollectMethod method = builder.build();
+		walletCollectMethodDao.insertSelective(method);
+		return method;
 	}
 
 	/**

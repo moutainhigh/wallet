@@ -22,7 +22,7 @@ public class SmsRetryRequest extends  AbstractApiRequest {
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/senior/sms_retry";
+    return "/wallet_server/v1/m/senior/pay/sms_retry";
   }
 
   @Override

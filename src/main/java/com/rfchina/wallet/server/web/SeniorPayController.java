@@ -8,19 +8,15 @@ import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.ResponseValue;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.JsonUtil;
-import com.rfchina.wallet.domain.model.WalletClearing;
-import com.rfchina.wallet.domain.model.WalletCollect;
 import com.rfchina.wallet.domain.model.WalletOrder;
-import com.rfchina.wallet.domain.model.WalletRefund;
 import com.rfchina.wallet.server.api.SeniorPayApi;
 import com.rfchina.wallet.server.model.ext.AgentPayReq;
 import com.rfchina.wallet.server.model.ext.CollectReq;
-import com.rfchina.wallet.server.model.ext.RechargeReq;
+import com.rfchina.wallet.server.model.ext.DeductionReq;
 import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
 import com.rfchina.wallet.server.model.ext.SettleResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
-import com.rfchina.wallet.server.model.ext.WithdrawReq;
 import com.rfchina.wallet.server.model.ext.WithdrawResp;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import io.swagger.annotations.Api;
@@ -73,7 +69,8 @@ public class SeniorPayController {
 		@ApiParam(value = "客户Ip", required = true) @RequestParam(value = "customer_ip") String customerIp
 	) {
 
-		WithdrawResp result = seniorPayApi.withdraw(accessToken, walletId, cardId, amount, jumpUrl,customerIp);
+		WithdrawResp result = seniorPayApi
+			.withdraw(accessToken, walletId, cardId, amount, jumpUrl, customerIp);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result);
 	}
 
@@ -115,6 +112,20 @@ public class SeniorPayController {
 		List<RefundInfo> rList = JsonUtil.toArray(refundList, RefundInfo.class, DEF_REQ_OBJ_MAP);
 		WalletOrder refund = seniorPayApi.refund(accessToken, bizNo, collectOrderNo, rList);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, refund);
+	}
+
+	@ApiOperation("高级钱包-代扣")
+	@PostMapping(UrlConstant.SENIOR_WALLET_DEDUCTION)
+	public ResponseValue<WalletCollectResp> deduction(
+		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
+		@ApiParam(value = "消费内容，参考ConsumeReq结构体", required = true) @RequestParam("consume_req") String consumeReq,
+		@ApiParam(value = "跳转地址", required = false) @RequestParam(value = "jump_url", required = false) String jumpUrl,
+		@ApiParam(value = "客户Ip", required = false) @RequestParam(value = "customer_ip", required = false) String customerIp
+	) {
+
+		DeductionReq req = JsonUtil.toObject(consumeReq, DeductionReq.class, DEF_REQ_OBJ_MAP);
+		WalletCollectResp result = seniorPayApi.deduction(accessToken, req, jumpUrl, customerIp);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result);
 	}
 
 	@ApiOperation("高级钱包-订单结果查询")

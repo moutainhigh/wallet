@@ -28,7 +28,7 @@ public class SmsConfirmRequest extends  AbstractApiRequest {
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/senior/sms_confirm";
+    return "/wallet_server/v1/m/senior/pay/sms_confirm";
   }
 
   @Override

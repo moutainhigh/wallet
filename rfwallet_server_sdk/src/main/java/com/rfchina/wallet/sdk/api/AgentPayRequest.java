@@ -28,7 +28,7 @@ public class AgentPayRequest extends  AbstractApiRequest {
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/senior/agent_pay";
+    return "/wallet_server/v1/m/senior/pay/agent_pay";
   }
 
   @Override

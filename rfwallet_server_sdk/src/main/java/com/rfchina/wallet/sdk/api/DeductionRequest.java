@@ -9,15 +9,15 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 
 
-/** 高级钱包-即刻代收 */
+/** 高级钱包-代扣 */
 @Builder
-public class CollectSyncRequest extends  AbstractApiRequest {
+public class DeductionRequest extends  AbstractApiRequest {
 
   @ApiModelProperty("应用令牌")
   private String accessToken ;
 
-  @ApiModelProperty("代收内容，参考CollectReq结构体")
-  private String collectReq ;
+  @ApiModelProperty("消费内容，参考ConsumeReq结构体")
+  private String consumeReq ;
 
   @ApiModelProperty("客户Ip")
   private String customerIp ;
@@ -28,7 +28,7 @@ public class CollectSyncRequest extends  AbstractApiRequest {
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/senior/pay/collect_sync";
+    return "/wallet_server/v1/m/senior/pay/deduction";
   }
 
   @Override
@@ -42,8 +42,8 @@ public class CollectSyncRequest extends  AbstractApiRequest {
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
       }
-      if(collectReq != null){
-        parameters.put("collect_req", collectReq.toString());
+      if(consumeReq != null){
+        parameters.put("consume_req", consumeReq.toString());
       }
       if(customerIp != null){
         parameters.put("customer_ip", customerIp.toString());

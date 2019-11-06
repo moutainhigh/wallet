@@ -217,6 +217,7 @@ public class EnumWallet {
 		AGENT_PAY((byte) 5, "代付"),
 		REFUND((byte) 6, "退款"),
 		CONSUME((byte) 7, "消费"),
+		DEDUCTION((byte) 8, "代扣"),
 		;
 
 		private Byte value;

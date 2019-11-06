@@ -7,6 +7,8 @@ import com.rfchina.wallet.domain.model.WalletChannel;
 import com.rfchina.wallet.domain.model.WalletClearing;
 import com.rfchina.wallet.domain.model.WalletCollect;
 import com.rfchina.wallet.domain.model.WalletCollectInfo;
+import com.rfchina.wallet.domain.model.WalletCollectMethod;
+import com.rfchina.wallet.domain.model.WalletConsume;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletRecharge;
 import com.rfchina.wallet.domain.model.WalletRefund;
@@ -94,6 +96,14 @@ public abstract class EBankHandler {
 	 */
 	public WithdrawResp withdraw(WalletOrder order, WalletWithdraw withdraw,
 		WalletChannel payer) {
+		throw new RuntimeException();
+	}
+
+	/**
+	 * 消费
+	 */
+	public WalletCollectResp consume(WalletOrder order, WalletConsume consume, WalletChannel payer,
+		WalletChannel payee, List<WalletCollectMethod> methods) {
 		throw new RuntimeException();
 	}
 

@@ -22,7 +22,7 @@ public class OrderQueryRequest extends  AbstractApiRequest {
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/senior/order_query";
+    return "/wallet_server/v1/m/senior/pay/order_query";
   }
 
   @Override

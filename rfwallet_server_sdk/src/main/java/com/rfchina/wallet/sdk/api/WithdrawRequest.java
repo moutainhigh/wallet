@@ -34,7 +34,7 @@ public class WithdrawRequest extends  AbstractApiRequest {
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/senior/withdraw";
+    return "/wallet_server/v1/m/senior/pay/withdraw";
   }
 
   @Override
