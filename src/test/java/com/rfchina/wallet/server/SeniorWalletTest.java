@@ -130,8 +130,7 @@ public class SeniorWalletTest extends WalletBaseTest {
 	 */
 	@Test
 	public void testSeniorWalletPersonSetPayPassword() {
-		seniorWalletPersonSetPayPassword((byte) 3, 10035L, "观富昌", "13710819640",
-			"440923198711033434");
+		seniorWalletPersonSetPayPassword(10035L, "/test");
 	}
 
 	/**

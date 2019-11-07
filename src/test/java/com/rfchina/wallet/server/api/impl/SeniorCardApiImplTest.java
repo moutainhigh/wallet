@@ -26,7 +26,7 @@ public class SeniorCardApiImplTest extends SpringApiTest {
 	@Test
 	public void confirmBindCard() {
 		seniorCardApi.confirmBindCard(super.accessToken, WALLET_ID,
-			"177982799745", null);
+			"459918", "b24cc677-3e05-4e47-8728-9ebc77eb65be");
 	}
 
 	@Test

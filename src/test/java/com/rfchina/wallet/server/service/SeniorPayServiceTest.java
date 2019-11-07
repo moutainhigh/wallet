@@ -45,7 +45,7 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	private Long payerWalletId = 10035L;
 	private Long payeeWalletId = 10035L;
 	private Long platWalletId = 10000L;
-	private Long cardId = 12L;
+	private Long cardId = 17L;
 
 
 	/**
@@ -63,7 +63,7 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	@Test
 	public void recharge() {
 		WalletCard walletCard = walletCardDao.selectByPrimaryKey(cardId);
-		RechargeResp resp = seniorPayService.recharge(payerWalletId, walletCard, 1L, "", "");
+		RechargeResp resp = seniorPayService.recharge(payerWalletId, walletCard, 1L);
 		log.info("recharge.resp = {}", JsonUtil.toJSON(resp));
 	}
 
@@ -79,8 +79,8 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	public void withdraw() {
 		WalletCard walletCard = walletCardDao.selectByPrimaryKey(cardId);
 		WalletOrder withdraw = seniorPayService
-			.withdraw(payerWalletId, walletCard, 1L, "test", "0.0.0.0");
-		log.info("withdraw.resp = {}", withdraw);
+			.withdraw(payerWalletId, walletCard, 1L, "http://192.168.197.75:7777/#/withdrawSuccess", "8.8.8.8");
+		log.info("withdraw.resp = {}", JsonUtil.toJSON(withdraw));
 	}
 
 	/**
@@ -93,8 +93,8 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 //			.build();
 		CodePay codePay = CodePay.builder()
 			.payType((byte) 41)
-			.authcode("134753097912258779")
-			.amount(1L)
+			.authcode("134998119558850474")
+			.amount(10L)
 			.build();
 //		BankCard bankCard = BankCard.builder()
 //			.payType(CollectPayType.BANKCARD.getValue())
@@ -103,13 +103,13 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 //			.build();
 
 		Reciever reciever = Reciever.builder()
-			.walletId(platWalletId)
-			.amount(1L)
+			.walletId(payeeWalletId)
+			.amount(10L)
 			.build();
 		CollectReq req = CollectReq.builder()
-			.payerWalletId(payerWalletId)
+			.payerWalletId(platWalletId)
 			.bizNo(String.valueOf(System.currentTimeMillis()))
-			.amount(1L)
+			.amount(10L)
 			.note("")
 			.fee(0L)
 			.validateType((byte) 0)
@@ -128,9 +128,9 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	public void agentPay() {
 		AgentPayReq.Reciever reciever = new AgentPayReq.Reciever();
 		reciever.setWalletId(payeeWalletId);
-		reciever.setAmount(1L);
+		reciever.setAmount(10L);
 		reciever.setFeeAmount(0L);
-		WalletOrder order = walletOrderDao.selectByOrderNo("WC20191101089285121");
+		WalletOrder order = walletOrderDao.selectByOrderNo("WC20191107748264218");
 		SettleResp resp = seniorPayService
 			.agentPay(order, String.valueOf(System.currentTimeMillis())
 				, reciever);

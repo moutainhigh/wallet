@@ -98,12 +98,13 @@ public class SeniorPayApiImplTest extends SpringApiTest {
 			.industryName("保险代理")
 			.walletPayMethod(WalletPayMethod.builder().balance(balance).build())
 			.build();
-		WalletCollectResp resp = seniorPayApi.deduction(super.accessToken, req, null, null);
+		WalletCollectResp resp = seniorPayApi.deduction(super.accessToken, req);
 		log.info("Deduction resp = {}", JsonUtil.toJSON(resp));
 	}
 
 	@Test
 	public void smsConfirm() {
-		seniorPayApi.smsConfirm(super.accessToken,"021013e9-12a5-4267-9caa-e485d9972038","669805","192.168.197.28");
+		seniorPayApi.smsConfirm(super.accessToken, "021013e9-12a5-4267-9caa-e485d9972038", "669805",
+			"192.168.197.28");
 	}
 }
