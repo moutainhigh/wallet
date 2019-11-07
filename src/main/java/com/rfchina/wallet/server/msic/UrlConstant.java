@@ -155,9 +155,9 @@ public class UrlConstant {
 	 */
 	public static final String WALLET_LOGIN_WITH_VERIFY_CODE = VERSION + "/m/wallet/login_with_verify_code";
 	/**
-	 * 升级高级钱包渠道信息
+	 * 高级钱包渠道信息
 	 */
-	public static final String WALLET_CHANNEL_INFO = VERSION + "/m/senior/wallet/channel_info";
+	public static final String WALLET_TUNNEL_INFO = VERSION + "/m/senior/wallet/tunnel_info";
 	/**
 	 * 升级高级钱包
 	 */

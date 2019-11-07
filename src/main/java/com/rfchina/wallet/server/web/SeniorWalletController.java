@@ -43,14 +43,14 @@ public class SeniorWalletController {
 	}
 
 	@ApiOperation("高级钱包渠道信息")
-	@PostMapping(UrlConstant.WALLET_CHANNEL_INFO)
-	public ResponseValue<WalletTunnel> seniorWalletChannelInfo(
+	@PostMapping(UrlConstant.WALLET_TUNNEL_INFO)
+	public ResponseValue<WalletTunnel> seniorWalletTunnelInfo(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = true) @RequestParam("tunnel_type") Byte tunnelType,
 		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId) {
 
 		WalletTunnel channel = seniorWalletApi
-			.seniorWalletChannelInfo(accessToken, tunnelType, walletId);
+			.seniorWalletTunnelInfo(accessToken, tunnelType, walletId);
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, channel);
 	}
