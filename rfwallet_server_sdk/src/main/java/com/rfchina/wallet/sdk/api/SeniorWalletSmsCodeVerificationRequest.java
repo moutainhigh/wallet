@@ -39,7 +39,7 @@ public class SeniorWalletSmsCodeVerificationRequest extends  AbstractApiRequest 
 
   @Override
   public Class<?> getResponseModelClass() {
-    return WalletChannel.class;
+    return WalletTunnel.class;
   }
 
   @Override
