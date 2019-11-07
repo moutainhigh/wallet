@@ -394,7 +394,7 @@ public class SeniorPayService {
 			.orderId(payOrder.getId())
 			.collectOrderNo(collectOrder.getOrderNo())
 			.collectInfoId(collectInfo.getId())
-			.payeeWalletId(receiver.getWalletId())
+			.agentWalletId(agentEntWalletId)
 			.amount(receiver.getAmount())
 			.createTime(new Date())
 			.build();

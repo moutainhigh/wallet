@@ -403,7 +403,7 @@ public class YunstBizHandler extends EBankHandler {
 			.amount(clearing.getAmount())
 			.build();
 		WalletTunnel tunnel = walletTunnelExtDao
-			.selectByWalletId(clearing.getPayeeWalletId(), order.getTunnelType());
+			.selectByWalletId(order.getWalletId(), order.getTunnelType());
 		AgentPayReq req = AgentPayReq.builder()
 			.bizOrderNo(order.getOrderNo())
 			.collectPayList(Lists.newArrayList(collectPay))
