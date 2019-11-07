@@ -40,7 +40,7 @@ public class CollectReq  {
     @ApiModelProperty("收款列表")
     private List<Reciever> recievers ;
 
-    @ApiModelProperty("交易验证方式 1：短信 2：密码")
+    @ApiModelProperty("交易验证方式 0：无验证 1：短信 2：密码")
     private Integer validateType ;
 
     @ApiModelProperty("钱包支付方式")
