@@ -33,7 +33,7 @@ public class SeniorWalletUpgradeRequest extends  AbstractApiRequest {
 
   @Override
   public Class<?> getResponseModelClass() {
-    return WalletChannel.class;
+    return WalletTunnel.class;
   }
 
   @Override

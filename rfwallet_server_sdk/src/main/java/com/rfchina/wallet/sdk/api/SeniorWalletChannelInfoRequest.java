@@ -17,7 +17,7 @@ public class SeniorWalletChannelInfoRequest extends  AbstractApiRequest {
   private String accessToken ;
 
   @ApiModelProperty("渠道类型 1:浦发银企直连,2:通联云商通")
-  private Integer channelType ;
+  private Integer tunnelType ;
 
   @ApiModelProperty("钱包id")
   private Long walletId ;
@@ -30,7 +30,7 @@ public class SeniorWalletChannelInfoRequest extends  AbstractApiRequest {
 
   @Override
   public Class<?> getResponseModelClass() {
-    return WalletChannel.class;
+    return WalletTunnel.class;
   }
 
   @Override
@@ -39,8 +39,8 @@ public class SeniorWalletChannelInfoRequest extends  AbstractApiRequest {
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
       }
-      if(channelType != null){
-        parameters.put("channel_type", channelType.toString());
+      if(tunnelType != null){
+        parameters.put("tunnel_type", tunnelType.toString());
       }
       if(walletId != null){
         parameters.put("wallet_id", walletId.toString());
