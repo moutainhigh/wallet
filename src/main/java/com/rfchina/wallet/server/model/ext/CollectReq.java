@@ -32,7 +32,7 @@ public class CollectReq {
 	@ApiModelProperty(required = true, value = "手续费，单位:分。如果不存在,则填 0。")
 	private Long fee;
 
-	@ApiModelProperty(required = true, name = "validate_type", value = "交易验证方式 1：短信 2：密码")
+	@ApiModelProperty(required = true, name = "validate_type", value = "交易验证方式 0：无验证 1：短信 2：密码")
 	private Byte validateType;
 
 	@ApiModelProperty(name = "expire_time", value = "订单过期时间,订单最长时效为 24 小时")

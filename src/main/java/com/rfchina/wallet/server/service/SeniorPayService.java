@@ -7,7 +7,7 @@ import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
 import com.rfchina.wallet.domain.misc.EnumDef.BizValidateType;
-import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelSignContract;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletChannelSignContract;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.Wallet;
@@ -51,6 +51,7 @@ import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
 import com.rfchina.wallet.server.model.ext.SettleResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.model.ext.WithdrawResp;
+import com.rfchina.wallet.server.msic.EnumWallet;
 import com.rfchina.wallet.server.msic.EnumWallet.ChannelType;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
 import com.rfchina.wallet.server.msic.EnumWallet.DirtyType;
@@ -201,13 +202,7 @@ public class SeniorPayService {
 
 		// 充值
 		EBankHandler handler = handlerHelper.selectByTunnelType(rechargeOrder.getTunnelType());
-		RechargeResp result = handler.recharge(rechargeOrder, recharge, payer);
-
-		String signedParams = ((YunstBizHandler) handler)
-			.passwordConfirm(rechargeOrder, payer, jumpUrl, customerIp);
-		result.setSignedParams(signedParams);
-
-		return result;
+		return handler.recharge(rechargeOrder, recharge, payer);
 	}
 
 	/**
@@ -248,7 +243,7 @@ public class SeniorPayService {
 			.orderId(withdrawOrder.getId())
 			.cardId(walletCard.getId())
 			.bankAccount(walletCard.getBankAccount())
-			.validateType(BizValidateType.SMS.getValue())
+			.validateType(BizValidateType.PASSWORD.getValue())
 			.payMethod(ChannelType.BANKCARD.getValue())
 			.createTime(new Date())
 			.build();
@@ -300,9 +295,7 @@ public class SeniorPayService {
 
 		// 生成代收单
 		Byte validateType =
-			req.getWalletPayMethod().getBalance() != null ? BizValidateType.PASSWORD.getValue()
-				: (req.getWalletPayMethod().getBankCard() != null ? BizValidateType.SMS.getValue()
-					: 0);
+			req.getValidateType() != null ? req.getValidateType() : BizValidateType.SMS.getValue();
 		WalletCollect collect = WalletCollect.builder()
 			.orderId(collectOrder.getId())
 			.agentWalletId(agentEntWalletId)
@@ -334,6 +327,7 @@ public class SeniorPayService {
 
 		EBankHandler handler = handlerHelper.selectByTunnelType(collectOrder.getTunnelType());
 		WalletCollectResp result = handler.collect(collectOrder, collect, collectInfos, payer);
+		// 签名密码验证参数
 		if (collect.getValidateType().byteValue() == BizValidateType.PASSWORD.getValue()) {
 			String signedParams = ((YunstBizHandler) handler)
 				.passwordConfirm(collectOrder, payer, jumpUrl, customerIp);
@@ -551,11 +545,6 @@ public class SeniorPayService {
 		EBankHandler handler = handlerHelper.selectByTunnelType(consumeOrder.getTunnelType());
 		WalletCollectResp result = handler.consume(consumeOrder, consume, payer, payee,
 			Arrays.asList(method));
-		if (consume.getValidateType().byteValue() == BizValidateType.PASSWORD.getValue()) {
-			String signedParams = ((YunstBizHandler) handler)
-				.passwordConfirm(consumeOrder, payer, jumpUrl, customerIp);
-			result.setSignedParams(signedParams);
-		}
 
 		return result;
 	}
@@ -678,7 +667,7 @@ public class SeniorPayService {
 				.selectByWalletId(order.getWalletId(), order.getTunnelType());
 			// 判断签约
 			if (walletTunnel.getIsSignContact() == null
-				|| walletTunnel.getIsSignContact() == WalletTunnelSignContract.NONE.getValue()
+				|| walletTunnel.getIsSignContact() == WalletChannelSignContract.NONE.getValue()
 				.byteValue()) {
 				return null;
 			}
