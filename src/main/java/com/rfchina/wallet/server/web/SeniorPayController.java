@@ -48,13 +48,11 @@ public class SeniorPayController {
 		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
 		@ApiParam(value = "银行卡id", required = true) @RequestParam("card_id") Long cardId,
-		@ApiParam(value = "金额", required = true) @RequestParam("amount") Long amount,
-		@ApiParam(value = "跳转地址", required = false) @RequestParam(value = "jump_url", required = false) String jumpUrl,
-		@ApiParam(value = "客户Ip", required = false) @RequestParam(value = "customer_ip", required = false) String customerIp
+		@ApiParam(value = "金额", required = true) @RequestParam("amount") Long amount
 	) {
 
 		RechargeResp result = seniorPayApi
-			.recharge(accessToken, walletId, cardId, amount, jumpUrl, customerIp);
+			.recharge(accessToken, walletId, cardId, amount);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result);
 	}
 
@@ -118,13 +116,11 @@ public class SeniorPayController {
 	@PostMapping(UrlConstant.SENIOR_WALLET_DEDUCTION)
 	public ResponseValue<WalletCollectResp> deduction(
 		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
-		@ApiParam(value = "消费内容，参考DeductionReq结构体", required = true) @RequestParam("deduction_req") String deductionReq,
-		@ApiParam(value = "跳转地址", required = false) @RequestParam(value = "jump_url", required = false) String jumpUrl,
-		@ApiParam(value = "客户Ip", required = false) @RequestParam(value = "customer_ip", required = false) String customerIp
+		@ApiParam(value = "消费内容，参考DeductionReq结构体", required = true) @RequestParam("deduction_req") String deductionReq
 	) {
 
 		DeductionReq req = JsonUtil.toObject(deductionReq, DeductionReq.class, DEF_REQ_OBJ_MAP);
-		WalletCollectResp result = seniorPayApi.deduction(accessToken, req, jumpUrl, customerIp);
+		WalletCollectResp result = seniorPayApi.deduction(accessToken, req);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result);
 	}
 

@@ -13,8 +13,7 @@ import java.util.List;
 
 public interface SeniorPayApi {
 
-	RechargeResp recharge(String accessToken, Long walletId, Long cardId, Long amount,
-		String jumpUrl, String customerIp);
+	RechargeResp recharge(String accessToken, Long walletId, Long cardId, Long amount);
 
 	WithdrawResp withdraw(String accessToken, Long walletId, Long cardId, Long amount,
 		String jumpUrl, String customerIp);
@@ -27,8 +26,7 @@ public interface SeniorPayApi {
 	WalletOrder refund(String accessToken, String bizNo, String collectOrderNo,
 		List<RefundInfo> rList);
 
-	WalletCollectResp deduction(String accessToken, DeductionReq req, String jumpUrl,
-		String customerIp);
+	WalletCollectResp deduction(String accessToken, DeductionReq req);
 
 	WalletOrder orderQuery(String accessToken, String orderNo);
 
