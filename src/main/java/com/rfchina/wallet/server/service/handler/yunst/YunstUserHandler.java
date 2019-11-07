@@ -76,7 +76,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 	public String generateSignContractUrl(String bizUserId, String jumpUrl) {
 		YunstSignContractReq req = YunstSignContractReq.builder$()
 			.bizUserId(bizUserId)
-			.jumpUrl(configService.getYunstResultJumpUrl() + jumpUrl)
+			.jumpUrl(configService.getYunstJumpUrlPrefix() + jumpUrl)
 			.backUrl(configService.getYunstNotifybackUrl())
 			.source(TERMINAL_TYPE)
 			.build();
@@ -97,7 +97,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 			.phone(phone)
 			.identityType(identityType)
 			.identityNo(RSAUtil.encrypt(identityNo))
-			.jumpUrl(configService.getYunstResultJumpUrl() + jumpUrl)
+			.jumpUrl(configService.getYunstJumpUrlPrefix() + jumpUrl)
 			.backUrl(configService.getYunstNotifybackUrl())
 			.build();
 		String res = yunstTpl.signRequest(req);
@@ -139,7 +139,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 			.payerId(bizUserId)
 			.receiverId(configService.getYunstReceiverId())
 			.protocolName(configService.getYunstBalanceProtocolName())
-			.jumpUrl(configService.getYunstResultJumpUrl() + jumpUrl)
+			.jumpUrl(configService.getYunstJumpUrlPrefix() + jumpUrl)
 			.backUrl(configService.getYunstNotifybackUrl())
 			.source(TERMINAL_TYPE)
 			.build();

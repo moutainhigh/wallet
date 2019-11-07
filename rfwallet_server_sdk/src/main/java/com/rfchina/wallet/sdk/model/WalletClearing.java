@@ -2,10 +2,6 @@ package com.rfchina.wallet.sdk.model;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import java.util.List;
-import java.util.Map;
-import java.util.Date;
-import java.util.ArrayList;
 
     
 /**
@@ -13,6 +9,9 @@ import java.util.ArrayList;
 */
 @Data
 public class WalletClearing  {
+    @ApiModelProperty("中间账户钱包id")
+    private Long agentWalletId ;
+
     @ApiModelProperty("金额")
     private Long amount ;
 
@@ -30,9 +29,6 @@ public class WalletClearing  {
 
     @ApiModelProperty("订单id")
     private Long orderId ;
-
-    @ApiModelProperty("收款人钱包id")
-    private Long payeeWalletId ;
 
 
 }

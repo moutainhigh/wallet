@@ -2,8 +2,8 @@ package com.rfchina.wallet.server.service.handler.yunst;
 
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.domain.misc.EnumDef;
-import com.rfchina.wallet.domain.misc.EnumDef.WalletChannelSetPayPwd;
-import com.rfchina.wallet.domain.misc.EnumDef.WalletChannelSignContract;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelSetPayPwd;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelSignContract;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyChannel;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyRefType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyType;
@@ -49,7 +49,7 @@ public class YunstNotifyHandler {
 
 		if (result == 2L) {
 			walletChannel.setStatus(
-				EnumDef.WalletChannelAuditStatus.AUDIT_SUCCESS.getValue().byteValue());
+				EnumDef.WalletTunnelAuditStatus.AUDIT_SUCCESS.getValue().byteValue());
 			walletChannel.setFailReason(null);
 			walletVerifyHisExtDao.insertSelective(
 				WalletVerifyHis.builder().walletId(walletChannel.getWalletId())
@@ -61,7 +61,7 @@ public class YunstNotifyHandler {
 					.createTime(new Date()).build());
 		} else if (result == 3L) {
 			walletChannel
-				.setStatus(EnumDef.WalletChannelAuditStatus.AUDIT_FAIL.getValue().byteValue());
+				.setStatus(EnumDef.WalletTunnelAuditStatus.AUDIT_FAIL.getValue().byteValue());
 			walletChannel.setFailReason(failReason);
 		}
 		walletChannel.setRemark(remark);
@@ -85,7 +85,7 @@ public class YunstNotifyHandler {
 		WalletTunnel walletChannel = walletTunnelExtDao.selectByTunnelTypeAndBizUserId(
 			EnumDef.ChannelType.YUNST.getValue().intValue(), bizUserId);
 
-		walletChannel.setIsSignContact(WalletChannelSignContract.MEMBER.getValue().byteValue());
+		walletChannel.setIsSignContact(WalletTunnelSignContract.MEMBER.getValue().byteValue());
 
 		int effectRows = walletTunnelExtDao.updateByPrimaryKeySelective(walletChannel);
 		if (effectRows != 1) {
@@ -108,7 +108,7 @@ public class YunstNotifyHandler {
 
 		if (YUNST_SIGN_SUCCESS.equalsIgnoreCase(signStatus)) {
 			walletChannel
-				.setIsSignContact(WalletChannelSignContract.BALANCE.getValue().byteValue());
+				.setIsSignContact(WalletTunnelSignContract.BALANCE.getValue().byteValue());
 			int effectRows = walletTunnelExtDao.updateByPrimaryKeySelective(walletChannel);
 			if (effectRows != 1) {
 				log.error("更新扣款协议状态失败:bizUserId:{}", bizUserId);
@@ -142,7 +142,7 @@ public class YunstNotifyHandler {
 		WalletTunnel walletChannel = walletTunnelExtDao.selectByTunnelTypeAndBizUserId(
 			EnumDef.ChannelType.YUNST.getValue().intValue(), bizUserId);
 
-		walletChannel.setHasPayPassword(WalletChannelSetPayPwd.YES.getValue().byteValue());
+		walletChannel.setHasPayPassword(WalletTunnelSetPayPwd.YES.getValue().byteValue());
 
 		int effectRows = walletTunnelExtDao.updateByPrimaryKeySelective(walletChannel);
 		if (effectRows != 1) {

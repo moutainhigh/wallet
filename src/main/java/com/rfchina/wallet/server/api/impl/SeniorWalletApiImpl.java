@@ -91,7 +91,7 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 
 		if (smsCodeType == EnumDef.EnumVerifyCodeType.YUNST_BIND_PHONE.getValue().intValue()) {
 			if (EnumDef.WalletSource.FHT_CORP.getValue().intValue() == source
-				&& EnumDef.WalletChannelAuditStatus.AUDIT_SUCCESS.getValue().byteValue()
+				&& EnumDef.WalletTunnelAuditStatus.AUDIT_SUCCESS.getValue().byteValue()
 				!= walletChannel.getStatus()) {
 				log.error("企业用户资料通道未审核通过，walletId:{}", walletId);
 				throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,

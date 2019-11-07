@@ -7,7 +7,7 @@ import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
 import com.rfchina.wallet.domain.misc.EnumDef.BizValidateType;
-import com.rfchina.wallet.domain.misc.EnumDef.WalletChannelSignContract;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelSignContract;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.Wallet;
@@ -678,7 +678,7 @@ public class SeniorPayService {
 				.selectByWalletId(order.getWalletId(), order.getTunnelType());
 			// 判断签约
 			if (walletTunnel.getIsSignContact() == null
-				|| walletTunnel.getIsSignContact() == WalletChannelSignContract.NONE.getValue()
+				|| walletTunnel.getIsSignContact() == WalletTunnelSignContract.NONE.getValue()
 				.byteValue()) {
 				return null;
 			}
