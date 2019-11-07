@@ -51,6 +51,7 @@ import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
 import com.rfchina.wallet.server.model.ext.SettleResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.model.ext.WithdrawResp;
+import com.rfchina.wallet.server.msic.EnumWallet;
 import com.rfchina.wallet.server.msic.EnumWallet.ChannelType;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
 import com.rfchina.wallet.server.msic.EnumWallet.DirtyType;
@@ -147,8 +148,7 @@ public class SeniorPayService {
 	/**
 	 * 充值
 	 */
-	public RechargeResp recharge(Long walletId, WalletCard walletCard, Long amount, String jumpUrl,
-		String customerIp) {
+	public RechargeResp recharge(Long walletId, WalletCard walletCard, Long amount) {
 
 		// 检查钱包
 		Wallet payerWallet = verifyService.checkSeniorWallet(walletId);
@@ -257,6 +257,7 @@ public class SeniorPayService {
 
 		String signedParams = ((YunstBizHandler) handler)
 			.passwordConfirm(withdrawOrder, payer, jumpUrl, customerIp);
+		signedParams = configService.getYunstPwdConfirmUrl() + "?" + signedParams;
 		result.setSignedParams(signedParams);
 		return result;
 	}
@@ -330,6 +331,7 @@ public class SeniorPayService {
 		if (collect.getValidateType().byteValue() == BizValidateType.PASSWORD.getValue()) {
 			String signedParams = ((YunstBizHandler) handler)
 				.passwordConfirm(collectOrder, payer, jumpUrl, customerIp);
+			signedParams = configService.getYunstPwdConfirmUrl() + "?" + signedParams;
 			result.setSignedParams(signedParams);
 		}
 
@@ -496,7 +498,7 @@ public class SeniorPayService {
 	/**
 	 * 预代收
 	 */
-	public WalletCollectResp deduction(DeductionReq req, String jumpUrl, String customerIp) {
+	public WalletCollectResp deduction(DeductionReq req) {
 
 		// 定义付款人
 		Long payerWalletId = (req.getPayerWalletId() != null) ? req.getPayerWalletId()

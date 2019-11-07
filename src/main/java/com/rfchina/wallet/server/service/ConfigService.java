@@ -154,6 +154,10 @@ public class ConfigService {
 	@Value("${wallet.storage.dir}")
 	private String storageDir;
 
+
+	@Value("${yunst.pwdConfirm.url}")
+	private String yunstPwdConfirmUrl;
+
 // yunst end
 
 }
