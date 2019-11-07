@@ -9,8 +9,8 @@ import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.ChannelType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumVerifyCodeType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletAuditType;
-import com.rfchina.wallet.domain.misc.EnumDef.WalletChannelAuditStatus;
-import com.rfchina.wallet.domain.misc.EnumDef.WalletChannelSignContract;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelAuditStatus;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelSignContract;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyChannel;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyRefType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyType;
@@ -91,7 +91,7 @@ public class SeniorWalletService {
 		}
 		WalletTunnelBuilder builder = WalletTunnel.builder()
 			.tunnelType(channelType.byteValue())
-			.status(WalletChannelAuditStatus.NOT_COMMIT.getValue().byteValue())
+			.status(WalletTunnelAuditStatus.NOT_COMMIT.getValue().byteValue())
 			.walletId(walletId)
 			.createTime(new Date());
 		if (channelType == EnumDef.ChannelType.YUNST.getValue().intValue()) {
@@ -213,7 +213,7 @@ public class SeniorWalletService {
 					EnumWalletResponseCode.WALLET_ACCOUNT_NOT_EXIST);
 			}
 
-			if (EnumDef.WalletChannelAuditStatus.AUDIT_SUCCESS.getValue().byteValue()
+			if (EnumDef.WalletTunnelAuditStatus.AUDIT_SUCCESS.getValue().byteValue()
 				== walletChannel.getStatus()) {
 				return;
 			}
@@ -225,7 +225,7 @@ public class SeniorWalletService {
 			yunstUserHandler.personCertification(walletChannel.getBizUserId(), realName,
 				EnumDef.EnumIdType.ID_CARD.getValue().longValue(), idNo);
 			walletChannel.setStatus(
-				EnumDef.WalletChannelAuditStatus.AUDIT_SUCCESS.getValue().byteValue());
+				EnumDef.WalletTunnelAuditStatus.AUDIT_SUCCESS.getValue().byteValue());
 			walletChannel.setCheckTime(new Date());
 			int effectRows = walletTunnelDao.updateByPrimaryKeySelective(walletChannel);
 			if (effectRows != 1) {
@@ -286,12 +286,12 @@ public class SeniorWalletService {
 		WalletTunnel walletChannel = walletTunnelDao
 			.selectByTunnelTypeAndWalletId(channelType.byteValue(), walletId);
 		walletChannel.setStatus(
-			EnumDef.WalletChannelAuditStatus.WAITING_AUDIT.getValue().byteValue());
+			EnumDef.WalletTunnelAuditStatus.WAITING_AUDIT.getValue().byteValue());
 		if (channelType == EnumDef.ChannelType.YUNST.getValue().intValue()) {
 			String transformBizUserId = walletChannel.getBizUserId();
 			try {
 				boolean isAuth =
-					auditType == EnumDef.WalletChannelAuditType.AUTO.getValue().intValue();
+					auditType == EnumDef.WalletTunnelAuditType.AUTO.getValue().intValue();
 				YunstSetCompanyInfoResult yunstSetCompanyInfoResult = yunstUserHandler
 					.setCompanyInfo(walletChannel.getBizUserId(),
 						isAuth, companyBasicInfo);
@@ -307,7 +307,7 @@ public class SeniorWalletService {
 					if (Objects.nonNull(result)) {
 						if (2L == result.longValue()) {
 							walletChannel.setStatus(
-								EnumDef.WalletChannelAuditStatus.AUDIT_SUCCESS.getValue()
+								EnumDef.WalletTunnelAuditStatus.AUDIT_SUCCESS.getValue()
 									.byteValue());
 							walletChannel.setFailReason(null);
 							walletChannel.setCheckTime(curDate);
@@ -323,14 +323,14 @@ public class SeniorWalletService {
 									.verifyTime(curDate).createTime(curDate).build());
 						} else if (3L == result.longValue()) {
 							walletChannel.setStatus(
-								EnumDef.WalletChannelAuditStatus.AUDIT_FAIL.getValue()
+								EnumDef.WalletTunnelAuditStatus.AUDIT_FAIL.getValue()
 									.byteValue());
 							walletChannel.setFailReason(failReason);
 						}
 						walletChannel.setCheckTime(curDate);
 					} else {
 						walletChannel.setStatus(
-							EnumDef.WalletChannelAuditStatus.WAITING_AUDIT.getValue()
+							EnumDef.WalletTunnelAuditStatus.WAITING_AUDIT.getValue()
 								.byteValue());
 					}
 					walletChannel.setRemark(remark);
@@ -491,7 +491,7 @@ public class SeniorWalletService {
 		}
 		// 判断签约
 		if (walletTunnel.getIsSignContact() == null
-			|| walletTunnel.getIsSignContact() == WalletChannelSignContract.NONE.getValue()
+			|| walletTunnel.getIsSignContact() == WalletTunnelSignContract.NONE.getValue()
 			.byteValue()) {
 			return;
 		}

@@ -112,9 +112,6 @@ public class ConfigService {
 	@Value("${yunst.tlCertPath}")
 	private String ystTlCertPath;
 
-	@Value("${yunst.jumpUrl}")
-	private String yunstResultJumpUrl;
-
 	@Value("${yunst.jumpUrl.prefix}")
 	private String yunstJumpUrlPrefix;
 

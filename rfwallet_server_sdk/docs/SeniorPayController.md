@@ -21,13 +21,13 @@
   "msg": ""//消息
    , "data":  {
     clearing:{
+    agent_wallet_id:""  , //中间账户钱包id
     amount:""  , //金额
     collect_info_id:""  , //分帐id
     collect_order_no:""  , //代收单号
     create_time:""  , //创建日期
     id:""  , //id
-    order_id:""  , //订单id
-    payee_wallet_id:""   //收款人钱包id
+    order_id:""   //订单id
 }  , 
     order:{
     amount:""  , //金额
