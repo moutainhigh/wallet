@@ -118,12 +118,12 @@ public class SeniorPayController {
 	@PostMapping(UrlConstant.SENIOR_WALLET_DEDUCTION)
 	public ResponseValue<WalletCollectResp> deduction(
 		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
-		@ApiParam(value = "消费内容，参考ConsumeReq结构体", required = true) @RequestParam("consume_req") String consumeReq,
+		@ApiParam(value = "消费内容，参考DeductionReq结构体", required = true) @RequestParam("deduction_req") String deductionReq,
 		@ApiParam(value = "跳转地址", required = false) @RequestParam(value = "jump_url", required = false) String jumpUrl,
 		@ApiParam(value = "客户Ip", required = false) @RequestParam(value = "customer_ip", required = false) String customerIp
 	) {
 
-		DeductionReq req = JsonUtil.toObject(consumeReq, DeductionReq.class, DEF_REQ_OBJ_MAP);
+		DeductionReq req = JsonUtil.toObject(deductionReq, DeductionReq.class, DEF_REQ_OBJ_MAP);
 		WalletCollectResp result = seniorPayApi.deduction(accessToken, req, jumpUrl, customerIp);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result);
 	}
