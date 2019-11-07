@@ -191,9 +191,10 @@ public class SeniorWalletService {
 	 */
 	public String resetSecurityTel(WalletPerson person, WalletTunnel channel, String jumpUrl) {
 
+		jumpUrl = configService.getYunstJumpUrlPrefix() + jumpUrl;
 		String signedParams = yunstUserHandler.resetSecurityTel(channel.getBizUserId(),
 			person.getName(), channel.getSecurityTel(), person.getIdNo(), jumpUrl);
-		return configService.getYunstSignContractUrl() + "?" + signedParams;
+		return configService.getYunstPersonChangeBindPhoneUrl() + "?" + signedParams;
 	}
 
 
@@ -426,8 +427,10 @@ public class SeniorWalletService {
 	public String resetTunnelPayPwd(Long walletId, String jumpUrl) {
 		WalletPerson person = walletPersonDao.selectByWalletId(walletId);
 		WalletTunnel channel = verifyService.checkChannel(walletId, ChannelType.YUNST);
+
+		jumpUrl = configService.getYunstJumpUrlPrefix() + jumpUrl;
 		String signedParam = yunstUserHandler.resetPayPwd(person, channel, jumpUrl);
-		return configService.getYunstSignContractUrl() + "?" + signedParam;
+		return configService.getYunstUpdatePayPasswordUrl() + "?" + signedParam;
 	}
 
 	/**

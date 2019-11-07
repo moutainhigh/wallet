@@ -123,7 +123,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 			.phone(channel.getSecurityTel())
 			.identityType(YunstIdType.ID_CARD.getValue())
 			.identityNo(encryptIdNo)
-			.jumpUrl(configService.getYunstJumpUrlPrefix() + jumpUrl)
+			.jumpUrl(jumpUrl)
 			.backUrl(configService.getYunstNotifybackUrl())
 			.build();
 		return yunstTpl.signRequest(req);
@@ -199,7 +199,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 			.identityType(YunstIdType.ID_CARD.getValue())
 			.identityNo(encryptIdNo)
 			.oldPhone(oldPhone)
-			.jumpUrl(configService.getYunstJumpUrlPrefix() + jumpUrl)
+			.jumpUrl(jumpUrl)
 			.backUrl(configService.getYunstNotifybackUrl())
 			.build();
 
