@@ -4,18 +4,20 @@ import com.allinpay.yunst.sdk.util.RSAUtil;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.JsonUtil;
-import com.rfchina.wallet.domain.model.WalletChannel;
+import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.WalletPerson;
+import com.rfchina.wallet.domain.model.WalletTunnel;
+import com.rfchina.wallet.server.bank.yunst.exception.UnknownException;
 import com.rfchina.wallet.server.bank.yunst.request.ResetPayPwdReq;
+import com.rfchina.wallet.server.bank.yunst.request.UpdatePhoneByPayPwdReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstApplyBindBankCardReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstBalanceProtocolReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstBindBankCardReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstBindPhoneReq;
-import com.rfchina.wallet.server.bank.yunst.request.UpdatePhoneByPayPwdReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstCreateMemberReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstGetMemberInfoReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstPersonSetRealNameReq;
-import com.rfchina.wallet.server.bank.yunst.request.YunstQueryBalanceReq;
+import com.rfchina.wallet.server.bank.yunst.request.QueryBalanceReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSMSVerificationCodeReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetPayPwdReq;
@@ -107,7 +109,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 设置支付密码(个人)
 	 */
-	public String resetPayPwd(WalletPerson person, WalletChannel channel, String jumpUrl) {
+	public String resetPayPwd(WalletPerson person, WalletTunnel channel, String jumpUrl) {
 
 		String encryptIdNo = null;
 		try {
@@ -183,7 +185,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 	 * 修改绑定手机
 	 */
 	public String resetSecurityTel(String bizUserId, String realName, String oldPhone,
-		String identityNo, String jumpUrl)  {
+		String identityNo, String jumpUrl) {
 
 		String encryptIdNo = null;
 		try {
@@ -327,11 +329,18 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 查询余额
 	 */
-	public YunstQueryBalanceResult queryBalance(String bizUserId) throws Exception {
-		YunstQueryBalanceReq req = YunstQueryBalanceReq.builder$().bizUserId(bizUserId)
-			.accountSetNo(configService.getUserAccSet()).build();
+	public YunstQueryBalanceResult queryBalance(String bizUserId) {
+		QueryBalanceReq req = QueryBalanceReq.builder()
+			.bizUserId(bizUserId)
+			.accountSetNo(configService.getUserAccSet())
+			.build();
 
-		return yunstTpl.execute(req, YunstQueryBalanceResult.class);
+		try {
+			return yunstTpl.execute(req, YunstQueryBalanceResult.class);
+		} catch (Exception e) {
+			log.error("查询余额错误 " + bizUserId, e);
+			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
+		}
 	}
 
 }

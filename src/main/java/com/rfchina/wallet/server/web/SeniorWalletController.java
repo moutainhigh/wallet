@@ -5,7 +5,7 @@ import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.ResponseValue;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.model.Wallet;
-import com.rfchina.wallet.domain.model.WalletChannel;
+import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.api.SeniorWalletApi;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult;
@@ -29,7 +29,7 @@ public class SeniorWalletController {
 
 	@ApiOperation("升级高级钱包")
 	@PostMapping(UrlConstant.WALLET_UPGRADE)
-	public ResponseValue<WalletChannel> seniorWalletUpgrade(
+	public ResponseValue<WalletTunnel> seniorWalletUpgrade(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = true, example = "1") @RequestParam("channel_type")
 			Integer channelType,
@@ -44,20 +44,20 @@ public class SeniorWalletController {
 
 	@ApiOperation("高级钱包渠道信息")
 	@PostMapping(UrlConstant.WALLET_CHANNEL_INFO)
-	public ResponseValue<WalletChannel> seniorWalletChannelInfo(
+	public ResponseValue<WalletTunnel> seniorWalletChannelInfo(
 		@RequestParam("access_token") String accessToken,
-		@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = true, example = "1") @RequestParam("channel_type")
-			Integer channelType,
-		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId)
-		throws Exception {
+		@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = true) @RequestParam("tunnel_type") Byte tunnelType,
+		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId) {
 
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
-			seniorWalletApi.seniorWalletChannelInfo(accessToken, channelType, walletId));
+		WalletTunnel channel = seniorWalletApi
+			.seniorWalletChannelInfo(accessToken, tunnelType, walletId);
+
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, channel);
 	}
 
 	@ApiOperation("高级钱包认证验证码")
 	@PostMapping(UrlConstant.WALLET_SENIOR_SMS_VERIFY_CODE)
-	public ResponseValue<WalletChannel> seniorWalletSmsCodeVerification(
+	public ResponseValue<WalletTunnel> seniorWalletSmsCodeVerification(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = true, example = "1") @RequestParam("channel_type")
 			Integer channelType,
@@ -123,7 +123,7 @@ public class SeniorWalletController {
 
 	@ApiOperation("高级钱包-商家资料审核（通道）")
 	@PostMapping(UrlConstant.WALLET_SENIOR_COMPANY_INFO_AUDIT)
-	public ResponseValue<WalletChannel> seniorWalletCompanyInfoAudit(
+	public ResponseValue<WalletTunnel> seniorWalletCompanyInfoAudit(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = true, example = "1") @RequestParam("channel_type")
 			Integer channelType,
@@ -131,7 +131,7 @@ public class SeniorWalletController {
 		@ApiParam(value = "审核方式", required = true) @RequestParam("audit_type") Integer auditType,
 		@ApiParam(value = "企业信息(json)", required = true) @RequestParam("company_basic_info")
 			String companyBasicInfo) {
-		WalletChannel walletChannel = seniorWalletApi
+		WalletTunnel walletChannel = seniorWalletApi
 			.seniorWalletCompanyAudit(accessToken, channelType, auditType, walletId,
 				JsonUtil.toObject(companyBasicInfo, YunstSetCompanyInfoReq.CompanyBasicInfo.class,
 					objectMapper -> {

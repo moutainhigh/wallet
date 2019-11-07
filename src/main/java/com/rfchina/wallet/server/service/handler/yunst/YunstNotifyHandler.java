@@ -8,10 +8,10 @@ import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyChannel;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyRefType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyType;
 import com.rfchina.wallet.domain.model.ChannelNotify;
-import com.rfchina.wallet.domain.model.WalletChannel;
+import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.domain.model.WalletVerifyHis;
 import com.rfchina.wallet.server.bank.yunst.response.YunstNotify;
-import com.rfchina.wallet.server.mapper.ext.WalletChannelExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletVerifyHisExtDao;
 import com.rfchina.wallet.server.model.ext.SLWalletMqMessage;
 import java.util.Date;
@@ -26,7 +26,7 @@ public class YunstNotifyHandler {
 
 	public static final String YUNST_SIGN_SUCCESS = "success";
 	@Autowired
-	private WalletChannelExtDao walletChannelExtDao;
+	private WalletTunnelExtDao walletTunnelExtDao;
 	@Autowired
 	private WalletVerifyHisExtDao walletVerifyHisExtDao;
 	@Autowired
@@ -44,7 +44,7 @@ public class YunstNotifyHandler {
 
 		channelNotify.setBizUserId(bizUserId);
 
-		WalletChannel walletChannel = walletChannelExtDao.selectByChannelTypeAndBizUserId(
+		WalletTunnel walletChannel = walletTunnelExtDao.selectByTunnelTypeAndBizUserId(
 			EnumDef.ChannelType.YUNST.getValue().intValue(), bizUserId);
 
 		if (result == 2L) {
@@ -68,7 +68,7 @@ public class YunstNotifyHandler {
 		walletChannel
 			.setCheckTime(DateUtil.parse(checkTime, DateUtil.STANDARD_DTAETIME_PATTERN));
 
-		int effectRows = walletChannelExtDao.updateByPrimaryKeySelective(walletChannel);
+		int effectRows = walletTunnelExtDao.updateByPrimaryKeySelective(walletChannel);
 		if (effectRows != 1) {
 			log.error("处理企业信息审核结果通知-更新审核状态状态失败:bizUserId:{}", bizUserId);
 		}
@@ -82,12 +82,12 @@ public class YunstNotifyHandler {
 		log.info("处理会员电子签约通知 rtnVal:{}", rtnVal);
 		String bizUserId = rtnVal.getBizUserId();
 		channelNotify.setBizUserId(bizUserId);
-		WalletChannel walletChannel = walletChannelExtDao.selectByChannelTypeAndBizUserId(
+		WalletTunnel walletChannel = walletTunnelExtDao.selectByTunnelTypeAndBizUserId(
 			EnumDef.ChannelType.YUNST.getValue().intValue(), bizUserId);
 
 		walletChannel.setIsSignContact(WalletChannelSignContract.MEMBER.getValue().byteValue());
 
-		int effectRows = walletChannelExtDao.updateByPrimaryKeySelective(walletChannel);
+		int effectRows = walletTunnelExtDao.updateByPrimaryKeySelective(walletChannel);
 		if (effectRows != 1) {
 			log.error("更新电子签约状态失败:bizUserId:{}", bizUserId);
 		}
@@ -99,7 +99,7 @@ public class YunstNotifyHandler {
 		String reqSn = rtnVal.getProtocolReqSn();
 		String signStatus = rtnVal.getSignStatus();
 
-		WalletChannel walletChannel = walletChannelExtDao.selectByBanlceProtocolReqSn(reqSn);
+		WalletTunnel walletChannel = walletTunnelExtDao.selectByBanlceProtocolReqSn(reqSn);
 		if (Objects.isNull(walletChannel)) {
 			return;
 		}
@@ -109,7 +109,7 @@ public class YunstNotifyHandler {
 		if (YUNST_SIGN_SUCCESS.equalsIgnoreCase(signStatus)) {
 			walletChannel
 				.setIsSignContact(WalletChannelSignContract.BALANCE.getValue().byteValue());
-			int effectRows = walletChannelExtDao.updateByPrimaryKeySelective(walletChannel);
+			int effectRows = walletTunnelExtDao.updateByPrimaryKeySelective(walletChannel);
 			if (effectRows != 1) {
 				log.error("更新扣款协议状态失败:bizUserId:{}", bizUserId);
 			}
@@ -123,12 +123,12 @@ public class YunstNotifyHandler {
 		String bizUserId = rtnVal.getBizUserId();
 		String newPhone = rtnVal.getNewPhone();
 		channelNotify.setBizUserId(bizUserId);
-		WalletChannel walletChannel = walletChannelExtDao.selectByChannelTypeAndBizUserId(
+		WalletTunnel walletChannel = walletTunnelExtDao.selectByTunnelTypeAndBizUserId(
 			EnumDef.ChannelType.YUNST.getValue().intValue(), bizUserId);
 
 		walletChannel.setSecurityTel(newPhone);
 
-		int effectRows = walletChannelExtDao.updateByPrimaryKeySelective(walletChannel);
+		int effectRows = walletTunnelExtDao.updateByPrimaryKeySelective(walletChannel);
 		if (effectRows != 1) {
 			log.error("处理个人会员修改绑定手机失败:bizUserId:{},newPhone:{}", bizUserId, newPhone);
 		}
@@ -139,12 +139,12 @@ public class YunstNotifyHandler {
 		log.info("处理个人设置支付密码通知 rtnVal:{}", rtnVal);
 		String bizUserId = rtnVal.getBizUserId();
 		channelNotify.setBizUserId(bizUserId);
-		WalletChannel walletChannel = walletChannelExtDao.selectByChannelTypeAndBizUserId(
+		WalletTunnel walletChannel = walletTunnelExtDao.selectByTunnelTypeAndBizUserId(
 			EnumDef.ChannelType.YUNST.getValue().intValue(), bizUserId);
 
 		walletChannel.setHasPayPassword(WalletChannelSetPayPwd.YES.getValue().byteValue());
 
-		int effectRows = walletChannelExtDao.updateByPrimaryKeySelective(walletChannel);
+		int effectRows = walletTunnelExtDao.updateByPrimaryKeySelective(walletChannel);
 		if (effectRows != 1) {
 			log.error("处理个人设置支付密码失败:bizUserId:{}", bizUserId);
 		}

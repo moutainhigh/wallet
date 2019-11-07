@@ -8,10 +8,10 @@ import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletCardStatus;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletCard;
-import com.rfchina.wallet.domain.model.WalletChannel;
 import com.rfchina.wallet.domain.model.WalletOrder;
-import com.rfchina.wallet.server.mapper.ext.WalletChannelExtDao;
+import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletStatus;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +26,7 @@ public class VerifyService {
 	private WalletDao walletDao;
 
 	@Autowired
-	private WalletChannelExtDao walletChannelDao;
+	private WalletTunnelExtDao walletTunnelDao;
 
 	@Autowired
 	private WalletOrderExtDao walletOrderDao;
@@ -95,13 +95,11 @@ public class VerifyService {
 	/**
 	 * 检查渠道注册
 	 */
-	public WalletChannel checkChannel(Long walletId, ChannelType channelType) {
+	public WalletTunnel checkChannel(Long walletId, ChannelType channelType) {
 
-		WalletChannel channel = walletChannelDao
-			.selectByWalletId(walletId, channelType.getValue());
-		Optional.ofNullable(channel)
-			.orElseThrow(
-				() -> new WalletResponseException(EnumWalletResponseCode.CHANNEL_STATUS_ERROR));
+		WalletTunnel channel = walletTunnelDao.selectByWalletId(walletId, channelType.getValue());
+		Optional.ofNullable(channel).orElseThrow(
+			() -> new WalletResponseException(EnumWalletResponseCode.CHANNEL_STATUS_ERROR));
 		return channel;
 	}
 }

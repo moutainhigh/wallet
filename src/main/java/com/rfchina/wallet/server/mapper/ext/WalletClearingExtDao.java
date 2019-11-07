@@ -15,7 +15,7 @@ public interface WalletClearingExtDao extends WalletClearingMapper {
 		"where order_id = #{orderId}"
 	})
 	@ResultMap({"com.rfchina.wallet.domain.mapper.WalletClearingMapper.BaseResultMap"})
-	List<WalletClearing> selectByOrderId(@Param("orderId") Long orderId);
+	WalletClearing selectByOrderId(@Param("orderId") Long orderId);
 
 	@Select({
 		"select * from rf_wallet_clearing",

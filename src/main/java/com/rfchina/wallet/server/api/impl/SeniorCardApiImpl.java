@@ -4,8 +4,6 @@ import com.rfchina.passport.token.EnumTokenType;
 import com.rfchina.passport.token.TokenVerify;
 import com.rfchina.platform.common.annotation.Log;
 import com.rfchina.platform.common.annotation.SignVerify;
-import com.rfchina.platform.common.exception.RfchinaResponseException;
-import com.rfchina.platform.common.misc.ResponseCode;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.BankCodeDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
@@ -18,14 +16,13 @@ import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletCardStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletCardType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.BankCode;
-import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletCard;
-import com.rfchina.wallet.domain.model.WalletChannel;
 import com.rfchina.wallet.domain.model.WalletPerson;
+import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.api.SeniorCardApi;
 import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
 import com.rfchina.wallet.server.bank.yunst.response.result.ApplyBindBankCardResp;
-import com.rfchina.wallet.server.mapper.ext.WalletChannelExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.model.ext.PreBindCardVo;
 import com.rfchina.wallet.server.msic.EnumWallet.TunnelType;
 import com.rfchina.wallet.server.service.VerifyService;
@@ -59,7 +56,7 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 	private RedisTemplate redisTemplate;
 
 	@Autowired
-	private WalletChannelExtDao walletChannelDao;
+	private WalletTunnelExtDao walletTunnelDao;
 
 	@Autowired
 	private BankCodeDao bankCodeDao;
@@ -82,12 +79,12 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 		String cvv2) {
 
 		verifyService.checkSeniorWallet(walletId);
-		WalletChannel walletChannel = walletChannelDao
+		WalletTunnel walletTunnel = walletTunnelDao
 			.selectByWalletId(walletId, TunnelType.YUNST.getValue());
 
 		try {
 			ApplyBindBankCardResp result = yunstUserHandler
-				.applyBindBankCard(walletChannel.getBizUserId(), cardNo, realName, phone,
+				.applyBindBankCard(walletTunnel.getBizUserId(), cardNo, realName, phone,
 					EnumIdType.ID_CARD.getValue().longValue(), identityNo, validate, cvv2);
 
 			PreBindCardVo preBindCardVo = PreBindCardVo.builder()
@@ -139,11 +136,11 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 		if (preBindCardVo == null || walletId.longValue() != preBindCardVo.getWalletId()) {
 			throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_BIND_TIMEOUT);
 		}
-		WalletChannel walletChannel = walletChannelDao
+		WalletTunnel walletTunnel = walletTunnelDao
 			.selectByWalletId(walletId, TunnelType.YUNST.getValue());
 
 		try {
-			yunstUserHandler.bindBankCard(walletChannel.getBizUserId(), preBindCardVo.getTransNum(),
+			yunstUserHandler.bindBankCard(walletTunnel.getBizUserId(), preBindCardVo.getTransNum(),
 				preBindCardVo.getTransDate(), preBindCardVo.getPhone(), preBindCardVo.getValidate(),
 				preBindCardVo.getCvv2(), verifyCode);
 		} catch (CommonGatewayException e) {
@@ -189,10 +186,10 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 	@Override
 	public void unBindCard(String accessToken, Long cardId) {
 		WalletCard walletCard = walletCardDao.selectByPrimaryKey(cardId);
-		WalletChannel walletChannel = walletChannelDao
+		WalletTunnel walletTunnel = walletTunnelDao
 			.selectByWalletId(walletCard.getWalletId(), TunnelType.YUNST.getValue());
 		try {
-			yunstUserHandler.unbindBankCard(walletChannel.getBizUserId(), walletCard.getBankAccount());
+			yunstUserHandler.unbindBankCard(walletTunnel.getBizUserId(), walletCard.getBankAccount());
 			walletCard.setStatus(EnumWalletCardStatus.UNBIND.getValue().byteValue());
 			walletCardDao.updateByPrimaryKeySelective(walletCard);
 		} catch (Exception e) {

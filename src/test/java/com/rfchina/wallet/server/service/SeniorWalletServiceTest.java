@@ -1,10 +1,10 @@
 package com.rfchina.wallet.server.service;
 
-import com.rfchina.wallet.domain.model.WalletChannel;
 import com.rfchina.wallet.domain.model.WalletPerson;
+import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.SpringBaseTest;
-import com.rfchina.wallet.server.mapper.ext.WalletChannelExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.msic.EnumWallet.TunnelType;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -20,7 +20,7 @@ public class SeniorWalletServiceTest extends SpringBaseTest {
 	private WalletPersonExtDao walletPersonDao;
 
 	@Autowired
-	private WalletChannelExtDao walletChannelDao;
+	private WalletTunnelExtDao walletTunnelDao;
 
 
 	private Long payerWalletId = 10035L;
@@ -28,7 +28,7 @@ public class SeniorWalletServiceTest extends SpringBaseTest {
 	@Test
 	public void personChangeBindPhone() throws Exception {
 		WalletPerson walletPerson = walletPersonDao.selectByWalletId(payerWalletId);
-		WalletChannel channel = walletChannelDao
+		WalletTunnel channel = walletTunnelDao
 			.selectByWalletId(payerWalletId, TunnelType.YUNST.getValue());
 
 		String url = seniorWalletService

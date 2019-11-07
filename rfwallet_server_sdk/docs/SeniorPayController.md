@@ -124,7 +124,7 @@
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
 |access_token|是|应用令牌|
-|consume_req|是|消费内容，参考ConsumeReq结构体|
+|deduction_req|是|消费内容，参考DeductionReq结构体|
 |customer_ip|否|客户Ip|
 |jump_url|否|跳转地址|
 

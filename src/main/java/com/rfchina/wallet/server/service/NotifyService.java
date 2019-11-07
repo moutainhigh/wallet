@@ -126,20 +126,7 @@ public class NotifyService {
 		};
 	}
 
-	@PostMq(routingKey = MqConstant.ORDER_STATUS_CHANGE)
-	public WalletOrder handleOrderResult(ChannelNotify channelNotify, OrderType type) {
-
-		RecallResp recallResp = JsonUtil.toObject(channelNotify.getContent(), RecallResp.class,
-			objectMapper -> {
-				objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-			});
-		RpsResp rpsResp = JsonUtil.toObject(recallResp.getRps(), RpsResp.class, objectMapper -> {
-			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-		});
-
-		return yunstBizHandler.updateOrderStatus(rpsResp.getReturnValue().getBizOrderNo());
-
-	}
+//
 
 
 }

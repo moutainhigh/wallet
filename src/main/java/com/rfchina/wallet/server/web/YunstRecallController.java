@@ -9,6 +9,8 @@ import com.rfchina.wallet.server.bank.yunst.response.RecallResp;
 import com.rfchina.wallet.server.bank.yunst.response.RpsResp;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import com.rfchina.wallet.server.service.NotifyService;
+import com.rfchina.wallet.server.service.SeniorPayService;
+import com.rfchina.wallet.server.service.SeniorWalletService;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBizHandler;
 import com.rfchina.wallet.server.service.handler.yunst.YunstNotifyHandler;
 import java.util.stream.Collectors;
@@ -20,14 +22,14 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Map;
 
 @RestController
-public class NotifyController {
+public class YunstRecallController {
 
 	@Autowired
 	private NotifyService notifyService;
 	@Autowired
 	private YunstNotifyHandler yunstNotifyHandler;
 	@Autowired
-	private YunstBizHandler yunstBizHandler;
+	private SeniorPayService seniorPayService;
 
 	@RequestMapping(value = UrlConstant.YUNST_NOTIFY)
 	@SuppressWarnings("unchecked")
@@ -60,10 +62,10 @@ public class NotifyController {
 			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		});
 
-		yunstBizHandler.updateOrderStatus(rpsResp.getReturnValue().getBizOrderNo());
+		seniorPayService.updateOrderStatus(rpsResp.getReturnValue().getBizOrderNo());
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS.getValue(),
-			"Receive Yunst recharge recall");
+			"Receive Yunst order recall");
 	}
 
 

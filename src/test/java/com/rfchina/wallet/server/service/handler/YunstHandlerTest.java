@@ -16,7 +16,7 @@ import com.rfchina.wallet.server.bank.yunst.response.result.YunstCreateMemberRes
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstPersonSetRealNameResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstSendVerificationCodeResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstSetCompanyInfoResult;
-import com.rfchina.wallet.server.mapper.ext.WalletChannelExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBaseHandler;
 import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
 import com.rfchina.wallet.server.utils.IdCardGenerator;
@@ -32,7 +32,7 @@ public class YunstHandlerTest extends SpringBaseTest {
 	@Autowired
 	private YunstUserHandler yunstUserHandler;
 	@Autowired
-	private WalletChannelExtDao walletChannelExtDao;
+	private WalletTunnelExtDao walletTunnelExtDao;
 
 	@Test
 	public void createMember() throws Exception {

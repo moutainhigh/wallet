@@ -1041,4 +1041,30 @@ public class EnumWallet {
 			return this.value;
 		}
 	}
+
+
+	/**
+	 * 脏数据标识 1：正常 2：
+	 */
+	public enum DirtyType implements Valuable<Byte> {
+		/**
+		 * 身份证
+		 */
+		NORMAL((byte) 1, "正常"),
+		DIRTY((byte) 2L, "脏数据"),
+		;
+
+		private Byte value;
+		private String valueName;
+
+		DirtyType(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return this.value;
+		}
+	}
 }

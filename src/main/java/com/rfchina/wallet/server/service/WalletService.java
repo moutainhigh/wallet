@@ -34,9 +34,9 @@ import com.rfchina.wallet.domain.model.WalletApply;
 import com.rfchina.wallet.domain.model.WalletApplyCriteria;
 import com.rfchina.wallet.domain.model.WalletApplyCriteria.Criteria;
 import com.rfchina.wallet.domain.model.WalletCard;
-import com.rfchina.wallet.domain.model.WalletChannel;
 import com.rfchina.wallet.domain.model.WalletCompany;
 import com.rfchina.wallet.domain.model.WalletPerson;
+import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.domain.model.WalletUser;
 import com.rfchina.wallet.domain.model.ext.Bank;
 import com.rfchina.wallet.domain.model.ext.BankArea;
@@ -56,8 +56,8 @@ import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp.WalletInfoRespBuilder;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.NotifyType;
-import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.OrderType;
+import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletType;
 import com.rfchina.wallet.server.service.handler.common.EBankHandler;
@@ -498,8 +498,8 @@ public class WalletService {
 			&& wallet.getAuditType() == EnumWalletAuditType.ALLINPAY
 			.getValue().byteValue()) {
 			try {
-				WalletChannel walletChannel = seniorWalletService
-					.getWalletChannel(ChannelType.YUNST.getValue().intValue(), walletId);
+				WalletTunnel walletChannel = seniorWalletService
+					.getWalletTunnelInfo(ChannelType.YUNST.getValue(), walletId);
 				wallet.setWalletBalance(walletChannel.getBalance());
 				wallet.setFreezeAmount(walletChannel.getFreezenAmount());
 			} catch (Exception e) {
@@ -521,9 +521,9 @@ public class WalletService {
 			.selectByWalletId(walletId, EnumDefBankCard.YES.getValue(),
 				WalletCardSenior.NO.getValue());
 
-		WalletCard walletCard = Objects.nonNull(walletCardList) && !walletCardList.isEmpty()?
+		WalletCard walletCard = Objects.nonNull(walletCardList) && !walletCardList.isEmpty() ?
 			walletCardDao.selectByWalletId(walletId, EnumDefBankCard.YES.getValue(),
-				WalletCardSenior.NO.getValue()).get(0):null;
+				WalletCardSenior.NO.getValue()).get(0) : null;
 
 		int bankCardCount = walletCardDao
 			.selectCountByWalletId(walletId, EnumWalletCardStatus.BIND.getValue());

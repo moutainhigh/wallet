@@ -16,8 +16,8 @@ public class DeductionRequest extends  AbstractApiRequest {
   @ApiModelProperty("应用令牌")
   private String accessToken ;
 
-  @ApiModelProperty("消费内容，参考ConsumeReq结构体")
-  private String consumeReq ;
+  @ApiModelProperty("消费内容，参考DeductionReq结构体")
+  private String deductionReq ;
 
   @ApiModelProperty("客户Ip")
   private String customerIp ;
@@ -42,8 +42,8 @@ public class DeductionRequest extends  AbstractApiRequest {
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
       }
-      if(consumeReq != null){
-        parameters.put("consume_req", consumeReq.toString());
+      if(deductionReq != null){
+        parameters.put("deduction_req", deductionReq.toString());
       }
       if(customerIp != null){
         parameters.put("customer_ip", customerIp.toString());

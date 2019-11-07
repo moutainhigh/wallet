@@ -6,7 +6,6 @@ import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.server.SpringBaseTest;
-import com.rfchina.wallet.server.bank.yunst.util.YunstTpl;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import com.rfchina.wallet.server.model.ext.AgentPayReq;
@@ -18,7 +17,6 @@ import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
 import com.rfchina.wallet.server.model.ext.SettleResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
-import com.rfchina.wallet.server.service.handler.yunst.YunstBizHandler;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -27,7 +25,6 @@ import java.util.Arrays;
 import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
-import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Slf4j
@@ -45,14 +42,6 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	@Autowired
 	private WalletCardDao walletCardDao;
 
-
-	@Spy
-	@Autowired
-	private YunstTpl yunstTpl;
-
-	@Autowired
-	private YunstBizHandler yunstBizHandler;
-
 	private Long payerWalletId = 10035L;
 	private Long payeeWalletId = 10035L;
 	private Long platWalletId = 10000L;
@@ -64,9 +53,8 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	 */
 	@Test
 	public void updateOrderStatus() {
-		String orderNo = "WS20191106343112877";
-		yunstBizHandler.updateOrderStatus(orderNo);
-
+		String orderNo = "WR20191107673623254";
+		seniorPayService.updateOrderStatus(orderNo);
 	}
 
 	/**
@@ -90,7 +78,8 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	@Test
 	public void withdraw() {
 		WalletCard walletCard = walletCardDao.selectByPrimaryKey(cardId);
-		WalletOrder withdraw = seniorPayService.withdraw(payerWalletId, walletCard, 1L, "test", "0.0.0.0");
+		WalletOrder withdraw = seniorPayService
+			.withdraw(payerWalletId, walletCard, 1L, "test", "0.0.0.0");
 		log.info("withdraw.resp = {}", withdraw);
 	}
 

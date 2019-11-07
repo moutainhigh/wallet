@@ -15,9 +15,4 @@ public class NotifyServiceTest extends SpringBaseTest {
 	@Autowired
 	private ChannelNotifyExtDao channelNotifyDao;
 
-	@Test
-	public void handleRechargeResult() {
-		ChannelNotify channelNotify = channelNotifyDao.selectByPrimaryKey(11L);
-		notifyService.handleOrderResult(channelNotify, OrderType.RECHARGE);
-	}
 }

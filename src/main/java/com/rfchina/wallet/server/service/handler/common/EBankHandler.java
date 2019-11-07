@@ -3,7 +3,6 @@ package com.rfchina.wallet.server.service.handler.common;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.wallet.domain.model.GatewayTrans;
 import com.rfchina.wallet.domain.model.WalletApply;
-import com.rfchina.wallet.domain.model.WalletChannel;
 import com.rfchina.wallet.domain.model.WalletClearing;
 import com.rfchina.wallet.domain.model.WalletCollect;
 import com.rfchina.wallet.domain.model.WalletCollectInfo;
@@ -13,6 +12,7 @@ import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletRecharge;
 import com.rfchina.wallet.domain.model.WalletRefund;
 import com.rfchina.wallet.domain.model.WalletRefundDetail;
+import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.domain.model.WalletWithdraw;
 import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
@@ -65,7 +65,7 @@ public abstract class EBankHandler {
 	 * 代收
 	 */
 	public WalletCollectResp collect(WalletOrder order, WalletCollect collect,
-		List<WalletCollectInfo> clearInfos, WalletChannel payer) {
+		List<WalletCollectInfo> clearInfos, WalletTunnel payer) {
 		throw new RuntimeException();
 	}
 
@@ -87,7 +87,7 @@ public abstract class EBankHandler {
 	 * 充值
 	 */
 	public RechargeResp recharge(WalletOrder order, WalletRecharge recharge,
-		WalletChannel payer) {
+		WalletTunnel payer) {
 		throw new RuntimeException();
 	}
 
@@ -95,15 +95,15 @@ public abstract class EBankHandler {
 	 * 提现
 	 */
 	public WithdrawResp withdraw(WalletOrder order, WalletWithdraw withdraw,
-		WalletChannel payer) {
+		WalletTunnel payer) {
 		throw new RuntimeException();
 	}
 
 	/**
 	 * 消费
 	 */
-	public WalletCollectResp consume(WalletOrder order, WalletConsume consume, WalletChannel payer,
-		WalletChannel payee, List<WalletCollectMethod> methods) {
+	public WalletCollectResp consume(WalletOrder order, WalletConsume consume, WalletTunnel payer,
+		WalletTunnel payee, List<WalletCollectMethod> methods) {
 		throw new RuntimeException();
 	}
 

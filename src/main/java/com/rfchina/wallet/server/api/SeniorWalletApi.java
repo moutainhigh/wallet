@@ -1,7 +1,7 @@
 package com.rfchina.wallet.server.api;
 
 import com.rfchina.wallet.domain.model.Wallet;
-import com.rfchina.wallet.domain.model.WalletChannel;
+import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult;
 
@@ -14,7 +14,7 @@ public interface SeniorWalletApi {
 	 * @param channelType 必填, 渠道类型.1: 浦发银企直连，2：通联云商通
 	 * @param walletId 必填, 钱包id
 	 */
-	WalletChannel seniorWalletChannelInfo(String accessToken, Integer channelType, Long walletId);
+	WalletTunnel seniorWalletChannelInfo(String accessToken, Byte channelType, Long walletId);
 
 	/**
 	 * 升级高级钱包
@@ -23,7 +23,7 @@ public interface SeniorWalletApi {
 	 * @param source 必填, 钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户
 	 * @param walletId 必填, 钱包id
 	 */
-	WalletChannel seniorWalletUpgrade(String accessToken, Byte source, Integer channelType,
+	WalletTunnel seniorWalletUpgrade(String accessToken, Byte source, Integer channelType,
 		Long walletId);
 
 	/**
@@ -35,7 +35,7 @@ public interface SeniorWalletApi {
 	 * @param mobile 必填, 电话
 	 * @param walletId 必填, 短信验证码类型
 	 */
-	WalletChannel seniorWalletSmsCodeVerification(String accessToken, Byte source,
+	WalletTunnel seniorWalletSmsCodeVerification(String accessToken, Byte source,
 		Integer channelType, Long walletId, String mobile, Integer smsCodeType);
 
 	/**
@@ -68,7 +68,8 @@ public interface SeniorWalletApi {
 	 * @param jumpUrl 必填,前端跳转地址
 	 */
 	String seniorWalletPersonAuthentication(String accessToken, Integer channelType,
-		Long walletId, String realName, String idNo, String mobile, String verifyCode,String jumpUrl);
+		Long walletId, String realName, String idNo, String mobile, String verifyCode,
+		String jumpUrl);
 
 	/**
 	 * 高级钱包商家资料审核
@@ -78,7 +79,7 @@ public interface SeniorWalletApi {
 	 * @param walletId 必填, 钱包id
 	 * @param companyBasicInfo 必填, 企业基本信息
 	 */
-	WalletChannel seniorWalletCompanyAudit(String accessToken, Integer channelType,
+	WalletTunnel seniorWalletCompanyAudit(String accessToken, Integer channelType,
 		Integer auditType, Long walletId, YunstSetCompanyInfoReq.CompanyBasicInfo companyBasicInfo);
 
 	/**

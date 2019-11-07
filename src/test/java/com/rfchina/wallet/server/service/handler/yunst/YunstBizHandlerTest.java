@@ -11,10 +11,7 @@ public class YunstBizHandlerTest extends SpringBaseTest {
 	@Autowired
 	private YunstBizHandler yunstBizHandler;
 
-	@Test
-	public void updateOrderStatus(){
-		yunstBizHandler.updateOrderStatus("WR20191106635755424");
-	}
+
 
 
 }
