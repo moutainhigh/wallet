@@ -1,17 +1,16 @@
 package com.rfchina.wallet.sdk.api;
 
+import com.rfchina.platform.sdk2.request.AbstractApiRequest;
+import com.rfchina.wallet.sdk.model.WalletTunnel;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.HashMap;
 import java.util.Map;
-import com.rfchina.wallet.sdk.model.*;
-import com.rfchina.platform.sdk2.request.AbstractApiRequest;
 import lombok.Builder;
-import io.swagger.annotations.ApiModelProperty;
-import java.util.List;
 
 
 /** 高级钱包渠道信息 */
 @Builder
-public class SeniorWalletChannelInfoRequest extends  AbstractApiRequest {
+public class SeniorWalletTunnelInfoRequest extends  AbstractApiRequest {
 
   @ApiModelProperty("access_token")
   private String accessToken ;
@@ -25,7 +24,7 @@ public class SeniorWalletChannelInfoRequest extends  AbstractApiRequest {
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/senior/wallet/channel_info";
+    return "/wallet_server/v1/m/senior/wallet/tunnel_info";
   }
 
   @Override
