@@ -14,7 +14,7 @@ public interface SeniorWalletApi {
 	 * @param channelType 必填, 渠道类型.1: 浦发银企直连，2：通联云商通
 	 * @param walletId 必填, 钱包id
 	 */
-	WalletTunnel seniorWalletChannelInfo(String accessToken, Byte channelType, Long walletId);
+	WalletTunnel seniorWalletTunnelInfo(String accessToken, Byte channelType, Long walletId);
 
 	/**
 	 * 升级高级钱包

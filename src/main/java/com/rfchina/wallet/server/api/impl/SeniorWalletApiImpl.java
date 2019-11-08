@@ -51,7 +51,7 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public WalletTunnel seniorWalletChannelInfo(String accessToken, Byte channelType,
+	public WalletTunnel seniorWalletTunnelInfo(String accessToken, Byte channelType,
 		Long walletId) {
 		WalletTunnel walletChannel = null;
 		try {

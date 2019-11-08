@@ -4,8 +4,11 @@ import static org.junit.Assert.assertNotNull;
 
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.FileUtil;
+import com.rfchina.wallet.domain.misc.EnumDef.EnumIdType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumVerifyCodeType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletSource;
+import com.rfchina.wallet.domain.model.WalletPerson;
+import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.SpringBaseTest;
 import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
@@ -16,11 +19,14 @@ import com.rfchina.wallet.server.bank.yunst.response.result.YunstCreateMemberRes
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstPersonSetRealNameResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstSendVerificationCodeResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstSetCompanyInfoResult;
+import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
+import com.rfchina.wallet.server.msic.EnumWallet.TunnelType;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBaseHandler;
 import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
 import com.rfchina.wallet.server.utils.IdCardGenerator;
 import com.rfchina.wallet.server.utils.RandomUtils;
+import java.net.URLEncoder;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
@@ -33,6 +39,8 @@ public class YunstHandlerTest extends SpringBaseTest {
 	private YunstUserHandler yunstUserHandler;
 	@Autowired
 	private WalletTunnelExtDao walletTunnelExtDao;
+	@Autowired
+	private WalletPersonExtDao walletPersonDao;
 
 	@Test
 	public void createMember() throws Exception {
@@ -63,10 +71,12 @@ public class YunstHandlerTest extends SpringBaseTest {
 		assertNotNull(member);
 		logStack(member);
 		String tel = genRamdomTelphone(null);
+		System.out.println("电话:"+tel);
 		YunstSendVerificationCodeResult result = yunstUserHandler.sendVerificationCode(member.left.getBizUserId(), tel, EnumVerifyCodeType.YUNST_BIND_PHONE.getValue());
 		assertNotNull(result);
 		logStack(result);
-		YunstBindPhoneResult result2 = yunstUserHandler.bindPhone(member.left.getBizUserId(), tel, "11111");
+//		YunstBindPhoneResult result2 = yunstUserHandler.bindPhone(member.left.getBizUserId(), tel, "11111");
+		YunstBindPhoneResult result2 = yunstUserHandler.bindPhone("WU1365", tel, "11111");
 		logStack(result2);
 	}
 
@@ -111,9 +121,10 @@ public class YunstHandlerTest extends SpringBaseTest {
 		String realName = RandomUtils.getChineseName();
 		Long identityType = 1L;
 		String identityNo = new IdCardGenerator().generate();
+		System.out.println("身份证:"+identityNo);
 		YunstPersonSetRealNameResult result = yunstUserHandler.personCertification(member.left.getBizUserId(), realName, identityType, identityNo);
 		logStack(result);
-		String url = yunstUserHandler.generateSignContractUrl(member.left.getBizUserId(),"/#/success");
+		String url = yunstUserHandler.generateSignContractUrl(member.left.getBizUserId(),URLEncoder.encode("/#/success","UTF-8"));
 		logStack(url);
 	}
 
@@ -190,11 +201,25 @@ public class YunstHandlerTest extends SpringBaseTest {
 
 	@Test
 	public void genSignContractUrl() throws Exception {
-		Tuple<Long, Byte> bizUserTuple = genBizUser(WalletSource.USER.getValue().intValue());
-		Tuple<YunstCreateMemberResult, YunstBaseHandler.YunstMemberType> member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
-		assertNotNull(member);
-		logStack(member);
-		String result = yunstUserHandler.generateSignContractUrl(member.left.getBizUserId(),"/#/success");
+		Long walletId = 10050L;
+		WalletTunnel walletTunnel = walletTunnelExtDao
+			.selectByWalletId(walletId, TunnelType.YUNST.getValue());
+		String result = yunstUserHandler.generateSignContractUrl(walletTunnel.getBizUserId(),
+			URLEncoder.encode("/#/success","utf-8"));
+//		String result = yunstUserHandler.generateSignContractUrl("WU10053","/#/success");
+		logStack(result);
+	}
+
+	@Test
+	public void genSetPayPasswordUrl() throws Exception {
+		Long walletId = 10058L;
+		WalletTunnel walletTunnel = walletTunnelExtDao
+			.selectByWalletId(walletId, TunnelType.YUNST.getValue());
+		WalletPerson walletPerson = walletPersonDao.selectByWalletId(walletId);
+//		String result = yunstUserHandler.generatePersonSetPayPasswordUrl(walletTunnel.getBizUserId(),walletTunnel.getSecurityTel(),walletPerson.getName(),
+//			EnumIdType.ID_CARD.getValue().longValue(),walletPerson.getIdNo(),URLEncoder.encode("/#/success","UTF-8"));
+		String result = yunstUserHandler.generatePersonSetPayPasswordUrl(	"WU1365","15202111429","微昭",
+			EnumIdType.ID_CARD.getValue().longValue(),"350822197605252678","/#/success");
 //		String result = yunstUserHandler.generateSignContractUrl("WU10053","/#/success");
 		logStack(result);
 	}
