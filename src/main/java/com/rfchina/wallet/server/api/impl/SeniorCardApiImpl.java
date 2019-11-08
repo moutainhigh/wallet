@@ -13,6 +13,7 @@ import com.rfchina.wallet.domain.misc.EnumDef.EnumDefBankCard;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumIdType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumPublicAccount;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletCardStatus;
+import com.rfchina.wallet.domain.misc.EnumDef.VerifyChannel;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletCardType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.BankCode;
@@ -28,6 +29,7 @@ import com.rfchina.wallet.server.msic.EnumWallet.TunnelType;
 import com.rfchina.wallet.server.service.VerifyService;
 import com.rfchina.wallet.server.service.WalletService;
 import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
+import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
@@ -168,6 +170,9 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 			.depositBank(bankCode != null ? bankCode.getBankName() : null)
 			.bankAccount(preBindCardVo.getCardNo())
 			.depositName(walletPerson.getName())
+			.telephone(preBindCardVo.getPhone())
+			.verifyChannel(VerifyChannel.YUNST.getValue())
+			.verifyTime(new Date())
 			.isPublic(EnumPublicAccount.NO.getValue().byteValue())
 			.isDef(cardCount == 0 ? EnumDefBankCard.YES.getValue().byteValue()
 				: EnumDefBankCard.NO.getValue().byteValue())

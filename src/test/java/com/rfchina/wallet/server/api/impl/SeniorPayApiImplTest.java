@@ -104,6 +104,7 @@ public class SeniorPayApiImplTest extends SpringApiTest {
 
 	@Test
 	public void smsConfirm() {
-		seniorPayApi.smsConfirm(super.accessToken,"021013e9-12a5-4267-9caa-e485d9972038","669805","192.168.197.28");
+		seniorPayApi.smsConfirm(super.accessToken, "021013e9-12a5-4267-9caa-e485d9972038", "669805",
+			"192.168.197.28");
 	}
 }

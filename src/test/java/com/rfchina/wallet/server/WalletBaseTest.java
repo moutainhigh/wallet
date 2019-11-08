@@ -343,15 +343,12 @@ public abstract class WalletBaseTest extends BaseTest {
 	}
 
 
-	protected Map<String, Object> seniorWalletPersonSetPayPassword(Byte source, Long walletId,
-		String name, String phone, String idNum) {
+	protected Map<String, Object> seniorWalletPersonSetPayPassword(Long walletId,
+		String jumpUrl) {
 		Map<String, String> params = new HashMap<>();
 		params.put("access_token", getAccessToken(appId, appSecret));
-		params.put("source", String.valueOf(source));
 		params.put("wallet_id", String.valueOf(walletId));
-		params.put("name", name);
-		params.put("phone", phone);
-		params.put("identity_no", idNum);
+		params.put("jump_url", jumpUrl);
 		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
 		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
 		params.put("sign", sign);
