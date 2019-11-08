@@ -599,6 +599,7 @@ public class YunstBizHandler extends EBankHandler {
 				MoneyLog moneyLog = MoneyLog.builder()
 					.walletId(order.getWalletId())
 					.orderId(order.getId())
+					.orderNo(order.getOrderNo())
 					.orderType(order.getType())
 					.type(DebitType.DEBIT.getValue())
 					.debitAmount(order.getAmount())
@@ -613,6 +614,7 @@ public class YunstBizHandler extends EBankHandler {
 				MoneyLogBuilder builder = MoneyLog.builder()
 					.walletId(order.getWalletId())
 					.orderId(order.getId())
+					.orderNo(order.getOrderNo())
 					.orderType(order.getType())
 					.createTime(new Date());
 				if (order.getType().byteValue() == OrderType.RECHARGE.getValue()
