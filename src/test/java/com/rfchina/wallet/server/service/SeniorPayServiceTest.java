@@ -63,7 +63,7 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	@Test
 	public void recharge() {
 		WalletCard walletCard = walletCardDao.selectByPrimaryKey(cardId);
-		RechargeResp resp = seniorPayService.recharge(payerWalletId, walletCard, 1L, "", "");
+		RechargeResp resp = seniorPayService.recharge(payerWalletId, walletCard, 1L);
 		log.info("recharge.resp = {}", JsonUtil.toJSON(resp));
 	}
 

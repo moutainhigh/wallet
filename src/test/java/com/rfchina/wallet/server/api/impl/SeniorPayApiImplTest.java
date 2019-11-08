@@ -98,7 +98,7 @@ public class SeniorPayApiImplTest extends SpringApiTest {
 			.industryName("保险代理")
 			.walletPayMethod(WalletPayMethod.builder().balance(balance).build())
 			.build();
-		WalletCollectResp resp = seniorPayApi.deduction(super.accessToken, req, null, null);
+		WalletCollectResp resp = seniorPayApi.deduction(super.accessToken, req);
 		log.info("Deduction resp = {}", JsonUtil.toJSON(resp));
 	}
 

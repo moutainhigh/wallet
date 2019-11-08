@@ -314,7 +314,7 @@ public abstract class WalletBaseTest extends BaseTest {
 		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
 		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
 		params.put("sign", sign);
-		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_CHANNEL_INFO, params, 1001);
+		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_TUNNEL_INFO, params, 1001);
 	}
 
 
