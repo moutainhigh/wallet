@@ -30,12 +30,15 @@ import com.rfchina.wallet.server.service.VerifyService;
 import com.rfchina.wallet.server.service.WalletService;
 import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
 import java.util.Date;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
@@ -127,6 +130,7 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 	@Override
 	public void confirmBindCard(String accessToken, Long walletId,
 		String verifyCode, String preBindTicket) {
@@ -164,6 +168,13 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 		int cardCount = walletCardDao
 			.selectCountByWalletId(walletId, EnumWalletCardStatus.BIND.getValue());
 
+		//兼容升级银行卡做通联验证,将旧的卡解绑
+		WalletCard exsitsCard = walletCardDao.selectByWalletIdAndBankAccount(walletId,preBindCardVo.getCardNo());
+		if (Objects.nonNull(exsitsCard)){
+			exsitsCard.setStatus(EnumWalletCardStatus.UNBIND.getValue().byteValue());
+			walletCardDao.updateByPrimaryKeySelective(exsitsCard);
+		}
+
 		WalletCard walletCard = WalletCard.builder().walletId(walletId)
 			.bankCode(bankCode != null ? bankCode.getBankCode() : null)
 			.bankName(bankCode != null ? bankCode.getClassName() : null)
@@ -180,6 +191,7 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 			.cardType(preBindCardVo.getCardType())
 			.build();
 		walletCardDao.insertSelective(walletCard);
+
 	}
 
 	/**
