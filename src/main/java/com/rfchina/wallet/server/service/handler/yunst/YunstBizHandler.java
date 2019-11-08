@@ -12,6 +12,7 @@ import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.MoneyLogMapper;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletLevel;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
+import com.rfchina.wallet.domain.model.BalanceTunnelDetail;
 import com.rfchina.wallet.domain.model.GatewayTrans;
 import com.rfchina.wallet.domain.model.MoneyLog;
 import com.rfchina.wallet.domain.model.MoneyLog.MoneyLogBuilder;
@@ -68,6 +69,7 @@ import com.rfchina.wallet.server.bank.yunst.response.SmsPayResp;
 import com.rfchina.wallet.server.bank.yunst.response.SmsRetryResp;
 import com.rfchina.wallet.server.bank.yunst.response.WithdrawApplyResp;
 import com.rfchina.wallet.server.bank.yunst.util.YunstTpl;
+import com.rfchina.wallet.server.mapper.ext.BalanceTunnelDetailExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletClearingExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectExtDao;
@@ -178,6 +180,9 @@ public class YunstBizHandler extends EBankHandler {
 
 	@Autowired
 	private MoneyLogMapper moneyLogDao;
+
+	@Autowired
+	private BalanceTunnelDetailExtDao balanceTunnelDetailDao;
 
 
 	public boolean isSupportWalletLevel(Byte walletLevel) {
@@ -562,7 +567,6 @@ public class YunstBizHandler extends EBankHandler {
 	 */
 	public WalletOrder updateOrderStatus(WalletOrder order) {
 
-
 		GetOrderDetailResp tunnelOrder = queryOrderDetail(order.getOrderNo());
 		if (!order.getTunnelOrderNo().equals(tunnelOrder.getOrderNo())) {
 			log.error("渠道单号不匹配， recharge = {} , channelOrderNo = {}", order,
@@ -819,14 +823,14 @@ public class YunstBizHandler extends EBankHandler {
 	}
 
 
-	public String balanceUrl(Date date, YunstFileType fileType) {
+	public void balance(Date date) {
 		String resourceUrl = null;
 		String tempUrl = configService.getStorageDir();
 		String fileUrl = null;
 		// 获取文件地址
 		GetCheckAccountFileReq req = GetCheckAccountFileReq.builder()
 			.date(DateUtil.formatDate(date, DateUtil.SHORT_DTAE_PATTERN))
-			.fileType(fileType.getValue())
+			.fileType(YunstFileType.DETAIL.getValue())
 			.build();
 		try {
 			GetCheckAccountFileResp resp = yunstTpl.execute(req, GetCheckAccountFileResp.class);
@@ -838,28 +842,35 @@ public class YunstBizHandler extends EBankHandler {
 		// 下载文件
 		try {
 			URL url = new URL(resourceUrl);
-			fileUrl = tempUrl + url.getFile();
+			String uri = url.getFile();
+			fileUrl = tempUrl + uri.substring(uri.lastIndexOf("/"));
 			HttpFile.download(url, fileUrl);
 		} catch (Exception e) {
 			log.error("文件下载错误", e);
 		}
+
+		balanceTunnelDetailDao
+			.deleteByDate(DateUtil.formatDate(date, DateUtil.STANDARD_DTAE_PATTERN));
 		// 解析文件
 		try {
-			List<CheckAccount> tempList = Lists.newArrayList();
 			try (BufferedReader reader = Files.newBufferedReader(Paths.get(fileUrl))) {
-				String line = reader.readLine();
-				CheckAccount check = StringObject.parseStringObject(line, CheckAccount.class, "|");
-				tempList.add(check);
-				if (tempList.size() >= 100) {
 
-					tempList.clear();
+				String line = reader.readLine();
+				for (line = reader.readLine(); line != null; line = reader.readLine()) {
+					CheckAccount check = StringObject
+						.parseStringObject(line, CheckAccount.class, "\\|");
+					BalanceTunnelDetail detail = BeanUtil
+						.newInstance(check, BalanceTunnelDetail.class);
+					detail.setTunnelType(TunnelType.YUNST.getValue());
+					detail.setWalletBalanceDate(date);
+					detail.setCreateTime(new Date());
+					balanceTunnelDetailDao.insertSelective(detail);
 				}
 			}
-			if (tempList.size() > 0) {
-			}
 		} catch (Exception e) {
-
+			log.error("【通联】更新对账单异常", e);
 		}
-		return null;
+		// 对比明细
+
 	}
 }

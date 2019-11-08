@@ -695,13 +695,9 @@ public class SeniorPayService {
 	/**
 	 * 对账
 	 */
-	public String balance(Date date) {
+	public void balance(Date date) {
 		EBankHandler handler = handlerHelper.selectByTunnelType(TunnelType.YUNST.getValue());
-		if (handler instanceof YunstBizHandler) {
-			((YunstBizHandler) handler).balanceUrl(date, YunstFileType.DETAIL);
-		}
-
-		return null;
+		handler.balance(date);
 	}
 
 

@@ -19,12 +19,6 @@ public class DeductionRequest extends  AbstractApiRequest {
   @ApiModelProperty("消费内容，参考DeductionReq结构体")
   private String deductionReq ;
 
-  @ApiModelProperty("客户Ip")
-  private String customerIp ;
-
-  @ApiModelProperty("跳转地址")
-  private String jumpUrl ;
-
 
   @Override
   public String getApiUrl() {
@@ -44,12 +38,6 @@ public class DeductionRequest extends  AbstractApiRequest {
       }
       if(deductionReq != null){
         parameters.put("deduction_req", deductionReq.toString());
-      }
-      if(customerIp != null){
-        parameters.put("customer_ip", customerIp.toString());
-      }
-      if(jumpUrl != null){
-        parameters.put("jump_url", jumpUrl.toString());
       }
     return parameters;
   }

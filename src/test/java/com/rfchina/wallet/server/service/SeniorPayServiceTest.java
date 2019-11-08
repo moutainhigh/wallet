@@ -152,8 +152,7 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 
 	@Test
 	public void balance() {
-		String url = seniorPayService.balance(DateUtil.addDate2(new Date(), -3));
-		log.info("balance url = {}", url);
+		seniorPayService.balance(DateUtil.addDate2(new Date(), -1));
 	}
 
 	@Test
@@ -161,5 +160,12 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 		String uri = "http://test.allinpay.com/checkfile/merchantCheck/2019/11/1902271423530473681_20191101_1_allinpay.txt";
 		URL url = new URL(uri);
 		Files.copy(url.openStream(), Paths.get("./test"), StandardCopyOption.REPLACE_EXISTING);
+	}
+
+	@Test
+	public void test(){
+		String text = "1191887302113107968|代收|8000|0|2019-11-06 09:17:31|3N54N6a090f70fcbaa4f8fb4f7dce60402613|0||0|0|0|0|1|||BALANCE||||||";
+		String[] split = text.split("\\|");
+		log.info("{}",split.length);
 	}
 }

@@ -21,6 +21,7 @@ import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.model.ext.WithdrawResp;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
+import java.util.Date;
 import java.util.List;
 
 
@@ -104,6 +105,13 @@ public abstract class EBankHandler {
 	 */
 	public WalletCollectResp consume(WalletOrder order, WalletConsume consume, WalletTunnel payer,
 		WalletTunnel payee, List<WalletCollectMethod> methods) {
+		throw new RuntimeException();
+	}
+
+	/**
+	 * 对账
+	 */
+	public void balance(Date date){
 		throw new RuntimeException();
 	}
 
