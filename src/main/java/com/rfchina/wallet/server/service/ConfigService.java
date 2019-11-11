@@ -161,6 +161,12 @@ public class ConfigService {
 	@Value("${yunst.pwdConfirm.url}")
 	private String yunstPwdConfirmUrl;
 
+	@Value("${yunst.anony.walletId}")
+	private Long anonyPayerWalletId = 10001L;
+
+	@Value("${yunst.agentEnt.walletId}")
+	private Long agentEntWalletId = 10000L;
+
 // yunst end
 
 }

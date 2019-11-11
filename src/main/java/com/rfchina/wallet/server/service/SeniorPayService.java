@@ -144,9 +144,6 @@ public class SeniorPayService {
 	private WalletConsumeExtDao walletConsumeDao;
 
 
-	private Long anonyPayerWalletId = 10001L;
-	private Long agentEntWalletId = 10000L;
-
 	/**
 	 * 充值
 	 */
@@ -277,7 +274,7 @@ public class SeniorPayService {
 
 		// 定义付款人
 		Long payerWalletId = (req.getPayerWalletId() != null) ? req.getPayerWalletId()
-			: anonyPayerWalletId;
+			: configService.getAnonyPayerWalletId();
 		verifyService.checkSeniorWallet(payerWalletId);
 
 		// 工单记录
@@ -309,7 +306,7 @@ public class SeniorPayService {
 			req.getValidateType() != null ? req.getValidateType() : BizValidateType.SMS.getValue();
 		WalletCollect collect = WalletCollect.builder()
 			.orderId(collectOrder.getId())
-			.agentWalletId(agentEntWalletId)
+			.agentWalletId(configService.getAgentEntWalletId())
 			.refundLimit(req.getAmount())
 			.payMethod(req.getWalletPayMethod().getMethods())
 			.validateType(validateType)
@@ -401,7 +398,7 @@ public class SeniorPayService {
 			.orderId(payOrder.getId())
 			.collectOrderNo(collectOrder.getOrderNo())
 			.collectInfoId(collectInfo.getId())
-			.agentWalletId(agentEntWalletId)
+			.agentWalletId(configService.getAgentEntWalletId())
 			.amount(receiver.getAmount())
 			.createTime(new Date())
 			.build();
@@ -479,7 +476,7 @@ public class SeniorPayService {
 		WalletRefund refund = WalletRefund.builder()
 			.orderId(refundOrder.getId())
 			.collectOrderNo(collectOrder.getOrderNo())
-			.agentWalletId(agentEntWalletId)
+			.agentWalletId(configService.getAgentEntWalletId())
 			.collectAmount(collectOrder.getAmount())
 			.createTime(new Date())
 			.build();
@@ -514,7 +511,7 @@ public class SeniorPayService {
 
 		// 定义付款人
 		Long payerWalletId = (req.getPayerWalletId() != null) ? req.getPayerWalletId()
-			: anonyPayerWalletId;
+			: configService.getAnonyPayerWalletId();
 		verifyService.checkSeniorWallet(payerWalletId);
 
 		// 工单记录
@@ -544,7 +541,7 @@ public class SeniorPayService {
 		// 生成代收单
 		WalletConsume consume = WalletConsume.builder()
 			.orderId(consumeOrder.getId())
-			.payeeWalletId(agentEntWalletId)
+			.payeeWalletId(configService.getAgentEntWalletId())
 			.validateType(BizValidateType.NONE.getValue())
 			.createTime(new Date())
 			.build();
