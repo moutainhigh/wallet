@@ -151,11 +151,11 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 	@SignVerify
 	@Override
 	public SettleResp agentPay(String accessToken, String bizNo, String collectOrderNo,
-		Reciever receiver) {
+		Reciever receiver,String note) {
 		// 检查代收单
 		WalletOrder collectOrder = verifyService
 			.checkOrder(collectOrderNo, OrderStatus.SUCC.getValue());
-		return seniorPayService.agentPay(collectOrder, bizNo, receiver);
+		return seniorPayService.agentPay(collectOrder, bizNo, receiver,note);
 	}
 
 

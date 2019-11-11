@@ -5,8 +5,7 @@ import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
-import com.rfchina.wallet.domain.misc.EnumDef.EnumDefBankCard;
-import com.rfchina.wallet.domain.misc.EnumDef.WalletCardSenior;
+import com.rfchina.wallet.domain.misc.EnumDef.OrderType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.WalletApply;
 import com.rfchina.wallet.domain.model.WalletCard;
@@ -14,13 +13,10 @@ import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.model.ext.PayInReq;
 import com.rfchina.wallet.server.model.ext.PayInResp;
-import com.rfchina.wallet.server.msic.EnumWallet.OrderType;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyStatus;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
-
 import java.util.Date;
 import java.util.List;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

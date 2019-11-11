@@ -21,7 +21,8 @@ public interface SeniorPayApi {
 	WalletCollectResp collect(String accessToken, CollectReq req, String jumpUrl,
 		String customerIp);
 
-	SettleResp agentPay(String accessToken, String bizNo, String collectOrderNo, Reciever receiver);
+	SettleResp agentPay(String accessToken, String bizNo, String collectOrderNo, Reciever receiver,
+		String note);
 
 	WalletOrder refund(String accessToken, String bizNo, String collectOrderNo,
 		List<RefundInfo> rList);

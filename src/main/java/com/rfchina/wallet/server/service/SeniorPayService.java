@@ -6,7 +6,9 @@ import com.rfchina.platform.common.utils.EnumUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
+import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.BizValidateType;
+import com.rfchina.wallet.domain.misc.EnumDef.OrderType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelSignContract;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
@@ -51,15 +53,12 @@ import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
 import com.rfchina.wallet.server.model.ext.SettleResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.model.ext.WithdrawResp;
-import com.rfchina.wallet.server.msic.EnumWallet;
 import com.rfchina.wallet.server.msic.EnumWallet.ChannelType;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
 import com.rfchina.wallet.server.msic.EnumWallet.DirtyType;
 import com.rfchina.wallet.server.msic.EnumWallet.GwProgress;
 import com.rfchina.wallet.server.msic.EnumWallet.OrderStatus;
-import com.rfchina.wallet.server.msic.EnumWallet.OrderType;
 import com.rfchina.wallet.server.msic.EnumWallet.TunnelType;
-import com.rfchina.wallet.server.msic.EnumWallet.YunstFileType;
 import com.rfchina.wallet.server.service.handler.common.EBankHandler;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBizHandler;
@@ -83,6 +82,9 @@ public class SeniorPayService {
 	public static final String PREFIX_RECHARGE = "WR";
 	public static final String PREFIX_WITHDRAW = "WD";
 	public static final String PREFIX_DEDUCTION = "WS";
+
+	public static final String INDUSTRY_CODE = "1910";
+	public static final String INDUSTRY_NAME = "其他";
 
 	@Autowired
 	private HandlerHelper handlerHelper;
@@ -173,6 +175,9 @@ public class SeniorPayService {
 			.progress(GwProgress.WAIT_SEND.getValue())
 			.status(OrderStatus.WAITTING.getValue())
 			.tunnelType(TunnelType.YUNST.getValue())
+			.note("钱包充值")
+			.industryCode(INDUSTRY_CODE)
+			.industryName(INDUSTRY_NAME)
 			.createTime(new Date())
 			.build();
 		walletOrderDao.insertSelective(rechargeOrder);
@@ -233,6 +238,9 @@ public class SeniorPayService {
 			.progress(GwProgress.WAIT_SEND.getValue())
 			.status(OrderStatus.WAITTING.getValue())
 			.tunnelType(TunnelType.YUNST.getValue())
+			.note("钱包提现")
+			.industryCode(INDUSTRY_CODE)
+			.industryName(INDUSTRY_NAME)
 			.createTime(new Date())
 			.build();
 		walletOrderDao.insertSelective(withdrawOrder);
@@ -289,6 +297,9 @@ public class SeniorPayService {
 			.progress(GwProgress.WAIT_SEND.getValue())
 			.status(OrderStatus.WAITTING.getValue())
 			.tunnelType(TunnelType.YUNST.getValue())
+			.note(req.getNote())
+			.industryCode(req.getIndustryCode())
+			.industryName(req.getIndustryName())
 			.createTime(new Date())
 			.build();
 		walletOrderDao.insertSelective(collectOrder);
@@ -341,7 +352,7 @@ public class SeniorPayService {
 	/**
 	 * 发起代付（加锁）
 	 */
-	public SettleResp agentPay(WalletOrder collectOrder, String bizNo, Reciever receiver) {
+	public SettleResp agentPay(WalletOrder collectOrder, String bizNo, Reciever receiver,String note) {
 
 		// 代收明细
 		WalletCollect walletCollect = walletCollectDao.selectByOrderId(collectOrder.getId());
@@ -380,6 +391,7 @@ public class SeniorPayService {
 			.progress(GwProgress.WAIT_SEND.getValue())
 			.status(OrderStatus.WAITTING.getValue())
 			.tunnelType(TunnelType.YUNST.getValue())
+			.note(note)
 			.createTime(new Date())
 			.build();
 		walletOrderDao.insertSelective(payOrder);
@@ -522,6 +534,9 @@ public class SeniorPayService {
 			.progress(GwProgress.WAIT_SEND.getValue())
 			.status(OrderStatus.WAITTING.getValue())
 			.tunnelType(TunnelType.YUNST.getValue())
+			.industryCode(req.getIndustryCode())
+			.industryName(req.getIndustryName())
+			.note(req.getNote())
 			.createTime(new Date())
 			.build();
 		walletOrderDao.insertSelective(consumeOrder);

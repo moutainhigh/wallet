@@ -207,34 +207,6 @@ public class EnumWallet {
 	}
 
 	/**
-	 * 工单类型，1：财务结算，2：充值，3：提现，4：代收，5：代付，6：退款，7：消费
-	 */
-	public enum OrderType implements Valuable<Byte> {
-		SETTLE((byte) 1, "财务结算"),
-		RECHARGE((byte) 2, "充值"),
-		WITHDRAWAL((byte) 3, "提现"),
-		COLLECT((byte) 4, "代收"),
-		AGENT_PAY((byte) 5, "代付"),
-		REFUND((byte) 6, "退款"),
-		CONSUME((byte) 7, "消费"),
-		DEDUCTION((byte) 8, "代扣"),
-		;
-
-		private Byte value;
-		private String valueName;
-
-		OrderType(Byte value, String valueName) {
-			this.value = value;
-			this.valueName = valueName;
-		}
-
-		@Override
-		public Byte getValue() {
-			return value;
-		}
-	}
-
-	/**
 	 * 交易状态。 1: 待发送银行网关，2：银行受理中，3：交易成功，4：交易失败，5：撤销
 	 */
 	public enum WalletApplyStatus implements Valuable<Byte> {

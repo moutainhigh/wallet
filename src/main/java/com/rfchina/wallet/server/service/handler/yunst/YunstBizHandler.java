@@ -11,6 +11,7 @@ import com.rfchina.platform.common.utils.HttpFile;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.MoneyLogMapper;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletLevel;
+import com.rfchina.wallet.domain.misc.EnumDef.OrderType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.BalanceTunnelDetail;
 import com.rfchina.wallet.domain.model.GatewayTrans;
@@ -95,7 +96,6 @@ import com.rfchina.wallet.server.msic.EnumWallet.EnumYunstDeviceType;
 import com.rfchina.wallet.server.msic.EnumWallet.EnumYunstWithdrawType;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.OrderStatus;
-import com.rfchina.wallet.server.msic.EnumWallet.OrderType;
 import com.rfchina.wallet.server.msic.EnumWallet.RefundType;
 import com.rfchina.wallet.server.msic.EnumWallet.TunnelType;
 import com.rfchina.wallet.server.msic.EnumWallet.UniProgress;
@@ -127,8 +127,7 @@ public class YunstBizHandler extends EBankHandler {
 
 	public static final String TRADE_CODESTRING_COLLECT = "3001";
 	public static final String TRADE_CODESTRING_AGENTPAY = "4001";
-	public static final String INDUSTRY_CODE = "1910";
-	public static final String INDUSTRY_NAME = "其他";
+
 
 	@Autowired
 	private YunstTpl yunstTpl;
@@ -234,8 +233,9 @@ public class YunstBizHandler extends EBankHandler {
 			.backUrl(configService.getYunstRecallPrefix() + UrlConstant.YUNST_ORDER_RECALL)
 			.orderExpireDatetime(expireTime)
 			.payMethod(getMethodMap(methods, true))
-			.industryCode(INDUSTRY_CODE)
-			.industryName(INDUSTRY_NAME)
+			.industryCode(order.getIndustryCode())
+			.industryName(order.getIndustryName())
+			.summary(order.getNote())
 			.source(EnumYunstDeviceType.MOBILE.getValue())
 			.build();
 		// 发起时间
@@ -296,8 +296,9 @@ public class YunstBizHandler extends EBankHandler {
 			.bankCardNo(bankAccount)
 			.bankCardPro(EnumYunstCardPro.PERSON.getValue())
 			.withdrawType(EnumYunstWithdrawType.D0.getValue())
-			.industryCode(INDUSTRY_CODE)
-			.industryName(INDUSTRY_NAME)
+			.industryCode(order.getIndustryCode())
+			.industryName(order.getIndustryName())
+			.summary(order.getNote())
 			.source(EnumYunstDeviceType.MOBILE.getValue())
 			.build();
 
@@ -356,8 +357,9 @@ public class YunstBizHandler extends EBankHandler {
 			.ordErexpireDatetime(expireTime)
 			.payMethod(getMethodMap(methods, false))
 			.tradeCode(TRADE_CODESTRING_COLLECT)
-			.industryCode(INDUSTRY_CODE)
-			.industryName(INDUSTRY_NAME)
+			.industryCode(order.getIndustryCode())
+			.industryName(order.getIndustryName())
+			.summary(order.getNote())
 			.source(1L)
 			.build();
 
@@ -413,7 +415,7 @@ public class YunstBizHandler extends EBankHandler {
 			.fee(0L)
 			.splitRuleList(null)
 			.tradeCode(TRADE_CODESTRING_AGENTPAY)
-			.summary(null)
+			.summary(order.getNote())
 			.build();
 
 		order.setProgress(UniProgress.SENDED.getValue());
@@ -509,8 +511,9 @@ public class YunstBizHandler extends EBankHandler {
 			.backUrl(configService.getYunstRecallPrefix() + UrlConstant.YUNST_ORDER_RECALL)
 			.orderExpireDatetime(expireTime)
 			.payMethod(getMethodMap(methods, false))
-			.industryCode(INDUSTRY_CODE)
-			.industryName(INDUSTRY_NAME)
+			.industryCode(order.getIndustryCode())
+			.industryName(order.getIndustryName())
+			.summary(order.getNote())
 			.source(1L)
 			.build();
 
