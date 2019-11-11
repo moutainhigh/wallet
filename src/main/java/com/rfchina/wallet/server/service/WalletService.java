@@ -206,9 +206,7 @@ public class WalletService {
 	 */
 	public void doTunnelTransfer(WalletApply walletApply) {
 
-		WalletCard walletCard = walletCardDao.selectByWalletId(walletApply.getWalletId(),
-			EnumDefBankCard.YES.getValue(),
-			WalletCardSenior.NO.getValue()).get(0);
+		WalletCard walletCard = walletCardDao.selectDefCardByWalletId(walletApply.getWalletId());
 		if (walletCard == null) {
 			log.warn("钱包[{}]没有绑定银行卡，跳过申请单[{}]", walletApply.getWalletId(),
 				walletApply.getId());
@@ -518,16 +516,14 @@ public class WalletService {
 		}
 
 		List<WalletCard> walletCardList = walletCardDao
-			.selectByWalletId(walletId, EnumDefBankCard.YES.getValue(),
-				WalletCardSenior.NO.getValue());
+			.selectByWalletId(walletId);
 
-		WalletCard walletCard = Objects.nonNull(walletCardList) && !walletCardList.isEmpty() ?
-			walletCardDao.selectByWalletId(walletId, EnumDefBankCard.YES.getValue(),
-				WalletCardSenior.NO.getValue()).get(0) : null;
+		WalletCard defCard = Objects.nonNull(walletCardList) && !walletCardList.isEmpty() ?
+			walletCardDao.selectDefCardByWalletId(walletId) : null;
 
 		int bankCardCount = walletCardDao
 			.selectCountByWalletId(walletId, EnumWalletCardStatus.BIND.getValue());
-		return builder.wallet(wallet).defWalletCard(walletCard)
+		return builder.wallet(wallet).defWalletCard(defCard)
 			.bankCardCount(bankCardCount)
 			.build();
 	}
@@ -609,8 +605,7 @@ public class WalletService {
 	 * @param walletId 钱包ID
 	 */
 	public List<WalletCard> bankCardList(@ParamValid(nullable = false) Long walletId) {
-		return walletCardDao.selectByWalletId(walletId, EnumDefBankCard.NO.getValue(),
-			WalletCardSenior.NO.getValue());
+		return walletCardDao.selectByWalletId(walletId);
 	}
 
 	/**

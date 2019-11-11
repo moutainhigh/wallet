@@ -70,7 +70,7 @@ public class JuniorWalletService {
 					EnumWalletResponseCode.PAY_IN_AMOUNT_ERROR);
 			}
 			// 用户必须已经绑卡
-			WalletCard walletCard = getWalletCard(payInReq.getWalletId());
+			WalletCard walletCard = getDefWalletCard(payInReq.getWalletId());
 			if (walletCard == null) {
 				throw new WalletResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST
 					, String.valueOf(payInReq.getWalletId()));
@@ -101,9 +101,8 @@ public class JuniorWalletService {
 	}
 
 
-	private WalletCard getWalletCard(Long walletId) {
-		return walletCardDao.selectByWalletId(walletId, EnumDefBankCard.YES.getValue(),
-			WalletCardSenior.NO.getValue()).get(0);
+	private WalletCard getDefWalletCard(Long walletId) {
+		return walletCardDao.selectDefCardByWalletId(walletId);
 	}
 
 
