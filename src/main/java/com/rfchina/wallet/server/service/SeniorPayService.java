@@ -2,16 +2,19 @@ package com.rfchina.wallet.server.service;
 
 import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.biztools.mq.PostMq;
+import com.rfchina.platform.biztool.mapper.string.StringObject;
+import com.rfchina.platform.common.utils.BeanUtil;
+import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EnumUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
-import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.BizValidateType;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelSignContract;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
+import com.rfchina.wallet.domain.model.BalanceTunnelDetail;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletClearing;
@@ -26,7 +29,9 @@ import com.rfchina.wallet.domain.model.WalletRefund;
 import com.rfchina.wallet.domain.model.WalletRefundDetail;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.domain.model.WalletWithdraw;
+import com.rfchina.wallet.server.bank.yunst.response.CheckAccount;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstQueryBalanceResult;
+import com.rfchina.wallet.server.mapper.ext.BalanceTunnelDetailExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletClearingExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectExtDao;
@@ -63,6 +68,9 @@ import com.rfchina.wallet.server.service.handler.common.EBankHandler;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBizHandler;
 import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
+import java.io.BufferedReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -143,6 +151,8 @@ public class SeniorPayService {
 	@Autowired
 	private WalletConsumeExtDao walletConsumeDao;
 
+	@Autowired
+	private BalanceTunnelDetailExtDao balanceTunnelDetailDao;
 
 	/**
 	 * 充值
@@ -162,12 +172,21 @@ public class SeniorPayService {
 			return walletOrderDao.selectCountByOrderNo(id) == 0;
 		});
 
+		// 支付方式
+		BankCard bankCard = new BankCard();
+		bankCard.setBankCardNo(walletCard.getBankAccount());
+		bankCard.setAmount(amount);
+		bankCard.setPayType(CollectPayType.BANKCARD.getValue());
+		WalletPayMethod payMethod = new WalletPayMethod();
+		payMethod.setBankCard(bankCard);
+
 		WalletOrder rechargeOrder = WalletOrder.builder()
 			.orderNo(orderNo)
 			.batchNo(batchNo)
 			.bizNo(IdGenerator.createBizId(PREFIX_RECHARGE, 19, (id) -> true))
 			.walletId(walletId)
 			.type(OrderType.RECHARGE.getValue())
+			.payMethod(payMethod.getMethods())
 			.amount(amount)
 			.progress(GwProgress.WAIT_SEND.getValue())
 			.status(OrderStatus.WAITTING.getValue())
@@ -179,19 +198,12 @@ public class SeniorPayService {
 			.build();
 		walletOrderDao.insertSelective(rechargeOrder);
 
-		// 支付方式
-		BankCard bankCard = new BankCard();
-		bankCard.setBankCardNo(walletCard.getBankAccount());
-		bankCard.setAmount(amount);
-		bankCard.setPayType(CollectPayType.BANKCARD.getValue());
-		WalletPayMethod payMethod = new WalletPayMethod();
-		payMethod.setBankCard(bankCard);
+
 
 		// 充值记录
 		WalletRecharge recharge = WalletRecharge.builder()
 			.orderId(rechargeOrder.getId())
 			.validateType(BizValidateType.SMS.getValue())
-			.payMethod(payMethod.getMethods())
 			.createTime(new Date())
 			.build();
 		walletRechargeDao.insertSelective(recharge);
@@ -231,6 +243,7 @@ public class SeniorPayService {
 			.bizNo(IdGenerator.createBizId(PREFIX_WITHDRAW, 19, (id) -> true))
 			.walletId(walletId)
 			.type(OrderType.WITHDRAWAL.getValue())
+			.payMethod(ChannelType.BANKCARD.getValue())
 			.amount(amount)
 			.progress(GwProgress.WAIT_SEND.getValue())
 			.status(OrderStatus.WAITTING.getValue())
@@ -242,13 +255,12 @@ public class SeniorPayService {
 			.build();
 		walletOrderDao.insertSelective(withdrawOrder);
 
-		// 充值记录
+		// 提现记录
 		WalletWithdraw withdraw = WalletWithdraw.builder()
 			.orderId(withdrawOrder.getId())
 			.cardId(walletCard.getId())
 			.bankAccount(walletCard.getBankAccount())
 			.validateType(BizValidateType.PASSWORD.getValue())
-			.payMethod(ChannelType.BANKCARD.getValue())
 			.createTime(new Date())
 			.build();
 		walletWithdrawDao.insertSelective(withdraw);
@@ -290,6 +302,7 @@ public class SeniorPayService {
 			.bizNo(req.getBizNo())
 			.walletId(payerWalletId)
 			.type(OrderType.COLLECT.getValue())
+			.payMethod(req.getWalletPayMethod().getMethods())
 			.amount(req.getAmount())
 			.progress(GwProgress.WAIT_SEND.getValue())
 			.status(OrderStatus.WAITTING.getValue())
@@ -308,7 +321,6 @@ public class SeniorPayService {
 			.orderId(collectOrder.getId())
 			.agentWalletId(configService.getAgentEntWalletId())
 			.refundLimit(req.getAmount())
-			.payMethod(req.getWalletPayMethod().getMethods())
 			.validateType(validateType)
 			.createTime(new Date())
 			.build();
@@ -349,7 +361,8 @@ public class SeniorPayService {
 	/**
 	 * 发起代付（加锁）
 	 */
-	public SettleResp agentPay(WalletOrder collectOrder, String bizNo, Reciever receiver,String note) {
+	public SettleResp agentPay(WalletOrder collectOrder, String bizNo, Reciever receiver,
+		String note) {
 
 		// 代收明细
 		WalletCollect walletCollect = walletCollectDao.selectByOrderId(collectOrder.getId());
@@ -709,8 +722,35 @@ public class SeniorPayService {
 	 */
 	public void balance(Date date) {
 		EBankHandler handler = handlerHelper.selectByTunnelType(TunnelType.YUNST.getValue());
-		handler.balance(date);
-	}
+		String fileUrl = handler.getBalanceFile(date);
 
+		// 删除历史数据
+		Date beginDate = DateUtil.getDate2(date);
+		Date endDate = DateUtil.getDate(date);
+		balanceTunnelDetailDao.deleteByBalanceDate(beginDate, endDate);
+		// 解析文件
+		try {
+			try (BufferedReader reader = Files.newBufferedReader(Paths.get(fileUrl))) {
+
+				String line = reader.readLine();
+				for (line = reader.readLine(); line != null; line = reader.readLine()) {
+					CheckAccount check = StringObject
+						.parseStringObject(line, CheckAccount.class, "\\|");
+					BalanceTunnelDetail detail = BeanUtil
+						.newInstance(check, BalanceTunnelDetail.class);
+					detail.setTunnelType(TunnelType.YUNST.getValue());
+					detail.setWalletBalanceDate(date);
+					detail.setCreateTime(new Date());
+					balanceTunnelDetailDao.insertSelective(detail);
+				}
+			}
+		} catch (Exception e) {
+			log.error("【通联】更新对账单异常", e);
+		}
+
+		balanceTunnelDetailDao.selectByBalanceDate(beginDate,endDate);
+
+
+	}
 
 }

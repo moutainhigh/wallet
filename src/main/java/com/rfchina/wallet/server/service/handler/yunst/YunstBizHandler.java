@@ -1,7 +1,10 @@
 package com.rfchina.wallet.server.service.handler.yunst;
 
 import com.allinpay.yunst.sdk.util.RSAUtil;
+import com.google.common.base.Function;
+import com.google.common.base.Supplier;
 import com.google.common.collect.Lists;
+import com.rabbitmq.client.UnblockedCallback;
 import com.rfchina.platform.biztool.mapper.string.StringObject;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.BeanUtil;
@@ -117,6 +120,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -180,8 +184,6 @@ public class YunstBizHandler extends EBankHandler {
 	@Autowired
 	private MoneyLogMapper moneyLogDao;
 
-	@Autowired
-	private BalanceTunnelDetailExtDao balanceTunnelDetailDao;
 
 
 	public boolean isSupportWalletLevel(Byte walletLevel) {
@@ -827,11 +829,15 @@ public class YunstBizHandler extends EBankHandler {
 		return yunstTpl.signRequest(req);
 	}
 
+	/**
+	 * 对账
+	 */
+	public String getBalanceFile(Date date) {
+		String resourceUrl = queryBalanceFile.apply(date);
+		return downloadFile.apply(resourceUrl);
+	}
 
-	public void balance(Date date) {
-		String resourceUrl = null;
-		String tempUrl = configService.getStorageDir();
-		String fileUrl = null;
+	private Function<Date, String> queryBalanceFile = (date) -> {
 		// 获取文件地址
 		GetCheckAccountFileReq req = GetCheckAccountFileReq.builder()
 			.date(DateUtil.formatDate(date, DateUtil.SHORT_DTAE_PATTERN))
@@ -839,43 +845,24 @@ public class YunstBizHandler extends EBankHandler {
 			.build();
 		try {
 			GetCheckAccountFileResp resp = yunstTpl.execute(req, GetCheckAccountFileResp.class);
-			resourceUrl = resp.getUrl();
+			return resp.getUrl();
 		} catch (Exception e) {
 			log.error("通联-接口异常", e);
 			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
 		}
+	};
+
+	private Function<String,String> downloadFile = (resourceUrl) -> {
 		// 下载文件
 		try {
 			URL url = new URL(resourceUrl);
 			String uri = url.getFile();
-			fileUrl = tempUrl + uri.substring(uri.lastIndexOf("/"));
+			String fileUrl = configService.getStorageDir() + uri.substring(uri.lastIndexOf("/"));
 			HttpFile.download(url, fileUrl);
+			return fileUrl;
 		} catch (Exception e) {
 			log.error("文件下载错误", e);
+			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
 		}
-
-		balanceTunnelDetailDao
-			.deleteByDate(DateUtil.formatDate(date, DateUtil.STANDARD_DTAE_PATTERN));
-		// 解析文件
-		try {
-			try (BufferedReader reader = Files.newBufferedReader(Paths.get(fileUrl))) {
-
-				String line = reader.readLine();
-				for (line = reader.readLine(); line != null; line = reader.readLine()) {
-					CheckAccount check = StringObject
-						.parseStringObject(line, CheckAccount.class, "\\|");
-					BalanceTunnelDetail detail = BeanUtil
-						.newInstance(check, BalanceTunnelDetail.class);
-					detail.setTunnelType(TunnelType.YUNST.getValue());
-					detail.setWalletBalanceDate(date);
-					detail.setCreateTime(new Date());
-					balanceTunnelDetailDao.insertSelective(detail);
-				}
-			}
-		} catch (Exception e) {
-			log.error("【通联】更新对账单异常", e);
-		}
-		// 对比明细
-
-	}
+	};
 }

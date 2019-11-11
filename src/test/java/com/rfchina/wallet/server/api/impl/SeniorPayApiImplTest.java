@@ -72,13 +72,13 @@ public class SeniorPayApiImplTest extends SpringApiTest {
 		reciever.setAmount(1L);
 		reciever.setFeeAmount(0L);
 		seniorPayApi.agentPay(super.accessToken, String.valueOf(System.currentTimeMillis()),
-			collectOrderNo, reciever);
+			collectOrderNo, reciever, "");
 
 		reciever.setWalletId(payeeWalletId);
 		reciever.setAmount(2L);
 		reciever.setFeeAmount(0L);
 		seniorPayApi.agentPay(super.accessToken, String.valueOf(System.currentTimeMillis()),
-			collectOrderNo, reciever);
+			collectOrderNo, reciever, "");
 	}
 
 	@Test

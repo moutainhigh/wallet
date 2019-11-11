@@ -111,7 +111,7 @@ public abstract class EBankHandler {
 	/**
 	 * 对账
 	 */
-	public void balance(Date date){
+	public String getBalanceFile(Date date){
 		throw new RuntimeException();
 	}
 
