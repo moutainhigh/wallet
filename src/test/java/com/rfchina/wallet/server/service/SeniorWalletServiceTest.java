@@ -32,7 +32,7 @@ public class SeniorWalletServiceTest extends SpringBaseTest {
 			.selectByWalletId(payerWalletId, TunnelType.YUNST.getValue());
 
 		String url = seniorWalletService
-			.resetSecurityTel(walletPerson, channel, "http://www.163.com");
+			.updateSecurityTel(walletPerson, channel, "http://www.163.com");
 		log.info("changeBindPhone url = ", url);
 	}
 }

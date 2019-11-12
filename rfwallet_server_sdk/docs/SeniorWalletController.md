@@ -1,55 +1,3 @@
-###  高级钱包-修改支付密码
-
-请求地址: /wallet_server/v1/m/senior/wallet/reset_pay_pwd
-
-请求类型: POST
-
-请求参数:
-
-
-| 参数名 | 是否必须 | 描述 |
-|:-- |:-- |:--   |
-|access_token|是|access_token|
-|jump_url|是|前端跳转地址|
-|wallet_id|是|钱包id|
-
-返回数据
-```
-{
-  "code": 1001,//状态码
-  "msg": ""//消息
-   , "data":  {
-    url:""   //
-}  
-}
-```
-
-###  高级钱包-修改手机
-
-请求地址: /wallet_server/v1/m/senior/wallet/reset_security_tel
-
-请求类型: POST
-
-请求参数:
-
-
-| 参数名 | 是否必须 | 描述 |
-|:-- |:-- |:--   |
-|access_token|是|access_token|
-|wallet_id|是|钱包id|
-|jump_url|否|前端回跳地址|
-
-返回数据
-```
-{
-  "code": 1001,//状态码
-  "msg": ""//消息
-   , "data":  {
-    url:""   //
-}  
-}
-```
-
 ###  高级钱包-企业用户绑定手机
 
 请求地址: /wallet_server/v1/m/senior/wallet/bind_phone
@@ -473,6 +421,58 @@
     tunnel_type:""  , //渠道类型。1: 浦发银企直连，2：通联云商通
     tunnel_user_id:""  , //银行用户标识
     wallet_id:""   //钱包id
+}  
+}
+```
+
+###  高级钱包-修改支付密码
+
+请求地址: /wallet_server/v1/m/senior/wallet/update_pay_pwd
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|jump_url|是|前端跳转地址|
+|wallet_id|是|钱包id|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+   , "data":  {
+    url:""   //
+}  
+}
+```
+
+###  高级钱包-修改手机
+
+请求地址: /wallet_server/v1/m/senior/wallet/update_security_tel
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|wallet_id|是|钱包id|
+|jump_url|否|前端回跳地址|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+   , "data":  {
+    url:""   //
 }  
 }
 ```

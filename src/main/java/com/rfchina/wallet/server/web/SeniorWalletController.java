@@ -75,13 +75,13 @@ public class SeniorWalletController {
 	}
 
 	@ApiOperation("高级钱包-修改手机")
-	@PostMapping(UrlConstant.WALLET_SENIOR_RESET_SECURITY_TEL)
-	public ResponseValue<PageVo> resetSecurityTel(
+	@PostMapping(UrlConstant.WALLET_SENIOR_UPDATE_SECURITY_TEL)
+	public ResponseValue<PageVo> updateSecurityTel(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
 		@ApiParam(value = "前端回跳地址") @RequestParam(value = "jump_url", required = false) String jumpUrl) {
 
-		String redirectUrl = seniorWalletApi.resetSecurityTel(accessToken, walletId, jumpUrl);
+		String redirectUrl = seniorWalletApi.updateSecurityTel(accessToken, walletId, jumpUrl);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
 			PageVo.builder().url(redirectUrl).build());
 	}
@@ -177,13 +177,13 @@ public class SeniorWalletController {
 	}
 
 	@ApiOperation("高级钱包-修改支付密码")
-	@PostMapping(UrlConstant.WALLET_SENIOR_RESET_PAY_PWD)
-	public ResponseValue<PageVo> resetPayPwd(
+	@PostMapping(UrlConstant.WALLET_SENIOR_UPDATE_PAY_PWD)
+	public ResponseValue<PageVo> updatePayPwd(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
 		@ApiParam(value = "前端跳转地址", required = true) @RequestParam("jump_url") String jumpUrl) {
 
-		String redirectUrl = seniorWalletApi.resetPayPwd(accessToken, walletId, jumpUrl);
+		String redirectUrl = seniorWalletApi.updatePayPwd(accessToken, walletId, jumpUrl);
 		PageVo pageVo = PageVo.builder().url(redirectUrl).build();
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, pageVo);
 	}

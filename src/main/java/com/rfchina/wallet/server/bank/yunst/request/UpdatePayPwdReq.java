@@ -9,8 +9,8 @@ import lombok.ToString;
 @Builder
 @Data
 @ToString(callSuper = true)
-@ApiModel(description = "4.1.19 重置支付密码【密码验证版】")
-public class ResetPayPwdReq implements YunstBaseReq {
+@ApiModel(description = "4.1.18 修改支付密码【密码验证版】")
+public class UpdatePayPwdReq implements YunstBaseReq {
 
 	private static final long serialVersionUID = 118332437377003408L;
 
@@ -21,7 +21,7 @@ public class ResetPayPwdReq implements YunstBaseReq {
 
 	@Override
 	public String getMethodName() {
-		return "resetPayPwd";
+		return "updatePayPwd";
 	}
 
 
@@ -31,8 +31,8 @@ public class ResetPayPwdReq implements YunstBaseReq {
 	@ApiModelProperty(value = "用户姓名", required = true)
 	private String name;
 
-	@ApiModelProperty(value = "用户绑定手机号码", required = true)
-	private String phone;
+//	@ApiModelProperty(value = "用户绑定手机号码", required = true)
+//	private String phone;
 
 	@ApiModelProperty(value = "证件类型 目前只支持身份证-1L", required = true)
 	private Long identityType;
@@ -40,10 +40,10 @@ public class ResetPayPwdReq implements YunstBaseReq {
 	@ApiModelProperty(value = "证件号码 (RSA加密)", required = true)
 	private String identityNo;
 
-	@ApiModelProperty(value = "签订之后，跳转返回的页面地址", required = true)
-	private String jumpUrl;
-
 	@ApiModelProperty(value = "后台通知地址", required = true)
 	private String backUrl;
+
+	@ApiModelProperty(value = "签订之后，跳转返回的页面地址", required = true)
+	private String jumpUrl;
 
 }

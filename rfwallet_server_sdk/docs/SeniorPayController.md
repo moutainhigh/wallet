@@ -13,6 +13,7 @@
 |agent_pay_req|是|代付列表（与代收的分账规则对应），参考AgentPayReq.Reciever结构体|
 |biz_no|是|业务方单号|
 |collect_order_no|是|原代收单号|
+|note|否|备注|
 
 返回数据
 ```
@@ -39,9 +40,13 @@
     end_time:""  , //结束时间
     expire_time:""  , //过期时间
     id:""  , //id
+    industry_code:""  , //行业代码（由渠道分配
+    industry_name:""  , //行业名称（由渠道分配）
     locked:""  , //1:未锁 2：锁定
+    note:""  , //备注，最长1024
     notified:""  , //1:已通知技术 2:已通知业务
     order_no:""  , //订单号
+    pay_method:""  , //支付方式 1：余额 2：微信 4：支付宝 8:刷卡支付 16：银行卡
     progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
     start_time:""  , //开始时间
     status:""  , //交易状态。 2：进行中，3：交易成功，4：交易失败
@@ -52,6 +57,7 @@
     tunnel_succ_time:""  , //通道成功时间
     tunnel_type:""  , //通道类型。1: 浦发银企直连，2：通联云商通
     type:""  , //类型，1：财务结算，2：充值，3：提现，4：代收，5：代付，6：退款，7：消费
+    user_err_msg:""  , //用户端错误提示
     wallet_id:""   //钱包id
 }   
 }  
@@ -89,10 +95,14 @@
     end_time:""  , //结束时间
     expire_time:""  , //过期时间
     id:""  , //id
+    industry_code:""  , //行业代码（由渠道分配
+    industry_name:""  , //行业名称（由渠道分配）
     locked:""  , //1:未锁 2：锁定
+    note:""  , //备注，最长1024
     notified:""  , //1:已通知技术 2:已通知业务
     order_no:""  , //订单号
     pay_info:""  , //扫码支付信息/ JS 支付串信息/微信原生 H5 支付串信息
+    pay_method:""  , //支付方式 1：余额 2：微信 4：支付宝 8:刷卡支付 16：银行卡
     progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
     signed_params:""  , //密码确认时输入参数
     start_time:""  , //开始时间
@@ -106,6 +116,7 @@
     tunnel_succ_time:""  , //通道成功时间
     tunnel_type:""  , //通道类型。1: 浦发银企直连，2：通联云商通
     type:""  , //类型，1：财务结算，2：充值，3：提现，4：代收，5：代付，6：退款，7：消费
+    user_err_msg:""  , //用户端错误提示
     wallet_id:""  , //钱包id
     we_chat_a_p_p_info:""   //微信 APP 支付信息
 }  
@@ -141,10 +152,14 @@
     end_time:""  , //结束时间
     expire_time:""  , //过期时间
     id:""  , //id
+    industry_code:""  , //行业代码（由渠道分配
+    industry_name:""  , //行业名称（由渠道分配）
     locked:""  , //1:未锁 2：锁定
+    note:""  , //备注，最长1024
     notified:""  , //1:已通知技术 2:已通知业务
     order_no:""  , //订单号
     pay_info:""  , //扫码支付信息/ JS 支付串信息/微信原生 H5 支付串信息
+    pay_method:""  , //支付方式 1：余额 2：微信 4：支付宝 8:刷卡支付 16：银行卡
     progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
     signed_params:""  , //密码确认时输入参数
     start_time:""  , //开始时间
@@ -158,6 +173,7 @@
     tunnel_succ_time:""  , //通道成功时间
     tunnel_type:""  , //通道类型。1: 浦发银企直连，2：通联云商通
     type:""  , //类型，1：财务结算，2：充值，3：提现，4：代收，5：代付，6：退款，7：消费
+    user_err_msg:""  , //用户端错误提示
     wallet_id:""  , //钱包id
     we_chat_a_p_p_info:""   //微信 APP 支付信息
 }  
@@ -193,9 +209,13 @@
     end_time:""  , //结束时间
     expire_time:""  , //过期时间
     id:""  , //id
+    industry_code:""  , //行业代码（由渠道分配
+    industry_name:""  , //行业名称（由渠道分配）
     locked:""  , //1:未锁 2：锁定
+    note:""  , //备注，最长1024
     notified:""  , //1:已通知技术 2:已通知业务
     order_no:""  , //订单号
+    pay_method:""  , //支付方式 1：余额 2：微信 4：支付宝 8:刷卡支付 16：银行卡
     progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
     start_time:""  , //开始时间
     status:""  , //交易状态。 2：进行中，3：交易成功，4：交易失败
@@ -206,6 +226,7 @@
     tunnel_succ_time:""  , //通道成功时间
     tunnel_type:""  , //通道类型。1: 浦发银企直连，2：通联云商通
     type:""  , //类型，1：财务结算，2：充值，3：提现，4：代收，5：代付，6：退款，7：消费
+    user_err_msg:""  , //用户端错误提示
     wallet_id:""   //钱包id
 }  
 }
@@ -243,11 +264,15 @@
     expire_time:""  , //过期时间
     extend_info:""  , //扩展参数
     id:""  , //id
+    industry_code:""  , //行业代码（由渠道分配
+    industry_name:""  , //行业名称（由渠道分配）
     locked:""  , //1:未锁 2：锁定
+    note:""  , //备注，最长1024
     notified:""  , //1:已通知技术 2:已通知业务
     order_no:""  , //订单号
     password_confirm:""  , //密码验证
     pay_info:""  , //扫码支付信息/ JS支付串信息/ 微信原生H5支付串信息
+    pay_method:""  , //支付方式 1：余额 2：微信 4：支付宝 8:刷卡支付 16：银行卡
     progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
     sms_confirm:""  , //短信验证
     start_time:""  , //开始时间
@@ -261,6 +286,7 @@
     tunnel_succ_time:""  , //通道成功时间
     tunnel_type:""  , //通道类型。1: 浦发银企直连，2：通联云商通
     type:""  , //类型，1：财务结算，2：充值，3：提现，4：代收，5：代付，6：退款，7：消费
+    user_err_msg:""  , //用户端错误提示
     wallet_id:""  , //钱包id
     we_chat_a_p_p_info:""   //微信 APP 支付信息
 }  
@@ -298,9 +324,13 @@
     end_time:""  , //结束时间
     expire_time:""  , //过期时间
     id:""  , //id
+    industry_code:""  , //行业代码（由渠道分配
+    industry_name:""  , //行业名称（由渠道分配）
     locked:""  , //1:未锁 2：锁定
+    note:""  , //备注，最长1024
     notified:""  , //1:已通知技术 2:已通知业务
     order_no:""  , //订单号
+    pay_method:""  , //支付方式 1：余额 2：微信 4：支付宝 8:刷卡支付 16：银行卡
     progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
     start_time:""  , //开始时间
     status:""  , //交易状态。 2：进行中，3：交易成功，4：交易失败
@@ -311,6 +341,7 @@
     tunnel_succ_time:""  , //通道成功时间
     tunnel_type:""  , //通道类型。1: 浦发银企直连，2：通联云商通
     type:""  , //类型，1：财务结算，2：充值，3：提现，4：代收，5：代付，6：退款，7：消费
+    user_err_msg:""  , //用户端错误提示
     wallet_id:""   //钱包id
 }  
 }
@@ -398,9 +429,13 @@
     end_time:""  , //结束时间
     expire_time:""  , //过期时间
     id:""  , //id
+    industry_code:""  , //行业代码（由渠道分配
+    industry_name:""  , //行业名称（由渠道分配）
     locked:""  , //1:未锁 2：锁定
+    note:""  , //备注，最长1024
     notified:""  , //1:已通知技术 2:已通知业务
     order_no:""  , //订单号
+    pay_method:""  , //支付方式 1：余额 2：微信 4：支付宝 8:刷卡支付 16：银行卡
     progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
     signed_params:""  , //密码确认时输入参数
     start_time:""  , //开始时间
@@ -413,6 +448,7 @@
     tunnel_succ_time:""  , //通道成功时间
     tunnel_type:""  , //通道类型。1: 浦发银企直连，2：通联云商通
     type:""  , //类型，1：财务结算，2：充值，3：提现，4：代收，5：代付，6：退款，7：消费
+    user_err_msg:""  , //用户端错误提示
     wallet_id:""   //钱包id
 }  
 }

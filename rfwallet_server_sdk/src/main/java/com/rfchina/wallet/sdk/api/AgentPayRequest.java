@@ -25,6 +25,9 @@ public class AgentPayRequest extends  AbstractApiRequest {
   @ApiModelProperty("原代收单号")
   private String collectOrderNo ;
 
+  @ApiModelProperty("备注")
+  private String note ;
+
 
   @Override
   public String getApiUrl() {
@@ -50,6 +53,9 @@ public class AgentPayRequest extends  AbstractApiRequest {
       }
       if(collectOrderNo != null){
         parameters.put("collect_order_no", collectOrderNo.toString());
+      }
+      if(note != null){
+        parameters.put("note", note.toString());
       }
     return parameters;
   }

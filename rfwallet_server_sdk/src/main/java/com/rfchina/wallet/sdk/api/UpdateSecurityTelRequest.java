@@ -9,28 +9,28 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 
 
-/** 高级钱包渠道信息 */
+/** 高级钱包-修改手机 */
 @Builder
-public class SeniorWalletTunnelInfoRequest extends  AbstractApiRequest {
+public class UpdateSecurityTelRequest extends  AbstractApiRequest {
 
   @ApiModelProperty("access_token")
   private String accessToken ;
 
-  @ApiModelProperty("渠道类型 1:浦发银企直连,2:通联云商通")
-  private Integer tunnelType ;
-
   @ApiModelProperty("钱包id")
   private Long walletId ;
+
+  @ApiModelProperty("前端回跳地址")
+  private String jumpUrl ;
 
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/senior/wallet/tunnel_info";
+    return "/wallet_server/v1/m/senior/wallet/update_security_tel";
   }
 
   @Override
   public Class<?> getResponseModelClass() {
-    return WalletTunnel.class;
+    return PageVo.class;
   }
 
   @Override
@@ -39,11 +39,11 @@ public class SeniorWalletTunnelInfoRequest extends  AbstractApiRequest {
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
       }
-      if(tunnelType != null){
-        parameters.put("tunnel_type", tunnelType.toString());
-      }
       if(walletId != null){
         parameters.put("wallet_id", walletId.toString());
+      }
+      if(jumpUrl != null){
+        parameters.put("jump_url", jumpUrl.toString());
       }
     return parameters;
   }

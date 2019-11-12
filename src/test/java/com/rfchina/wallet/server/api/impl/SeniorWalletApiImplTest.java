@@ -1,7 +1,5 @@
 package com.rfchina.wallet.server.api.impl;
 
-import static org.junit.Assert.*;
-
 import com.rfchina.wallet.server.SpringApiTest;
 import com.rfchina.wallet.server.api.SeniorWalletApi;
 import lombok.extern.slf4j.Slf4j;
@@ -18,14 +16,14 @@ public class SeniorWalletApiImplTest extends SpringApiTest {
 	@Test
 	public void resetSecurityTel() {
 
-		String url = seniorWalletApi.resetSecurityTel(super.accessToken, walletId, "/test");
-		log.info("resetSecurityTel url = {}", url);
+		String url = seniorWalletApi.updateSecurityTel(super.accessToken, walletId, "/test");
+		log.info("updateSecurityTel url = {}", url);
 	}
 
 	@Test
-	public void resetPayPwd() {
+	public void updatePayPwd() {
 
-		String url = seniorWalletApi.resetPayPwd(super.accessToken, walletId, "/test");
-		log.info("resetPayPwd url = {}", url);
+		String url = seniorWalletApi.updatePayPwd(super.accessToken, walletId, "/test");
+		log.info("updatePayPwd url = {}", url);
 	}
 }

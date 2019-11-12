@@ -8,7 +8,7 @@ import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.WalletPerson;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.bank.yunst.exception.UnknownException;
-import com.rfchina.wallet.server.bank.yunst.request.ResetPayPwdReq;
+import com.rfchina.wallet.server.bank.yunst.request.UpdatePayPwdReq;
 import com.rfchina.wallet.server.bank.yunst.request.UpdatePhoneByPayPwdReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstApplyBindBankCardReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstBalanceProtocolReq;
@@ -109,7 +109,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 设置支付密码(个人)
 	 */
-	public String resetPayPwd(WalletPerson person, WalletTunnel channel, String jumpUrl) {
+	public String updatePayPwd(WalletPerson person, WalletTunnel channel, String jumpUrl) {
 
 		String encryptIdNo = null;
 		try {
@@ -117,10 +117,9 @@ public class YunstUserHandler extends YunstBaseHandler {
 		} catch (Exception e) {
 			log.error("身份证加密错误", e);
 		}
-		ResetPayPwdReq req = ResetPayPwdReq.builder()
+		UpdatePayPwdReq req = UpdatePayPwdReq.builder()
 			.bizUserId(channel.getBizUserId())
 			.name(person.getName())
-			.phone(channel.getSecurityTel())
 			.identityType(YunstIdType.ID_CARD.getValue())
 			.identityNo(encryptIdNo)
 			.jumpUrl(jumpUrl)
@@ -184,7 +183,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 修改绑定手机
 	 */
-	public String resetSecurityTel(String bizUserId, String realName, String oldPhone,
+	public String updateSecurityTel(String bizUserId, String realName, String oldPhone,
 		String identityNo, String jumpUrl) {
 
 		String encryptIdNo = null;

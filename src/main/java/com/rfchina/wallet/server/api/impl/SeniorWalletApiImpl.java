@@ -112,12 +112,12 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public String resetSecurityTel(String accessToken, Long walletId, String jumpUrl) {
+	public String updateSecurityTel(String accessToken, Long walletId, String jumpUrl) {
 
 		verifyService.checkSeniorWallet(walletId);
 		WalletTunnel channel = verifyService.checkChannel(walletId, ChannelType.YUNST);
 		WalletPerson walletPerson = walletPersonDao.selectByWalletId(walletId);
-		return seniorWalletService.resetSecurityTel(walletPerson, channel, jumpUrl);
+		return seniorWalletService.updateSecurityTel(walletPerson, channel, jumpUrl);
 	}
 
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
@@ -231,9 +231,9 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public String resetPayPwd(String accessToken, Long walletId, String jumpUrl) {
+	public String updatePayPwd(String accessToken, Long walletId, String jumpUrl) {
 		verifyService.checkSeniorWallet(walletId);
-		return seniorWalletService.resetTunnelPayPwd(walletId, jumpUrl);
+		return seniorWalletService.updateTunnelPayPwd(walletId, jumpUrl);
 	}
 
 	@Log

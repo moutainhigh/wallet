@@ -12,19 +12,7 @@ public interface BalanceTunnelDetailExtDao extends BalanceTunnelDetailMapper {
 	@Update({
 		"update rf_balance_tunnel_detail",
 		"set deleted = 1",
-		"where wallet_balance_date  >=  beginDate and wallet_balance_date <= endDate "
+		"where wallet_balance_date  >=  #{beginDate} and wallet_balance_date <= #{endDate} "
 	})
 	void deleteByBalanceDate(@Param("beginDate") Date beginDate,@Param("endDate") Date endDate);
-
-	@Select({
-		"select * from rf_balance_tunnel_detail",
-		"where deleted = 0 and wallet_balance_date  >=  beginDate and wallet_balance_date < endDate"
-	})
-	void selectByBalanceDate(@Param("beginDate") Date beginDate,@Param("endDate") Date endDate);
-
-	@Select({
-		"select * from rf_balance_tunnel_detail",
-		"where deleted = 0 and wallet_balance_date  >=  beginDate and wallet_balance_date < endDate"
-	})
-	void selectCountByBalanceDate(@Param("beginDate") Date beginDate,@Param("endDate") Date endDate);
 }

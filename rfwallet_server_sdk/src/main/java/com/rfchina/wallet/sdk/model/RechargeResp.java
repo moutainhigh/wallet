@@ -43,8 +43,17 @@ public class RechargeResp  {
     @ApiModelProperty("id")
     private Long id ;
 
+    @ApiModelProperty("行业代码（由渠道分配")
+    private String industryCode ;
+
+    @ApiModelProperty("行业名称（由渠道分配）")
+    private String industryName ;
+
     @ApiModelProperty("1:未锁 2：锁定")
     private Integer locked ;
+
+    @ApiModelProperty("备注，最长1024")
+    private String note ;
 
     @ApiModelProperty("1:已通知技术 2:已通知业务")
     private Integer notified ;
@@ -57,6 +66,9 @@ public class RechargeResp  {
 
     @ApiModelProperty("扫码支付信息/ JS支付串信息/ 微信原生H5支付串信息")
     private String payInfo ;
+
+    @ApiModelProperty("支付方式 1：余额 2：微信 4：支付宝 8:刷卡支付 16：银行卡")
+    private Integer payMethod ;
 
     @ApiModelProperty("进度。1：待发送 2：已发送 3：已接收结果")
     private Integer progress ;
@@ -96,6 +108,9 @@ public class RechargeResp  {
 
     @ApiModelProperty("类型，1：财务结算，2：充值，3：提现，4：代收，5：代付，6：退款，7：消费")
     private Integer type ;
+
+    @ApiModelProperty("用户端错误提示")
+    private String userErrMsg ;
 
     @ApiModelProperty("钱包id")
     private Long walletId ;

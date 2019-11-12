@@ -150,9 +150,6 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	}
 
 
-	@Test
-	public void balance() {
-		seniorPayService.balance(DateUtil.addDate2(new Date(), -1));
-	}
+
 
 }

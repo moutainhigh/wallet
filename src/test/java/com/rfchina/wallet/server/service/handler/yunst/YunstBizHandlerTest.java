@@ -36,7 +36,7 @@ public class YunstBizHandlerTest extends SpringBaseTest {
 		WalletTunnel payer = walletTunnelDao
 			.selectByWalletId(withdrawOrder.getWalletId(), withdrawOrder.getTunnelType());
 		String signedParams = yunstBizHandler
-			.passwordConfirm(withdrawOrder, payer, jumpUrl, customerIp);
+			.pwdGwConfirm(withdrawOrder, payer, jumpUrl, customerIp);
 		signedParams = configService.getYunstPwdConfirmUrl() + "?" + signedParams;
 
 		log.info(signedParams);

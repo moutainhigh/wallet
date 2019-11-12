@@ -60,6 +60,7 @@ import com.rfchina.wallet.server.bank.yunst.request.GetOrderDetailReq;
 import com.rfchina.wallet.server.bank.yunst.request.PwdConfirmReq;
 import com.rfchina.wallet.server.bank.yunst.request.RefundApplyReq;
 import com.rfchina.wallet.server.bank.yunst.request.RefundApplyReq.RefundInfo;
+import com.rfchina.wallet.server.bank.yunst.request.SmsGwPayReq;
 import com.rfchina.wallet.server.bank.yunst.request.SmsPayReq;
 import com.rfchina.wallet.server.bank.yunst.request.SmsRetryReq;
 import com.rfchina.wallet.server.bank.yunst.request.WithdrawApplyReq;
@@ -183,7 +184,6 @@ public class YunstBizHandler extends EBankHandler {
 
 	@Autowired
 	private MoneyLogMapper moneyLogDao;
-
 
 
 	public boolean isSupportWalletLevel(Byte walletLevel) {
@@ -817,7 +817,20 @@ public class YunstBizHandler extends EBankHandler {
 	/**
 	 * 短信确认支付
 	 */
-	public String passwordConfirm(WalletOrder order, WalletTunnel channel, String jumpUrl,
+	public String smsGwConfirm(WalletOrder order, WalletTunnel channel, String consumerIp) {
+
+		SmsGwPayReq req = SmsGwPayReq.builder()
+			.bizOrderNo(order.getOrderNo())
+			.bizUserId(channel.getBizUserId())
+			.consumerIp(consumerIp)
+			.build();
+		return yunstTpl.signRequest(req);
+	}
+
+	/**
+	 * 密码确认支付
+	 */
+	public String pwdGwConfirm(WalletOrder order, WalletTunnel channel, String jumpUrl,
 		String consumerIp) {
 
 		PwdConfirmReq req = PwdConfirmReq.builder()
@@ -832,7 +845,7 @@ public class YunstBizHandler extends EBankHandler {
 	/**
 	 * 对账
 	 */
-	public String getBalanceFile(Date date) {
+	public String downloadBalanceFile(Date date) {
 		String resourceUrl = queryBalanceFile.apply(date);
 		return downloadFile.apply(resourceUrl);
 	}
@@ -852,12 +865,13 @@ public class YunstBizHandler extends EBankHandler {
 		}
 	};
 
-	private Function<String,String> downloadFile = (resourceUrl) -> {
+	private Function<String, String> downloadFile = (resourceUrl) -> {
 		// 下载文件
 		try {
 			URL url = new URL(resourceUrl);
 			String uri = url.getFile();
-			String fileUrl = configService.getStorageDir() + uri.substring(uri.lastIndexOf("/"));
+			String fileUrl =
+				configService.getStorageDir() + "/yunst/" + uri.substring(uri.lastIndexOf("/"));
 			HttpFile.download(url, fileUrl);
 			return fileUrl;
 		} catch (Exception e) {

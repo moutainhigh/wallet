@@ -1019,17 +1019,38 @@ public class EnumWallet {
 	 * 脏数据标识 1：正常 2：
 	 */
 	public enum DirtyType implements Valuable<Byte> {
-		/**
-		 * 身份证
-		 */
 		NORMAL((byte) 1, "正常"),
-		DIRTY((byte) 2L, "脏数据"),
+		DIRTY((byte) 2, "脏数据"),
 		;
 
 		private Byte value;
 		private String valueName;
 
 		DirtyType(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return this.value;
+		}
+	}
+
+	/**
+	 * 对账状态
+	 */
+	public enum BalanceStatus implements Valuable<Byte> {
+		SUCC((byte) 1, "对账成功"),
+		AMOUNT_NOT_MATCH((byte) 2, "金额不匹配"),
+		TUNNEL_MORE((byte) 3, "通道条目多"),
+		WALLET_MORE((byte) 4, "钱包条目多"),
+		;
+
+		private Byte value;
+		private String valueName;
+
+		BalanceStatus(Byte value, String valueName) {
 			this.value = value;
 			this.valueName = valueName;
 		}

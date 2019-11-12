@@ -265,7 +265,7 @@ public abstract class WalletBaseTest extends BaseTest {
 		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
 		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
 		params.put("sign", sign);
-		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_RESET_SECURITY_TEL,
+		return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SENIOR_UPDATE_SECURITY_TEL,
 			params, 1001);
 	}
 

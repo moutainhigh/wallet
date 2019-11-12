@@ -2,9 +2,6 @@ package com.rfchina.wallet.server.service;
 
 import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.biztools.mq.PostMq;
-import com.rfchina.platform.biztool.mapper.string.StringObject;
-import com.rfchina.platform.common.utils.BeanUtil;
-import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EnumUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
@@ -14,7 +11,6 @@ import com.rfchina.wallet.domain.misc.EnumDef.OrderType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelSignContract;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
-import com.rfchina.wallet.domain.model.BalanceTunnelDetail;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletClearing;
@@ -29,9 +25,7 @@ import com.rfchina.wallet.domain.model.WalletRefund;
 import com.rfchina.wallet.domain.model.WalletRefundDetail;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.domain.model.WalletWithdraw;
-import com.rfchina.wallet.server.bank.yunst.response.CheckAccount;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstQueryBalanceResult;
-import com.rfchina.wallet.server.mapper.ext.BalanceTunnelDetailExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletClearingExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectExtDao;
@@ -68,9 +62,6 @@ import com.rfchina.wallet.server.service.handler.common.EBankHandler;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBizHandler;
 import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
-import java.io.BufferedReader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -151,8 +142,6 @@ public class SeniorPayService {
 	@Autowired
 	private WalletConsumeExtDao walletConsumeDao;
 
-	@Autowired
-	private BalanceTunnelDetailExtDao balanceTunnelDetailDao;
 
 	/**
 	 * 充值
@@ -197,8 +186,6 @@ public class SeniorPayService {
 			.createTime(new Date())
 			.build();
 		walletOrderDao.insertSelective(rechargeOrder);
-
-
 
 		// 充值记录
 		WalletRecharge recharge = WalletRecharge.builder()
@@ -273,7 +260,7 @@ public class SeniorPayService {
 		WithdrawResp result = handler.withdraw(withdrawOrder, withdraw, payer);
 
 		String signedParams = ((YunstBizHandler) handler)
-			.passwordConfirm(withdrawOrder, payer, jumpUrl, customerIp);
+			.pwdGwConfirm(withdrawOrder, payer, jumpUrl, customerIp);
 		signedParams = configService.getYunstPwdConfirmUrl() + "?" + signedParams;
 		result.setSignedParams(signedParams);
 		return result;
@@ -350,7 +337,12 @@ public class SeniorPayService {
 		// 签名密码验证参数
 		if (collect.getValidateType().byteValue() == BizValidateType.PASSWORD.getValue()) {
 			String signedParams = ((YunstBizHandler) handler)
-				.passwordConfirm(collectOrder, payer, jumpUrl, customerIp);
+				.pwdGwConfirm(collectOrder, payer, jumpUrl, customerIp);
+			signedParams = configService.getYunstPwdConfirmUrl() + "?" + signedParams;
+			result.setSignedParams(signedParams);
+		} else if(collect.getValidateType().byteValue() == BizValidateType.SMS.getValue()){
+			String signedParams = ((YunstBizHandler) handler)
+				.smsGwConfirm(collectOrder,payer,customerIp);
 			signedParams = configService.getYunstPwdConfirmUrl() + "?" + signedParams;
 			result.setSignedParams(signedParams);
 		}
@@ -717,40 +709,5 @@ public class SeniorPayService {
 		return null;
 	}
 
-	/**
-	 * 对账
-	 */
-	public void balance(Date date) {
-		EBankHandler handler = handlerHelper.selectByTunnelType(TunnelType.YUNST.getValue());
-		String fileUrl = handler.getBalanceFile(date);
-
-		// 删除历史数据
-		Date beginDate = DateUtil.getDate2(date);
-		Date endDate = DateUtil.getDate(date);
-		balanceTunnelDetailDao.deleteByBalanceDate(beginDate, endDate);
-		// 解析文件
-		try {
-			try (BufferedReader reader = Files.newBufferedReader(Paths.get(fileUrl))) {
-
-				String line = reader.readLine();
-				for (line = reader.readLine(); line != null; line = reader.readLine()) {
-					CheckAccount check = StringObject
-						.parseStringObject(line, CheckAccount.class, "\\|");
-					BalanceTunnelDetail detail = BeanUtil
-						.newInstance(check, BalanceTunnelDetail.class);
-					detail.setTunnelType(TunnelType.YUNST.getValue());
-					detail.setWalletBalanceDate(date);
-					detail.setCreateTime(new Date());
-					balanceTunnelDetailDao.insertSelective(detail);
-				}
-			}
-		} catch (Exception e) {
-			log.error("【通联】更新对账单异常", e);
-		}
-
-		balanceTunnelDetailDao.selectByBalanceDate(beginDate,endDate);
-
-
-	}
 
 }

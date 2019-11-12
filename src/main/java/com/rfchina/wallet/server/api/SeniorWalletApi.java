@@ -43,7 +43,7 @@ public interface SeniorWalletApi {
 	 *
 	 * @param walletId 必填, 钱包id
 	 */
-	String resetSecurityTel(String accessToken, Long walletId, String jumpUrl);
+	String updateSecurityTel(String accessToken, Long walletId, String jumpUrl);
 
 	/**
 	 * 高级钱包绑定手机
@@ -109,7 +109,7 @@ public interface SeniorWalletApi {
 	/**
 	 * 重置支付密码
 	 */
-	String resetPayPwd(String accessToken, Long walletId, String jumpUrl);
+	String updatePayPwd(String accessToken, Long walletId, String jumpUrl);
 
 	/**
 	 * 高级钱包获取企业用户信息
