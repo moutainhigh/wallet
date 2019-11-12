@@ -1,11 +1,15 @@
 package com.rfchina.wallet.server.service;
 
-import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.platform.biztool.mapper.string.StringObject;
+import com.rfchina.platform.biztools.fileserver.EnumFileAcl;
+import com.rfchina.platform.biztools.fileserver.FileServer;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.platform.common.utils.DateUtil;
-import com.rfchina.wallet.domain.mapper.BalanceResultMapper;
+import com.rfchina.wallet.domain.exception.WalletResponseException;
+import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
+import com.rfchina.wallet.domain.model.BalanceJob;
+import com.rfchina.wallet.domain.model.BalanceJobCriteria;
 import com.rfchina.wallet.domain.model.BalanceResult;
 import com.rfchina.wallet.domain.model.BalanceTunnelDetail;
 import com.rfchina.wallet.domain.model.BalanceTunnelDetailCriteria;
@@ -15,9 +19,11 @@ import com.rfchina.wallet.server.bank.yunst.response.CheckAccount;
 import com.rfchina.wallet.server.mapper.ext.BalanceResultExtDao;
 import com.rfchina.wallet.server.mapper.ext.BalanceTunnelDetailExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
+import com.rfchina.wallet.server.mapper.ext.BalanceJobExtDao;
 import com.rfchina.wallet.server.model.ext.BalanceVo;
 import com.rfchina.wallet.server.model.ext.WalletOrderVo;
-import com.rfchina.wallet.server.msic.EnumWallet.BalanceStatus;
+import com.rfchina.wallet.server.msic.EnumWallet.BalanceJobStatus;
+import com.rfchina.wallet.server.msic.EnumWallet.BalanceResultStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.OrderStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.TunnelType;
 import com.rfchina.wallet.server.service.handler.common.EBankHandler;
@@ -26,6 +32,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Date;
@@ -65,7 +72,13 @@ public class SeniorBalanceService {
 	private ConfigService configService;
 
 	@Autowired
+	private BalanceJobExtDao balanceJobDao;
+
+	@Autowired
 	private RedisTemplate<String, String> redisTemplate;
+
+	@Autowired
+	private FileServer fileServer;
 
 	/**
 	 * 对账
@@ -97,54 +110,84 @@ public class SeniorBalanceService {
 		Set<BalanceVo> walletDiffSet = diffSet(walletOps, tunnelKey, walletDiffKey);
 		Set<BalanceVo> succSet = diffSet(tunnelOps, tunnelDiffKey, succDiffKey);
 
+		// 创建JOB
+		BalanceJob job = createJob(beginDate, endDate);
 		// 完全匹配
-		saveResult(succSet, date, BalanceStatus.SUCC);
+		saveResult(succSet, beginDate, endDate, job.getId(), BalanceResultStatus.SUCC);
 		// 通道多
 		Set<BalanceVo> tunnelMoreSet = new HashSet<>(tunnelDiffSet);
 		tunnelMoreSet.removeAll(walletDiffSet);
-		saveResult(tunnelMoreSet, date, BalanceStatus.TUNNEL_MORE);
+		saveResult(tunnelMoreSet, beginDate, endDate, job.getId(), BalanceResultStatus.TUNNEL_MORE);
 		// 钱包多
 		Set<BalanceVo> walletMoreSet = new HashSet<>(walletDiffSet);
 		walletMoreSet.removeAll(tunnelDiffSet);
-		saveResult(walletMoreSet, date, BalanceStatus.WALLET_MORE);
+		saveResult(walletMoreSet, beginDate, endDate, job.getId(), BalanceResultStatus.WALLET_MORE);
 		// 金额不匹配
 		Set<BalanceVo> diffSet = new HashSet<>(walletDiffSet);
 		diffSet.removeAll(walletMoreSet);
-		saveResult(diffSet, date, BalanceStatus.AMOUNT_NOT_MATCH);
+		saveResult(diffSet, beginDate, endDate, job.getId(), BalanceResultStatus.AMOUNT_NOT_MATCH);
+		// 生成对账文件
+//		if (tunnelMoreSet.size() > 0) {
+//
+//		} else if (walletMoreSet.size() > 0) {
+//
+//		} else if (diffSet.size() > 0) {
+//
+//		} else
 
-		if (tunnelMoreSet.size() > 0) {
-
-		} else if (walletMoreSet.size() > 0) {
-
-		} else if (diffSet.size() > 0) {
-
-		} else {
-			write2File(date, succSet);
+		// 上传文件服务器
+		try {
+			Path path = write2File(date, succSet);
+			byte[] bytes = Files.readAllBytes(path);
+			String fileKey = path.getFileName().toString();
+			fileServer.upload(fileKey, bytes, "text/plain", EnumFileAcl.PUBLIC_READ, null);
+			Files.delete(path);
+			job.setStatus(BalanceJobStatus.SUCC.getValue());
+			job.setWalletFileUrl(fileServer.getSvrEndpoint() + "/_f/" +
+				fileServer.getSrvBucket() + "/" + fileKey);
+			balanceJobDao.updateByPrimaryKeySelective(job);
+		} catch (Exception e) {
+			log.error("上传对账文件异常", e);
 		}
-
-
 	}
 
-	private void write2File(Date date, Set<BalanceVo> succSet) {
-		// 对账成功的数据生成文件
+	private BalanceJob createJob(Date beginDate, Date endDate) {
+		balanceJobDao.deleteByDate(beginDate, endDate);
+		BalanceJob job = BalanceJob.builder()
+			.balanceDate(beginDate)
+			.status(BalanceJobStatus.RUNNING.getValue())
+			.deleted((byte) 0)
+			.createTime(new Date())
+			.build();
+		balanceJobDao.insertSelective(job);
+		return job;
+	}
+
+	private Path write2File(Date date, Set<BalanceVo> succSet) {
 		String balanceFile = configService.getStorageDir() + "/result/" + DateUtil
-			.formatDate(date, DateUtil.STANDARD_DTAE_PATTERN);
+			.formatDate(date, DateUtil.STANDARD_DTAE_PATTERN) + ".csv";
+		Path path = Paths.get(balanceFile);
 		try (BufferedWriter writer = Files
-			.newBufferedWriter(Paths.get(balanceFile), Charset.forName("UTF-8"),
-				StandardOpenOption.TRUNCATE_EXISTING)) {
+			.newBufferedWriter(path, Charset.forName("UTF-8"),
+				StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+
+			String end = SPLIT_TAG + "\n";
+			writer.write(StringObject.toTitle(WalletOrderVo.class, SPLIT_TAG) + end);
 
 			List<String> orderNos = succSet.stream()
 				.map(order -> order.getOrderNo())
 				.collect(Collectors.toList());
-			for (int offset = 0, limit = 1; offset <= orderNos.size(); offset += limit) {
+			for (int offset = 0, limit = 1; offset < orderNos.size(); offset += limit) {
 				String orderNo = orderNos.get(offset);
 				WalletOrder order = walletOrderDao.selectByOrderNo(orderNo);
 				WalletOrderVo orderVo = BeanUtil.newInstance(order, WalletOrderVo.class);
-				String line = StringObject.toObjectString(orderVo, WalletOrderVo.class, "|");
-				writer.write(line);
+				String line = StringObject.toObjectString(orderVo, WalletOrderVo.class, SPLIT_TAG);
+				writer.write(line + end);
 			}
+			return path;
 		} catch (Exception e) {
 			log.error("写入对账文件错误", e);
+			throw new WalletResponseException(EnumWalletResponseCode.UNDEFINED_ERROR);
 		}
 	}
 
@@ -239,12 +282,15 @@ public class SeniorBalanceService {
 		return new Tuple(tunnelOps, walletOps);
 	}
 
-	private void saveResult(Set<BalanceVo> resultSet, Date date, BalanceStatus status) {
+	private void saveResult(Set<BalanceVo> resultSet, Date beginDate, Date endDate, Long jobId,
+		BalanceResultStatus status) {
+		balanceResultDao.deleteByDate(beginDate, endDate);
 		// 保存结果
 		resultSet.forEach(value -> {
 			if (value != null) {
 				BalanceResult result = BalanceResult.builder()
-					.balanceDate(date)
+					.balanceDate(beginDate)
+					.jobId(jobId)
 					.orderNo(value.getOrderNo())
 					.balanceStatus(status.getValue())
 					.build();
@@ -253,4 +299,11 @@ public class SeniorBalanceService {
 		});
 	}
 
+	public List<BalanceJob> balanceFile(Date beginDate, Date endDate) {
+		BalanceJobCriteria example = new BalanceJobCriteria();
+		example.createCriteria()
+			.andStatusEqualTo(BalanceJobStatus.SUCC.getValue())
+			.andBalanceDateBetween(beginDate,endDate);
+		return balanceJobDao.selectByExample(example);
+	}
 }

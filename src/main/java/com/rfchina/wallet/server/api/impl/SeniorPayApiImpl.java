@@ -9,6 +9,7 @@ import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
+import com.rfchina.wallet.domain.model.BalanceJob;
 import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.server.api.SeniorPayApi;
@@ -25,8 +26,10 @@ import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.model.ext.WithdrawResp;
 import com.rfchina.wallet.server.msic.EnumWallet.OrderStatus;
 import com.rfchina.wallet.server.service.ConfigService;
+import com.rfchina.wallet.server.service.SeniorBalanceService;
 import com.rfchina.wallet.server.service.SeniorPayService;
 import com.rfchina.wallet.server.service.VerifyService;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -57,6 +60,9 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 
 	@Autowired
 	private ConfigService configService;
+
+	@Autowired
+	private SeniorBalanceService seniorBalanceService;
 
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
@@ -231,6 +237,14 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 		WalletOrder order = verifyService
 			.checkOrder(vo.getOrderId(), OrderStatus.WAITTING.getValue());
 		seniorPayService.smsRetry(order);
+	}
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
+	@Override
+	public List<BalanceJob> balanceFile(String accessToken, Date beginDate, Date endDate) {
+		return seniorBalanceService.balanceFile(beginDate,endDate);
 	}
 
 	private UnifiedConfirmVo getUnifiedConfirmVo(String ticket) {

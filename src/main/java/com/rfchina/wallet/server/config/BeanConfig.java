@@ -2,6 +2,7 @@ package com.rfchina.wallet.server.config;
 
 import com.rfchina.biztools.lock.SimpleExclusiveLock;
 import com.rfchina.passport.misc.SessionThreadLocal;
+import com.rfchina.platform.biztools.fileserver.FileServerAutoConfig;
 import com.rfchina.platform.spring.SpringContext;
 import com.rfchina.wallet.server.bank.pudong.domain.predicate.ExactErrPredicate;
 import com.rfchina.wallet.server.bank.pudong.domain.predicate.UserRedoPredicate;
@@ -25,7 +26,7 @@ import org.springframework.context.annotation.Import;
  */
 @Slf4j
 @Configuration
-@Import(SimpleExclusiveLock.class)
+@Import({SimpleExclusiveLock.class, FileServerAutoConfig.class})
 public class BeanConfig {
 
 	@Autowired

@@ -64,6 +64,31 @@
 }
 ```
 
+###  高级钱包-对账文件
+
+请求地址: /wallet_server/v1/m/senior/pay/balance_file
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|应用令牌|
+|begin_date|是|开始时间|
+|end_date|是|结束时间|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+   , "data": [ {
+} ] 
+}
+```
+
 ###  高级钱包-即刻代收
 
 请求地址: /wallet_server/v1/m/senior/pay/collect_sync

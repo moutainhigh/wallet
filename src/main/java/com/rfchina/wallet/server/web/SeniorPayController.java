@@ -8,6 +8,7 @@ import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.ResponseValue;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.JsonUtil;
+import com.rfchina.wallet.domain.model.BalanceJob;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.server.api.SeniorPayApi;
 import com.rfchina.wallet.server.model.ext.AgentPayReq;
@@ -23,6 +24,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -160,4 +162,16 @@ public class SeniorPayController {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
 
+
+	@ApiOperation("高级钱包-对账文件")
+	@PostMapping(UrlConstant.SENIOR_WALLET_BALANCE_FILE)
+	public ResponseValue<List<BalanceJob>> balanceFile(
+		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
+		@ApiParam(value = "开始时间", required = true) @RequestParam("begin_date") Date beginDate,
+		@ApiParam(value = "结束时间", required = true) @RequestParam("end_date") Date endDate
+	) {
+
+		List<BalanceJob> result = seniorPayApi.balanceFile(accessToken, beginDate, endDate);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result);
+	}
 }

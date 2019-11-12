@@ -1038,9 +1038,9 @@ public class EnumWallet {
 	}
 
 	/**
-	 * 对账状态
+	 * 对账结果状态
 	 */
-	public enum BalanceStatus implements Valuable<Byte> {
+	public enum BalanceResultStatus implements Valuable<Byte> {
 		SUCC((byte) 1, "对账成功"),
 		AMOUNT_NOT_MATCH((byte) 2, "金额不匹配"),
 		TUNNEL_MORE((byte) 3, "通道条目多"),
@@ -1050,7 +1050,29 @@ public class EnumWallet {
 		private Byte value;
 		private String valueName;
 
-		BalanceStatus(Byte value, String valueName) {
+		BalanceResultStatus(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return this.value;
+		}
+	}
+
+	/**
+	 * 对账任务状态
+	 */
+	public enum BalanceJobStatus implements Valuable<Byte> {
+		RUNNING((byte) 1, "进行中"),
+		SUCC((byte) 2, "对账成功"),
+		;
+
+		private Byte value;
+		private String valueName;
+
+		BalanceJobStatus(Byte value, String valueName) {
 			this.value = value;
 			this.valueName = valueName;
 		}
