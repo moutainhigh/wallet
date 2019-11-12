@@ -6,6 +6,7 @@ import com.rfchina.platform.biztools.fileserver.FileServer;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.platform.common.utils.DateUtil;
+import com.rfchina.platform.common.utils.EmailUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.BalanceJob;
@@ -16,10 +17,10 @@ import com.rfchina.wallet.domain.model.BalanceTunnelDetailCriteria;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletOrderCriteria;
 import com.rfchina.wallet.server.bank.yunst.response.CheckAccount;
+import com.rfchina.wallet.server.mapper.ext.BalanceJobExtDao;
 import com.rfchina.wallet.server.mapper.ext.BalanceResultExtDao;
 import com.rfchina.wallet.server.mapper.ext.BalanceTunnelDetailExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
-import com.rfchina.wallet.server.mapper.ext.BalanceJobExtDao;
 import com.rfchina.wallet.server.model.ext.BalanceVo;
 import com.rfchina.wallet.server.model.ext.WalletOrderVo;
 import com.rfchina.wallet.server.msic.EnumWallet.BalanceJobStatus;
@@ -44,10 +45,12 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundSetOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -80,10 +83,13 @@ public class SeniorBalanceService {
 	@Autowired
 	private FileServer fileServer;
 
+	@Autowired
+	private JavaMailSender javaMailSender;
+
 	/**
 	 * 对账
 	 */
-	public void balance(Date date) {
+	public void doBalance(Date date) {
 
 		// 下载数据
 		EBankHandler handler = handlerHelper.selectByTunnelType(TunnelType.YUNST.getValue());
@@ -114,11 +120,11 @@ public class SeniorBalanceService {
 		BalanceJob job = createJob(beginDate, endDate);
 		// 完全匹配
 		saveResult(succSet, beginDate, endDate, job.getId(), BalanceResultStatus.SUCC);
-		// 通道多
+		// 通道条目多
 		Set<BalanceVo> tunnelMoreSet = new HashSet<>(tunnelDiffSet);
 		tunnelMoreSet.removeAll(walletDiffSet);
 		saveResult(tunnelMoreSet, beginDate, endDate, job.getId(), BalanceResultStatus.TUNNEL_MORE);
-		// 钱包多
+		// 钱包条目多
 		Set<BalanceVo> walletMoreSet = new HashSet<>(walletDiffSet);
 		walletMoreSet.removeAll(tunnelDiffSet);
 		saveResult(walletMoreSet, beginDate, endDate, job.getId(), BalanceResultStatus.WALLET_MORE);
@@ -127,15 +133,6 @@ public class SeniorBalanceService {
 		diffSet.removeAll(walletMoreSet);
 		saveResult(diffSet, beginDate, endDate, job.getId(), BalanceResultStatus.AMOUNT_NOT_MATCH);
 		// 生成对账文件
-//		if (tunnelMoreSet.size() > 0) {
-//
-//		} else if (walletMoreSet.size() > 0) {
-//
-//		} else if (diffSet.size() > 0) {
-//
-//		} else
-
-		// 上传文件服务器
 		try {
 			Path path = write2File(date, succSet);
 			byte[] bytes = Files.readAllBytes(path);
@@ -149,6 +146,39 @@ public class SeniorBalanceService {
 		} catch (Exception e) {
 			log.error("上传对账文件异常", e);
 		}
+		// 邮件通知
+		StringBuilder content = new StringBuilder();
+		content.append("通道条目多&nbsp&nbsp")
+			.append(tunnelMoreSet.stream().map(v -> v.toString()).collect(Collectors.joining(",")))
+			.append("</br>")
+			.append("钱包条目多&nbsp&nbsp")
+			.append(walletMoreSet.stream().map(v -> v.toString()).collect(Collectors.joining(",")))
+			.append("</br>")
+			.append("金额不匹配&nbsp&nbsp")
+			.append(diffSet.stream().map(v -> v.toString()).collect(Collectors.joining(",")))
+			.append("</br>");
+
+		// 发送通知邮件
+		try {
+			EmailUtil.EmailBody emailBody = new EmailUtil.EmailBody(
+				"**********[钱包服务]对账通知",
+				content.toString(),
+				configService.getEmailSender(),
+				configService.getEmailSender()
+			);
+			String errorContract = configService.getNotifyContract();
+			if (StringUtils.isNotBlank(errorContract)) {
+				for (String email : errorContract.split(",")) {
+					emailBody.addReceiver(email, email);
+				}
+				EmailUtil.send(emailBody, () -> javaMailSender.createMimeMessage(),
+					(m) -> javaMailSender.send(m));
+			}
+
+		} catch (Exception e) {
+			log.error("[钱包服务]通知邮件发送失败, " + content, e);
+		}
+
 	}
 
 	private BalanceJob createJob(Date beginDate, Date endDate) {
@@ -303,7 +333,7 @@ public class SeniorBalanceService {
 		BalanceJobCriteria example = new BalanceJobCriteria();
 		example.createCriteria()
 			.andStatusEqualTo(BalanceJobStatus.SUCC.getValue())
-			.andBalanceDateBetween(beginDate,endDate);
+			.andBalanceDateBetween(beginDate, endDate);
 		return balanceJobDao.selectByExample(example);
 	}
 }

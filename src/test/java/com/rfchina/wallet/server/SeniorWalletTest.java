@@ -179,7 +179,7 @@ public class SeniorWalletTest extends WalletBaseTest {
 	@Test
 	public void testRecharge() {
 		String rechargeReq = "{\"amount\":1,\"biz_no\":\"" + System.currentTimeMillis()
-			+ "\",\"expire_time\":null,\"fee\":0,\"industry_code\":\"1910\",\"industry_name\":\"其他\",\"payer_wallet_id\":10035,\"validate_type\":2,\"wallet_pay_method\":{\"alipay\":null,\"balance\":null,\"code_pay\":null,\"methods\":null,\"wechat\":null,\"bank_card\":{\"pay_type\":51,\"bank_card_no\":\"6214850201481956\",\"amount\":1}}}";
+			+ "\",\"expire_time\":null,\"fee\":0,\"industry_code\":\"1910\",\"industry_name\":\"其他\",\"payer_wallet_id\":10035,\"validate_type\":2,\"wallet_pay_method\":{\"alipay\":null,\"doBalance\":null,\"code_pay\":null,\"methods\":null,\"wechat\":null,\"bank_card\":{\"pay_type\":51,\"bank_card_no\":\"6214850201481956\",\"amount\":1}}}";
 		Map<String, String> params = new HashMap<>();
 		params.put("access_token", getAccessToken(appId, appSecret));
 		params.put("recharge_req", rechargeReq);

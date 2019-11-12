@@ -1,7 +1,7 @@
 package com.rfchina.wallet.server.web;
 
 import com.rfchina.scheduler.annotation.FuScheduleTaskReporter;
-import com.rfchina.wallet.server.api.WalletApi;
+import com.rfchina.wallet.server.api.impl.ScheduleApi;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ScheduleController {
 
 	@Autowired
-	private WalletApi walletApi;
+	private ScheduleApi scheduleApi;
 
 
 	@RequestMapping(value = UrlConstant.QUARTZ_UPDATE_PAY_STATUS, method = RequestMethod.POST)
@@ -27,7 +27,7 @@ public class ScheduleController {
 
 		log.info("scheduler: 开始执行任务[{}]", "quartzUpdatePayStatus");
 
-		walletApi.quartzUpdate();
+		scheduleApi.quartzUpdate();
 
 		log.info("scheduler: 完成任务[{}]", "quartzUpdatePayStatus");
 		return "success";
@@ -42,7 +42,7 @@ public class ScheduleController {
 
 		log.info("scheduler: 开始执行任务[{}]", "quartzPay");
 
-		walletApi.quartzDealApply();
+		scheduleApi.quartzDealApply();
 
 		log.info("scheduler: 完成任务[{}]", "quartzPay");
 
@@ -58,9 +58,25 @@ public class ScheduleController {
 
 		log.info("scheduler: 开始执行任务[{}]", "quartzNotify");
 
-		walletApi.quartzNotify();
+		scheduleApi.quartzNotify();
 
 		log.info("scheduler: 完成任务[{}]", "quartzNotify");
+
+		return "success";
+	}
+
+	@RequestMapping(value = UrlConstant.QUARTZ_BALANCE, method = RequestMethod.POST)
+	@FuScheduleTaskReporter
+	public String quartzBalance(
+		@RequestParam("schedule_id") String scheduleId,
+		@RequestParam("timestamp") String timestamp,
+		@RequestParam("sign") String sign) {
+
+		log.info("scheduler: 开始执行任务[{}]", "quartzBalance");
+
+		scheduleApi.quartzBalance();
+
+		log.info("scheduler: 完成任务[{}]", "quartzBalance");
 
 		return "success";
 	}

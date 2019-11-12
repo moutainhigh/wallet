@@ -92,6 +92,11 @@ public class UrlConstant {
 	public static final String QUARTZ_NOTIFY = VERSION + "/schedule/quartz_notify";
 
 	/**
+	 * 定时支付
+	 */
+	public static final String QUARTZ_BALANCE = VERSION + "/schedule/quartz_balance";
+
+	/**
 	 * 查询钱包信息（企业or个人）
 	 */
 	public static final String WALLET_QUERY_INFO = VERSION + "/m/wallet/query_wallet_info";

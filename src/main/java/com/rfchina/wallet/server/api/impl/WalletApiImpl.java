@@ -32,8 +32,6 @@ import com.rfchina.wallet.server.api.WalletApi;
 import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
-import com.rfchina.wallet.server.msic.EnumWallet.LockStatus;
-import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyStatus;
 import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.JuniorWalletService;
 import com.rfchina.wallet.server.service.UserService;
@@ -56,9 +54,6 @@ public class WalletApiImpl implements WalletApi {
 	private JuniorWalletService juniorWalletService;
 
 	@Autowired
-	private SimpleExclusiveLock lock;
-
-	@Autowired
 	private WalletUserDao walletUserDao;
 
 	@Autowired
@@ -72,6 +67,9 @@ public class WalletApiImpl implements WalletApi {
 
 	@Autowired
 	private WalletApplyExtDao walletApplyExtDao;
+
+	@Autowired
+	private SimpleExclusiveLock lock;
 
 
 	@Log
@@ -102,82 +100,6 @@ public class WalletApiImpl implements WalletApi {
 		} else {
 			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_REDO_DUPLICATE,
 				walletLogId.toString());
-		}
-	}
-
-	@Log
-	@Override
-	public void quartzUpdate() {
-
-		String lockName = "quartzUpdate";
-		boolean succ = lock.acquireLock(lockName, 900, 0, 1);
-		if (succ) {
-			try {
-				walletService.quartzUpdate(configService.getBatchUpdateSize());
-			} finally {
-				lock.unLock(lockName);
-			}
-		} else {
-			log.warn("获取分布式锁失败， 跳过执行的quartzUpdatePayStatus任务");
-		}
-	}
-
-	@Log
-	@Override
-	public void quartzDealApply() {
-
-		String lockName = "quartzDealApply";
-		boolean succ = lock.acquireLock(lockName, 1800, 0, 1);
-		if (succ) {
-			try {
-				List<Long> ids = walletApplyExtDao
-					.selectUnSendApply(configService.getBatchPaySize());
-				ids.forEach(id -> {
-
-					int c = walletApplyExtDao.updateLock(id, LockStatus.UNLOCK.getValue(),
-						LockStatus.LOCKED.getValue());
-					if (c <= 0) {
-						log.error("锁定记录失败, applyId = {}", id);
-						return;
-					}
-
-					log.info("开始更新批次号 [{}]", id);
-					try {
-						walletService.doTunnelAsyncJob(id);
-					} catch (Exception e) {
-						log.error("", e);
-					} finally {
-						log.info("结束更新批次号 [{}]", id);
-						walletApplyExtDao.updateLock(id, LockStatus.LOCKED.getValue(),
-							LockStatus.UNLOCK.getValue());
-					}
-				});
-			} finally {
-				lock.unLock(lockName);
-			}
-		} else {
-			log.warn("获取分布式锁失败， 跳过执行的quartzDealApply任务");
-		}
-	}
-
-	@Override
-	public void quartzNotify() {
-		String lockName = "quartzNotify";
-		boolean succ = lock.acquireLock(lockName, 600, 0, 1);
-		if (succ) {
-			try {
-				List<WalletApply> walletApplys = walletApplyExtDao
-					.selectByStatusNotNotified(WalletApplyStatus.WAIT_DEAL.getValue(), 200);
-				walletService.notifyDeveloper(walletApplys);
-
-				walletApplys = walletApplyExtDao
-					.selectByStatusNotNotified(WalletApplyStatus.REDO.getValue(), 200);
-				walletService.notifyBusiness(walletApplys);
-			} finally {
-				lock.unLock(lockName);
-			}
-		} else {
-			log.warn("获取分布式锁失败， 跳过执行的{}任务", lockName);
 		}
 	}
 
@@ -332,4 +254,6 @@ public class WalletApiImpl implements WalletApi {
 
 		return walletUser;
 	}
+
+
 }

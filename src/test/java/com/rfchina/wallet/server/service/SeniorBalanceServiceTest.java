@@ -1,7 +1,5 @@
 package com.rfchina.wallet.server.service;
 
-import static org.junit.Assert.*;
-
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.server.SpringBaseTest;
 import java.util.Date;
@@ -15,6 +13,6 @@ public class SeniorBalanceServiceTest extends SpringBaseTest {
 
 	@Test
 	public void balance() {
-		seniorBalanceService.balance(DateUtil.addDate2(new Date(), -1));
+		seniorBalanceService.doBalance(DateUtil.addDate2(new Date(), -1));
 	}
 }

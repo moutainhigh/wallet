@@ -29,21 +29,6 @@ public interface WalletApi {
 	void redoWalletApply(String accessToken, Long walletLogId);
 
 	/**
-	 * 定时更新支付状态
-	 */
-	void quartzUpdate();
-
-	/**
-	 * 定时支付
-	 */
-	void quartzDealApply();
-
-	/**
-	 * 定时通知
-	 */
-	void quartzNotify();
-
-	/**
 	 * 查询钱包明细
 	 */
 	WalletInfoResp queryWalletInfo(String accessToken, Long walletId);
