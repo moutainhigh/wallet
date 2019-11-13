@@ -34,6 +34,7 @@ import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
 import com.rfchina.wallet.server.bank.yunst.exception.UnknownException;
 import com.rfchina.wallet.server.bank.yunst.request.AgentPayReq;
 import com.rfchina.wallet.server.bank.yunst.request.AgentPayReq.CollectPay;
+import com.rfchina.wallet.server.bank.yunst.request.CardBinReq;
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq;
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod;
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod.Alipay;
@@ -62,6 +63,7 @@ import com.rfchina.wallet.server.bank.yunst.request.SmsPayReq;
 import com.rfchina.wallet.server.bank.yunst.request.SmsRetryReq;
 import com.rfchina.wallet.server.bank.yunst.request.WithdrawApplyReq;
 import com.rfchina.wallet.server.bank.yunst.response.AgentPayResp;
+import com.rfchina.wallet.server.bank.yunst.response.CardBinResp;
 import com.rfchina.wallet.server.bank.yunst.response.CollectApplyResp;
 import com.rfchina.wallet.server.bank.yunst.response.GetCheckAccountFileResp;
 import com.rfchina.wallet.server.bank.yunst.response.GetOrderDetailResp;
@@ -869,4 +871,24 @@ public class YunstBizHandler extends EBankHandler {
 			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
 		}
 	};
+
+	public String cardBin(String cardNo) {
+		try {
+			cardNo = RSAUtil.encrypt(cardNo);
+		} catch (Exception e) {
+			log.error("银行卡加密失败", e);
+		}
+
+		CardBinReq req = CardBinReq.builder()
+			.cardNo(cardNo)
+			.build();
+
+		try {
+			CardBinResp resp = yunstTpl.execute(req, CardBinResp.class);
+			return resp.getCardBinInfo();
+		} catch (Exception e) {
+			log.error("通联-接口异常", e);
+			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
+		}
+	}
 }

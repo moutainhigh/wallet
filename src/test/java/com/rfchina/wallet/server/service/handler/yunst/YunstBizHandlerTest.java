@@ -3,6 +3,7 @@ package com.rfchina.wallet.server.service.handler.yunst;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.SpringBaseTest;
+import com.rfchina.wallet.server.bank.yunst.request.CardBinReq;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.service.ConfigService;
@@ -40,5 +41,11 @@ public class YunstBizHandlerTest extends SpringBaseTest {
 		signedParams = configService.getYunstPwdConfirmUrl() + "?" + signedParams;
 
 		log.info(signedParams);
+	}
+
+	@Test
+	public void cardBin() {
+		String result = yunstBizHandler.cardBin("6214850201481956");
+		log.info("cardBin = {}", result);
 	}
 }

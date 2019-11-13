@@ -149,7 +149,6 @@ public class SeniorCardService {
 			throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_INFO_INVALID);
 		}
 		// 登记绑定卡
-		BankCode bankCode = bankCodeDao.selectByBankCode(preBindCardVo.getBankCode(),TunnelType.YUNST.getValue());
 		WalletPerson walletPerson = walletPersonDao.selectByWalletId(walletId);
 		int cardCount = walletCardDao
 			.selectCountByWalletId(walletId, EnumWalletCardStatus.BIND.getValue());
@@ -162,9 +161,9 @@ public class SeniorCardService {
 		}
 
 		WalletCard walletCard = WalletCard.builder().walletId(walletId)
-			.bankCode(bankCode != null ? bankCode.getBankCode() : null)
-			.bankName(bankCode != null ? bankCode.getClassName() : null)
-			.depositBank(bankCode != null ? bankCode.getBankName() : null)
+			.bankCode(preBindCardVo.getBankCode())
+			.bankName(preBindCardVo.getBankName())
+			.depositBank(null)
 			.bankAccount(preBindCardVo.getCardNo())
 			.depositName(walletPerson.getName())
 			.telephone(preBindCardVo.getPhone())

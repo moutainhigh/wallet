@@ -6,6 +6,7 @@ import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.FileUtil;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumIdType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumVerifyCodeType;
+import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletSource;
 import com.rfchina.wallet.domain.model.WalletPerson;
 import com.rfchina.wallet.domain.model.WalletTunnel;
@@ -21,7 +22,6 @@ import com.rfchina.wallet.server.bank.yunst.response.result.YunstSendVerificatio
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstSetCompanyInfoResult;
 import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
-import com.rfchina.wallet.server.msic.EnumWallet.TunnelType;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBaseHandler;
 import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
 import com.rfchina.wallet.server.utils.IdCardGenerator;
