@@ -23,23 +23,8 @@ public class WalletApiImplTest extends SpringApiTest {
 	}
 
 	@Test
-	public void quartzPay() {
-//		walletApi.quartzPay();
-	}
-
-	@Test
-	public void quartzUpdate() {
-		walletApi.quartzUpdate();
-	}
-
-	@Test
 	public void queryWalletInfo() {
 		WalletInfoResp result = walletApi.queryWalletInfo(accessToken, 2L);
 		assertTrue(result != null);
-	}
-
-	@Test
-	public void quartzNotify() {
-		walletApi.quartzNotify();
 	}
 }

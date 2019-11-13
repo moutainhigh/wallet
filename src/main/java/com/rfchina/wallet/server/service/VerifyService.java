@@ -3,8 +3,8 @@ package com.rfchina.wallet.server.service;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
 import com.rfchina.wallet.domain.misc.EnumDef;
-import com.rfchina.wallet.domain.misc.EnumDef.ChannelType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletCardStatus;
+import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletCard;
@@ -95,7 +95,7 @@ public class VerifyService {
 	/**
 	 * 检查渠道注册
 	 */
-	public WalletTunnel checkChannel(Long walletId, ChannelType channelType) {
+	public WalletTunnel checkChannel(Long walletId, TunnelType channelType) {
 
 		WalletTunnel channel = walletTunnelDao.selectByWalletId(walletId, channelType.getValue());
 		Optional.ofNullable(channel).orElseThrow(

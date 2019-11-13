@@ -10,7 +10,7 @@ import com.rfchina.platform.common.misc.ResponseCode;
 import com.rfchina.platform.common.utils.RegexUtil;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
 import com.rfchina.wallet.domain.misc.EnumDef;
-import com.rfchina.wallet.domain.misc.EnumDef.ChannelType;
+import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletPerson;
 import com.rfchina.wallet.domain.model.WalletTunnel;
@@ -115,7 +115,7 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	public String updateSecurityTel(String accessToken, Long walletId, String jumpUrl) {
 
 		verifyService.checkSeniorWallet(walletId);
-		WalletTunnel channel = verifyService.checkChannel(walletId, ChannelType.YUNST);
+		WalletTunnel channel = verifyService.checkChannel(walletId, TunnelType.YUNST);
 		WalletPerson walletPerson = walletPersonDao.selectByWalletId(walletId);
 		return seniorWalletService.updateSecurityTel(walletPerson, channel, jumpUrl);
 	}

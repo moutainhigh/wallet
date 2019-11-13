@@ -12,6 +12,7 @@ import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumDefBankCard;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletLevel;
+import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletCardSenior;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
@@ -49,7 +50,6 @@ import com.rfchina.wallet.server.msic.EnumWallet.SysFlag;
 import com.rfchina.wallet.server.msic.EnumWallet.TransStatus8804;
 import com.rfchina.wallet.server.msic.EnumWallet.TransStatusDO48;
 import com.rfchina.wallet.server.msic.EnumWallet.TransStatusDO49;
-import com.rfchina.wallet.server.msic.EnumWallet.TunnelType;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyStatus;
 import com.rfchina.wallet.server.service.CacheService;
 import com.rfchina.wallet.server.service.ConfigService;
@@ -145,7 +145,7 @@ public class Handler8800 extends EBankHandler {
 			BigDecimal bigAmount = new BigDecimal(walletApply.getAmount())
 				.divide(new BigDecimal("100"), 2, BigDecimal.ROUND_DOWN);
 
-			BankCode bankCode = bankCodeExtDao.selectByCode(walletApply.getPayeeBankCode());
+			BankCode bankCode = bankCodeExtDao.selectByCode(walletApply.getPayeeBankCode(),TunnelType.PUDONG.getValue());
 			if (bankCode == null) {
 				throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_BATCH_LIMIT);
 			}

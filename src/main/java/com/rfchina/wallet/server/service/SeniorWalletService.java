@@ -6,9 +6,9 @@ import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.misc.EnumDef;
-import com.rfchina.wallet.domain.misc.EnumDef.ChannelType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumVerifyCodeType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletAuditType;
+import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelAuditStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelSignContract;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyChannel;
@@ -33,7 +33,6 @@ import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletVerifyHisExtDao;
 import com.rfchina.wallet.server.msic.EnumWallet.DirtyType;
 import com.rfchina.wallet.server.msic.EnumWallet.EnumYunstResponse;
-import com.rfchina.wallet.server.msic.EnumWallet.TunnelType;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletStatus;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBaseHandler.YunstMemberType;
 import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
@@ -94,7 +93,7 @@ public class SeniorWalletService {
 			.status(WalletTunnelAuditStatus.NOT_COMMIT.getValue().byteValue())
 			.walletId(walletId)
 			.createTime(new Date());
-		if (channelType == EnumDef.ChannelType.YUNST.getValue().intValue()) {
+		if (channelType == TunnelType.YUNST.getValue().intValue()) {
 			Tuple<YunstCreateMemberResult, YunstMemberType> member = null;
 			try {
 				member = yunstUserHandler.createMember(walletId, source);
@@ -148,7 +147,7 @@ public class SeniorWalletService {
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 	public void seniorWalletBindPhone(Integer channelType, Long walletId, String mobile,
 		String verifyCode) throws Exception {
-		if (channelType == EnumDef.ChannelType.YUNST.getValue().intValue()) {
+		if (channelType == TunnelType.YUNST.getValue().intValue()) {
 			WalletTunnel walletChannel = walletTunnelDao
 				.selectByTunnelTypeAndWalletId(channelType.byteValue(), walletId);
 
@@ -205,7 +204,7 @@ public class SeniorWalletService {
 	public void seniorWalletPersonAuth(Integer channelType, Long walletId, String realName,
 		String idNo,
 		String mobile, String verifyCode) throws Exception {
-		if (channelType == EnumDef.ChannelType.YUNST.getValue().intValue()) {
+		if (channelType == TunnelType.YUNST.getValue().intValue()) {
 			WalletTunnel walletChannel = walletTunnelDao
 				.selectByTunnelTypeAndWalletId(channelType.byteValue(), walletId);
 			if (walletChannel == null) {
@@ -288,7 +287,7 @@ public class SeniorWalletService {
 			.selectByTunnelTypeAndWalletId(channelType.byteValue(), walletId);
 		walletChannel.setStatus(
 			EnumDef.WalletTunnelAuditStatus.WAITING_AUDIT.getValue().byteValue());
-		if (channelType == EnumDef.ChannelType.YUNST.getValue().intValue()) {
+		if (channelType == TunnelType.YUNST.getValue().intValue()) {
 			String transformBizUserId = walletChannel.getBizUserId();
 			try {
 				boolean isAuth =
@@ -365,7 +364,7 @@ public class SeniorWalletService {
 		String telephone) throws Exception {
 		WalletTunnel walletChannel = walletTunnelDao
 			.selectByTunnelTypeAndWalletId(channelType.byteValue(), walletId);
-		if (channelType.intValue() == EnumDef.ChannelType.YUNST.getValue().intValue()) {
+		if (channelType.intValue() == TunnelType.YUNST.getValue().intValue()) {
 			yunstUserHandler.sendVerificationCode(walletChannel.getBizUserId(), telephone,
 				EnumVerifyCodeType.YUNST_BIND_PHONE.getValue());
 		}
@@ -376,7 +375,7 @@ public class SeniorWalletService {
 	 */
 	public String signBalanceProtocol(Long walletId, String jumpUrl) {
 		WalletTunnel walletChannel = walletTunnelDao
-			.selectByTunnelTypeAndWalletId(ChannelType.YUNST.getValue(), walletId);
+			.selectByTunnelTypeAndWalletId(TunnelType.YUNST.getValue(), walletId);
 		if (walletChannel == null) {
 			log.error("未创建云商通用户: walletId:{}", walletId);
 			throw new RfchinaResponseException(EnumResponseCode.COMMON_FAILURE,
@@ -394,7 +393,7 @@ public class SeniorWalletService {
 	 */
 	public String signMemberProtocol(Long walletId, String jumpUrl) {
 		WalletTunnel walletChannel = walletTunnelDao
-			.selectByTunnelTypeAndWalletId(ChannelType.YUNST.getValue(), walletId);
+			.selectByTunnelTypeAndWalletId(TunnelType.YUNST.getValue(), walletId);
 		if (walletChannel == null) {
 			log.error("未创建云商通用户: walletId:{}", walletId);
 			throw new RfchinaResponseException(EnumResponseCode.COMMON_FAILURE,
@@ -408,7 +407,7 @@ public class SeniorWalletService {
 	 */
 	public String setPersonPayPassword(Long walletId, String jumpUrl) throws Exception {
 		WalletTunnel walletChannel = walletTunnelDao
-			.selectByTunnelTypeAndWalletId(ChannelType.YUNST.getValue(), walletId);
+			.selectByTunnelTypeAndWalletId(TunnelType.YUNST.getValue(), walletId);
 		if (walletChannel == null) {
 			log.error("未创建云商通用户: walletId:{}", walletId);
 			throw new RfchinaResponseException(EnumResponseCode.COMMON_FAILURE,
@@ -426,7 +425,7 @@ public class SeniorWalletService {
 	 */
 	public String updateTunnelPayPwd(Long walletId, String jumpUrl) {
 		WalletPerson person = walletPersonDao.selectByWalletId(walletId);
-		WalletTunnel channel = verifyService.checkChannel(walletId, ChannelType.YUNST);
+		WalletTunnel channel = verifyService.checkChannel(walletId, TunnelType.YUNST);
 
 		jumpUrl = configService.getYunstJumpUrlPrefix() + jumpUrl;
 		String signedParam = yunstUserHandler.updatePayPwd(person, channel, jumpUrl);
@@ -438,7 +437,7 @@ public class SeniorWalletService {
 	 */
 	public CompanyInfoResult seniorWalletGetCompanyInfo(Long walletId) throws Exception {
 		WalletTunnel walletChannel = walletTunnelDao
-			.selectByTunnelTypeAndWalletId(ChannelType.YUNST.getValue(), walletId);
+			.selectByTunnelTypeAndWalletId(TunnelType.YUNST.getValue(), walletId);
 		if (walletChannel == null) {
 			log.error("未创建云商通用户: walletId:{}", walletId);
 			throw new RfchinaResponseException(EnumResponseCode.COMMON_FAILURE,
@@ -454,7 +453,7 @@ public class SeniorWalletService {
 	 */
 	public PersonInfoResult seniorWalletGetPersonInfo(Long walletId) throws Exception {
 		WalletTunnel walletChannel = walletTunnelDao
-			.selectByTunnelTypeAndWalletId(ChannelType.YUNST.getValue(), walletId);
+			.selectByTunnelTypeAndWalletId(TunnelType.YUNST.getValue(), walletId);
 		if (walletChannel == null) {
 			log.error("未创建云商通用户: walletId:{}", walletId);
 			throw new RfchinaResponseException(EnumResponseCode.COMMON_FAILURE,

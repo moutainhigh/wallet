@@ -2,6 +2,7 @@ package com.rfchina.wallet.server.service.handler.yunst;
 
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.domain.misc.EnumDef;
+import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelSetPayPwd;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelSignContract;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyChannel;
@@ -45,7 +46,7 @@ public class YunstNotifyHandler {
 		channelNotify.setBizUserId(bizUserId);
 
 		WalletTunnel walletChannel = walletTunnelExtDao.selectByTunnelTypeAndBizUserId(
-			EnumDef.ChannelType.YUNST.getValue().intValue(), bizUserId);
+			TunnelType.YUNST.getValue().intValue(), bizUserId);
 
 		if (result == 2L) {
 			walletChannel.setStatus(
@@ -83,7 +84,7 @@ public class YunstNotifyHandler {
 		String bizUserId = rtnVal.getBizUserId();
 		channelNotify.setBizUserId(bizUserId);
 		WalletTunnel walletChannel = walletTunnelExtDao.selectByTunnelTypeAndBizUserId(
-			EnumDef.ChannelType.YUNST.getValue().intValue(), bizUserId);
+			TunnelType.YUNST.getValue().intValue(), bizUserId);
 
 		walletChannel.setIsSignContact(WalletTunnelSignContract.MEMBER.getValue().byteValue());
 
@@ -124,7 +125,7 @@ public class YunstNotifyHandler {
 		String newPhone = rtnVal.getNewPhone();
 		channelNotify.setBizUserId(bizUserId);
 		WalletTunnel walletChannel = walletTunnelExtDao.selectByTunnelTypeAndBizUserId(
-			EnumDef.ChannelType.YUNST.getValue().intValue(), bizUserId);
+			TunnelType.YUNST.getValue().intValue(), bizUserId);
 
 		walletChannel.setSecurityTel(newPhone);
 
@@ -140,7 +141,7 @@ public class YunstNotifyHandler {
 		String bizUserId = rtnVal.getBizUserId();
 		channelNotify.setBizUserId(bizUserId);
 		WalletTunnel walletChannel = walletTunnelExtDao.selectByTunnelTypeAndBizUserId(
-			EnumDef.ChannelType.YUNST.getValue().intValue(), bizUserId);
+			TunnelType.YUNST.getValue().intValue(), bizUserId);
 
 		walletChannel.setHasPayPassword(WalletTunnelSetPayPwd.YES.getValue().byteValue());
 

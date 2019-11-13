@@ -508,24 +508,6 @@ public class EnumWallet {
 		}
 	}
 
-	public enum TunnelType implements Valuable<Byte> {
-		PUDONG((byte) 1, "浦发银企直连"),
-		YUNST((byte) 2, "通联云商通");
-
-		private Byte value;
-		private String valueName;
-
-		TunnelType(Byte value, String valueName) {
-			this.value = value;
-			this.valueName = valueName;
-		}
-
-		@Override
-		public Byte getValue() {
-			return value;
-		}
-	}
-
 	/**
 	 * 支付渠道 1：钱包余额 2：微信 4：支付宝 8：银行卡
 	 */

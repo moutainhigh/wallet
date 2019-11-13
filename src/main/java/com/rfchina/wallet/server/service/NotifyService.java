@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rfchina.platform.common.json.ObjectSetter;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.misc.EnumDef;
+import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.model.ChannelNotify;
 import com.rfchina.wallet.server.bank.yunst.response.YunstNotify;
 import com.rfchina.wallet.server.mapper.ext.ChannelNotifyExtDao;
@@ -39,7 +40,7 @@ public class NotifyService {
 		log.info("Yunst notify: {}", json);
 
 		ChannelNotify channelNotify = ChannelNotify.builder()
-			.channelType(EnumDef.ChannelType.YUNST.getValue().intValue())
+			.channelType(TunnelType.YUNST.getValue().intValue())
 			.content(json)
 			.createTime(new Date())
 			.build();
