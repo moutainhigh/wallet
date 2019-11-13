@@ -18,13 +18,11 @@ import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.BankCodeDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.misc.EnumDef;
-import com.rfchina.wallet.domain.misc.EnumDef.EnumDefBankCard;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletAuditType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletCardStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletLevel;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderType;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
-import com.rfchina.wallet.domain.misc.EnumDef.WalletCardSenior;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.BankCode;
@@ -172,7 +170,7 @@ public class WalletService {
 				resp.setTransDate(DateUtil.formatDate(walletApply.getCreateTime()));
 			}
 			if (!StringUtils.isEmpty(walletApply.getPayeeBankCode())) {
-				BankCode bankCode = bankCodeDao.selectByBankCode(walletApply.getPayeeBankCode(),TunnelType.PUDONG.getValue());
+				BankCode bankCode = bankCodeDao.selectByBankCode(walletApply.getPayeeBankCode());
 				resp.setPayeeBankInfo(bankCode);
 			}
 			return resp;
@@ -629,7 +627,7 @@ public class WalletService {
 			throw new WalletResponseException(EnumWalletResponseCode.WALLET_ACCOUNT_NOT_EXIST);
 		}
 
-		BankCode bankCodeResult = bankCodeDao.selectByBankCode(bankCode,TunnelType.PUDONG.getValue());
+		BankCode bankCodeResult = bankCodeDao.selectByBankCode(bankCode);
 		if (null == bankCodeResult) {
 			throw new RfchinaResponseException(EnumResponseCode.COMMON_INVALID_PARAMS, "bank_code");
 		}
@@ -675,7 +673,7 @@ public class WalletService {
 	 * 查询银行类别列表
 	 */
 	public List<BankClass> bankClassList() {
-		return bankCodeDao.selectBankClassList(TunnelType.PUDONG.getValue());
+		return bankCodeDao.selectBankClassList();
 	}
 
 	/**
@@ -684,7 +682,7 @@ public class WalletService {
 	 * @param classCode 类别编码
 	 */
 	public List<BankArea> bankAreaList(String classCode) {
-		return bankCodeDao.selectBankAreaList(classCode,TunnelType.PUDONG.getValue());
+		return bankCodeDao.selectBankAreaList(classCode);
 	}
 
 	/**
@@ -694,7 +692,7 @@ public class WalletService {
 	 * @param areaCode 地区编码
 	 */
 	public List<Bank> bankList(String classCode, String areaCode) {
-		return bankCodeDao.selectBankList(classCode, areaCode,TunnelType.PUDONG.getValue());
+		return bankCodeDao.selectBankList(classCode, areaCode);
 	}
 
 	public BankCode bank(String bankCode) {
