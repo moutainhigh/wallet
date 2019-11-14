@@ -1,5 +1,6 @@
 package com.rfchina.wallet.server.service.handler.yunst;
 
+import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
@@ -8,6 +9,7 @@ import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelSignContract;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyChannel;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyRefType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyType;
+import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.model.ChannelNotify;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.domain.model.WalletVerifyHis;
@@ -33,6 +35,7 @@ public class YunstNotifyHandler {
 	@Autowired
 	private YunstBizHandler yunstBizHandler;
 
+	@PostMq(routingKey = MqConstant.WALLET_SENIOR_COMPANY_AUDIT)
 	public SLWalletMqMessage handleVerfiyResult(ChannelNotify channelNotify,
 		YunstNotify.CompanyAuditResult rtnVal) {
 		log.info("处理企业信息审核结果通知 rtnVal:{}", rtnVal);
