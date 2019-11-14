@@ -333,6 +333,7 @@ public class SeniorBalanceService {
 		BalanceJobCriteria example = new BalanceJobCriteria();
 		example.createCriteria()
 			.andStatusEqualTo(BalanceJobStatus.SUCC.getValue())
+			.andDeletedEqualTo((byte)0)
 			.andBalanceDateBetween(beginDate, endDate);
 		return balanceJobDao.selectByExample(example);
 	}
