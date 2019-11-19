@@ -124,9 +124,6 @@ public class ConfigService {
 	@Value("${yunst.balanceProtocol.name}")
 	private String yunstBalanceProtocolName;
 
-	@Value("${yunst.receiverId}")
-	private String yunstReceiverId;
-
 	@Value("${yunst.signBalaceProtocol.gateway.url}")
 	private String yunstSignBalanceProtocolUrl;
 
