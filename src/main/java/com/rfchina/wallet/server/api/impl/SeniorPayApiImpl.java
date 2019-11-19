@@ -1,6 +1,6 @@
 package com.rfchina.wallet.server.api.impl;
 
-import com.rfchina.biztools.limiter.aspect.RateSetting;
+import com.rfchina.biztools.limiter.setting.RateSetting;
 import com.rfchina.passport.token.EnumTokenType;
 import com.rfchina.passport.token.TokenVerify;
 import com.rfchina.platform.common.annotation.Log;

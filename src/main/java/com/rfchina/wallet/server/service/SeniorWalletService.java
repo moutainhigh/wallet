@@ -9,6 +9,7 @@ import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumVerifyCodeType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletAuditType;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletSource;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelAuditStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelSignContract;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyChannel;
@@ -116,8 +117,12 @@ public class SeniorWalletService {
 			throw new RfchinaResponseException(EnumResponseCode.COMMON_FAILURE,
 				"开通高级钱包失败-插入渠道信息");
 		}
-		wallet.setLevel(EnumDef.EnumWalletLevel.SENIOR.getValue());
-		walletDao.updateByPrimaryKeySelective(wallet);
+
+		if (source != WalletSource.USER.getValue().byteValue()){
+			wallet.setLevel(EnumDef.EnumWalletLevel.SENIOR.getValue());
+			walletDao.updateByPrimaryKeySelective(wallet);
+		}
+
 		return walletChannel;
 	}
 
@@ -130,6 +135,9 @@ public class SeniorWalletService {
 			log.error("更新钱包等级失败, 查无此钱包, walletId: {}", walletId);
 			throw new RfchinaResponseException(EnumResponseCode.COMMON_FAILURE,
 				"更新钱包等级失败");
+		}
+		if (wallet.getLevel().byteValue() == EnumDef.EnumWalletLevel.SENIOR.getValue()){
+			return wallet;
 		}
 		wallet.setLevel(EnumDef.EnumWalletLevel.SENIOR.getValue());
 		int effctRows = walletDao.updateByPrimaryKeySelective(wallet);
@@ -274,6 +282,8 @@ public class SeniorWalletService {
 			walletDao.updateActiveStatus(walletId,
 				WalletStatus.ACTIVE.getValue(),
 				EnumWalletAuditType.ALLINPAY.getValue().longValue());
+
+			this.upgradeWalletLevel(walletId);
 		}
 	}
 
