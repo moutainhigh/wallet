@@ -31,7 +31,7 @@ public class SeniorCardApiImplTest extends SpringApiTest {
 
 	@Test
 	public void unBindCard() {
-		seniorCardApi.unBindCard(super.accessToken, 12L);
+		seniorCardApi.unBindCard(super.accessToken, 24L);
 	}
 
 	@Test

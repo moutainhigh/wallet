@@ -4,6 +4,7 @@ import com.allinpay.yunst.sdk.util.RSAUtil;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.JsonUtil;
+import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.WalletPerson;
 import com.rfchina.wallet.domain.model.WalletTunnel;
@@ -34,6 +35,7 @@ import com.rfchina.wallet.server.bank.yunst.response.result.YunstSendVerificatio
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstSetCompanyInfoResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstUnBindBankCardResult;
 import com.rfchina.wallet.server.bank.yunst.util.YunstTpl;
+import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.msic.EnumWallet.YunstIdType;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -128,15 +130,22 @@ public class YunstUserHandler extends YunstBaseHandler {
 		return yunstTpl.signRequest(req);
 	}
 
+	@Autowired
+	private WalletTunnelExtDao walletTunnelDao;
+
 	/**
 	 * 委托扣款协议签约(生成前端H5 url)
 	 */
 	public Tuple<String, String> generateBalanceProtocolUrl(String bizUserId, String jumpUrl) {
+
+		WalletTunnel agentEnt = walletTunnelDao
+			.selectByWalletId(configService.getAgentEntWalletId(), TunnelType.YUNST.getValue());
+
 		String protocolReqSn = UUID.randomUUID().toString().replaceAll("-", "");
 		YunstBalanceProtocolReq req = YunstBalanceProtocolReq.builder$()
 			.protocolReqSn(protocolReqSn)
 			.payerId(bizUserId)
-			.receiverId(configService.getYunstReceiverId())
+			.receiverId(agentEnt.getBizUserId())
 			.protocolName(configService.getYunstBalanceProtocolName())
 			.jumpUrl(configService.getYunstJumpUrlPrefix() + jumpUrl)
 			.backUrl(configService.getYunstNotifybackUrl())
