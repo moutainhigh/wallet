@@ -9,11 +9,12 @@ import com.rfchina.wallet.domain.misc.EnumDef.EnumDefBankCard;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumIdType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumPublicAccount;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletCardStatus;
+import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletLevel;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.EnumDef.VerifyChannel;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletCardType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
-import com.rfchina.wallet.domain.model.BankCode;
+import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletPerson;
 import com.rfchina.wallet.domain.model.WalletTunnel;
@@ -137,6 +138,12 @@ public class SeniorCardService {
 			yunstUserHandler.bindBankCard(walletTunnel.getBizUserId(), preBindCardVo.getTransNum(),
 				preBindCardVo.getTransDate(), preBindCardVo.getPhone(), preBindCardVo.getValidate(),
 				preBindCardVo.getCvv2(), verifyCode);
+
+			Wallet wallet = walletDao.selectByPrimaryKey(walletId);
+			if (wallet.getLevel() == EnumWalletLevel.JUNIOR.getValue().byteValue()){
+				wallet.setLevel(EnumWalletLevel.SENIOR.getValue());
+				walletDao.updateByPrimaryKeySelective(wallet);
+			}
 		} catch (CommonGatewayException e) {
 			String errMsg = e.getBankErrMsg();
 			if (errMsg.indexOf("参数validate为空") > -1) {

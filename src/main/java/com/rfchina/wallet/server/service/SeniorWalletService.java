@@ -9,6 +9,7 @@ import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumVerifyCodeType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletAuditType;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletSource;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelAuditStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelSignContract;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyChannel;
@@ -116,8 +117,12 @@ public class SeniorWalletService {
 			throw new RfchinaResponseException(EnumResponseCode.COMMON_FAILURE,
 				"开通高级钱包失败-插入渠道信息");
 		}
-		wallet.setLevel(EnumDef.EnumWalletLevel.SENIOR.getValue());
-		walletDao.updateByPrimaryKeySelective(wallet);
+
+		if (source != WalletSource.USER.getValue().byteValue()){
+			wallet.setLevel(EnumDef.EnumWalletLevel.SENIOR.getValue());
+			walletDao.updateByPrimaryKeySelective(wallet);
+		}
+
 		return walletChannel;
 	}
 
