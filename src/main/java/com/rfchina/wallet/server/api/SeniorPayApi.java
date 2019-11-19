@@ -1,5 +1,6 @@
 package com.rfchina.wallet.server.api;
 
+import com.rfchina.biztools.limiter.setting.RateSetting;
 import com.rfchina.wallet.domain.model.BalanceJob;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.server.model.ext.AgentPayReq.Reciever;
@@ -21,15 +22,15 @@ public interface SeniorPayApi {
 		String jumpUrl, String customerIp);
 
 	WalletCollectResp collect(String accessToken, CollectReq req, String jumpUrl,
-		String customerIp);
+		String customerIp, RateSetting rateSetting);
 
 	SettleResp agentPay(String accessToken, String bizNo, String collectOrderNo, Reciever receiver,
-		String note);
+		String note, RateSetting rateSetting);
 
 	WalletOrder refund(String accessToken, String bizNo, String collectOrderNo,
-		List<RefundInfo> rList);
+		List<RefundInfo> rList, RateSetting rateSetting);
 
-	WalletCollectResp deduction(String accessToken, DeductionReq req);
+	WalletCollectResp deduction(String accessToken, DeductionReq req, RateSetting rateSetting);
 
 	WalletOrder orderQuery(String accessToken, String orderNo);
 

@@ -1,8 +1,11 @@
 package com.rfchina.wallet.server.api.impl;
 
+import com.rfchina.biztools.limiter.aspect.RateSetting;
 import com.rfchina.passport.token.EnumTokenType;
 import com.rfchina.passport.token.TokenVerify;
 import com.rfchina.platform.common.annotation.Log;
+import com.rfchina.platform.common.annotation.ParamValid;
+import com.rfchina.platform.common.annotation.ParamVerify;
 import com.rfchina.platform.common.annotation.SignVerify;
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.utils.BeanUtil;
@@ -68,15 +71,15 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public RechargeResp recharge(String accessToken, Long walletId, Long cardId, Long amount) {
+	@ParamVerify
+	public RechargeResp recharge(
+		@ParamValid(nullable = false) String accessToken,
+		@ParamValid(nullable = false) Long walletId,
+		@ParamValid(nullable = false) Long cardId,
+		@ParamValid(nullable = false) Long amount) {
 
 		WalletCard walletCard = walletCardDao.selectByPrimaryKey(cardId);
-		if (walletCard == null) {
-			throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_NOT_EXISTS);
-		}
-		if (walletId.longValue() != walletCard.getWalletId().longValue()) {
-			throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_NOT_AUTH);
-		}
+		verifyService.checkCard(walletCard);
 
 		RechargeResp resp = seniorPayService.recharge(walletId, walletCard, amount);
 
@@ -93,15 +96,17 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public WithdrawResp withdraw(String accessToken, Long walletId, Long cardId, Long amount,
-		String jumpUrl, String customerIp) {
+	@ParamVerify
+	public WithdrawResp withdraw(
+		@ParamValid(nullable = false) String accessToken,
+		@ParamValid(nullable = false) Long walletId,
+		@ParamValid(nullable = false) Long cardId,
+		@ParamValid(nullable = false) Long amount,
+		@ParamValid(nullable = false) String jumpUrl,
+		@ParamValid(nullable = false) String customerIp) {
+
 		WalletCard walletCard = walletCardDao.selectByPrimaryKey(cardId);
-		if (walletCard == null) {
-			throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_NOT_EXISTS);
-		}
-		if (walletId.longValue() != walletCard.getWalletId().longValue()) {
-			throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_NOT_AUTH);
-		}
+		verifyService.checkCard(walletCard);
 
 		jumpUrl = configService.getYunstJumpUrlPrefix() + jumpUrl;
 		WithdrawResp withdraw = seniorPayService
@@ -119,8 +124,13 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public WalletCollectResp collect(String accessToken, CollectReq req, String jumpUrl,
-		String customerIp) {
+	@ParamVerify
+	public WalletCollectResp collect(
+		@ParamValid(nullable = false) String accessToken,
+		@ParamValid(nullable = false) CollectReq req,
+		@ParamValid(nullable = true) String jumpUrl,
+		@ParamValid(nullable = true) String customerIp,
+		RateSetting rateSetting) {
 		// 判断收款人记录不重复
 		Set<String> walletSet = req.getRecievers().stream()
 			.map(receiver -> receiver.getWalletId().toString())
@@ -156,12 +166,18 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public SettleResp agentPay(String accessToken, String bizNo, String collectOrderNo,
-		Reciever receiver,String note) {
+	@ParamVerify
+	public SettleResp agentPay(
+		@ParamValid(nullable = false) String accessToken,
+		@ParamValid(nullable = false) String bizNo,
+		@ParamValid(nullable = false) String collectOrderNo,
+		@ParamValid(nullable = false) Reciever receiver,
+		@ParamValid(nullable = true) String note,
+		RateSetting rateSetting) {
 		// 检查代收单
 		WalletOrder collectOrder = verifyService
 			.checkOrder(collectOrderNo, OrderStatus.SUCC.getValue());
-		return seniorPayService.agentPay(collectOrder, bizNo, receiver,note);
+		return seniorPayService.agentPay(collectOrder, bizNo, receiver, note);
 	}
 
 
@@ -169,8 +185,13 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public WalletOrder refund(String accessToken, String bizNo, String collectOrderNo,
-		List<RefundInfo> refundList) {
+	@ParamVerify
+	public WalletOrder refund(
+		@ParamValid(nullable = false) String accessToken,
+		@ParamValid(nullable = false) String bizNo,
+		@ParamValid(nullable = false) String collectOrderNo,
+		@ParamValid(nullable = false) List<RefundInfo> refundList,
+		RateSetting rateSetting) {
 		// 判断退款申请不重复
 		Set<String> walletIdSet = refundList.stream()
 			.map(r -> r.getWalletId().toString())
@@ -189,7 +210,11 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public WalletCollectResp deduction(String accessToken, DeductionReq req) {
+	@ParamVerify
+	public WalletCollectResp deduction(
+		@ParamValid(nullable = false) String accessToken,
+		@ParamValid(nullable = false) DeductionReq req,
+		RateSetting rateSetting) {
 
 		// 检验支付方式
 		WalletPayMethod payMethod = req.getWalletPayMethod();
@@ -211,7 +236,10 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public WalletOrder orderQuery(String accessToken, String orderNo) {
+	@ParamVerify
+	public WalletOrder orderQuery(
+		@ParamValid(nullable = false) String accessToken,
+		@ParamValid(nullable = false) String orderNo) {
 		return seniorPayService.orderQuery(orderNo);
 	}
 
@@ -219,8 +247,12 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public void smsConfirm(String accessToken, String ticket,
-		String verifyCode, String ip) {
+	@ParamVerify
+	public void smsConfirm(
+		@ParamValid(nullable = false) String accessToken,
+		@ParamValid(nullable = false) String ticket,
+		@ParamValid(nullable = false) String verifyCode,
+		@ParamValid(nullable = false) String ip) {
 
 		UnifiedConfirmVo vo = getUnifiedConfirmVo(ticket);
 		WalletOrder order = verifyService
@@ -232,7 +264,11 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public void smsRetry(String accessToken, String ticket) {
+	@ParamVerify
+	public void smsRetry(
+		@ParamValid(nullable = false) String accessToken,
+		@ParamValid(nullable = false) String ticket) {
+
 		UnifiedConfirmVo vo = getUnifiedConfirmVo(ticket);
 		WalletOrder order = verifyService
 			.checkOrder(vo.getOrderId(), OrderStatus.WAITTING.getValue());
@@ -243,8 +279,12 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public List<BalanceJob> balanceFile(String accessToken, Date beginDate, Date endDate) {
-		return seniorBalanceService.balanceFile(beginDate,endDate);
+	@ParamVerify
+	public List<BalanceJob> balanceFile(
+		@ParamValid(nullable = false) String accessToken,
+		@ParamValid(nullable = false) Date beginDate,
+		@ParamValid(nullable = false) Date endDate) {
+		return seniorBalanceService.balanceFile(beginDate, endDate);
 	}
 
 	private UnifiedConfirmVo getUnifiedConfirmVo(String ticket) {

@@ -1,4 +1,4 @@
-package com.rfchina.wallet.server.api.impl;
+package com.rfchina.wallet.server.api;
 
 public interface ScheduleApi {
 	/**
