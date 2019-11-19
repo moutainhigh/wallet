@@ -136,6 +136,9 @@ public class SeniorWalletService {
 			throw new RfchinaResponseException(EnumResponseCode.COMMON_FAILURE,
 				"更新钱包等级失败");
 		}
+		if (wallet.getLevel().byteValue() == EnumDef.EnumWalletLevel.SENIOR.getValue()){
+			return wallet;
+		}
 		wallet.setLevel(EnumDef.EnumWalletLevel.SENIOR.getValue());
 		int effctRows = walletDao.updateByPrimaryKeySelective(wallet);
 		if (effctRows != 1) {
@@ -279,6 +282,8 @@ public class SeniorWalletService {
 			walletDao.updateActiveStatus(walletId,
 				WalletStatus.ACTIVE.getValue(),
 				EnumWalletAuditType.ALLINPAY.getValue().longValue());
+
+			this.upgradeWalletLevel(walletId);
 		}
 	}
 
