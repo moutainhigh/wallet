@@ -16,14 +16,14 @@ public class ConfirmBindBankCardRequest extends  AbstractApiRequest {
   @ApiModelProperty("access_token")
   private String accessToken ;
 
+  @ApiModelProperty("预绑卡票据")
+  private String preBindTicket ;
+
   @ApiModelProperty("短信验证码")
   private String verifyCode ;
 
   @ApiModelProperty("钱包id")
   private Long walletId ;
-
-  @ApiModelProperty("预绑卡票据")
-  private String preBindTicket ;
 
 
   @Override
@@ -42,14 +42,14 @@ public class ConfirmBindBankCardRequest extends  AbstractApiRequest {
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
       }
+      if(preBindTicket != null){
+        parameters.put("pre_bind_ticket", preBindTicket.toString());
+      }
       if(verifyCode != null){
         parameters.put("verify_code", verifyCode.toString());
       }
       if(walletId != null){
         parameters.put("wallet_id", walletId.toString());
-      }
-      if(preBindTicket != null){
-        parameters.put("pre_bind_ticket", preBindTicket.toString());
       }
     return parameters;
   }

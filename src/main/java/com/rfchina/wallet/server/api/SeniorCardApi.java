@@ -1,5 +1,8 @@
 package com.rfchina.wallet.server.api;
 
+import com.rfchina.wallet.domain.model.WalletCard;
+import java.util.List;
+
 public interface SeniorCardApi {
 
 	/**
@@ -30,4 +33,11 @@ public interface SeniorCardApi {
 	 * 高级钱包确认绑定银行卡
 	 */
 	void unBindCard(String accessToken, Long cardId);
+
+	/**
+	 * 高级钱包-银行卡列表
+	 *
+	 * @param walletId 必填, 钱包id
+	 */
+	List<WalletCard> listCard(String accessToken, Long walletId);
 }

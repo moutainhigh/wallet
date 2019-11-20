@@ -1,3 +1,27 @@
+###  高级钱包-银行卡列表
+
+请求地址: /wallet_server/v1/m/senior/card/list
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|wallet_id|是|钱包id|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+   , "data": [ {
+} ] 
+}
+```
+
 ###  高级钱包-确认绑定银行卡
 
 请求地址: /wallet_server/v1/m/senior/card/confirm_bind_card
@@ -10,9 +34,9 @@
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
 |access_token|是|access_token|
+|pre_bind_ticket|是|预绑卡票据|
 |verify_code|是|短信验证码|
 |wallet_id|是|钱包id|
-|pre_bind_ticket|否|预绑卡票据|
 
 返回数据
 ```

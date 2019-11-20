@@ -223,6 +223,10 @@ public class UrlConstant {
 	 */
 	public static final String WALLET_SENIOR_UNBIND_CARD = VERSION + "/m/senior/card/unbind_card";
 	/**
+	 * 高级钱包-银行卡列表
+	 */
+	public static final String WALLET_SENIOR_BANK_CARD_LIST = VERSION + "/m/senior/card/list";
+	/**
 	 * 高级钱包个人信息
 	 */
 	public static final String WALLET_SENIOR_PERSON_INFO = VERSION + "/m/senior/wallet/person_info";

@@ -22,6 +22,7 @@ import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.model.ext.PreBindCardVo;
 import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -199,4 +200,12 @@ public class SeniorCardService {
 		}
 	}
 
+	/**
+	 * 银行卡列表
+	 * @param walletId
+	 * @return
+	 */
+	public List<WalletCard> cardList(Long walletId){
+		return walletCardDao.selectByWalletId(walletId);
+	}
 }

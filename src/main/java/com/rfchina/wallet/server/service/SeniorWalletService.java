@@ -6,9 +6,14 @@ import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.misc.EnumDef;
+import com.rfchina.wallet.domain.misc.EnumDef.EnumDefBankCard;
+import com.rfchina.wallet.domain.misc.EnumDef.EnumPublicAccount;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumVerifyCodeType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletAuditType;
+import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletCardStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
+import com.rfchina.wallet.domain.misc.EnumDef.VerifyChannel;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletCardType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletSource;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelAuditStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelSignContract;
@@ -17,6 +22,7 @@ import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyRefType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.Wallet;
+import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletPerson;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.domain.model.WalletTunnel.WalletTunnelBuilder;
@@ -28,6 +34,7 @@ import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResul
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.PersonInfoResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstQueryBalanceResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstSetCompanyInfoResult;
+import com.rfchina.wallet.server.mapper.ext.WalletCardExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
@@ -38,6 +45,7 @@ import com.rfchina.wallet.server.msic.EnumWallet.WalletStatus;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBaseHandler.YunstMemberType;
 import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -65,6 +73,9 @@ public class SeniorWalletService {
 
 	@Autowired
 	private WalletVerifyHisExtDao walletVerifyHisExtDao;
+
+	@Autowired
+	private WalletCardExtDao walletCardDao;
 
 	@Autowired
 	private VerifyService verifyService;
@@ -331,6 +342,26 @@ public class SeniorWalletService {
 									.verifyType(
 										WalletVerifyType.COMPANY_VERIFY.getValue().byteValue())
 									.verifyTime(curDate).createTime(curDate).build());
+
+							List<WalletCard> walletCards = walletCardDao
+								.selectPubAccountByWalletId(walletId);
+							if (walletCards != null && !walletCards.isEmpty()){
+								walletCardDao.updateWalletCard(walletId, EnumWalletCardStatus.UNBIND.getValue(), EnumWalletCardStatus.BIND.getValue(), EnumPublicAccount.YES.getValue());
+							}
+
+							walletCardDao.insertSelective(
+								WalletCard.builder()
+									.cardType(WalletCardType.DEPOSIT.getValue())
+									.walletId(walletId)
+									.bankName(companyBasicInfo.getParentBankName())
+									.depositBank(companyBasicInfo.getBankName())
+									.bankAccount(companyBasicInfo.getAccountNo())
+									.verifyChannel(VerifyChannel.YUNST.getValue())
+									.verifyTime(curDate)
+									.isPublic(EnumPublicAccount.YES.getValue().byteValue())
+									.isDef(EnumDefBankCard.YES.getValue().byteValue())
+									.status(EnumWalletCardStatus.BIND.getValue().byteValue())
+								.build());
 						} else if (3L == result.longValue()) {
 							walletChannel.setStatus(
 								EnumDef.WalletTunnelAuditStatus.AUDIT_FAIL.getValue()
@@ -342,6 +373,25 @@ public class SeniorWalletService {
 						walletChannel.setStatus(
 							EnumDef.WalletTunnelAuditStatus.WAITING_AUDIT.getValue()
 								.byteValue());
+
+						List<WalletCard> walletCards = walletCardDao
+							.selectPubAccountByWalletId(walletId);
+						if (walletCards != null && !walletCards.isEmpty()){
+							walletCardDao.updateWalletCard(walletId, EnumWalletCardStatus.UNBIND.getValue(), EnumWalletCardStatus.BIND.getValue(), EnumPublicAccount.YES.getValue());
+						}
+
+						walletCardDao.insertSelective(
+							WalletCard.builder()
+								.cardType(WalletCardType.DEPOSIT.getValue())
+								.walletId(walletId)
+								.bankName(companyBasicInfo.getParentBankName())
+								.depositBank(companyBasicInfo.getBankName())
+								.bankAccount(companyBasicInfo.getAccountNo())
+								.verifyChannel(VerifyChannel.YUNST.getValue())
+								.isPublic(EnumPublicAccount.YES.getValue().byteValue())
+								.isDef(EnumDefBankCard.YES.getValue().byteValue())
+								.status(EnumWalletCardStatus.BIND.getValue().byteValue())
+								.build());
 					}
 					walletChannel.setRemark(remark);
 					walletChannel.setFailReason(null);

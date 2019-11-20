@@ -9,9 +9,9 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 
 
-/** 钱包绑定的银行卡列表 */
+/** 高级钱包-银行卡列表 */
 @Builder
-public class BindingBankCardListRequest extends  AbstractApiRequest {
+public class BankCardListRequest extends  AbstractApiRequest {
 
   @ApiModelProperty("access_token")
   private String accessToken ;
@@ -22,12 +22,12 @@ public class BindingBankCardListRequest extends  AbstractApiRequest {
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/wallet/bank_card/list";
+    return "/wallet_server/v1/m/senior/card/list";
   }
 
   @Override
   public Class<?> getResponseModelClass() {
-    return ListListWalletCard.class;
+    return ListWalletCard.class;
   }
 
   @Override

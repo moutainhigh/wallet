@@ -3,6 +3,7 @@ package com.rfchina.wallet.server.service.handler.yunst;
 import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.domain.misc.EnumDef;
+import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletCardStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelSetPayPwd;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelSignContract;
@@ -11,9 +12,11 @@ import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyRefType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyType;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.model.ChannelNotify;
+import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.domain.model.WalletVerifyHis;
 import com.rfchina.wallet.server.bank.yunst.response.YunstNotify;
+import com.rfchina.wallet.server.mapper.ext.WalletCardExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletVerifyHisExtDao;
 import com.rfchina.wallet.server.model.ext.SLWalletMqMessage;
@@ -33,6 +36,8 @@ public class YunstNotifyHandler {
 	@Autowired
 	private WalletVerifyHisExtDao walletVerifyHisExtDao;
 	@Autowired
+	private WalletCardExtDao walletCardDao;
+	@Autowired
 	private YunstBizHandler yunstBizHandler;
 
 	@PostMq(routingKey = MqConstant.WALLET_SENIOR_COMPANY_AUDIT)
@@ -48,36 +53,46 @@ public class YunstNotifyHandler {
 
 		channelNotify.setBizUserId(bizUserId);
 
-		WalletTunnel walletChannel = walletTunnelExtDao.selectByTunnelTypeAndBizUserId(
+		WalletTunnel walletTunnel = walletTunnelExtDao.selectByTunnelTypeAndBizUserId(
 			TunnelType.YUNST.getValue().intValue(), bizUserId);
 
+		WalletCard walletCard = walletCardDao
+			.selectNonVerifyPubAccountByWalletId(walletTunnel.getWalletId());
+
 		if (result == 2L) {
-			walletChannel.setStatus(
+			walletTunnel.setStatus(
 				EnumDef.WalletTunnelAuditStatus.AUDIT_SUCCESS.getValue().byteValue());
-			walletChannel.setFailReason(null);
+			walletTunnel.setFailReason(null);
 			walletVerifyHisExtDao.insertSelective(
-				WalletVerifyHis.builder().walletId(walletChannel.getWalletId())
-					.refId(walletChannel.getId()).type(
+				WalletVerifyHis.builder().walletId(walletTunnel.getWalletId())
+					.refId(walletTunnel.getId()).type(
 					WalletVerifyRefType.COMPANY.getValue().byteValue()).verifyChannel(
 					WalletVerifyChannel.TONGLIAN.getValue().byteValue()).verifyType(
 					WalletVerifyType.COMPANY_VERIFY.getValue().byteValue())
 					.verifyTime(DateUtil.parse(checkTime, DateUtil.STANDARD_DTAETIME_PATTERN))
 					.createTime(new Date()).build());
+			walletCard.setVerifyTime(DateUtil.parse(checkTime, DateUtil.STANDARD_DTAETIME_PATTERN));
 		} else if (result == 3L) {
-			walletChannel
+			walletTunnel
 				.setStatus(EnumDef.WalletTunnelAuditStatus.AUDIT_FAIL.getValue().byteValue());
-			walletChannel.setFailReason(failReason);
+			walletTunnel.setFailReason(failReason);
+
+			walletCard.setStatus(EnumWalletCardStatus.UNBIND.getValue().byteValue());
 		}
-		walletChannel.setRemark(remark);
-		walletChannel
+		walletTunnel.setRemark(remark);
+		walletTunnel
 			.setCheckTime(DateUtil.parse(checkTime, DateUtil.STANDARD_DTAETIME_PATTERN));
 
-		int effectRows = walletTunnelExtDao.updateByPrimaryKeySelective(walletChannel);
+		int effectRows = walletTunnelExtDao.updateByPrimaryKeySelective(walletTunnel);
 		if (effectRows != 1) {
 			log.error("处理企业信息审核结果通知-更新审核状态状态失败:bizUserId:{}", bizUserId);
 		}
 
-		return SLWalletMqMessage.builder().walletId(walletChannel.getWalletId())
+		effectRows = walletCardDao.updateByPrimaryKeySelective(walletCard);
+		if (effectRows != 1) {
+			log.error("处理企业信息审核结果通知-更新银行卡信息失败:bizUserId:{}", bizUserId);
+		}
+		return SLWalletMqMessage.builder().walletId(walletTunnel.getWalletId())
 			.isPass(result == 2L).checkTime(checkTime).failReason(failReason).build();
 	}
 

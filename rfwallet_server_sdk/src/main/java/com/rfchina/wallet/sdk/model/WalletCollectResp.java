@@ -49,7 +49,7 @@ public class WalletCollectResp  {
     @ApiModelProperty("1:未锁 2：锁定")
     private Integer locked ;
 
-    @ApiModelProperty("备注，最长1024")
+    @ApiModelProperty("附言,长度由通道确定")
     private String note ;
 
     @ApiModelProperty("1:已通知技术 2:已通知业务")
