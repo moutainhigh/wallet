@@ -7,22 +7,28 @@ import com.rfchina.platform.common.annotation.ParamValid;
 import com.rfchina.platform.common.annotation.SignVerify;
 import com.rfchina.platform.common.exception.RfchinaResponseException;
 import com.rfchina.platform.common.misc.ResponseCode;
+import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.platform.common.utils.RegexUtil;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.model.Wallet;
+import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletPerson;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.api.SeniorWalletApi;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.CompanyInfoResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.PersonInfoResult;
+import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletSource;
 import com.rfchina.wallet.server.service.SeniorWalletService;
 import com.rfchina.wallet.server.service.VerifyService;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -42,6 +48,9 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 
 	@Autowired
 	private WalletPersonExtDao walletPersonDao;
+
+	@Autowired
+	private WalletOrderExtDao walletOrderExtDao;
 
 	@Autowired
 	private VerifyService verifyService;
@@ -301,5 +310,23 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 				"高级钱包获取个人会员信息失败");
 		}
 
+	}
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
+	@Override
+	public Pagination<WalletOrder> queryWalletOrderDetail(String accessToken, Long walletId,
+		Date fromTime, Date toTime, Integer tradeType, Integer status, int limit, int offset,
+		Boolean stat) {
+		List<WalletOrder> walletOrderList = walletOrderExtDao
+			.selectByCondition(walletId, fromTime, toTime, tradeType, status, limit, offset);
+		long total = Objects.nonNull(stat) && stat ? walletOrderExtDao
+			.selectCountByCondition(walletId, fromTime, toTime, tradeType, status) : 0;
+		return new Pagination.PaginationBuilder<WalletOrder>().data(walletOrderList)
+			.total(total)
+			.offset(offset)
+			.pageLimit(limit)
+			.build();
 	}
 }

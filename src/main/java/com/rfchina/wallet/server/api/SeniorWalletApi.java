@@ -1,9 +1,12 @@
 package com.rfchina.wallet.server.api;
 
+import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.wallet.domain.model.Wallet;
+import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult;
+import java.util.Date;
 
 public interface SeniorWalletApi {
 
@@ -126,4 +129,12 @@ public interface SeniorWalletApi {
 	 */
 	YunstMemberInfoResult.PersonInfoResult seniorWalletGetPersonInfo(String accessToken,
 		Long walletId);
+
+	/**
+	 * 高级钱包余额明细
+	 *
+	 * @param walletId 必填, 钱包id
+	 */
+	Pagination<WalletOrder> queryWalletOrderDetail(String accessToken, Long walletId, Date fromTime,
+			Date toTime, Integer tradeType, Integer status, int limit, int offset, Boolean stat);
 }
