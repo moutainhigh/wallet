@@ -16,11 +16,8 @@ public class BalanceFileRequest extends  AbstractApiRequest {
   @ApiModelProperty("应用令牌")
   private String accessToken ;
 
-  @ApiModelProperty("开始时间")
-  private String beginDate ;
-
-  @ApiModelProperty("结束时间")
-  private String endDate ;
+  @ApiModelProperty("对账日期 yyyy-MM-dd")
+  private String balanceDate ;
 
 
   @Override
@@ -30,7 +27,7 @@ public class BalanceFileRequest extends  AbstractApiRequest {
 
   @Override
   public Class<?> getResponseModelClass() {
-    return ListBalanceJob.class;
+    return BalanceJob.class;
   }
 
   @Override
@@ -39,11 +36,8 @@ public class BalanceFileRequest extends  AbstractApiRequest {
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
       }
-      if(beginDate != null){
-        parameters.put("begin_date", beginDate.toString());
-      }
-      if(endDate != null){
-        parameters.put("end_date", endDate.toString());
+      if(balanceDate != null){
+        parameters.put("balance_date", balanceDate.toString());
       }
     return parameters;
   }

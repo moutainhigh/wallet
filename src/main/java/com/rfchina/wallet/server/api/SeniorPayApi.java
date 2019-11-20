@@ -42,6 +42,6 @@ public interface SeniorPayApi {
 	/**
 	 * 高级钱包-对账文件
 	 */
-	List<BalanceJob> balanceFile(String accessToken, Date beginDate, Date endDate);
+	BalanceJob balanceFile(String accessToken, Date balanceDate);
 
 }

@@ -280,11 +280,10 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 	@SignVerify
 	@Override
 	@ParamVerify
-	public List<BalanceJob> balanceFile(
+	public BalanceJob balanceFile(
 		@ParamValid(nullable = false) String accessToken,
-		@ParamValid(nullable = false) Date beginDate,
-		@ParamValid(nullable = false) Date endDate) {
-		return seniorBalanceService.balanceFile(beginDate, endDate);
+		@ParamValid(nullable = false) Date balanceDate) {
+		return seniorBalanceService.balanceFile(balanceDate);
 	}
 
 	private UnifiedConfirmVo getUnifiedConfirmVo(String ticket) {

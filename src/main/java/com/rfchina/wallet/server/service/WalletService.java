@@ -141,7 +141,7 @@ public class WalletService {
 		if (!StringUtils.isEmpty(batchNo)) {
 			criteria.andBatchNoEqualTo(batchNo);
 		}
-
+		example.setOrderByClause("id desc");
 		List<WalletApply> walletApplies = walletApplyDao.selectByExample(example);
 		if (walletApplies.isEmpty()) {
 			throw new RfchinaResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST,

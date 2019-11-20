@@ -31,6 +31,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -187,13 +188,12 @@ public class SeniorPayController {
 
 	@ApiOperation("高级钱包-对账文件")
 	@PostMapping(UrlConstant.SENIOR_WALLET_BALANCE_FILE)
-	public ResponseValue<List<BalanceJob>> balanceFile(
+	public ResponseValue<BalanceJob> balanceFile(
 		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
-		@ApiParam(value = "开始时间", required = true) @RequestParam("begin_date") Date beginDate,
-		@ApiParam(value = "结束时间", required = true) @RequestParam("end_date") Date endDate
+		@ApiParam(value = "对账日期 yyyy-MM-dd", required = true) @RequestParam("balance_date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date balanceDate
 	) {
 
-		List<BalanceJob> result = seniorPayApi.balanceFile(accessToken, beginDate, endDate);
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result);
+		BalanceJob job = seniorPayApi.balanceFile(accessToken, balanceDate);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, job);
 	}
 }

@@ -76,16 +76,21 @@
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
 |access_token|是|应用令牌|
-|begin_date|是|开始时间|
-|end_date|是|结束时间|
+|balance_date|是|对账日期 yyyy-MM-dd|
 
 返回数据
 ```
 {
   "code": 1001,//状态码
   "msg": ""//消息
-   , "data": [ {
-} ] 
+   , "data":  {
+    balance_date:""  , //钱包对账日期
+    create_time:""  , //创建日期
+    deleted:""  , //是否删除 0：正常 1：已删除
+    id:""  , //id
+    status:""  , //状态 1：进行中 2：对账完成
+    wallet_file_url:""   //对账文件
+}  
 }
 ```
 
