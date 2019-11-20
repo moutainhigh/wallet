@@ -230,6 +230,10 @@ public class UrlConstant {
 	 * 高级钱包企业信息
 	 */
 	public static final String WALLET_SENIOR_COMPANY_INFO= VERSION + "/m/senior/wallet/company_info";
+	/**
+	 * 高级钱包余额明细
+	 */
+	public static final String WALLET_SENIOR_ORDER_DETAIL= VERSION + "/m/senior/wallet/order_detail";
 
 	/**
 	 * 云商通统一回调
