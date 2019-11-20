@@ -92,7 +92,6 @@ import com.rfchina.wallet.server.model.ext.WithdrawResp;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
 import com.rfchina.wallet.server.msic.EnumWallet.DebitType;
 import com.rfchina.wallet.server.msic.EnumWallet.EnumBizTag;
-import com.rfchina.wallet.server.msic.EnumWallet.EnumYunstCardPro;
 import com.rfchina.wallet.server.msic.EnumWallet.EnumYunstDeviceType;
 import com.rfchina.wallet.server.msic.EnumWallet.EnumYunstWithdrawType;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
@@ -288,7 +287,7 @@ public class YunstBizHandler extends EBankHandler {
 			.orderExpireDatetime(expireTime)
 			.payMethod(null)
 			.bankCardNo(bankAccount)
-			.bankCardPro(EnumYunstCardPro.PERSON.getValue())
+			.bankCardPro(withdraw.getCardPro().longValue())
 			.withdrawType(EnumYunstWithdrawType.D0.getValue())
 			.industryCode(order.getIndustryCode())
 			.industryName(order.getIndustryName())

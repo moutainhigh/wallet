@@ -53,6 +53,7 @@ import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
 import com.rfchina.wallet.server.model.ext.SettleResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.model.ext.WithdrawResp;
+import com.rfchina.wallet.server.msic.EnumWallet.CardPro;
 import com.rfchina.wallet.server.msic.EnumWallet.ChannelType;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
 import com.rfchina.wallet.server.msic.EnumWallet.DirtyType;
@@ -246,6 +247,8 @@ public class SeniorPayService {
 		WalletWithdraw withdraw = WalletWithdraw.builder()
 			.orderId(withdrawOrder.getId())
 			.cardId(walletCard.getId())
+			.cardPro(walletCard.getIsPublic().intValue() == 1 ? CardPro.COMPANY.getValue()
+				: CardPro.PERSON.getValue())
 			.bankAccount(walletCard.getBankAccount())
 			.validateType(BizValidateType.PASSWORD.getValue())
 			.createTime(new Date())
@@ -340,9 +343,9 @@ public class SeniorPayService {
 				.pwdGwConfirm(collectOrder, payer, jumpUrl, customerIp);
 			signedParams = configService.getYunstPwdConfirmUrl() + "?" + signedParams;
 			result.setSignedParams(signedParams);
-		} else if(collect.getValidateType().byteValue() == BizValidateType.SMS.getValue()){
+		} else if (collect.getValidateType().byteValue() == BizValidateType.SMS.getValue()) {
 			String signedParams = ((YunstBizHandler) handler)
-				.smsGwConfirm(collectOrder,payer,customerIp);
+				.smsGwConfirm(collectOrder, payer, customerIp);
 			signedParams = configService.getYunstPwdConfirmUrl() + "?" + signedParams;
 			result.setSignedParams(signedParams);
 		}

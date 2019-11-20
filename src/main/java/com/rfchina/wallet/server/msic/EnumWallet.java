@@ -855,24 +855,24 @@ public class EnumWallet {
 	/**
 	 * 通联银行卡/账户属性
 	 */
-	public enum EnumYunstCardPro implements Valuable<Long> {
-		PERSON(0L, "个人银行卡"),
-		ENTERPRICE(1L, "企业对公账户");
-
-		private Long value;
-		private String valueName;
-
-		EnumYunstCardPro(Long value, String valueName) {
-			this.value = value;
-			this.valueName = valueName;
-		}
-
-		@Override
-		public Long getValue() {
-			return this.value;
-		}
-
-	}
+//	public enum EnumYunstCardPro implements Valuable<Long> {
+//		PERSON(0L, "个人银行卡"),
+//		ENTERPRICE(1L, "企业对公账户");
+//
+//		private Long value;
+//		private String valueName;
+//
+//		EnumYunstCardPro(Long value, String valueName) {
+//			this.value = value;
+//			this.valueName = valueName;
+//		}
+//
+//		@Override
+//		public Long getValue() {
+//			return this.value;
+//		}
+//
+//	}
 
 	/**
 	 * 通联提现方式 D0：D+0 到账 D1：D+1 到账 T1customized：T+1 到账，仅工作日代付 D0customized：D+0 到账，根据平台资金头寸付款 默认为 D0
@@ -1062,6 +1062,27 @@ public class EnumWallet {
 		@Override
 		public Byte getValue() {
 			return this.value;
+		}
+	}
+
+	/**
+	 * 卡属性 0：个人银行卡 1：企业对公账户
+	 */
+	public enum CardPro implements Valuable<Byte> {
+		PERSON((byte)0, "个人银行卡"),
+		COMPANY((byte)1,"企业对公账户");
+
+		private Byte value;
+		private String valueName;
+
+		CardPro(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
 		}
 	}
 }
