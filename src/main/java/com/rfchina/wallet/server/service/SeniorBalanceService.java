@@ -284,6 +284,7 @@ public class SeniorBalanceService {
 		tunnelExample.createCriteria()
 			.andDeletedEqualTo((byte) 0)
 			.andWalletBalanceDateBetween(beginDate, endDate);
+		tunnelExample.setOrderByClause("id asc");
 		BoundSetOperations<String, String> tunnelOps = local2Redis(tunnelKey,
 			() -> balanceTunnelDetailDao.countByExample(tunnelExample),
 			(offset, limit) -> {
@@ -294,15 +295,16 @@ public class SeniorBalanceService {
 					.collect(Collectors.toList());
 			});
 		// 加载钱包数据
-		WalletOrderCriteria example = new WalletOrderCriteria();
-		example.createCriteria()
+		WalletOrderCriteria OrderExample = new WalletOrderCriteria();
+		OrderExample.createCriteria()
 			.andStatusEqualTo(OrderStatus.SUCC.getValue())
 			.andEndTimeBetween(beginDate, endDate);
+		OrderExample.setOrderByClause("id asc");
 		BoundSetOperations<String, String> walletOps = local2Redis(walletKey,
-			() -> walletOrderDao.countByExample(example),
+			() -> walletOrderDao.countByExample(OrderExample),
 			(offset, limit) -> {
 				List<WalletOrder> orders = walletOrderDao
-					.selectByExampleWithRowbounds(example, new RowBounds(offset, limit));
+					.selectByExampleWithRowbounds(OrderExample, new RowBounds(offset, limit));
 				return orders.stream()
 					.map(order -> order.getOrderNo() + SPLIT_TAG + order.getAmount())
 					.collect(Collectors.toList());
@@ -329,12 +331,20 @@ public class SeniorBalanceService {
 		});
 	}
 
-	public List<BalanceJob> balanceFile(Date beginDate, Date endDate) {
+	public BalanceJob balanceFile(Date balanceDate) {
 		BalanceJobCriteria example = new BalanceJobCriteria();
+		Date beginDate = DateUtil.getDate2(balanceDate);
+		Date endDate = DateUtil.addDate2(beginDate, 1);
 		example.createCriteria()
 			.andStatusEqualTo(BalanceJobStatus.SUCC.getValue())
-			.andDeletedEqualTo((byte)0)
-			.andBalanceDateBetween(beginDate, endDate);
-		return balanceJobDao.selectByExample(example);
+			.andDeletedEqualTo((byte) 0)
+			.andBalanceDateGreaterThanOrEqualTo(beginDate)
+			.andBalanceDateLessThan(endDate);
+		example.setOrderByClause("id desc");
+		List<BalanceJob> balanceJobs = balanceJobDao.selectByExample(example);
+		if (!balanceJobs.isEmpty()) {
+			return balanceJobs.get(0);
+		}
+		return null;
 	}
 }

@@ -59,7 +59,7 @@ public class SeniorPayApiImplTest extends SpringApiTest {
 			.walletPayMethod(WalletPayMethod.builder().codePay(codePay).build())
 			.build();
 
-		WalletCollectResp resp = seniorPayApi.collect(super.accessToken, req, null, null);
+		WalletCollectResp resp = seniorPayApi.collect(super.accessToken, req, null, null, null);
 		log.info("collect resp = {}", JsonUtil.toJSON(resp));
 	}
 
@@ -72,13 +72,13 @@ public class SeniorPayApiImplTest extends SpringApiTest {
 		reciever.setAmount(1L);
 		reciever.setFeeAmount(0L);
 		seniorPayApi.agentPay(super.accessToken, String.valueOf(System.currentTimeMillis()),
-			collectOrderNo, reciever, "");
+			collectOrderNo, reciever, "", null);
 
 		reciever.setWalletId(payeeWalletId);
 		reciever.setAmount(2L);
 		reciever.setFeeAmount(0L);
 		seniorPayApi.agentPay(super.accessToken, String.valueOf(System.currentTimeMillis()),
-			collectOrderNo, reciever, "");
+			collectOrderNo, reciever, "", null);
 	}
 
 	@Test
@@ -98,7 +98,7 @@ public class SeniorPayApiImplTest extends SpringApiTest {
 			.industryName("保险代理")
 			.walletPayMethod(WalletPayMethod.builder().balance(balance).build())
 			.build();
-		WalletCollectResp resp = seniorPayApi.deduction(super.accessToken, req);
+		WalletCollectResp resp = seniorPayApi.deduction(super.accessToken, req, null);
 		log.info("Deduction resp = {}", JsonUtil.toJSON(resp));
 	}
 
