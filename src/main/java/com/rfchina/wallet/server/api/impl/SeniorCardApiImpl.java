@@ -6,8 +6,10 @@ import com.rfchina.platform.common.annotation.Log;
 import com.rfchina.platform.common.annotation.ParamValid;
 import com.rfchina.platform.common.annotation.ParamVerify;
 import com.rfchina.platform.common.annotation.SignVerify;
+import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.server.api.SeniorCardApi;
 import com.rfchina.wallet.server.service.SeniorCardService;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -71,6 +73,11 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 		@ParamValid(nullable = false) Long cardId) {
 
 		seniorCardService.unBindCard(cardId);
+	}
+
+	@Override
+	public List<WalletCard> listCard(String accessToken, Long walletId) {
+		return seniorCardService.cardList(walletId);
 	}
 
 }

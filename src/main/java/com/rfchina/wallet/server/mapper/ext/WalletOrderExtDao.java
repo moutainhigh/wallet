@@ -42,7 +42,6 @@ public interface WalletOrderExtDao extends WalletOrderMapper {
 		"and create_time <![CDATA[<=]]> #{toTime}", "</if>",
 		"<if test=\"tradeType != null\"> and type =#{tradeType}</if>",
 		"<if test=\"status != null\"> and status =#{status}</if>",
-		"<if test=\"tradeNo != null\"> and trade_no =#{tradeNo}</if>",
 		"order by create_time desc", "limit #{limit} offset #{offset}",
 		"</script>"
 	})
@@ -61,7 +60,6 @@ public interface WalletOrderExtDao extends WalletOrderMapper {
 		"and create_time <![CDATA[<=]]> #{toTime}", "</if>",
 		"<if test=\"tradeType != null\"> and type =#{tradeType}</if>",
 		"<if test=\"status != null\"> and status =#{status}</if>",
-		"<if test=\"tradeNo != null\"> and trade_no =#{tradeNo}</if>",
 		"</script>"
 	})
 	int selectCountByCondition(@Param("walletId") Long walletId,

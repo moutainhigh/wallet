@@ -3,11 +3,13 @@ package com.rfchina.wallet.server.web;
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.ResponseValue;
 import com.rfchina.platform.common.utils.BeanUtil;
+import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.server.api.SeniorCardApi;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -60,4 +62,14 @@ public class SeniorCardController {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
 
+
+	@ApiOperation("高级钱包-银行卡列表")
+	@PostMapping(UrlConstant.WALLET_SENIOR_BANK_CARD_LIST)
+	public ResponseValue<List<WalletCard>> bankCardList(
+		@RequestParam("access_token") String accessToken,
+		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId) {
+
+		List<WalletCard> walletCards = seniorCardApi.listCard(accessToken, walletId);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, walletCards);
+	}
 }
