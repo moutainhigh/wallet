@@ -10,9 +10,9 @@
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
 |access_token|是|access_token|
+|pre_bind_ticket|是|预绑卡票据|
 |verify_code|是|短信验证码|
 |wallet_id|是|钱包id|
-|pre_bind_ticket|否|预绑卡票据|
 
 返回数据
 ```
