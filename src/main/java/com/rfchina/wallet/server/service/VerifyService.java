@@ -93,6 +93,19 @@ public class VerifyService {
 	}
 
 	/**
+	 * 检查银行卡
+	 */
+	public void checkCard(WalletCard walletCard) {
+		if (walletCard == null) {
+			throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_NOT_EXISTS);
+		}
+		if (walletCard.getStatus().intValue() != EnumWalletCardStatus.BIND.getValue().intValue()) {
+			throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_STATUS_ERROR);
+		}
+	}
+
+
+	/**
 	 * 检查渠道注册
 	 */
 	public WalletTunnel checkChannel(Long walletId, TunnelType channelType) {

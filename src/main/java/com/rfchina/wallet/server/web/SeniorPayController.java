@@ -3,11 +3,15 @@ package com.rfchina.wallet.server.web;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.rfchina.biztools.limiter.annotation.EnumFixedRate;
+import com.rfchina.biztools.limiter.setting.RateSetting;
+import com.rfchina.biztools.limiter.setting.RateSettingUtil;
 import com.rfchina.platform.common.json.ObjectSetter;
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.ResponseValue;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.JsonUtil;
+import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.model.BalanceJob;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.server.api.SeniorPayApi;
@@ -40,6 +44,18 @@ public class SeniorPayController {
 		objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		objectMapper.setDateFormat(new SimpleDateFormat(DateUtil.STANDARD_DTAETIME_PATTERN));
 	};
+
+	// 快捷参数配置工具，也可以自行构建
+	public static RateSetting settingTemplate = RateSetting.builder()
+		.limitWord("")
+		.fixedLength(5)
+		.fixedUnit(EnumFixedRate.SECONDS)
+		.max(1)
+		.overflow((setting) -> {
+			throw new WalletResponseException(600001, "超过" + setting.getMax() + "次数限制");
+		})
+		.build();
+
 
 	@Autowired
 	private SeniorPayApi seniorPayApi;
@@ -83,7 +99,9 @@ public class SeniorPayController {
 		@ApiParam(value = "客户Ip", required = false) @RequestParam(value = "customer_ip", required = false) String customerIp
 	) {
 		CollectReq req = JsonUtil.toObject(collectReq, CollectReq.class, DEF_REQ_OBJ_MAP);
-		WalletCollectResp result = seniorPayApi.collect(accessToken, req, jumpUrl, customerIp);
+		RateSetting rateSetting = RateSettingUtil.clone(req.getBizNo(), settingTemplate);
+		WalletCollectResp result = seniorPayApi
+			.collect(accessToken, req, jumpUrl, customerIp, rateSetting);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result);
 	}
 
@@ -98,8 +116,9 @@ public class SeniorPayController {
 	) {
 		AgentPayReq.Reciever reciever = JsonUtil
 			.toObject(agentPayReq, AgentPayReq.Reciever.class, DEF_REQ_OBJ_MAP);
+		RateSetting rateSetting = RateSettingUtil.clone(bizNo, settingTemplate);
 		SettleResp settleResp = seniorPayApi
-			.agentPay(accessToken, bizNo, collectOrderNo, reciever, note);
+			.agentPay(accessToken, bizNo, collectOrderNo, reciever, note, rateSetting);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, settleResp);
 	}
 
@@ -112,7 +131,9 @@ public class SeniorPayController {
 		@ApiParam(value = "退款清单，参考List<RefundInfo>结构体", required = true) @RequestParam("refund_list") String refundList
 	) {
 		List<RefundInfo> rList = JsonUtil.toArray(refundList, RefundInfo.class, DEF_REQ_OBJ_MAP);
-		WalletOrder refund = seniorPayApi.refund(accessToken, bizNo, collectOrderNo, rList);
+		RateSetting rateSetting = RateSettingUtil.clone(bizNo, settingTemplate);
+		WalletOrder refund = seniorPayApi
+			.refund(accessToken, bizNo, collectOrderNo, rList, rateSetting);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, refund);
 	}
 
@@ -124,7 +145,8 @@ public class SeniorPayController {
 	) {
 
 		DeductionReq req = JsonUtil.toObject(deductionReq, DeductionReq.class, DEF_REQ_OBJ_MAP);
-		WalletCollectResp result = seniorPayApi.deduction(accessToken, req);
+		RateSetting rateSetting = RateSettingUtil.clone(req.getBizNo(), settingTemplate);
+		WalletCollectResp result = seniorPayApi.deduction(accessToken, req, rateSetting);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result);
 	}
 

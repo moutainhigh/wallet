@@ -97,7 +97,7 @@ public class SeniorCardService {
 				.build();
 			String preBindTicket = UUID.randomUUID().toString();
 			redisTemplate.opsForValue()
-				.set(PRE_BINDCARD + preBindTicket, preBindCardVo, 15, TimeUnit.MINUTES);
+				.set(PRE_BINDCARD + preBindTicket, preBindCardVo, 30, TimeUnit.MINUTES);
 			return preBindTicket;
 		} catch (CommonGatewayException e) {
 			String errMsg = e.getBankErrMsg();
@@ -153,8 +153,7 @@ public class SeniorCardService {
 		int cardCount = walletCardDao
 			.selectCountByWalletId(walletId, EnumWalletCardStatus.BIND.getValue());
 		//兼容升级银行卡做通联验证,将旧的卡解绑
-		WalletCard exsitsCard = walletCardDao
-			.selectByWalletIdAndBankAccount(walletId, preBindCardVo.getCardNo());
+		WalletCard exsitsCard = walletCardDao.selectByCardNo(walletId, preBindCardVo.getCardNo());
 		if (Objects.nonNull(exsitsCard)) {
 			exsitsCard.setStatus(EnumWalletCardStatus.UNBIND.getValue().byteValue());
 			walletCardDao.updateByPrimaryKeySelective(exsitsCard);
@@ -184,12 +183,15 @@ public class SeniorCardService {
 	 */
 	public void unBindCard(Long cardId) {
 		WalletCard walletCard = walletCardDao.selectByPrimaryKey(cardId);
+		verifyService.checkCard(walletCard);
+
 		WalletTunnel walletTunnel = walletTunnelDao
 			.selectByWalletId(walletCard.getWalletId(), TunnelType.YUNST.getValue());
 		try {
 			yunstUserHandler
 				.unbindBankCard(walletTunnel.getBizUserId(), walletCard.getBankAccount());
 			walletCard.setStatus(EnumWalletCardStatus.UNBIND.getValue().byteValue());
+			walletCard.setLastUpdTime(new Date());
 			walletCardDao.updateByPrimaryKeySelective(walletCard);
 		} catch (Exception e) {
 			log.error("高级钱包银行卡解绑失败, cardId: {}", cardId);

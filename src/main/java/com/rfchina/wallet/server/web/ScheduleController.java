@@ -1,7 +1,7 @@
 package com.rfchina.wallet.server.web;
 
 import com.rfchina.scheduler.annotation.FuScheduleTaskReporter;
-import com.rfchina.wallet.server.api.impl.ScheduleApi;
+import com.rfchina.wallet.server.api.ScheduleApi;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

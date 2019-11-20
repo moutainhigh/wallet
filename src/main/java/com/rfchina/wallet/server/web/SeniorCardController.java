@@ -4,7 +4,6 @@ import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.ResponseValue;
 import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.wallet.server.api.SeniorCardApi;
-import com.rfchina.wallet.server.bank.yunst.response.result.ApplyBindBankCardResp;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -44,13 +43,12 @@ public class SeniorCardController {
 	public ResponseValue confirmBindBankCard(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
-		@ApiParam(value = "预绑卡票据", required = false) @RequestParam(value = "pre_bind_ticket", required = false) String preBindTicket,
+		@ApiParam(value = "预绑卡票据", required = true) @RequestParam(value = "pre_bind_ticket") String preBindTicket,
 		@ApiParam(value = "短信验证码", required = true) @RequestParam("verify_code") String verifyCode) {
 
 		seniorCardApi.confirmBindCard(accessToken, walletId, verifyCode, preBindTicket);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
-
 
 	@ApiOperation("高级钱包-解绑银行卡")
 	@PostMapping(UrlConstant.WALLET_SENIOR_UNBIND_CARD)
