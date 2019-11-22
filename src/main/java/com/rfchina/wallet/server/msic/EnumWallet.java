@@ -579,6 +579,22 @@ public class EnumWallet {
 				|| this.value.byteValue() == FAIL.getValue().byteValue()
 				|| this.value.byteValue() == CLOSED.getValue().byteValue();
 		}
+
+		/**
+		 * 0-待补录：该笔支付需要柜员手工补录必要支付信息； 1-待记帐：该笔支付已经处在等待柜员处理记账； 2-待复核：该笔支付处于等待柜员处理复核阶段；
+		 * 3-待授权：该笔支付处于等待客户进行网银授权阶段； 4-完成：该笔支付处理成功，客户记账成功； 8-拒绝：该笔支付处理失败，被拒绝；如果对外支付时被人民银行退票则也会将该笔支付状态置为拒绝，同时冲回客户扣出的钱款；
+		 * 9-撤销：该笔支付已被撤销；客户和柜员都可以对待处理的支付进行撤销动作；
+		 */
+		public static OrderStatus parsePuDong8804(String tranStatus) {
+			switch (tranStatus) {
+				case "4":
+					return SUCC;
+				case "9":
+					return CLOSED;
+				default:
+					return WAITTING;
+			}
+		}
 	}
 
 	/**
@@ -851,7 +867,6 @@ public class EnumWallet {
 
 	}
 
-
 	/**
 	 * 通联银行卡/账户属性
 	 */
@@ -1069,13 +1084,57 @@ public class EnumWallet {
 	 * 卡属性 0：个人银行卡 1：企业对公账户
 	 */
 	public enum CardPro implements Valuable<Byte> {
-		PERSON((byte)0, "个人银行卡"),
-		COMPANY((byte)1,"企业对公账户");
+		PERSON((byte) 0, "个人银行卡"),
+		COMPANY((byte) 1, "企业对公账户");
 
 		private Byte value;
 		private String valueName;
 
 		CardPro(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}
+	}
+
+	/**
+	 * Gateway账户类型
+	 */
+	public enum GwPayeeType implements Valuable<Byte> {
+
+		COMPANY((byte) 1, "对公账号"),
+		PERSON((byte) 2, "个人账户");
+
+		private Byte value;
+		private String valueName;
+
+		GwPayeeType(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}
+	}
+
+	/**
+	 * 财务转账状态
+	 */
+	public enum FinanceSubStatus implements Valuable<Byte> {
+		NORMAL((byte) 0, "默认"),
+		WAIT_DEAL((byte) 1, "待人工处理"),
+		WAIT_REDO((byte) 2, "等待重新发起");
+
+		private Byte value;
+		private String valueName;
+
+		FinanceSubStatus(Byte value, String valueName) {
 			this.value = value;
 			this.valueName = valueName;
 		}

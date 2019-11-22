@@ -27,7 +27,7 @@ public class BindingBankCardListRequest extends  AbstractApiRequest {
 
   @Override
   public Class<?> getResponseModelClass() {
-    return ListListWalletCard.class;
+    return ListWalletCard.class;
   }
 
   @Override

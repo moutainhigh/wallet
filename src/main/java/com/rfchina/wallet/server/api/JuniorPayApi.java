@@ -5,7 +5,7 @@ import com.rfchina.wallet.server.model.ext.PayInResp;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import java.util.List;
 
-public interface JuniorWalletApi {
+public interface JuniorPayApi {
 
 	/**
 	 * 出佣到个人钱包

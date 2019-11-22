@@ -4,8 +4,8 @@ import com.rfchina.platform.common.misc.ResponseValue;
 import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.wallet.domain.model.BankCode;
 import com.rfchina.wallet.domain.model.Wallet;
-import com.rfchina.wallet.domain.model.WalletApply;
 import com.rfchina.wallet.domain.model.WalletCard;
+import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletUser;
 import com.rfchina.wallet.domain.model.ext.Bank;
 import com.rfchina.wallet.domain.model.ext.BankArea;
@@ -23,10 +23,10 @@ public interface WalletApi {
 	 */
 	List<PayStatusResp> queryWalletApply(String accessToken, String bizNo, String batchNo);
 
-	/**
-	 * 重做订单
-	 */
-	void redoWalletApply(String accessToken, Long walletLogId);
+//	/**
+//	 * 重做订单
+//	 */
+//	void redoWalletApply(String accessToken, Long walletLogId);
 
 	/**
 	 * 查询钱包明细
@@ -50,9 +50,8 @@ public interface WalletApi {
 	 * @param startTime 开始时间
 	 * @param endTime 结束时间
 	 */
-	Pagination<WalletApply> walletApplyList(String accessToekn, Long walletId, Date startTime,
-		Date endTime, int limit,
-		long offset, Boolean stat);
+	Pagination<WalletOrder> walletApplyList(String accessToekn, Long walletId, Date startTime,
+		Date endTime, int limit, int offset, Boolean stat);
 
 	/**
 	 * 查询绑定的银行卡列表

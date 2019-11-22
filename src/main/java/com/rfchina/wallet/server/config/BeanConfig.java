@@ -33,10 +33,6 @@ public class BeanConfig {
 	@Qualifier("exactErrPredicate")
 	private ExactErrPredicate exactErrPredicate;
 
-	@Autowired
-	@Qualifier("userRedoPredicate")
-	private UserRedoPredicate userRedoPredicate;
-
 	@Bean
 	public SpringContext springContext() {
 		return new SpringContext();
@@ -68,20 +64,6 @@ public class BeanConfig {
 	public void onExactErrChange(ConfigEvent event) {
 		log.info("change key wlpay.pudong.exactErr, event : {}", event);
 		exactErrPredicate.parseText(event.getValue());
-	}
-
-	@Bean(name = "userRedoPredicate")
-	public UserRedoPredicate userRedoPredicate(
-		@Value("${wlpay.pudong.userRedoErr}") String userRedoErr) {
-		UserRedoPredicate predicate = new UserRedoPredicate();
-		predicate.parseText(userRedoErr);
-		return predicate;
-	}
-
-	@OneKeyListener(key = "wlpay.pudong.userRedoErr")
-	public void onUserRedoErrChange(ConfigEvent event) {
-		log.info("change key wlpay.pudong.userRedoErr, event : {}", event);
-		userRedoPredicate.parseText(event.getValue());
 	}
 
 }

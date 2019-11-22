@@ -25,11 +25,11 @@ public class ScheduleController {
 		@RequestParam("timestamp") String timestamp,
 		@RequestParam("sign") String sign) {
 
-		log.info("scheduler: 开始执行任务[{}]", "quartzUpdatePayStatus");
+		log.info("scheduler: 开始执行订单状态更新任务");
 
 		scheduleApi.quartzUpdate();
 
-		log.info("scheduler: 完成任务[{}]", "quartzUpdatePayStatus");
+		log.info("scheduler: 完成执行订单状态更新任务");
 		return "success";
 	}
 
@@ -42,7 +42,7 @@ public class ScheduleController {
 
 		log.info("scheduler: 开始执行任务[{}]", "quartzPay");
 
-		scheduleApi.quartzDealApply();
+		scheduleApi.quartzPay();
 
 		log.info("scheduler: 完成任务[{}]", "quartzPay");
 

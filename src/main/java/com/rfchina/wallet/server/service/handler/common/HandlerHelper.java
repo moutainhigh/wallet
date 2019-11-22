@@ -30,25 +30,12 @@ public class HandlerHelper {
 		handler8800.setNext(yunstBizHandler);
 	}
 
-	public EBankHandler selectByWalletLevel(Byte walletLevel) {
-		EBankHandler currHandler = rootHandler;
-
-		while (currHandler != null) {
-			if (currHandler.isSupportWalletLevel(walletLevel)) {
-				return currHandler;
-			}
-			currHandler = currHandler.getNext();
-		}
-
-		throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_HANDLER_NOT_FOUND,
-			"type = " + walletLevel);
-	}
 
 	public EBankHandler selectByTunnelType(Byte tunnelType) {
 		EBankHandler currHandler = rootHandler;
 
 		while (currHandler != null) {
-			if (currHandler.isSupportWalletLevel(tunnelType)) {
+			if (currHandler.isSupportTunnelType(tunnelType)) {
 				return currHandler;
 			}
 			currHandler = currHandler.getNext();

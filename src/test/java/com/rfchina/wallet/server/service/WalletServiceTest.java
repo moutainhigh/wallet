@@ -18,15 +18,7 @@ public class WalletServiceTest extends SpringBaseTest {
 
 	private Long walletId = 2L;
 
-	@Test
-	public void quartzUpdate() {
-		walletService.quartzUpdate(100);
-	}
 
-	@Test
-	public void quartzPay() {
-//		walletService.quartzPay(100);
-	}
 
 
 	@Test
@@ -62,9 +54,6 @@ public class WalletServiceTest extends SpringBaseTest {
 //		walletService.activeWalletCompany(walletId, "公司", 1L);
 	}
 
-	@Test
-	public void sendEmail() {
-		walletService.sendEmail("测试", "测试邮件", "niezengming@rfchina.com,xiejueheng@rfchina.com");
-	}
+
 
 }

@@ -3,11 +3,10 @@ package com.rfchina.wallet.server.web;
 import com.alibaba.fastjson.JSON;
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.ResponseValue;
-import com.rfchina.wallet.server.api.JuniorWalletApi;
+import com.rfchina.wallet.server.api.JuniorPayApi;
 import com.rfchina.wallet.server.model.ext.PayInResp;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import com.rfchina.wallet.server.model.ext.PayInReq;
-import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -20,10 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Api
 @RestController
-public class JuniorWalletController {
+public class JuniorPayController {
 
 	@Autowired
-	private JuniorWalletApi juniorWalletApi;
+	private JuniorPayApi juniorPayApi;
 
 	@ApiOperation("初级钱包-思力出钱")
 	@PostMapping(UrlConstant.JUNIOR_WALLET_PAY_IN)
@@ -45,7 +44,7 @@ public class JuniorWalletController {
 			.payPurpose(payPurpose)
 			.build();
 
-		PayInResp respBody = juniorWalletApi.payIn(accessToken, Arrays.asList(payInReq));
+		PayInResp respBody = juniorPayApi.payIn(accessToken, Arrays.asList(payInReq));
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, respBody);
 	}
 
@@ -57,7 +56,7 @@ public class JuniorWalletController {
 	) {
 		List<PayInReq> payReqs = JSON.parseArray(jsonArry, PayInReq.class);
 
-		PayInResp respBody = juniorWalletApi.payIn(accessToken, payReqs);
+		PayInResp respBody = juniorPayApi.payIn(accessToken, payReqs);
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, respBody);
 	}

@@ -9,7 +9,7 @@ public interface ScheduleApi {
 	/**
 	 * 定时支付
 	 */
-	void quartzDealApply();
+	void quartzPay();
 
 	/**
 	 * 定时通知

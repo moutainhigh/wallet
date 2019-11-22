@@ -488,29 +488,6 @@
 }
 ```
 
-###  重做问题单
-
-请求地址: /wallet_server/v1/m/wallet/redo_pay
-
-请求类型: POST
-
-请求参数:
-
-
-| 参数名 | 是否必须 | 描述 |
-|:-- |:-- |:--   |
-|access_token|是|access_token|
-|wallet_log_id|是|流水id|
-
-返回数据
-```
-{
-  "code": 1001,//状态码
-  "msg": ""//消息
-  
-}
-```
-
 ###  发送短信验证码
 
 请求地址: /wallet_server/v1/m/wallet/send_verify_code

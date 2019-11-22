@@ -1,9 +1,12 @@
 package com.rfchina.wallet.server.service;
 
 import com.rfchina.wallet.domain.model.GatewayTrans;
-import com.rfchina.wallet.domain.model.WalletApply;
+import com.rfchina.wallet.domain.model.WalletFinance;
+import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.server.mapper.ext.GatewayTransExtDao;
-import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletFinanceExtDao;
+import com.rfchina.wallet.server.msic.EnumWallet.CardPro;
+import com.rfchina.wallet.server.msic.EnumWallet.GwPayeeType;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -19,27 +22,27 @@ public class GatewayTransService {
 	private GatewayTransExtDao gatewayTransDao;
 
 	@Autowired
-	private WalletApplyExtDao walletApplyExtDao;
+	private WalletFinanceExtDao walletFinanceDao;
 
 
-	public GatewayTrans selOrCrtTrans(WalletApply walletApply) {
+	public GatewayTrans selOrCrtTrans(WalletOrder walletOrder, WalletFinance walletFinance) {
 		GatewayTrans gatewayTrans = null;
 
-		if (walletApply.getCurrTransId() != null) {
-			gatewayTrans = gatewayTransDao.selectByPrimaryKey(walletApply.getCurrTransId());
+		if (walletFinance.getCurrTransId() != null) {
+			gatewayTrans = gatewayTransDao.selectByPrimaryKey(walletFinance.getCurrTransId());
 		}
 
 		if (gatewayTrans == null) {
-			gatewayTrans = createTrans(walletApply);
-			walletApply.setCurrTransId(gatewayTrans.getId());
-			walletApplyExtDao.updateCurrTransId(walletApply.getId(), gatewayTrans.getId());
+			gatewayTrans = createTrans(walletOrder, walletFinance);
+			walletFinance.setCurrTransId(gatewayTrans.getId());
+			walletFinanceDao.updateByPrimaryKeySelective(walletFinance);
 		}
 
 		return gatewayTrans;
 	}
 
 	public List<GatewayTrans> getTransIds(List<Long> tranIds) {
-		if(tranIds == null || tranIds.isEmpty()){
+		if (tranIds == null || tranIds.isEmpty()) {
 			return new ArrayList<>();
 		}
 		return gatewayTransDao.selectByIds(tranIds);
@@ -57,18 +60,20 @@ public class GatewayTransService {
 		gatewayTransDao.updateByPrimaryKey(gatewayTrans);
 	}
 
-	public GatewayTrans createTrans(WalletApply walletApply) {
+	public GatewayTrans createTrans(WalletOrder walletOrder, WalletFinance walletFinance) {
 
+		Byte payeeType = walletFinance.getCardPro().byteValue() == CardPro.COMPANY.getValue()
+			? GwPayeeType.COMPANY.getValue() : GwPayeeType.PERSON.getValue();
 		GatewayTrans gatewayTrans = GatewayTrans.builder()
-			.walletApplyId(walletApply.getId())
-			.payerAccount(walletApply.getPayerAccount())
-			.payeeAccount(walletApply.getPayeeAccount())
-			.payeeName(walletApply.getPayeeName())
-			.payeeType(walletApply.getPayeeType())
-			.bankCode(walletApply.getPayeeBankCode())
-			.amount(walletApply.getAmount())
-			.payPurpose(walletApply.getPayPurpose())
-			.note(walletApply.getNote())
+			.financeId(walletFinance.getId())
+			.payerAccount(walletFinance.getPayerAccount())
+			.payeeAccount(walletFinance.getPayeeAccount())
+			.payeeName(walletFinance.getPayeeName())
+			.payeeType(payeeType)
+			.bankCode(walletFinance.getPayeeBankCode())
+			.amount(walletOrder.getAmount())
+			.payPurpose(walletFinance.getPayPurpose())
+			.note(walletOrder.getNote())
 			.createTime(new Date())
 			.build();
 		gatewayTransDao.insert(gatewayTrans);

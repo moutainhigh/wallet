@@ -4,7 +4,7 @@ import com.allinpay.yunst.sdk.util.RSAUtil;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.rfchina.platform.biztools.fileserver.HttpFile;
-import com.rfchina.platform.common.misc.Tuple;
+import com.rfchina.platform.common.misc.Triple;
 import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EnumUtil;
@@ -17,19 +17,18 @@ import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.GatewayTrans;
 import com.rfchina.wallet.domain.model.MoneyLog;
 import com.rfchina.wallet.domain.model.MoneyLog.MoneyLogBuilder;
-import com.rfchina.wallet.domain.model.WalletApply;
 import com.rfchina.wallet.domain.model.WalletClearing;
 import com.rfchina.wallet.domain.model.WalletCollect;
 import com.rfchina.wallet.domain.model.WalletCollectInfo;
 import com.rfchina.wallet.domain.model.WalletCollectMethod;
 import com.rfchina.wallet.domain.model.WalletConsume;
+import com.rfchina.wallet.domain.model.WalletFinance;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletRecharge;
 import com.rfchina.wallet.domain.model.WalletRefund;
 import com.rfchina.wallet.domain.model.WalletRefundDetail;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.domain.model.WalletWithdraw;
-import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
 import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
 import com.rfchina.wallet.server.bank.yunst.exception.UnknownException;
 import com.rfchina.wallet.server.bank.yunst.request.AgentPayReq;
@@ -72,7 +71,6 @@ import com.rfchina.wallet.server.bank.yunst.response.SmsPayResp;
 import com.rfchina.wallet.server.bank.yunst.response.SmsRetryResp;
 import com.rfchina.wallet.server.bank.yunst.response.WithdrawApplyResp;
 import com.rfchina.wallet.server.bank.yunst.util.YunstTpl;
-import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletClearingExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectInfoExtDao;
@@ -84,8 +82,6 @@ import com.rfchina.wallet.server.mapper.ext.WalletRefundDetailExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRefundExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletWithdrawExtDao;
-import com.rfchina.wallet.server.model.ext.PayStatusResp;
-import com.rfchina.wallet.server.model.ext.PayTuple;
 import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.model.ext.WithdrawResp;
@@ -127,9 +123,6 @@ public class YunstBizHandler extends EBankHandler {
 
 	@Autowired
 	private YunstTpl yunstTpl;
-
-	@Autowired
-	private WalletApplyExtDao walletApplyDao;
 
 	@Autowired
 	private GatewayTransService gatewayTransService;
@@ -177,11 +170,6 @@ public class YunstBizHandler extends EBankHandler {
 	private MoneyLogMapper moneyLogDao;
 
 
-	public boolean isSupportWalletLevel(Byte walletLevel) {
-		return EnumWalletLevel.SENIOR.getValue().byteValue() == walletLevel;
-	}
-
-	@Override
 	public boolean isSupportTunnelType(Byte tunnelType) {
 		return TunnelType.YUNST.getValue().byteValue() == tunnelType.byteValue();
 	}
@@ -191,17 +179,19 @@ public class YunstBizHandler extends EBankHandler {
 		return null;
 	}
 
+	@Override
+	public List<Triple<WalletOrder, WalletFinance, GatewayTrans>> updateOrderStatus(
+		List<WalletOrder> orders) {
 
-	public PayStatusResp onAskErr(WalletApply walletLog, IGatewayError err) {
-		return null;
+		return orders.stream()
+			.map(order -> {
+				WalletOrder walletOrder = updateOrderStatus(order);
+				return new Triple<WalletOrder, WalletFinance, GatewayTrans>(walletOrder, null,
+					null);
+			})
+			.collect(Collectors.toList());
 	}
 
-	/**
-	 * 转账
-	 */
-	public Tuple<GatewayMethod, PayTuple> transfer(Long applyId) {
-		return null;
-	}
 
 	/**
 	 * 充值
@@ -550,16 +540,7 @@ public class YunstBizHandler extends EBankHandler {
 
 
 	/**
-	 * 更新转账状态
-	 */
-	public Tuple<WalletApply, GatewayTrans> updatePayStatus(
-		Tuple<WalletApply, GatewayTrans> applyTuple) {
-
-		return null;
-	}
-
-	/**
-	 * 更新充值状态
+	 * 更新状态
 	 */
 	public WalletOrder updateOrderStatus(WalletOrder order) {
 
@@ -646,6 +627,7 @@ public class YunstBizHandler extends EBankHandler {
 
 		return order;
 	}
+
 
 	/**
 	 * 支付方式

@@ -2,6 +2,7 @@ package com.rfchina.wallet.server.service;
 
 import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.biztools.mq.PostMq;
+import com.rfchina.platform.common.misc.Triple;
 import com.rfchina.platform.common.utils.EnumUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
@@ -9,9 +10,9 @@ import com.rfchina.wallet.domain.mapper.ext.WalletDao;
 import com.rfchina.wallet.domain.misc.EnumDef.BizValidateType;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderType;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
-import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelSignContract;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
+import com.rfchina.wallet.domain.model.GatewayTrans;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletClearing;
@@ -20,6 +21,7 @@ import com.rfchina.wallet.domain.model.WalletCollectInfo;
 import com.rfchina.wallet.domain.model.WalletCollectMethod;
 import com.rfchina.wallet.domain.model.WalletCollectMethod.WalletCollectMethodBuilder;
 import com.rfchina.wallet.domain.model.WalletConsume;
+import com.rfchina.wallet.domain.model.WalletFinance;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletRecharge;
 import com.rfchina.wallet.domain.model.WalletRefund;
@@ -27,7 +29,6 @@ import com.rfchina.wallet.domain.model.WalletRefundDetail;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.domain.model.WalletWithdraw;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstQueryBalanceResult;
-import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletClearingExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectInfoExtDao;
@@ -91,9 +92,6 @@ public class SeniorPayService {
 
 	@Autowired
 	private WalletDao walletDao;
-
-	@Autowired
-	private WalletApplyExtDao walletApplyDao;
 
 	@Autowired
 	private WalletCollectExtDao walletCollectDao;
@@ -682,34 +680,25 @@ public class SeniorPayService {
 
 		WalletOrder order = verifyService.checkOrder(orderNo, OrderStatus.WAITTING.getValue());
 		EBankHandler handler = handlerHelper.selectByTunnelType(order.getTunnelType());
-		if (handler instanceof YunstBizHandler) {
-			WalletOrder walletOrder = ((YunstBizHandler) handler).updateOrderStatus(order);
-			WalletTunnel walletTunnel = walletTunnelDao
-				.selectByWalletId(order.getWalletId(), order.getTunnelType());
-			// 判断签约
-			if (walletTunnel.getIsSignContact() == null
-				|| walletTunnel.getIsSignContact() == WalletTunnelSignContract.NONE.getValue()
-				.byteValue()) {
-				return null;
-			}
-			// 通联查余额
-			YunstQueryBalanceResult result = yunstUserHandler
-				.queryBalance(walletTunnel.getBizUserId());
-			// 更新通道余额
-			walletTunnel.setBalance(result.getAllAmount());
-			walletTunnel.setFreezenAmount(result.getFreezenAmount());
-			walletTunnel.setIsDirty(DirtyType.NORMAL.getValue());
-			walletTunnelDao.updateByPrimaryKeySelective(walletTunnel);
-			// 更新钱包余额
-			Wallet wallet = walletDao.selectByPrimaryKey(walletTunnel.getWalletId());
-			wallet.setWalletBalance(walletTunnel.getBalance());
-			wallet.setFreezeAmount(walletTunnel.getFreezenAmount());
-			walletDao.updateByPrimaryKeySelective(wallet);
+		List<Triple<WalletOrder, WalletFinance, GatewayTrans>> triples = handler
+			.updateOrderStatus(Arrays.asList(order));
 
-			return walletOrder;
-		}
+		WalletTunnel walletTunnel = walletTunnelDao
+			.selectByWalletId(order.getWalletId(), order.getTunnelType());
+		// 通联查余额
+		YunstQueryBalanceResult result = yunstUserHandler.queryBalance(walletTunnel.getBizUserId());
+		// 更新通道余额
+		walletTunnel.setBalance(result.getAllAmount());
+		walletTunnel.setFreezenAmount(result.getFreezenAmount());
+		walletTunnel.setIsDirty(DirtyType.NORMAL.getValue());
+		walletTunnelDao.updateByPrimaryKeySelective(walletTunnel);
+		// 更新钱包余额
+		Wallet wallet = walletDao.selectByPrimaryKey(walletTunnel.getWalletId());
+		wallet.setWalletBalance(walletTunnel.getBalance());
+		wallet.setFreezeAmount(walletTunnel.getFreezenAmount());
+		walletDao.updateByPrimaryKeySelective(wallet);
 
-		return null;
+		return triples.get(0).x;
 	}
 
 

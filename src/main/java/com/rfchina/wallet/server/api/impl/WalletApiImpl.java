@@ -21,19 +21,18 @@ import com.rfchina.wallet.domain.misc.WalletResponseCode;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.BankCode;
 import com.rfchina.wallet.domain.model.Wallet;
-import com.rfchina.wallet.domain.model.WalletApply;
 import com.rfchina.wallet.domain.model.WalletCard;
+import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletUser;
 import com.rfchina.wallet.domain.model.ext.Bank;
 import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
 import com.rfchina.wallet.domain.model.ext.WalletCardExt;
 import com.rfchina.wallet.server.api.WalletApi;
-import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import com.rfchina.wallet.server.service.ConfigService;
-import com.rfchina.wallet.server.service.JuniorWalletService;
+import com.rfchina.wallet.server.service.JuniorPayService;
 import com.rfchina.wallet.server.service.UserService;
 import com.rfchina.wallet.server.service.WalletService;
 import java.util.Date;
@@ -51,7 +50,7 @@ public class WalletApiImpl implements WalletApi {
 	private WalletService walletService;
 
 	@Autowired
-	private JuniorWalletService juniorWalletService;
+	private JuniorPayService juniorPayService;
 
 	@Autowired
 	private WalletUserDao walletUserDao;
@@ -64,9 +63,6 @@ public class WalletApiImpl implements WalletApi {
 
 	@Autowired
 	private ConfigService configService;
-
-	@Autowired
-	private WalletApplyExtDao walletApplyExtDao;
 
 	@Autowired
 	private SimpleExclusiveLock lock;
@@ -82,26 +78,26 @@ public class WalletApiImpl implements WalletApi {
 		return walletService.queryWalletApply(bizNo, batchNo);
 	}
 
-	@Log
-	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
-	@SignVerify
-	@Override
-	public void redoWalletApply(String accessToken,
-		@ParamValid(nullable = false) Long walletLogId) {
-
-		String lockName = "redoWalletApply：" + walletLogId;
-		boolean succ = lock.acquireLock(lockName, 60, 0, 1);
-		if (succ) {
-			try {
-				walletService.redo(walletLogId);
-			} finally {
-				lock.unLock(lockName);
-			}
-		} else {
-			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_REDO_DUPLICATE,
-				walletLogId.toString());
-		}
-	}
+//	@Log
+//	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+//	@SignVerify
+//	@Override
+//	public void redoWalletApply(String accessToken,
+//		@ParamValid(nullable = false) Long walletLogId) {
+//
+//		String lockName = "redoWalletApply：" + walletLogId;
+//		boolean succ = lock.acquireLock(lockName, 60, 0, 1);
+//		if (succ) {
+//			try {
+//				walletService.redo(walletLogId);
+//			} finally {
+//				lock.unLock(lockName);
+//			}
+//		} else {
+//			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_REDO_DUPLICATE,
+//				walletLogId.toString());
+//		}
+//	}
 
 
 	@Log
@@ -137,10 +133,10 @@ public class WalletApiImpl implements WalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public Pagination<WalletApply> walletApplyList(String accessToken, Long walletId,
+	public Pagination<WalletOrder> walletApplyList(String accessToken, Long walletId,
 		Date startTime,
-		Date endTime, int limit, long offset, Boolean stat) {
-		return walletService.walletApplyList(walletId, startTime, endTime,
+		Date endTime, int limit, int offset, Boolean stat) {
+		return walletService.walletOrderList(walletId, startTime, endTime,
 			limit, offset, stat);
 	}
 

@@ -2,10 +2,8 @@ package com.rfchina.wallet.server.web;
 
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.ResponseValue;
-import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.wallet.domain.model.BankCode;
 import com.rfchina.wallet.domain.model.Wallet;
-import com.rfchina.wallet.domain.model.WalletApply;
 import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletUser;
 import com.rfchina.wallet.domain.model.ext.Bank;
@@ -18,11 +16,9 @@ import com.rfchina.wallet.server.msic.UrlConstant;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -46,14 +42,14 @@ public class WalletController {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, resp);
 	}
 
-	@ApiOperation("重做问题单")
-	@PostMapping(UrlConstant.WALLET_APPLY_REDO)
-	public ResponseValue redoWalletApply(@RequestParam("access_token") String accessToken,
-		@ApiParam(value = "流水id", required = true, example = "1") @RequestParam(value = "wallet_log_id")
-			Long walletLogId) {
-		walletApi.redoWalletApply(accessToken, walletLogId);
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
-	}
+//	@ApiOperation("重做问题单")
+//	@PostMapping(UrlConstant.WALLET_APPLY_REDO)
+//	public ResponseValue redoWalletApply(@RequestParam("access_token") String accessToken,
+//		@ApiParam(value = "流水id", required = true, example = "1") @RequestParam(value = "wallet_log_id")
+//			Long walletLogId) {
+//		walletApi.redoWalletApply(accessToken, walletLogId);
+//		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
+//	}
 
 	@ApiOperation("查询钱包信息（企业or个人）")
 	@PostMapping(UrlConstant.WALLET_QUERY_INFO)
@@ -118,25 +114,25 @@ public class WalletController {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
 
-	@ApiOperation("钱包流水")
-	@PostMapping(UrlConstant.WALLET_LOG_LIST)
-	public ResponseValue<Pagination<WalletApply>> walletLogList(
-		@RequestParam("access_token") String accessToken,
-		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
-		@ApiParam(value = "开始时间") @RequestParam(value = "start_time", required = false)
-		@DateTimeFormat(pattern = "yyyy-MM-dd") Date startTime,
-		@ApiParam(value = "结束时间") @RequestParam(value = "end_time", required = false)
-		@DateTimeFormat(pattern = "yyyy-MM-dd") Date endTime,
-		@ApiParam(value = "需要查询的数量（数量最大50）", required = true) @RequestParam(value = "limit") int limit,
-		@ApiParam(value = "查询列表的起始偏移量，从0开始，即offset: 5是指从列表里的第六个开始读取", required = true)
-		@RequestParam(value = "offset") long offset,
-		@ApiParam(value = "非必填, false:否, true:是, 是否返回数据总量, 默认false") @RequestParam(value = "stat", required =
-			false)
-			Boolean stat) {
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
-			walletApi
-				.walletApplyList(accessToken, walletId, startTime, endTime, limit, offset, stat));
-	}
+//	@ApiOperation("钱包流水")
+//	@PostMapping(UrlConstant.WALLET_LOG_LIST)
+//	public ResponseValue<Pagination<WalletOrder>> walletLogList(
+//		@RequestParam("access_token") String accessToken,
+//		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+//		@ApiParam(value = "开始时间") @RequestParam(value = "start_time", required = false)
+//		@DateTimeFormat(pattern = "yyyy-MM-dd") Date startTime,
+//		@ApiParam(value = "结束时间") @RequestParam(value = "end_time", required = false)
+//		@DateTimeFormat(pattern = "yyyy-MM-dd") Date endTime,
+//		@ApiParam(value = "需要查询的数量（数量最大50）", required = true) @RequestParam(value = "limit") int limit,
+//		@ApiParam(value = "查询列表的起始偏移量，从0开始，即offset: 5是指从列表里的第六个开始读取", required = true)
+//		@RequestParam(value = "offset") long offset,
+//		@ApiParam(value = "非必填, false:否, true:是, 是否返回数据总量, 默认false") @RequestParam(value = "stat", required =
+//			false)
+//			Boolean stat) {
+//		Pagination<WalletOrder> page = walletApi
+//			.walletApplyList(accessToken, walletId, startTime, endTime, limit, offset, stat);
+//		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,page);
+//	}
 
 	@ApiOperation("钱包绑定的银行卡列表")
 	@PostMapping(UrlConstant.WALLET_BANK_CARD_LIST)

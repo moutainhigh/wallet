@@ -2,24 +2,20 @@ package com.rfchina.wallet.server.service.handler.pudong;
 
 import com.alibaba.fastjson.JSON;
 import com.rfchina.biztools.generate.IdGenerator;
-import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.platform.biztool.mapper.string.StringObject;
+import com.rfchina.platform.common.misc.Triple;
 import com.rfchina.platform.common.misc.Tuple;
-import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EnumUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
-import com.rfchina.wallet.domain.misc.EnumDef.EnumDefBankCard;
-import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletLevel;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
-import com.rfchina.wallet.domain.misc.EnumDef.WalletCardSenior;
-import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.BankCode;
 import com.rfchina.wallet.domain.model.GatewayTrans;
-import com.rfchina.wallet.domain.model.WalletApply;
 import com.rfchina.wallet.domain.model.WalletCard;
+import com.rfchina.wallet.domain.model.WalletFinance;
+import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.server.bank.pudong.builder.EBankQuery48Builder;
 import com.rfchina.wallet.server.bank.pudong.builder.EBankQuery49Builder;
 import com.rfchina.wallet.server.bank.pudong.builder.PubPayQueryBuilder;
@@ -27,7 +23,6 @@ import com.rfchina.wallet.server.bank.pudong.builder.PubPayReqBuilder;
 import com.rfchina.wallet.server.bank.pudong.domain.exception.GatewayError;
 import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
 import com.rfchina.wallet.server.bank.pudong.domain.predicate.ExactErrPredicate;
-import com.rfchina.wallet.server.bank.pudong.domain.predicate.UserRedoPredicate;
 import com.rfchina.wallet.server.bank.pudong.domain.request.PubPayReq;
 import com.rfchina.wallet.server.bank.pudong.domain.response.EBankQuery48Resp;
 import com.rfchina.wallet.server.bank.pudong.domain.response.EBankQuery48RespBody;
@@ -39,12 +34,15 @@ import com.rfchina.wallet.server.bank.pudong.domain.response.PubPayQueryRespBody
 import com.rfchina.wallet.server.bank.pudong.domain.response.PubPayRespBody;
 import com.rfchina.wallet.server.bank.pudong.domain.util.ExceptionUtil;
 import com.rfchina.wallet.server.mapper.ext.BankCodeExtDao;
-import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
-import com.rfchina.wallet.server.model.ext.PayStatusResp;
+import com.rfchina.wallet.server.mapper.ext.WalletFinanceExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import com.rfchina.wallet.server.model.ext.PayTuple;
+import com.rfchina.wallet.server.msic.EnumWallet.CardPro;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
-import com.rfchina.wallet.server.msic.EnumWallet.LancherType;
+import com.rfchina.wallet.server.msic.EnumWallet.GwPayeeType;
+import com.rfchina.wallet.server.msic.EnumWallet.GwProgress;
+import com.rfchina.wallet.server.msic.EnumWallet.OrderStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.RemitLocation;
 import com.rfchina.wallet.server.msic.EnumWallet.SysFlag;
 import com.rfchina.wallet.server.msic.EnumWallet.TransStatus8804;
@@ -63,7 +61,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import org.apache.commons.lang3.StringUtils;
@@ -80,7 +77,6 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Slf4j
-@Data
 public class Handler8800 extends EBankHandler {
 
 	@Autowired
@@ -88,9 +84,6 @@ public class Handler8800 extends EBankHandler {
 
 	@Autowired
 	private WalletCardDao walletCardDao;
-
-	@Autowired
-	private WalletApplyExtDao walletApplyDao;
 
 	@Autowired
 	private WalletExtDao walletDao;
@@ -106,20 +99,17 @@ public class Handler8800 extends EBankHandler {
 	private ExactErrPredicate exactErrPredicate;
 
 	@Autowired
-	@Qualifier("userRedoPredicate")
-	private UserRedoPredicate userRedoPredicate;
-
-	@Autowired
 	private CacheService cacheService;
 
 	@Autowired
 	private GatewayTransService gatewayTransService;
 
+	@Autowired
+	private WalletFinanceExtDao walletFinanceDao;
 
-	@Override
-	public boolean isSupportWalletLevel(Byte walletType) {
-		return EnumWalletLevel.JUNIOR.getValue().byteValue() == walletType;
-	}
+	@Autowired
+	private WalletOrderExtDao walletOrderDao;
+
 
 	@Override
 	public boolean isSupportTunnelType(Byte tunnelType) {
@@ -131,21 +121,25 @@ public class Handler8800 extends EBankHandler {
 		return GatewayMethod.PUDONG_8800;
 	}
 
-	//	@Override
-	public Tuple<GatewayMethod, PayTuple> transfer(List<WalletApply> payInReqs) throws Exception {
+	@Override
+	public Tuple<GatewayMethod, PayTuple> finance(List<Tuple<WalletOrder, WalletFinance>> tuples)
+		throws Exception {
 
-		if (payInReqs == null || payInReqs.isEmpty() || payInReqs.size() > 20) {
+		if (tuples == null || tuples.isEmpty() || tuples.size() > 20) {
 			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_BATCH_LIMIT);
 		}
 
 		Map<String, String> elecMap = new HashMap<>();
-		List<PubPayReq> payReqs = payInReqs.stream().map(walletApply -> {
+		List<PubPayReq> payReqs = tuples.stream().map(tuple -> {
 
+			WalletOrder walletOrder = tuple.left;
+			WalletFinance walletFinance = tuple.right;
 			// 必须注意，分转换为0.00元
-			BigDecimal bigAmount = new BigDecimal(walletApply.getAmount())
+			BigDecimal bigAmount = new BigDecimal(walletOrder.getAmount())
 				.divide(new BigDecimal("100"), 2, BigDecimal.ROUND_DOWN);
 
-			BankCode bankCode = bankCodeExtDao.selectByCode(walletApply.getPayeeBankCode(),TunnelType.PUDONG.getValue());
+			BankCode bankCode = bankCodeExtDao
+				.selectByCode(walletFinance.getPayeeBankCode(), TunnelType.PUDONG.getValue());
 			if (bankCode == null) {
 				throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_BATCH_LIMIT);
 			}
@@ -167,23 +161,25 @@ public class Handler8800 extends EBankHandler {
 			String elecNo = IdGenerator.createBizId("", 16, id -> {
 				return !gatewayTransService.existElecNo(id);
 			});
-			elecMap.put(walletApply.getId().toString(), elecNo);
+			elecMap.put(walletOrder.getId().toString(), elecNo);
 			return PubPayReq.builder()
 				.elecChequeNo(elecNo)
 				.acctNo(configService.getAcctNo())
 				.acctName(configService.getAcctName())
-				.payeeAcctNo(walletApply.getPayeeAccount())
-				.payeeName(walletApply.getPayeeName())
+				.payeeAcctNo(walletFinance.getPayeeAccount())
+				.payeeName(walletFinance.getPayeeName())
 				.amount(bigAmount.toString())
 				.sysFlag(sysFlag)
 				.remitLocation(remitLocation)
-				.note(walletApply.getNote())
-				.payeeType(walletApply.getPayeeType().equals("1") ? "0" : "1")
+				.note(walletOrder.getNote())
+				.payeeType(walletFinance.getCardPro().byteValue() == CardPro.COMPANY.getValue()
+					? GwPayeeType.COMPANY.getValue().toString()
+					: GwPayeeType.PERSON.getValue().toString())
 				.payeeBankName(payeeBankName)
 				.payeeBankSelectFlag(isOtherRemit ? "1" : null)
-				.payeeBankNo(isOtherRemit ? walletApply.getPayeeBankCode() : null)
+				.payeeBankNo(isOtherRemit ? walletFinance.getPayeeBankCode() : null)
 				.payPurpose(
-					walletApply.getPayPurpose() != null ? walletApply.getPayPurpose() : null)
+					walletFinance.getPayPurpose() != null ? walletFinance.getPayPurpose() : null)
 				.build();
 
 		}).collect(Collectors.toList());
@@ -193,7 +189,7 @@ public class Handler8800 extends EBankHandler {
 			.masterId(configService.getMasterId())
 			.packetId(packetId)
 			.authMasterId(configService.getAuditMasterId())
-			.packageNo(payInReqs.get(0).getBatchNo())
+			.packageNo(tuples.get(0).left.getBatchNo())
 			.payList(payReqs)
 			.build();
 
@@ -207,23 +203,32 @@ public class Handler8800 extends EBankHandler {
 		return new Tuple<>(getGatewayMethod(), payTuple);
 	}
 
-	public List<Tuple<WalletApply, GatewayTrans>> updatePayStatus(
-		List<Tuple<WalletApply, GatewayTrans>> applyTuples) {
+	public List<Triple<WalletOrder, WalletFinance, GatewayTrans>> updateOrderStatus(
+		List<WalletOrder> walletOrders) {
 
-		Tuple<WalletApply, GatewayTrans> firstTuple = applyTuples.get(0);
-		GatewayTrans firstTrans = firstTuple.right;
+		List<Triple<WalletOrder, WalletFinance, GatewayTrans>> triples = walletOrders.stream()
+			.map(walletOrder -> {
+				WalletFinance walletFinance = walletFinanceDao.selectByOrderId(walletOrder.getId());
+				GatewayTrans gatewayTrans = gatewayTransService
+					.selOrCrtTrans(walletOrder, walletFinance);
+				return new Triple<>(walletOrder, walletFinance, gatewayTrans);
+			}).collect(Collectors.toList());
+
+		Triple<WalletOrder, WalletFinance, GatewayTrans> firstTriple = triples.get(0);
+
+		GatewayTrans firstTrans = firstTriple.z;
 
 		// 如果包未授权过，则查询授权
 		if (StringUtils.isBlank(firstTrans.getHostAcceptNo())) {
 			// 查询包授权
-			boolean audited = doEBankPackageQuery(applyTuples);
+			boolean audited = doEBankPackageQuery(triples);
 			// 网银未授权的
 			if (!audited) {
 				return new ArrayList<>();
 			}
 
 			// 查询明细授权
-			doEBankDetailQuery(applyTuples);
+			doEBankDetailQuery(triples);
 		}
 
 		// 查核心支付结果
@@ -242,10 +247,12 @@ public class Handler8800 extends EBankHandler {
 		} catch (Exception e) {
 			log.error("银企直连-网关支付状态查询错误", e);
 			IGatewayError err = ExceptionUtil.explain(e);
-			applyTuples.forEach(tuple -> {
-				WalletApply walletApply = tuple.left;
-				if (WalletApplyStatus.PROCESSING.getValue() == walletApply.getStatus()) {
-					GatewayTrans gatewayTrans = gatewayTransService.selOrCrtTrans(walletApply);
+			triples.forEach(triple -> {
+				WalletOrder walletOrder = triple.x;
+				WalletFinance walletFinance = triple.y;
+				if (OrderStatus.WAITTING.getValue() == walletOrder.getStatus()) {
+					GatewayTrans gatewayTrans = gatewayTransService
+						.selOrCrtTrans(walletOrder, walletFinance);
 					gatewayTrans.setStage(err.getTransCode());
 					gatewayTrans.setErrCode(err.getErrCode());
 					gatewayTrans.setSysErrMsg(err.getErrMsg());
@@ -263,46 +270,39 @@ public class Handler8800 extends EBankHandler {
 			// 更新银行回单到流水表
 			return results.stream().map(rs -> {
 
-				Optional<Tuple<WalletApply, GatewayTrans>> opt = applyTuples.stream()
-					.filter(tuple -> {
-						WalletApply apply = tuple.left;
-						GatewayTrans trans = tuple.right;
+				Optional<Triple<WalletOrder, WalletFinance, GatewayTrans>> opt = triples.stream()
+					.filter(triple -> {
+						WalletOrder order = triple.x;
+						GatewayTrans trans = triple.z;
 						return rs.getElecChequeNo().equals(trans.getElecChequeNo())
-							&& apply.getStatus().byteValue() == WalletApplyStatus.PROCESSING
-							.getValue();
+							&& order.getStatus().byteValue() == OrderStatus.WAITTING.getValue();
 					}).findFirst();
 
 				if (opt.isPresent()) {
-					Tuple<WalletApply, GatewayTrans> tuple = opt.get();
-					WalletApply walletApply = tuple.left;
-					GatewayTrans trans = tuple.right;
+					Triple<WalletOrder, WalletFinance, GatewayTrans> tuple = opt.get();
+					WalletOrder walletOrder = tuple.x;
+					WalletFinance walletFinance = tuple.y;
+					GatewayTrans trans = tuple.z;
 
 					IGatewayError err = extractErrCode(rs.getNote());
 					// 如果是终态, 更新到申请单
 					TransStatus8804 transStatus = TransStatus8804.parse(rs.getTransStatus());
 					if (transStatus.isEndStatus()) {
-						WalletApplyStatus status;
+						OrderStatus status;
 						// 核心拒绝的，需要进一步判断错误码
 						if (TransStatus8804.REJECT.getValue().equals(transStatus.getValue())) {
-							if (exactErrPredicate.test(err)) {
-								boolean userRedo = userRedoPredicate.test(err);
-								status = userRedo ? WalletApplyStatus.REDO : WalletApplyStatus.FAIL;
-								walletApply.setLancher(userRedo ? LancherType.USER.getValue() : 0);
-							} else {
-								status = WalletApplyStatus.WAIT_DEAL;
-							}
+							status = exactErrPredicate.test(err) ? OrderStatus.FAIL
+								: OrderStatus.WAITTING;
 						} else {
-							status = WalletApplyStatus.parsePuDong8804(rs.getTransStatus());
+							status = OrderStatus.parsePuDong8804(rs.getTransStatus());
 						}
-						walletApply.setStatus(status.getValue());
-						if (StringUtil.isNotBlank(rs.getTransDate())) {
-							Date bizTime = DateUtil
-								.parse(rs.getTransDate(), DateUtil.SHORT_DTAE_PATTERN);
-							walletApply.setBizTime(bizTime);
-							trans.setBizTime(bizTime);
-						}
-						walletApplyDao.updateByPrimaryKey(walletApply);
+						walletOrder.setStatus(status.getValue());
+						walletOrderDao.updateByPrimaryKey(walletOrder);
 
+						if (StringUtil.isNotBlank(rs.getTransDate())) {
+							trans.setBizTime(DateUtil
+								.parse(rs.getTransDate(), DateUtil.SHORT_DTAE_PATTERN));
+						}
 						trans.setEndTime(new Date());
 					}
 					// 记录中间状态
@@ -342,44 +342,15 @@ public class Handler8800 extends EBankHandler {
 			.build();
 	}
 
-	@PostMq(routingKey = MqConstant.WALLET_PAY_RESULT)
-	@Override
-	public PayStatusResp onAskErr(WalletApply walletApply, IGatewayError err) {
-		// 确切失败的单业务会重新发起新的转账，其他的单进入待处理状态
-		boolean exactErr = exactErrPredicate.test(err);
-		boolean userRedo = userRedoPredicate.test(err);
-		Byte status = !exactErr ? WalletApplyStatus.WAIT_DEAL.getValue() :
-			(userRedo ? WalletApplyStatus.REDO.getValue() : WalletApplyStatus.FAIL.getValue());
-		walletApply.setStatus(status);
-		if (exactErr) {
-			walletApply.setLancher(userRedo ? LancherType.USER.getValue() : null);
-		}
-		walletApplyDao.updateByPrimaryKeySelective(walletApply);
-
-		GatewayTrans gatewayTrans = gatewayTransService.selOrCrtTrans(walletApply);
-		gatewayTrans.setStage(err.getTransCode());
-		gatewayTrans.setErrCode(err.getErrCode());
-		gatewayTrans.setSysErrMsg(err.getErrMsg());
-		gatewayTrans.setUserErrMsg("发起交易异常");
-		gatewayTransService.updateTrans(gatewayTrans);
-
-		PayStatusResp resp = BeanUtil.newInstance(walletApply, PayStatusResp.class);
-		resp.setErrCode(gatewayTrans.getErrCode());
-		resp.setUserErrMsg(gatewayTrans.getUserErrMsg());
-		resp.setSysErrMsg(gatewayTrans.getSysErrMsg());
-		resp.setEndTime(gatewayTrans.getEndTime());
-		return resp;
-	}
-
 
 	/**
 	 * 查询网银包受理状态
 	 */
 	private boolean doEBankPackageQuery(
-		List<Tuple<WalletApply, GatewayTrans>> applyTuples) {
+		List<Triple<WalletOrder, WalletFinance, GatewayTrans>> triples) {
 
-		Tuple<WalletApply, GatewayTrans> tuple = applyTuples.get(0);
-		GatewayTrans firstTrans = tuple.right;
+		Triple<WalletOrder, WalletFinance, GatewayTrans> triple = triples.get(0);
+		GatewayTrans firstTrans = triple.z;
 
 		if (StringUtils.isBlank(firstTrans.getAcceptNo())) {
 			log.error("交易的受理号为空 {}", JSON.toJSONString(firstTrans));
@@ -423,8 +394,8 @@ public class Handler8800 extends EBankHandler {
 			TransStatusDO48 status = EnumUtil
 				.parse(TransStatusDO48.class, audit48Result.getTransStatus());
 			// 未成功的时候，记录中间状态和错误码
-			applyTuples.forEach(applyTuple -> {
-				GatewayTrans trans = applyTuple.right;
+			triples.forEach(t -> {
+				GatewayTrans trans = t.z;
 				trans.setStage(req.getTransCode());
 				trans.setErrStatus(audit48Result.getTransStatus());
 				trans.setErrCode(audit48Result.getFailCode());
@@ -437,12 +408,13 @@ public class Handler8800 extends EBankHandler {
 			// 如果是未成功的终态，关闭这批交易
 			if (status != null && status.isEndStatus()) {
 
-				applyTuples.forEach(applyTuple -> {
-					WalletApply apply = applyTuple.left;
-					apply.setStatus(WalletApplyStatus.FAIL.getValue());
-					walletApplyDao.updateByPrimaryKeySelective(apply);
+				triples.forEach(t -> {
+					WalletOrder walletOrder = t.x;
+					walletOrder.setStatus(OrderStatus.FAIL.getValue());
+					walletOrder.setProgress(GwProgress.HAS_RESP.getValue());
+					walletOrderDao.updateByPrimaryKeySelective(walletOrder);
 
-					GatewayTrans trans = applyTuple.right;
+					GatewayTrans trans = t.z;
 					trans.setEndTime(new Date());
 					trans.setAuditTime(auditTime);
 					gatewayTransService.updateTrans(trans);
@@ -454,8 +426,8 @@ public class Handler8800 extends EBankHandler {
 		}
 
 		// 网银成功之后，更新网银受理编号和授权时间
-		applyTuples.forEach(applyTuple -> {
-			GatewayTrans trans = applyTuple.right;
+		triples.forEach(t -> {
+			GatewayTrans trans = t.z;
 			trans.setStage(req.getTransCode());
 			trans.setHostAcceptNo(audit48Result.getHostJnlSeqNo());
 			trans.setAuditTime(auditTime);
@@ -468,9 +440,11 @@ public class Handler8800 extends EBankHandler {
 	/**
 	 * 查询网银明细授权
 	 */
-	private void doEBankDetailQuery(List<Tuple<WalletApply, GatewayTrans>> applyTuples) {
-		Tuple<WalletApply, GatewayTrans> firstTuple = applyTuples.get(0);
-		GatewayTrans firstTrans = firstTuple.right;
+	private void doEBankDetailQuery(
+		List<Triple<WalletOrder, WalletFinance, GatewayTrans>> triples) {
+
+		Triple<WalletOrder, WalletFinance, GatewayTrans> firstTuple = triples.get(0);
+		GatewayTrans firstTrans = firstTuple.z;
 
 		// 网银授权明细
 		EBankQuery49Builder req = EBankQuery49Builder.builder()
@@ -497,19 +471,19 @@ public class Handler8800 extends EBankHandler {
 			// 关闭授权失败的单
 			if (TransStatusDO49.REFUSE.getValue().equals(respVo.getStatus())) {
 
-				Optional<Tuple<WalletApply, GatewayTrans>> opt = applyTuples.stream()
+				Optional<Triple<WalletOrder, WalletFinance, GatewayTrans>> opt = triples.stream()
 					.filter(applyTuple -> {
-						GatewayTrans trans = applyTuple.right;
+						GatewayTrans trans = applyTuple.z;
 						return respVo.getElecChequeNo().equals(trans.getElecChequeNo());
 					}).findFirst();
 				if (opt.isPresent()) {
-					Tuple<WalletApply, GatewayTrans> tuple = opt.get();
+					Triple<WalletOrder, WalletFinance, GatewayTrans> triple = opt.get();
 
-					WalletApply apply = tuple.left;
-					apply.setStatus(WalletApplyStatus.FAIL.getValue());
-					walletApplyDao.updateByPrimaryKeySelective(apply);
+					WalletOrder walletOrder = triple.x;
+					walletOrder.setStatus(WalletApplyStatus.FAIL.getValue());
+					walletOrderDao.updateByPrimaryKeySelective(walletOrder);
 
-					GatewayTrans trans = tuple.right;
+					GatewayTrans trans = triple.z;
 					trans.setStage(req.getTransCode());
 					trans.setErrStatus(respVo.getStatus());
 					trans.setUserErrMsg(TransStatusDO49.REFUSE.getValueName());
@@ -538,18 +512,4 @@ public class Handler8800 extends EBankHandler {
 		builder.append(idx.toString());
 		return builder.toString();
 	}
-
-
-	@Override
-	public Tuple<WalletApply, GatewayTrans> updatePayStatus(
-		Tuple<WalletApply, GatewayTrans> applyTuple) {
-		return null;
-	}
-
-	@Override
-	public Tuple<GatewayMethod, PayTuple> transfer(Long applyId) {
-		throw new RuntimeException();
-	}
-
-
 }

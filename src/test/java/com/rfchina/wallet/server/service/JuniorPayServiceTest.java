@@ -2,23 +2,20 @@ package com.rfchina.wallet.server.service;
 
 import static org.junit.Assert.*;
 
-import com.alibaba.fastjson.JSON;
 import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.wallet.server.SpringBaseTest;
 import com.rfchina.wallet.server.model.ext.PayInReq;
 import com.rfchina.wallet.server.model.ext.PayInResp;
-import io.github.xdiamond.client.annotation.AllKeyListener;
-import io.github.xdiamond.client.event.ConfigEvent;
 import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Slf4j
-public class JuniorWalletServiceTest extends SpringBaseTest {
+public class JuniorPayServiceTest extends SpringBaseTest {
 
 	@Autowired
-	private JuniorWalletService juniorWalletService;
+	private JuniorPayService juniorPayService;
 
 	@Test
 	public void p0101PayInSingle() {
@@ -30,7 +27,7 @@ public class JuniorWalletServiceTest extends SpringBaseTest {
 			.payPurpose((byte) 1)
 			.build();
 
-		PayInResp respBody = juniorWalletService.payIn(Arrays.asList(req1));
+		PayInResp respBody = juniorPayService.payIn(Arrays.asList(req1));
 		logStack(respBody);
 
 		assertNotNull(respBody);
@@ -54,7 +51,7 @@ public class JuniorWalletServiceTest extends SpringBaseTest {
 			.payPurpose((byte) 1)
 			.build();
 
-		PayInResp respBody = juniorWalletService.payIn(Arrays.asList(req1, req2));
+		PayInResp respBody = juniorPayService.payIn(Arrays.asList(req1, req2));
 		logStack(respBody);
 
 		assertNotNull(respBody);
