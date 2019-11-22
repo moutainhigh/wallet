@@ -88,7 +88,8 @@ public class SeniorWalletService {
 	 * 升级高级钱包
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-	public WalletTunnel createSeniorWallet(Integer channelType, Long walletId, Byte source) {
+	public WalletTunnel createSeniorWallet(Integer channelType, Long walletId, Byte source)
+		throws Exception {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		if (wallet == null) {
 			log.error("开通高级钱包失败, 查无此钱包, walletId: {}", walletId);
@@ -109,15 +110,29 @@ public class SeniorWalletService {
 			Tuple<YunstCreateMemberResult, YunstMemberType> member = null;
 			try {
 				member = yunstUserHandler.createMember(walletId, source);
-			} catch (Exception e) {
-				log.error("开通高级钱包失败, channelType: {}, walletId: {}, source:{}", channelType,
-					walletId, source);
-				throw new RfchinaResponseException(EnumResponseCode.COMMON_FAILURE,
-					"开通高级钱包失败");
+				builder.bizUserId(member.left.getBizUserId())
+					.tunnelUserId(member.left.getUserId())
+					.memberType(member.right.getValue().byteValue());
+			} catch (CommonGatewayException e) {
+				String errCode = e.getBankErrCode();
+				if (!EnumYunstResponse.ALREADY_EXISTS_MEMEBER.getValue().equals(errCode)) {
+					log.error("开通高级钱包失败, channelType: {}, walletId: {}, source:{}", channelType,
+						walletId, source);
+					throw new RfchinaResponseException(EnumResponseCode.COMMON_FAILURE,
+						"开通高级钱包失败");
+				}else {
+					YunstMemberType memberType = YunstMemberType.PERSON;
+					if (source == 1) {
+						memberType = YunstMemberType.COMPANY;
+					}
+					String bizUserId = yunstUserHandler.transferToYunstBizUserFormat(walletId, source, configService.getEnv());
+					builder.bizUserId(bizUserId)
+						.tunnelUserId(null)
+						.memberType(memberType.getValue().byteValue());
+				}
 			}
-			builder.bizUserId(member.left.getBizUserId())
-				.tunnelUserId(member.left.getUserId())
-				.memberType(member.right.getValue().byteValue());
+
+
 		}
 		walletChannel = builder.build();
 		int effectRows = walletTunnelDao.insertSelective(walletChannel);
