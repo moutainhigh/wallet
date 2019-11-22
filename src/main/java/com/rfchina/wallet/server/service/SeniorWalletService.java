@@ -241,8 +241,16 @@ public class SeniorWalletService {
 				this.seniorWalletBindPhone(channelType, walletId, mobile, verifyCode);
 			}
 			Date curDate = new Date();
-			yunstUserHandler.personCertification(walletChannel.getBizUserId(), realName,
-				EnumDef.EnumIdType.ID_CARD.getValue().longValue(), idNo);
+			try {
+				yunstUserHandler.personCertification(walletChannel.getBizUserId(), realName,
+					EnumDef.EnumIdType.ID_CARD.getValue().longValue(), idNo);
+			} catch (CommonGatewayException e) {
+				String errCode = e.getBankErrCode();
+				if (!EnumYunstResponse.ALREADY_REALNAME_AUTH.getValue().equals(errCode)) {
+					throw new WalletResponseException(EnumWalletResponseCode.WALLET_ALREADY_VERIFY_IDENTITY);
+				}
+			}
+
 			walletChannel.setStatus(
 				EnumDef.WalletTunnelAuditStatus.AUDIT_SUCCESS.getValue().byteValue());
 			walletChannel.setCheckTime(new Date());
@@ -254,13 +262,18 @@ public class SeniorWalletService {
 					EnumResponseCode.COMMON_FAILURE, "更新高级钱包审核状态信息失败");
 			}
 
-			walletVerifyHisExtDao.insertSelective(
-				WalletVerifyHis.builder().walletId(walletId)
-					.refId(walletChannel.getId()).type(
-					WalletVerifyRefType.PERSON.getValue().byteValue()).verifyChannel(
-					WalletVerifyChannel.TONGLIAN.getValue().byteValue()).verifyType(
-					WalletVerifyType.TWO_FACTOR.getValue().byteValue())
-					.verifyTime(curDate).createTime(curDate).build());
+			WalletVerifyHis walletVerifyHis = walletVerifyHisExtDao
+				.selectByWalletIdAndRefIdAndType(walletId, walletChannel.getId(),
+					WalletVerifyRefType.PERSON.getValue().byteValue());
+			if (null == walletVerifyHis){
+				walletVerifyHisExtDao.insertSelective(
+					WalletVerifyHis.builder().walletId(walletId)
+						.refId(walletChannel.getId()).type(
+						WalletVerifyRefType.PERSON.getValue().byteValue()).verifyChannel(
+						WalletVerifyChannel.TONGLIAN.getValue().byteValue()).verifyType(
+						WalletVerifyType.TWO_FACTOR.getValue().byteValue())
+						.verifyTime(curDate).createTime(curDate).build());
+			}
 
 			WalletPerson walletPerson = walletPersonDao.selectByWalletId(walletId);
 			if (walletPerson == null) {

@@ -812,6 +812,7 @@ public class EnumWallet {
 	 */
 	public enum EnumYunstResponse implements Valuable<String> {
 		ALREADY_BIND_PHONE("30024", "已绑定手机"),
+		ALREADY_REALNAME_AUTH("30007", "已实名验证"),
 		;
 
 		private String value;
