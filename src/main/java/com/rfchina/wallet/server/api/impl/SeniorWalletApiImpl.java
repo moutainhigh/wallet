@@ -80,10 +80,20 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	public WalletTunnel seniorWalletUpgrade(String accessToken,
 		@ParamValid(nullable = false) Byte source,
 		Integer channelType, Long walletId) {
-		return seniorWalletService.createSeniorWallet(channelType, walletId, source);
+		WalletTunnel walletTunnel = null;
+		try {
+			walletTunnel = seniorWalletService
+				.createSeniorWallet(channelType, walletId, source);
+		} catch (Exception e) {
+			log.error("用户创建高级钱包失败，walletId:{}", walletId);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+				"用户创建高级钱包失败");
+		}
+		return walletTunnel;
 	}
 
 	@Log
+
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
@@ -194,8 +204,14 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 			.selectByTunnelTypeAndWalletId(channelType.byteValue(), walletId);
 		if (walletChannel == null) {
 			log.info("未创建高级钱包用户: walletId:{}", walletId);
-			walletChannel = seniorWalletService
-				.createSeniorWallet(channelType, walletId, WalletSource.FHT_CORP.getValue());
+			try {
+				walletChannel = seniorWalletService
+					.createSeniorWallet(channelType, walletId, WalletSource.FHT_CORP.getValue());
+			} catch (Exception e) {
+				log.error("高级钱包企业创建高级钱包失败, walletId:{}", walletId);
+				throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+					"高级钱包企业创建高级钱包失败");
+			}
 			if (walletChannel == null) {
 				log.error("高级钱包企业信息审核失败, 创建云商通用户失败, walletId:{}", walletId);
 				throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,

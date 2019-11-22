@@ -88,7 +88,8 @@ public class SeniorWalletService {
 	 * 升级高级钱包
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-	public WalletTunnel createSeniorWallet(Integer channelType, Long walletId, Byte source) {
+	public WalletTunnel createSeniorWallet(Integer channelType, Long walletId, Byte source)
+		throws Exception {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		if (wallet == null) {
 			log.error("开通高级钱包失败, 查无此钱包, walletId: {}", walletId);
@@ -109,15 +110,29 @@ public class SeniorWalletService {
 			Tuple<YunstCreateMemberResult, YunstMemberType> member = null;
 			try {
 				member = yunstUserHandler.createMember(walletId, source);
-			} catch (Exception e) {
-				log.error("开通高级钱包失败, channelType: {}, walletId: {}, source:{}", channelType,
-					walletId, source);
-				throw new RfchinaResponseException(EnumResponseCode.COMMON_FAILURE,
-					"开通高级钱包失败");
+				builder.bizUserId(member.left.getBizUserId())
+					.tunnelUserId(member.left.getUserId())
+					.memberType(member.right.getValue().byteValue());
+			} catch (CommonGatewayException e) {
+				String errCode = e.getBankErrCode();
+				if (!EnumYunstResponse.ALREADY_EXISTS_MEMEBER.getValue().equals(errCode)) {
+					log.error("开通高级钱包失败, channelType: {}, walletId: {}, source:{}", channelType,
+						walletId, source);
+					throw new RfchinaResponseException(EnumResponseCode.COMMON_FAILURE,
+						"开通高级钱包失败");
+				}else {
+					YunstMemberType memberType = YunstMemberType.PERSON;
+					if (source == 1) {
+						memberType = YunstMemberType.COMPANY;
+					}
+					String bizUserId = yunstUserHandler.transferToYunstBizUserFormat(walletId, source, configService.getEnv());
+					builder.bizUserId(bizUserId)
+						.tunnelUserId(null)
+						.memberType(memberType.getValue().byteValue());
+				}
 			}
-			builder.bizUserId(member.left.getBizUserId())
-				.tunnelUserId(member.left.getUserId())
-				.memberType(member.right.getValue().byteValue());
+
+
 		}
 		walletChannel = builder.build();
 		int effectRows = walletTunnelDao.insertSelective(walletChannel);
@@ -241,8 +256,16 @@ public class SeniorWalletService {
 				this.seniorWalletBindPhone(channelType, walletId, mobile, verifyCode);
 			}
 			Date curDate = new Date();
-			yunstUserHandler.personCertification(walletChannel.getBizUserId(), realName,
-				EnumDef.EnumIdType.ID_CARD.getValue().longValue(), idNo);
+			try {
+				yunstUserHandler.personCertification(walletChannel.getBizUserId(), realName,
+					EnumDef.EnumIdType.ID_CARD.getValue().longValue(), idNo);
+			} catch (CommonGatewayException e) {
+				String errCode = e.getBankErrCode();
+				if (!EnumYunstResponse.ALREADY_REALNAME_AUTH.getValue().equals(errCode)) {
+					throw new WalletResponseException(EnumWalletResponseCode.WALLET_ALREADY_VERIFY_IDENTITY);
+				}
+			}
+
 			walletChannel.setStatus(
 				EnumDef.WalletTunnelAuditStatus.AUDIT_SUCCESS.getValue().byteValue());
 			walletChannel.setCheckTime(new Date());
@@ -254,13 +277,18 @@ public class SeniorWalletService {
 					EnumResponseCode.COMMON_FAILURE, "更新高级钱包审核状态信息失败");
 			}
 
-			walletVerifyHisExtDao.insertSelective(
-				WalletVerifyHis.builder().walletId(walletId)
-					.refId(walletChannel.getId()).type(
-					WalletVerifyRefType.PERSON.getValue().byteValue()).verifyChannel(
-					WalletVerifyChannel.TONGLIAN.getValue().byteValue()).verifyType(
-					WalletVerifyType.TWO_FACTOR.getValue().byteValue())
-					.verifyTime(curDate).createTime(curDate).build());
+			WalletVerifyHis walletVerifyHis = walletVerifyHisExtDao
+				.selectByWalletIdAndRefIdAndType(walletId, walletChannel.getId(),
+					WalletVerifyRefType.PERSON.getValue().byteValue());
+			if (null == walletVerifyHis){
+				walletVerifyHisExtDao.insertSelective(
+					WalletVerifyHis.builder().walletId(walletId)
+						.refId(walletChannel.getId()).type(
+						WalletVerifyRefType.PERSON.getValue().byteValue()).verifyChannel(
+						WalletVerifyChannel.TONGLIAN.getValue().byteValue()).verifyType(
+						WalletVerifyType.TWO_FACTOR.getValue().byteValue())
+						.verifyTime(curDate).createTime(curDate).build());
+			}
 
 			WalletPerson walletPerson = walletPersonDao.selectByWalletId(walletId);
 			if (walletPerson == null) {
@@ -308,6 +336,7 @@ public class SeniorWalletService {
 			.selectByTunnelTypeAndWalletId(channelType.byteValue(), walletId);
 		walletChannel.setStatus(
 			EnumDef.WalletTunnelAuditStatus.WAITING_AUDIT.getValue().byteValue());
+		String cardNo = companyBasicInfo.getAccountNo();
 		if (channelType == TunnelType.YUNST.getValue().intValue()) {
 			String transformBizUserId = walletChannel.getBizUserId();
 			try {
@@ -355,7 +384,7 @@ public class SeniorWalletService {
 									.walletId(walletId)
 									.bankName(companyBasicInfo.getParentBankName())
 									.depositBank(companyBasicInfo.getBankName())
-									.bankAccount(companyBasicInfo.getAccountNo())
+									.bankAccount(cardNo)
 									.verifyChannel(VerifyChannel.YUNST.getValue())
 									.verifyTime(curDate)
 									.isPublic(EnumPublicAccount.YES.getValue().byteValue())
@@ -386,7 +415,7 @@ public class SeniorWalletService {
 								.walletId(walletId)
 								.bankName(companyBasicInfo.getParentBankName())
 								.depositBank(companyBasicInfo.getBankName())
-								.bankAccount(companyBasicInfo.getAccountNo())
+								.bankAccount(cardNo)
 								.verifyChannel(VerifyChannel.YUNST.getValue())
 								.isPublic(EnumPublicAccount.YES.getValue().byteValue())
 								.isDef(EnumDefBankCard.YES.getValue().byteValue())

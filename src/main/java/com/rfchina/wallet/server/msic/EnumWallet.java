@@ -827,7 +827,9 @@ public class EnumWallet {
 	 * 通联sdk返回枚举
 	 */
 	public enum EnumYunstResponse implements Valuable<String> {
+		ALREADY_EXISTS_MEMEBER("30000","用户已存在"),
 		ALREADY_BIND_PHONE("30024", "已绑定手机"),
+		ALREADY_REALNAME_AUTH("30007", "已实名验证"),
 		;
 
 		private String value;
