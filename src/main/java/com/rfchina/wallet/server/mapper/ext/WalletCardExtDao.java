@@ -18,7 +18,7 @@ public interface WalletCardExtDao extends WalletCardMapper {
 	List<WalletCard> selectPubAccountByWalletId(@Param("walletId") Long walletId);
 
 	@Select({"<script>",
-		"select * from rf_wallet_card where wallet_id = #{walletId} and status = 1 and is_public = 1 and veriy_time is null limit 1",
+		"select * from rf_wallet_card where wallet_id = #{walletId} and status = 1 and is_public = 1 and verify_time is null limit 1",
 		"</script>"})
 	@ResultMap({"com.rfchina.wallet.domain.mapper.WalletCardMapper.BaseResultMap"})
 	WalletCard selectNonVerifyPubAccountByWalletId(@Param("walletId") Long walletId);
