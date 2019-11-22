@@ -308,6 +308,7 @@ public class SeniorWalletService {
 			.selectByTunnelTypeAndWalletId(channelType.byteValue(), walletId);
 		walletChannel.setStatus(
 			EnumDef.WalletTunnelAuditStatus.WAITING_AUDIT.getValue().byteValue());
+		String cardNo = companyBasicInfo.getAccountNo();
 		if (channelType == TunnelType.YUNST.getValue().intValue()) {
 			String transformBizUserId = walletChannel.getBizUserId();
 			try {
@@ -355,7 +356,7 @@ public class SeniorWalletService {
 									.walletId(walletId)
 									.bankName(companyBasicInfo.getParentBankName())
 									.depositBank(companyBasicInfo.getBankName())
-									.bankAccount(companyBasicInfo.getAccountNo())
+									.bankAccount(cardNo)
 									.verifyChannel(VerifyChannel.YUNST.getValue())
 									.verifyTime(curDate)
 									.isPublic(EnumPublicAccount.YES.getValue().byteValue())
@@ -386,7 +387,7 @@ public class SeniorWalletService {
 								.walletId(walletId)
 								.bankName(companyBasicInfo.getParentBankName())
 								.depositBank(companyBasicInfo.getBankName())
-								.bankAccount(companyBasicInfo.getAccountNo())
+								.bankAccount(cardNo)
 								.verifyChannel(VerifyChannel.YUNST.getValue())
 								.isPublic(EnumPublicAccount.YES.getValue().byteValue())
 								.isDef(EnumDefBankCard.YES.getValue().byteValue())
