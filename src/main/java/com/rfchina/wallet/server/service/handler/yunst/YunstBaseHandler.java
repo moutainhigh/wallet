@@ -29,14 +29,14 @@ public abstract class YunstBaseHandler {
 				configService.getYstPfxPath(), configService.getYstTlCertPath()));
 	}
 
-	public static String transferToYunstBizUserFormat(Long walletId, Byte type) {
+	public static String transferToYunstBizUserFormat(Long walletId, Byte type ,String env) {
 		switch (type){
 		case 1:
-			return MEMBER_TYPE_PREFIX_COMPANY + walletId;
+			return env.toUpperCase() + MEMBER_TYPE_PREFIX_COMPANY + walletId;
 		case 2:
-			return MEMBER_TYPE_PREFIX_PERSON + walletId;
+			return env.toUpperCase() + MEMBER_TYPE_PREFIX_PERSON + walletId;
 		case 3:
-			return MEMBER_TYPE_PREFIX_PERSON + walletId;
+			return env.toUpperCase() + MEMBER_TYPE_PREFIX_PERSON + walletId;
 		}
 		throw new WalletResponseException(ResponseCode.EnumResponseCode.COMMON_INVALID_PARAMS, "type");
 	}

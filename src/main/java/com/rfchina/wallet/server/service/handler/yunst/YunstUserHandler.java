@@ -62,7 +62,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 		if (source == 1) {
 			memberType = YunstMemberType.COMPANY;
 		}
-		String bizUserId = transferToYunstBizUserFormat(walletId, source);
+		String bizUserId = transferToYunstBizUserFormat(walletId, source, configService.getEnv());
 		YunstCreateMemberReq req = YunstCreateMemberReq.builder$()
 			.bizUserId(bizUserId)
 			.memberType(memberType.getValue())
