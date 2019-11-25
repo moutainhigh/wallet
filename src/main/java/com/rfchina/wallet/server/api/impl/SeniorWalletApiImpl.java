@@ -171,7 +171,7 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 					verifyCode);
 			return seniorWalletService.signMemberProtocol(walletId, jumpUrl);
 		} catch (Exception e) {
-			log.error("高级钱包个人认证失败, walletId: {},excption:{}", walletId, e.getMessage());
+			log.error("高级钱包个人认证失败, errMsg: {}", e);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
 				"高级钱包个人认证失败");
 		}

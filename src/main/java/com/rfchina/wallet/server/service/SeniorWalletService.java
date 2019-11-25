@@ -245,7 +245,6 @@ public class SeniorWalletService {
 					EnumDef.EnumIdType.ID_CARD.getValue().longValue(), idNo);
 			} catch (CommonGatewayException e) {
 				String errCode = e.getBankErrCode();
-				log.info("errCode = {}",errCode);
 				if (!EnumYunstResponse.ALREADY_REALNAME_AUTH.getValue().equals(errCode)) {
 					log.error("高级钱包个人渠道验证信息失败, walletId:{}", walletId);
 					throw new RfchinaResponseException(
