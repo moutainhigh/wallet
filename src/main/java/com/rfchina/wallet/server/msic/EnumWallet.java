@@ -1146,4 +1146,25 @@ public class EnumWallet {
 			return value;
 		}
 	}
+
+	/**
+	 * 企业信息审核状态
+	 */
+	public enum YunstCompanyInfoAuditStatus implements Valuable<Long> {
+		SUCCESS( 2L, "审核通过"),
+		FAIL(3L, "审核失败");
+
+		private Long value;
+		private String valueName;
+
+		YunstCompanyInfoAuditStatus(Long value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Long getValue() {
+			return value;
+		}
+	}
 }
