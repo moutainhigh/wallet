@@ -20,6 +20,7 @@ import com.rfchina.wallet.server.mapper.ext.WalletCardExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletVerifyHisExtDao;
 import com.rfchina.wallet.server.model.ext.SLWalletMqMessage;
+import com.rfchina.wallet.server.msic.EnumWallet.YunstCompanyInfoAuditStatus;
 import java.util.Date;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
@@ -59,7 +60,10 @@ public class YunstNotifyHandler {
 		WalletCard walletCard = walletCardDao
 			.selectNonVerifyPubAccountByWalletId(walletTunnel.getWalletId());
 
-		if (result == 2L) {
+		boolean isPass = false;
+
+		if (result == YunstCompanyInfoAuditStatus.SUCCESS.getValue().longValue()) {
+			isPass = true;
 			walletTunnel.setStatus(
 				EnumDef.WalletTunnelAuditStatus.AUDIT_SUCCESS.getValue().byteValue());
 			walletTunnel.setFailReason(null);
@@ -72,7 +76,7 @@ public class YunstNotifyHandler {
 					.verifyTime(DateUtil.parse(checkTime, DateUtil.STANDARD_DTAETIME_PATTERN))
 					.createTime(new Date()).build());
 			walletCard.setVerifyTime(DateUtil.parse(checkTime, DateUtil.STANDARD_DTAETIME_PATTERN));
-		} else if (result == 3L) {
+		} else if (result == YunstCompanyInfoAuditStatus.FAIL.getValue().longValue()) {
 			walletTunnel
 				.setStatus(EnumDef.WalletTunnelAuditStatus.AUDIT_FAIL.getValue().byteValue());
 			walletTunnel.setFailReason(failReason);
@@ -93,7 +97,7 @@ public class YunstNotifyHandler {
 			log.error("处理企业信息审核结果通知-更新银行卡信息失败:bizUserId:{}", bizUserId);
 		}
 		return SLWalletMqMessage.builder().walletId(walletTunnel.getWalletId())
-			.isPass(result == 2L).checkTime(checkTime).failReason(failReason).build();
+			.isPass(isPass).checkTime(checkTime).failReason(failReason).build();
 	}
 
 	public void handleSignContractResult(ChannelNotify channelNotify,
@@ -118,17 +122,18 @@ public class YunstNotifyHandler {
 		String reqSn = rtnVal.getProtocolReqSn();
 		String signStatus = rtnVal.getSignStatus();
 
-		WalletTunnel walletChannel = walletTunnelExtDao.selectByBanlceProtocolReqSn(reqSn);
-		if (Objects.isNull(walletChannel)) {
+		WalletTunnel walletTunnel = walletTunnelExtDao.selectByBanlceProtocolReqSn(reqSn);
+		if (Objects.isNull(walletTunnel)) {
+			log.error("查无对应walletTunnel, reqSn:{}", reqSn);
 			return;
 		}
-		String bizUserId = walletChannel.getBizUserId();
+		String bizUserId = walletTunnel.getBizUserId();
 		channelNotify.setBizUserId(bizUserId);
 
 		if (YUNST_SIGN_SUCCESS.equalsIgnoreCase(signStatus)) {
-			walletChannel
+			walletTunnel
 				.setIsSignContact(WalletTunnelSignContract.BALANCE.getValue().byteValue());
-			int effectRows = walletTunnelExtDao.updateByPrimaryKeySelective(walletChannel);
+			int effectRows = walletTunnelExtDao.updateByPrimaryKeySelective(walletTunnel);
 			if (effectRows != 1) {
 				log.error("更新扣款协议状态失败:bizUserId:{}", bizUserId);
 			}
