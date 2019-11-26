@@ -138,8 +138,7 @@ public class Handler8800 extends EBankHandler {
 			BigDecimal bigAmount = new BigDecimal(walletOrder.getAmount())
 				.divide(new BigDecimal("100"), 2, BigDecimal.ROUND_DOWN);
 
-			BankCode bankCode = bankCodeExtDao
-				.selectByCode(walletFinance.getPayeeBankCode(), TunnelType.PUDONG.getValue());
+			BankCode bankCode = bankCodeExtDao.selectByCode(walletFinance.getPayeeBankCode());
 			if (bankCode == null) {
 				throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_BATCH_LIMIT);
 			}
@@ -199,6 +198,7 @@ public class Handler8800 extends EBankHandler {
 		payTuple.setAcceptNo(resp.getAcceptNo());
 		payTuple.setPacketId(packetId);
 		payTuple.setElecMap(elecMap);
+		payTuple.setStage(req.getTransCode());
 
 		return new Tuple<>(getGatewayMethod(), payTuple);
 	}

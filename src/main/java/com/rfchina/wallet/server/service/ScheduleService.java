@@ -155,11 +155,11 @@ public class ScheduleService {
 				// 更新交易记录
 				GatewayTrans gatewayTrans = gatewayTransService
 					.selOrCrtTrans(walletOrder, walletFinance);
+				gatewayTrans.setStage(payInResp.getStage());
 				gatewayTrans.setAcceptNo(payInResp.getAcceptNo());
 				gatewayTrans.setPacketId(payInResp.getPacketId());
 				gatewayTrans.setElecChequeNo(
-					payInResp.getElecMap()
-						.get(gatewayTrans.getWalletApplyId().toString()));
+					payInResp.getElecMap().get(walletOrder.getId().toString()));
 				gatewayTrans.setRefMethod(method.getValue());
 				gatewayTrans.setLanchTime(new Date());
 				gatewayTransService.updateTrans(gatewayTrans);
@@ -196,8 +196,7 @@ public class ScheduleService {
 				walletOrder.setProgress(GwProgress.HAS_RESP.getValue());
 			} else {
 				// 人工处理
-				walletFinance.setSubStatus(FinanceSubStatus.WAIT_DEAL.getValue());
-				walletFinanceDao.updateByPrimaryKeySelective(walletFinance);
+				walletOrder.setSubStatus(FinanceSubStatus.WAIT_DEAL.getValue());
 			}
 			walletOrderDao.updateByPrimaryKeySelective(walletOrder);
 			// 记录网关信息

@@ -12,7 +12,7 @@ public interface WalletCollectMethodExtDao extends WalletCollectMethodMapper {
 
 	@Select({
 		"select * from rf_wallet_collect_method",
-		"where ref_id = #{collectId} and type = #{type}"
+		"where type = #{type} and ref_id = #{collectId}"
 	})
 	@ResultMap("com.rfchina.wallet.domain.mapper.WalletCollectMethodMapper.BaseResultMap")
 	List<WalletCollectMethod> selectByCollectId(@Param("collectId") Long collectId,

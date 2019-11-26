@@ -1,9 +1,10 @@
-package com.rfchina.wallet.server;
+package com.rfchina.wallet.server.web;
 
 import com.alibaba.fastjson.JSONObject;
 import com.allinpay.yunst.sdk.util.RSAUtil;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.rfchina.platform.common.utils.JsonUtil;
+import com.rfchina.wallet.server.WalletBaseTest;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
 import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.utils.RandomUtils;
