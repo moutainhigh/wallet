@@ -159,7 +159,7 @@ public class WalletService {
 			resp.setPayeeAccount(walletFinance.getPayeeAccount());
 			resp.setPayeeName(walletFinance.getPayeeName());
 			resp.setPayeeType(payeeType);
-			resp.setRemark(walletFinance.getRemark());
+			resp.setRemark(walletOrder.getRemark());
 			resp.setPayeeBankCode(walletFinance.getPayeeBankCode());
 			if (!StringUtils.isEmpty(walletFinance.getPayeeBankCode())) {
 				BankCode bankCode = bankCodeDao.selectByBankCode(walletFinance.getPayeeBankCode());

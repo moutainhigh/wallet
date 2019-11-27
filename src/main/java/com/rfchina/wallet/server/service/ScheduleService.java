@@ -227,7 +227,7 @@ public class ScheduleService {
 			.payeeBankInfo(null)
 			.elecChequeNo(gatewayTrans.getElecChequeNo())
 			.note(walletOrder.getNote())
-			.remark(walletFinance.getRemark())
+			.remark(walletOrder.getRemark())
 			.amount(walletOrder.getAmount())
 			.status(walletOrder.getStatus())
 			.errCode(walletOrder.getTunnelErrCode())
@@ -289,7 +289,7 @@ public class ScheduleService {
 		log.info("quartz: 开始更新支付状态[银企直连]");
 
 		List<String> batchNos = walletOrderDao
-			.selectUnFinishBatchNo(TunnelType.YUNST.getValue(), batchSize);
+			.selectUnFinishBatchNo(OrderType.FINANCE.getValue(), batchSize);
 
 		for (String batchNo : batchNos) {
 

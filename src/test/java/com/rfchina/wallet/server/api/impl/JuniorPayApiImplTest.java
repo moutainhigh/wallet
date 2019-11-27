@@ -11,7 +11,6 @@ import com.rfchina.wallet.server.model.ext.PayInResp;
 import java.util.Arrays;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
-import org.junit.experimental.theories.suppliers.TestedOn;
 import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -43,14 +42,19 @@ public class JuniorPayApiImplTest extends SpringApiTest {
 			.payPurpose((byte) 1)
 			.build();
 
-		PayInResp respBody = juniorPayApi.payIn(super.accessToken,Arrays.asList(req1, req2));
+		PayInResp respBody = juniorPayApi.payIn(super.accessToken, Arrays.asList(req1, req2), null);
 		logStack(respBody);
 
 		assertNotNull(respBody);
 	}
 
 	@Test
-	public void p02QuartzPay(){
+	public void p02QuartzPay() {
 		scheduleApi.quartzPay();
+	}
+
+	@Test
+	public void p03UpdateStatus(){
+		scheduleApi.quartzUpdate();
 	}
 }

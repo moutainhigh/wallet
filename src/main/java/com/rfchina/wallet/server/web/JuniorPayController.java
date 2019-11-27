@@ -1,17 +1,24 @@
 package com.rfchina.wallet.server.web;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.hash.Hashing;
+import com.rfchina.biztools.limiter.annotation.EnumFixedRate;
+import com.rfchina.biztools.limiter.setting.RateSetting;
+import com.rfchina.biztools.limiter.setting.RateSettingUtil;
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.ResponseValue;
+import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.server.api.JuniorPayApi;
+import com.rfchina.wallet.server.model.ext.PayInReq;
 import com.rfchina.wallet.server.model.ext.PayInResp;
 import com.rfchina.wallet.server.msic.UrlConstant;
-import com.rfchina.wallet.server.model.ext.PayInReq;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,6 +27,17 @@ import org.springframework.web.bind.annotation.RestController;
 @Api
 @RestController
 public class JuniorPayController {
+
+	// 快捷参数配置工具，也可以自行构建
+	public static RateSetting settingTemplate = RateSetting.builder()
+		.limitWord("")
+		.fixedLength(5)
+		.fixedUnit(EnumFixedRate.SECONDS)
+		.max(1)
+		.overflow((setting) -> {
+			throw new WalletResponseException(600001, "超过" + setting.getMax() + "次数限制");
+		})
+		.build();
 
 	@Autowired
 	private JuniorPayApi juniorPayApi;
@@ -44,7 +62,8 @@ public class JuniorPayController {
 			.payPurpose(payPurpose)
 			.build();
 
-		PayInResp respBody = juniorPayApi.payIn(accessToken, Arrays.asList(payInReq));
+		PayInResp respBody = juniorPayApi.payIn(accessToken, Arrays.asList(payInReq),
+			RateSettingUtil.clone(bizNo, settingTemplate));
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, respBody);
 	}
 
@@ -55,12 +74,15 @@ public class JuniorPayController {
 		@ApiParam(value = "json数组，参考思力出钱单笔接口，拼装成数组即可( 钱包类型必须统一为企业或个人 )", required = true) String jsonArry
 	) {
 		List<PayInReq> payReqs = JSON.parseArray(jsonArry, PayInReq.class);
+		String limitWord = payReqs.stream().map(PayInReq::getBizNo)
+			.collect(Collectors.joining("|"));
+		limitWord = DigestUtils.md5Hex(limitWord);
 
-		PayInResp respBody = juniorPayApi.payIn(accessToken, payReqs);
+		PayInResp respBody = juniorPayApi
+			.payIn(accessToken, payReqs, RateSettingUtil.clone(limitWord, settingTemplate));
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, respBody);
 	}
-
 
 
 }

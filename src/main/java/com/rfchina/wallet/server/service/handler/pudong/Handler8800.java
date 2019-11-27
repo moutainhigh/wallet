@@ -13,7 +13,6 @@ import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.BankCode;
 import com.rfchina.wallet.domain.model.GatewayTrans;
-import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletFinance;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.server.bank.pudong.builder.EBankQuery48Builder;
@@ -281,12 +280,16 @@ public class Handler8800 extends EBankHandler {
 				if (opt.isPresent()) {
 					Triple<WalletOrder, WalletFinance, GatewayTrans> tuple = opt.get();
 					WalletOrder walletOrder = tuple.x;
-					WalletFinance walletFinance = tuple.y;
 					GatewayTrans trans = tuple.z;
 
 					IGatewayError err = extractErrCode(rs.getNote());
+
 					// 如果是终态, 更新到申请单
 					TransStatus8804 transStatus = TransStatus8804.parse(rs.getTransStatus());
+					String userErrMsg = transStatus != null ? transStatus.getDescription()
+						: ("未知状态" + rs.getTransStatus());
+					String sysErrMsg = StringUtils.isNotBlank(err.getErrMsg()) ? err.getErrMsg()
+						: userErrMsg;
 					if (transStatus.isEndStatus()) {
 						OrderStatus status;
 						// 核心拒绝的，需要进一步判断错误码
@@ -297,19 +300,23 @@ public class Handler8800 extends EBankHandler {
 							status = OrderStatus.parsePuDong8804(rs.getTransStatus());
 						}
 						walletOrder.setStatus(status.getValue());
-						walletOrderDao.updateByPrimaryKey(walletOrder);
-
+						walletOrder.setProgress(GwProgress.HAS_RESP.getValue());
+						walletOrder.setEndTime(new Date());
+						walletOrder.setTunnelErrMsg(sysErrMsg);
+						walletOrder.setTunnelStatus(rs.getTransStatus());
+						walletOrder.setTunnelErrCode(err.getErrCode());
 						if (StringUtil.isNotBlank(rs.getTransDate())) {
-							trans.setBizTime(DateUtil
-								.parse(rs.getTransDate(), DateUtil.SHORT_DTAE_PATTERN));
+							Date bizTime = DateUtil
+								.parse(rs.getTransDate(), DateUtil.SHORT_DTAE_PATTERN);
+							trans.setBizTime(bizTime);
+							if (TransStatus8804.FINISH.getValue().equals(transStatus.getValue())) {
+								walletOrder.setTunnelSuccTime(bizTime);
+							}
 						}
+						walletOrderDao.updateByPrimaryKey(walletOrder);
 						trans.setEndTime(new Date());
 					}
 					// 记录中间状态
-					String userErrMsg = transStatus != null ? transStatus.getDescription()
-						: ("未知状态" + rs.getTransStatus());
-					String sysErrMsg = StringUtils.isNotBlank(err.getErrMsg()) ? err.getErrMsg()
-						: userErrMsg;
 					trans.setSeqNo(rs.getSeqNo());
 					trans.setStage(req.getTransCode());
 					trans.setErrStatus(rs.getTransStatus());
@@ -402,27 +409,25 @@ public class Handler8800 extends EBankHandler {
 				String errMsg = status != null ? status.getValueName() : "文档未记录状态";
 				trans.setUserErrMsg(errMsg);
 				trans.setSysErrMsg(errMsg);
-				gatewayTransService.updateTrans(trans);
-			});
 
-			// 如果是未成功的终态，关闭这批交易
-			if (status != null && status.isEndStatus()) {
+				// 如果是未成功的终态，关闭这批交易
+				if (status != null && status.isEndStatus()) {
 
-				triples.forEach(t -> {
 					WalletOrder walletOrder = t.x;
 					walletOrder.setStatus(OrderStatus.FAIL.getValue());
 					walletOrder.setProgress(GwProgress.HAS_RESP.getValue());
+					walletOrder.setTunnelErrMsg(errMsg);
+					walletOrder.setTunnelErrCode(audit48Result.getFailCode());
+					walletOrder.setTunnelStatus(audit48Result.getTransStatus());
+					walletOrder.setEndTime(new Date());
 					walletOrderDao.updateByPrimaryKeySelective(walletOrder);
 
-					GatewayTrans trans = t.z;
 					trans.setEndTime(new Date());
 					trans.setAuditTime(auditTime);
-					gatewayTransService.updateTrans(trans);
-				});
-			}
-
+				}
+				gatewayTransService.updateTrans(trans);
+			});
 			return false;
-
 		}
 
 		// 网银成功之后，更新网银受理编号和授权时间
@@ -481,6 +486,10 @@ public class Handler8800 extends EBankHandler {
 
 					WalletOrder walletOrder = triple.x;
 					walletOrder.setStatus(WalletApplyStatus.FAIL.getValue());
+					walletOrder.setProgress(GwProgress.HAS_RESP.getValue());
+					walletOrder.setTunnelStatus(respVo.getStatus());
+					walletOrder.setTunnelErrMsg(TransStatusDO49.REFUSE.getValueName());
+					walletOrder.setEndTime(new Date());
 					walletOrderDao.updateByPrimaryKeySelective(walletOrder);
 
 					GatewayTrans trans = triple.z;
@@ -494,11 +503,6 @@ public class Handler8800 extends EBankHandler {
 			}
 		}
 	}
-
-	private WalletCard getWalletCard(Long walletId) {
-		return walletCardDao.selectDefCardByWalletId(walletId);
-	}
-
 
 	/**
 	 * 获取报文流水号

@@ -1,5 +1,6 @@
 package com.rfchina.wallet.server.api;
 
+import com.rfchina.biztools.limiter.setting.RateSetting;
 import com.rfchina.wallet.server.model.ext.PayInReq;
 import com.rfchina.wallet.server.model.ext.PayInResp;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
@@ -10,7 +11,7 @@ public interface JuniorPayApi {
 	/**
 	 * 出佣到个人钱包
 	 */
-	PayInResp payIn(String accessToken, List<PayInReq> payInReqs);
+	PayInResp payIn(String accessToken, List<PayInReq> payInReqs, RateSetting rateSetting);
 
 
 }

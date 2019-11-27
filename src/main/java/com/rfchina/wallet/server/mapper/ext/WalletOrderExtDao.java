@@ -47,7 +47,8 @@ public interface WalletOrderExtDao extends WalletOrderMapper {
 		"where type = #{orderType} and progress = 2 and status = 2",
 		"limit #{batchSize}"
 	})
-	List<String> selectUnFinishBatchNo(@Param("orderType") Byte orderType, Integer batchSize);
+	List<String> selectUnFinishBatchNo(@Param("orderType") Byte orderType,
+		@Param("batchSize") Integer batchSize);
 
 	/**
 	 * 查询指定状态的批次申请单
