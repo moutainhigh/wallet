@@ -64,11 +64,17 @@ public class WalletOrder  {
     @ApiModelProperty("进度。1：待发送 2：已发送 3：已接收结果")
     private Integer progress ;
 
+    @ApiModelProperty("备注")
+    private String remark ;
+
     @ApiModelProperty("开始时间")
     private String startTime ;
 
     @ApiModelProperty("交易状态。 2：进行中，3：交易成功，4：交易失败")
     private Integer status ;
+
+    @ApiModelProperty("0：默认 1:待人工处理 2:等待重新发起")
+    private Integer subStatus ;
 
     @ApiModelProperty("通道错误码")
     private String tunnelErrCode ;
@@ -88,7 +94,7 @@ public class WalletOrder  {
     @ApiModelProperty("通道类型。1: 浦发银企直连，2：通联云商通")
     private Integer tunnelType ;
 
-    @ApiModelProperty("类型，1：财务结算，2：充值，3：提现，4：代收，5：代付，6：退款，7：消费")
+    @ApiModelProperty("类型，1：财务结算，2：充值，3：提现，4：代收，5：代付，6：退款，7：消费，8：代扣")
     private Integer type ;
 
     @ApiModelProperty("用户端错误提示")
