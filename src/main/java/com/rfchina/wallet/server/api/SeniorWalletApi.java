@@ -136,5 +136,6 @@ public interface SeniorWalletApi {
 	 * @param walletId 必填, 钱包id
 	 */
 	Pagination<WalletOrder> queryWalletOrderDetail(String accessToken, Long walletId, Date fromTime,
-			Date toTime, Integer tradeType, Integer status, int limit, int offset, Boolean stat);
+		Date toTime, Integer tradeType, Integer status, String orderNo, String bizNo, int limit,
+		int offset, Boolean stat);
 }

@@ -305,12 +305,14 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@SignVerify
 	@Override
 	public Pagination<WalletOrder> queryWalletOrderDetail(String accessToken, Long walletId,
-		Date fromTime, Date toTime, Integer tradeType, Integer status, int limit, int offset,
-		Boolean stat) {
+		Date fromTime, Date toTime, Integer tradeType, Integer status, String orderNo, String bizNo,
+		int limit, int offset, Boolean stat) {
 		List<WalletOrder> walletOrderList = walletOrderExtDao
-			.selectByCondition(walletId, fromTime, toTime, tradeType, status, limit, offset);
+			.selectByCondition(walletId, fromTime, toTime, tradeType, status, orderNo, bizNo, limit,
+				offset);
 		long total = Objects.nonNull(stat) && stat ? walletOrderExtDao
-			.selectCountByCondition(walletId, fromTime, toTime, tradeType, status) : 0;
+			.selectCountByCondition(walletId, fromTime, toTime, tradeType, status, orderNo, bizNo)
+			: 0;
 		return new Pagination.PaginationBuilder<WalletOrder>().data(walletOrderList)
 			.total(total)
 			.offset(offset)

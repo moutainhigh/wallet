@@ -10,14 +10,16 @@
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
 |access_token|是|access_token|
-|wallet_id|是|钱包id|
+|biz_no|否|关联订单号|
 |from_time|否|交易时间开始|
 |limit|否|每页限制|
 |offset|否|起始页偏移量|
+|order_no|否|钱包订单号|
 |stat|否|是否统计|
 |status|否|状态|
 |to_time|否|交易时间结束|
 |trade_type|否|交易类型|
+|wallet_id|否|钱包id|
 
 返回数据
 ```
@@ -43,15 +45,17 @@
     order_no:""  , //订单号
     pay_method:""  , //支付方式 1：余额 2：微信 4：支付宝 8:刷卡支付 16：银行卡
     progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
+    remark:""  , //备注
     start_time:""  , //开始时间
     status:""  , //交易状态。 2：进行中，3：交易成功，4：交易失败
+    sub_status:""  , //0：默认 1:待人工处理 2:等待重新发起
     tunnel_err_code:""  , //通道错误码
     tunnel_err_msg:""  , //系统错误信息
     tunnel_order_no:""  , //渠道订单号
     tunnel_status:""  , //通道状态
     tunnel_succ_time:""  , //通道成功时间
     tunnel_type:""  , //通道类型。1: 浦发银企直连，2：通联云商通
-    type:""  , //类型，1：财务结算，2：充值，3：提现，4：代收，5：代付，6：退款，7：消费
+    type:""  , //类型，1：财务结算，2：充值，3：提现，4：代收，5：代付，6：退款，7：消费，8：代扣
     user_err_msg:""  , //用户端错误提示
     wallet_id:""   //钱包id
 }  ]  , 

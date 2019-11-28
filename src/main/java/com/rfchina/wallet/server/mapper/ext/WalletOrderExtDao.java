@@ -118,14 +118,17 @@ public interface WalletOrderExtDao extends WalletOrderMapper {
 		"and create_time <![CDATA[<=]]> #{toTime}", "</if>",
 		"<if test=\"tradeType != null\"> and type =#{tradeType}</if>",
 		"<if test=\"status != null\"> and status =#{status}</if>",
+		"<if test=\"orderNo != null\"> and order_no =#{orderNo}</if>",
+		"<if test=\"bizNo != null\"> and biz_no =#{bizNo}</if>",
 		"order by create_time desc", "limit #{limit} offset #{offset}",
 		"</script>"
 	})
 	@ResultMap("com.rfchina.wallet.domain.mapper.WalletOrderMapper.BaseResultMap")
 	List<WalletOrder> selectByCondition(@Param("walletId") Long walletId,
 		@Param("fromTime") Date fromTime, @Param("toTime") Date toTime,
-		@Param("tradeType") Integer tradeType,
-		@Param("status") Integer status, @Param("limit") int limit, @Param("offset") int offset);
+		@Param("tradeType") Integer tradeType, @Param("status") Integer status,
+		@Param("orderNo") String orderNo, @Param("bizNo") String bizNo, @Param("limit") int limit,
+		@Param("offset") int offset);
 
 	@Select({
 		"<script>",
@@ -136,12 +139,14 @@ public interface WalletOrderExtDao extends WalletOrderMapper {
 		"and create_time <![CDATA[<=]]> #{toTime}", "</if>",
 		"<if test=\"tradeType != null\"> and type =#{tradeType}</if>",
 		"<if test=\"status != null\"> and status =#{status}</if>",
+		"<if test=\"orderNo != null\"> and order_no =#{orderNo}</if>",
+		"<if test=\"bizNo != null\"> and biz_no =#{bizNo}</if>",
 		"</script>"
 	})
 	int selectCountByCondition(@Param("walletId") Long walletId,
 		@Param("fromTime") Date fromTime, @Param("toTime") Date toTime,
-		@Param("tradeType") Integer tradeType,
-		@Param("status") Integer status);
+		@Param("tradeType") Integer tradeType, @Param("status") Integer status,
+		@Param("orderNo") String orderNo, @Param("bizNo") String bizNo);
 
 
 }
