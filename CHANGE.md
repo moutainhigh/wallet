@@ -6,7 +6,7 @@ jenkins job: platform-rfwallet-super-server-test
 ```
 ## 1.1.0_b9_2019112718_Beta
 ### [变动说明]
--  出佣整合到新架构
+- 出佣整合到新架构
 
 ## 1.1.0_b1_2019111917_Beta
 ### [变动说明]

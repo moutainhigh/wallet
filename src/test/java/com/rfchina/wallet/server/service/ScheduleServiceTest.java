@@ -10,14 +10,18 @@ public class ScheduleServiceTest extends SpringBaseTest {
 	private ScheduleService scheduleService;
 
 	@Test
-	public void quartzUpdate() {
+	public void quartzUpdateJunior() {
 		scheduleService.quartzUpdateJunior(100);
+	}
+
+	@Test
+	public void quartzUpdateSenior() {
 		scheduleService.quartzUpdateSenior(100);
 	}
 
 	@Test
 	public void quartzPay() {
-//		scheduleService.(100);
+		scheduleService.doTunnelFinanceJob("");
 	}
 
 	@Test

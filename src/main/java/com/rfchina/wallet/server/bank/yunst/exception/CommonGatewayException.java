@@ -18,7 +18,7 @@ public class CommonGatewayException extends WalletResponseException {
 	private String bankErrMsg;
 
 	public CommonGatewayException(WalletResponseCode.EnumWalletResponseCode code, String bankErrCode,String bankErrMsg) {
-		super(code.getValue(), WalletResponseCode.getMsg(code), null);
+		super(code.getValue(), bankErrMsg, null);
 		this.bankErrMsg = bankErrMsg;
 		this.bankErrCode = bankErrCode;
 	}

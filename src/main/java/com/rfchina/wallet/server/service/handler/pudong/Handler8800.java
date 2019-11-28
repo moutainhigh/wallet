@@ -235,7 +235,7 @@ public class Handler8800 extends EBankHandler {
 			.masterId(configService.getMasterId())
 			.packetId(genPkgId())
 			.acctNo(configService.getAcctNo())
-			.beginDate(DateUtil.formatDate(firstTrans.getAuditTime(), "yyyyMMdd"))
+			.beginDate(DateUtil.formatDate(firstTrans.getCreateTime(), "yyyyMMdd"))
 			.endDate(DateUtil.formatDate(firstTrans.getAuditTime(), "yyyyMMdd"))
 			.acceptNo(firstTrans.getHostAcceptNo())
 			.build();
@@ -370,7 +370,7 @@ public class Handler8800 extends EBankHandler {
 			.packetId(genPkgId())
 			.authMasterID(configService.getAuditMasterId())
 			.beginDate(DateUtil.formatDate(firstTrans.getLanchTime(), DateUtil.SHORT_DTAE_PATTERN))
-			.endDate(DateUtil.formatDate(firstTrans.getLanchTime(), DateUtil.SHORT_DTAE_PATTERN))
+			.endDate(DateUtil.formatDate(new Date(), DateUtil.SHORT_DTAE_PATTERN))
 			.acceptNo(firstTrans.getAcceptNo())
 			.build();
 		EBankQuery48RespBody resp;

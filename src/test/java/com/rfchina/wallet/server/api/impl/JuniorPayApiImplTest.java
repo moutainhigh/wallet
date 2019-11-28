@@ -55,6 +55,7 @@ public class JuniorPayApiImplTest extends SpringApiTest {
 
 	@Test
 	public void p03UpdateStatus(){
-		scheduleApi.quartzUpdate();
+		scheduleApi.quartzUpdateJunior();
 	}
+
 }

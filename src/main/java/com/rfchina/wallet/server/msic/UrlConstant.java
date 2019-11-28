@@ -85,6 +85,7 @@ public class UrlConstant {
 	 * 定时更新支付状态
 	 */
 	public static final String QUARTZ_UPDATE_PAY_STATUS = VERSION + "/schedule/quartz_update_pay_status";
+	public static final String QUARTZ_UPDATE_SENIOR_STATUS = VERSION + "/schedule/quartz_update_senior_status";
 
 	/**
 	 * 定时支付

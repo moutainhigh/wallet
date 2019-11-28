@@ -676,9 +676,17 @@ public class SeniorPayService {
 	}
 
 	@PostMq(routingKey = MqConstant.ORDER_STATUS_CHANGE)
-	public WalletOrder updateOrderStatus(String orderNo) {
-
+	public WalletOrder updateOrderStatusWithMq(String orderNo) {
 		WalletOrder order = verifyService.checkOrder(orderNo, OrderStatus.WAITTING.getValue());
+		return updateOrderStatus(order);
+	}
+
+	@PostMq(routingKey = MqConstant.ORDER_STATUS_CHANGE)
+	public WalletOrder updateOrderStatusWithMq(WalletOrder order) {
+		return updateOrderStatus(order);
+	}
+
+	public WalletOrder updateOrderStatus(WalletOrder order) {
 		EBankHandler handler = handlerHelper.selectByTunnelType(order.getTunnelType());
 		List<Triple<WalletOrder, WalletFinance, GatewayTrans>> triples = handler
 			.updateOrderStatus(Arrays.asList(order));
@@ -700,6 +708,5 @@ public class SeniorPayService {
 
 		return triples.get(0).x;
 	}
-
 
 }

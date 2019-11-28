@@ -21,6 +21,7 @@ import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletCompany;
 import com.rfchina.wallet.domain.model.WalletFinance;
 import com.rfchina.wallet.domain.model.WalletOrder;
+import com.rfchina.wallet.domain.model.WalletOrderCriteria;
 import com.rfchina.wallet.domain.model.WalletPerson;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
@@ -53,8 +54,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.session.RowBounds;
 import org.eclipse.jetty.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -308,15 +311,26 @@ public class ScheduleService {
 	 */
 	public void quartzUpdateSenior(Integer batchSize) {
 
-		List<String> orderNos = walletOrderDao.selectUnFinishOrderNo(batchSize);
-
 		log.info("quartz: 开始更新支付状态[高级钱包]");
 
-		for (String orderNo : orderNos) {
+		List<Byte> types = Stream.of(OrderType.values())
+			.filter(t -> t.getValue().byteValue() != OrderType.FINANCE.getValue().byteValue())
+			.map(t -> t.getValue())
+			.collect(Collectors.toList());
+
+		WalletOrderCriteria example = new WalletOrderCriteria();
+		example.setOrderByClause("id asc");
+		example.createCriteria()
+			.andProgressEqualTo(GwProgress.HAS_SEND.getValue())
+			.andStatusEqualTo(OrderStatus.WAITTING.getValue())
+			.andTypeIn(types);
+
+		List<WalletOrder> walletOrders = walletOrderDao
+			.selectByExampleWithRowbounds(example, new RowBounds(0, batchSize));
+		for (WalletOrder walletOrder : walletOrders) {
 			try {
-				walletOrderDao.incTryTimes(orderNo);
-				log.info("开始更新高级订单 [{}]", orderNo);
-				seniorPayService.updateOrderStatus(orderNo);
+				walletOrder.setCurrTryTimes(walletOrder.getCurrTryTimes() + 1);
+				seniorPayService.updateOrderStatusWithMq(walletOrder);
 			} catch (Exception e) {
 				log.error("定时更新支付状态, 异常！", e);
 			}

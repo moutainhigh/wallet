@@ -4,7 +4,8 @@ public interface ScheduleApi {
 	/**
 	 * 定时更新支付状态
 	 */
-	void quartzUpdate();
+	void quartzUpdateJunior();
+	void quartzUpdateSenior();
 
 	/**
 	 * 定时支付

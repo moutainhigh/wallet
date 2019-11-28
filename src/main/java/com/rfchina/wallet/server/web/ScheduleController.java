@@ -20,14 +20,29 @@ public class ScheduleController {
 
 	@RequestMapping(value = UrlConstant.QUARTZ_UPDATE_PAY_STATUS, method = RequestMethod.POST)
 	@FuScheduleTaskReporter
-	public String quartzUpdatePayStatus(
+	public String quartzUpdateJunior(
 		@RequestParam("schedule_id") String scheduleId,
 		@RequestParam("timestamp") String timestamp,
 		@RequestParam("sign") String sign) {
 
 		log.info("scheduler: 开始执行订单状态更新任务");
 
-		scheduleApi.quartzUpdate();
+		scheduleApi.quartzUpdateJunior();
+
+		log.info("scheduler: 完成执行订单状态更新任务");
+		return "success";
+	}
+
+	@RequestMapping(value = UrlConstant.QUARTZ_UPDATE_SENIOR_STATUS, method = RequestMethod.POST)
+	@FuScheduleTaskReporter
+	public String quartzUpdateSenior(
+		@RequestParam("schedule_id") String scheduleId,
+		@RequestParam("timestamp") String timestamp,
+		@RequestParam("sign") String sign) {
+
+		log.info("scheduler: 开始执行订单状态更新任务");
+
+		scheduleApi.quartzUpdateJunior();
 
 		log.info("scheduler: 完成执行订单状态更新任务");
 		return "success";

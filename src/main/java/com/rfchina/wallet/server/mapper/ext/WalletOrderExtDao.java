@@ -60,17 +60,7 @@ public interface WalletOrderExtDao extends WalletOrderMapper {
 	@ResultMap("com.rfchina.wallet.domain.mapper.WalletOrderMapper.BaseResultMap")
 	List<WalletOrder> selectByBatchNo(@Param("batchNo") String batchNo);
 
-	/**
-	 * 查询已提交未结束的
-	 */
-	@Select({
-		"select order_no ",
-		"from rf_wallet_order",
-		"where progress = 2 and status = 2",
-		"order by batch_no asc limit #{batchSize}"
-	})
-	@ResultMap("com.rfchina.wallet.domain.mapper.WalletOrderMapper.BaseResultMap")
-	List<String> selectUnFinishOrderNo(@Param("batchSize") Integer batchSize);
+
 
 	/**
 	 * 更新尝试次数

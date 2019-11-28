@@ -44,7 +44,7 @@ public class ScheduleApiImpl implements ScheduleApi {
 
 	@Log
 	@Override
-	public void quartzUpdate() {
+	public void quartzUpdateJunior() {
 
 		String lockName = "quartzUpdateJunior";
 		lockDone(lockName, 900, (date) -> {
@@ -54,8 +54,13 @@ public class ScheduleApiImpl implements ScheduleApi {
 				log.error("", e);
 			}
 		});
+	}
 
-		lockName = "quartzUpdateSenior";
+	@Log
+	@Override
+	public void quartzUpdateSenior() {
+
+		String lockName = "quartzUpdateSenior";
 		lockDone(lockName, 900, (date) -> {
 			try {
 				scheduleService.quartzUpdateSenior(configService.getBatchUpdateSize());
