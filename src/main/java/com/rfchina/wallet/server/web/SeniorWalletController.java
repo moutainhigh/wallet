@@ -218,19 +218,22 @@ public class SeniorWalletController {
 	@PostMapping(UrlConstant.WALLET_SENIOR_ORDER_DETAIL)
 	public ResponseValue<Pagination<WalletOrder>> seniorOrderDetail(
 		@RequestParam("access_token") String accessToken,
-		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+		@ApiParam(value = "钱包id", required = false) @RequestParam(value = "wallet_id", required = false) Long walletId,
 		@ApiParam(value = "交易时间开始", required = false) @RequestParam(value = "from_time", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd")
 			Date fromTime,
 		@ApiParam(value = "交易时间结束", required = false) @RequestParam(value = "to_time", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd")
 			Date toTime,
-		@ApiParam(value = "交易类型", required = false) @RequestParam(value = "trade_type", required = false) 	Integer tradeType,
-		@ApiParam(value = "状态", required = false) @RequestParam(value = "status", required = false) 	Integer status,
+		@ApiParam(value = "交易类型", required = false) @RequestParam(value = "trade_type", required = false) Integer tradeType,
+		@ApiParam(value = "状态", required = false) @RequestParam(value = "status", required = false) Integer status,
+		@ApiParam(value = "钱包订单号", required = false) @RequestParam(value = "order_no", required = false) String orderNo,
+		@ApiParam(value = "关联订单号", required = false) @RequestParam(value = "biz_no", required = false) String bizNo,
 		@ApiParam(value = "每页限制", required = false) @RequestParam(value = "limit") int limit,
 		@ApiParam(value = "起始页偏移量", required = false) @RequestParam(value = "offset") int offset,
 		@ApiParam(value = "是否统计", required = false) @RequestParam(value = "stat", required = false) Boolean stat) {
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
 			seniorWalletApi.queryWalletOrderDetail(accessToken, walletId, fromTime,
-				toTime, tradeType, status, limit, offset, stat));
+				toTime, tradeType, status, orderNo, bizNo, limit, offset, stat));
 	}
+
 }
