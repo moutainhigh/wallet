@@ -53,7 +53,7 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	 */
 	@Test
 	public void updateOrderStatus() {
-		String orderNo = "WO20191111418392075";
+		String orderNo = "WO20191128502973592";
 		seniorPayService.updateOrderStatusWithMq(orderNo);
 	}
 

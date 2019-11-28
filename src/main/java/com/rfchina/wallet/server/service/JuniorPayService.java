@@ -144,7 +144,7 @@ public class JuniorPayService {
 			.selectByTunnelType(walletOrders.get(0).getTunnelType());
 		try {
 			for (WalletOrder walletOrder : walletOrders) {
-				log.info("开始更新初级订单 [{}]", walletOrder.getId());
+				log.info("开始更新初级订单 [{}]", walletOrder.getOrderNo());
 				walletOrderDao.incTryTimes(walletOrder.getOrderNo());
 			}
 			return handler.updateOrderStatus(walletOrders);

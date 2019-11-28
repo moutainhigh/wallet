@@ -49,6 +49,7 @@ import com.rfchina.wallet.server.service.handler.common.EBankHandler;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -309,7 +310,7 @@ public class ScheduleService {
 	/**
 	 * 定时更新支付状态
 	 */
-	public void quartzUpdateSenior(Integer batchSize) {
+	public void quartzUpdateSenior(Integer batchSize, Integer periodSecord) {
 
 		log.info("quartz: 开始更新支付状态[高级钱包]");
 
@@ -325,16 +326,24 @@ public class ScheduleService {
 			.andStatusEqualTo(OrderStatus.WAITTING.getValue())
 			.andTypeIn(types);
 
-		List<WalletOrder> walletOrders = walletOrderDao
-			.selectByExampleWithRowbounds(example, new RowBounds(0, batchSize));
-		for (WalletOrder walletOrder : walletOrders) {
-			try {
-				walletOrder.setCurrTryTimes(walletOrder.getCurrTryTimes() + 1);
-				seniorPayService.updateOrderStatusWithMq(walletOrder);
-			} catch (Exception e) {
-				log.error("定时更新支付状态, 异常！", e);
+		List<WalletOrder> walletOrders = new ArrayList<>();
+		long beginTime = System.currentTimeMillis();
+		int persistSecond = 0;
+		do {
+
+			walletOrders = walletOrderDao
+				.selectByExampleWithRowbounds(example, new RowBounds(0, batchSize));
+			for (WalletOrder walletOrder : walletOrders) {
+				try {
+					walletOrder.setCurrTryTimes(walletOrder.getCurrTryTimes() + 1);
+					log.info("开始更新高级订单 [{}]", walletOrder.getOrderNo());
+					seniorPayService.updateOrderStatusWithMq(walletOrder);
+				} catch (Exception e) {
+					log.error("定时更新支付状态, 异常！", e);
+				}
 			}
-		}
+			persistSecond = (int) ((System.currentTimeMillis() - beginTime) / 1000);
+		} while (!walletOrders.isEmpty() || persistSecond / 4 < periodSecord / 5);
 		log.info("quartz: 结束更新支付状态[高级钱包]");
 	}
 

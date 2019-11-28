@@ -42,7 +42,7 @@ public class ScheduleController {
 
 		log.info("scheduler: 开始执行订单状态更新任务");
 
-		scheduleApi.quartzUpdateJunior();
+		scheduleApi.quartzUpdateSenior();
 
 		log.info("scheduler: 完成执行订单状态更新任务");
 		return "success";

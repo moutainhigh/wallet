@@ -61,9 +61,11 @@ public class ScheduleApiImpl implements ScheduleApi {
 	public void quartzUpdateSenior() {
 
 		String lockName = "quartzUpdateSenior";
-		lockDone(lockName, 900, (date) -> {
+		int periodSecord = 900;
+		lockDone(lockName, periodSecord, (date) -> {
 			try {
-				scheduleService.quartzUpdateSenior(configService.getBatchUpdateSize());
+				scheduleService
+					.quartzUpdateSenior(configService.getBatchUpdateSize(), periodSecord);
 			} catch (Exception e) {
 				log.error("", e);
 			}
