@@ -1,18 +1,19 @@
 package com.rfchina.wallet.server.service.handler;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import com.rfchina.platform.common.misc.Tuple;
-import com.rfchina.wallet.domain.model.GatewayTrans;
-import com.rfchina.wallet.domain.model.WalletApply;
+import com.rfchina.wallet.domain.model.WalletFinance;
+import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.server.SpringBaseTest;
 import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
-import com.rfchina.wallet.server.mapper.ext.WalletApplyExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletFinanceExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import com.rfchina.wallet.server.model.ext.PayTuple;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.service.handler.pudong.Handler8800;
 import java.util.Arrays;
-import java.util.List;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -22,16 +23,20 @@ public class Handler8800Test extends SpringBaseTest {
 	private Handler8800 handler8800;
 
 	@Autowired
-	private WalletApplyExtDao walletApplyDao;
+	private WalletOrderExtDao walletOrderDao;
+
+	@Autowired
+	private WalletFinanceExtDao walletFinanceDao;
 
 
 	@Test
 	public void p0101Pay() throws Exception {
-		WalletApply walletApply = walletApplyDao.selectByPrimaryKey(202L);
+		WalletOrder walletOrder = walletOrderDao.selectByPrimaryKey(202L);
+		WalletFinance walletFinance = walletFinanceDao.selectByOrderId(walletOrder.getId());
 
-		Tuple<GatewayMethod, PayTuple> tuple = handler8800.transfer(Arrays.asList(walletApply));
+		Tuple<GatewayMethod, PayTuple> tuple = handler8800
+			.finance(Arrays.asList(new Tuple<>(walletOrder, walletFinance)));
 		assertNotNull(tuple);
-		assertNotNull(tuple.right);
 		assertNotNull(tuple.right.getAcceptNo());
 
 	}

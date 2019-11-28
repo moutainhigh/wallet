@@ -1,5 +1,6 @@
 package com.rfchina.wallet.server.api.impl;
 
+import com.rfchina.biztools.limiter.setting.RateSetting;
 import com.rfchina.passport.token.EnumTokenType;
 import com.rfchina.passport.token.TokenVerify;
 import com.rfchina.platform.common.annotation.Log;
@@ -22,7 +23,7 @@ public class JuniorPayApiImpl implements JuniorPayApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public PayInResp payIn(String accessToken, List<PayInReq> payInReqs) {
+	public PayInResp payIn(String accessToken, List<PayInReq> payInReqs, RateSetting rateSetting) {
 		return juniorPayService.payIn(payInReqs);
 	}
 

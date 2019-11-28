@@ -155,11 +155,11 @@ public class ScheduleService {
 				// 更新交易记录
 				GatewayTrans gatewayTrans = gatewayTransService
 					.selOrCrtTrans(walletOrder, walletFinance);
+				gatewayTrans.setStage(payInResp.getStage());
 				gatewayTrans.setAcceptNo(payInResp.getAcceptNo());
 				gatewayTrans.setPacketId(payInResp.getPacketId());
 				gatewayTrans.setElecChequeNo(
-					payInResp.getElecMap()
-						.get(gatewayTrans.getWalletApplyId().toString()));
+					payInResp.getElecMap().get(walletOrder.getId().toString()));
 				gatewayTrans.setRefMethod(method.getValue());
 				gatewayTrans.setLanchTime(new Date());
 				gatewayTransService.updateTrans(gatewayTrans);
@@ -196,8 +196,7 @@ public class ScheduleService {
 				walletOrder.setProgress(GwProgress.HAS_RESP.getValue());
 			} else {
 				// 人工处理
-				walletFinance.setSubStatus(FinanceSubStatus.WAIT_DEAL.getValue());
-				walletFinanceDao.updateByPrimaryKeySelective(walletFinance);
+				walletOrder.setSubStatus(FinanceSubStatus.WAIT_DEAL.getValue());
 			}
 			walletOrderDao.updateByPrimaryKeySelective(walletOrder);
 			// 记录网关信息
@@ -228,7 +227,7 @@ public class ScheduleService {
 			.payeeBankInfo(null)
 			.elecChequeNo(gatewayTrans.getElecChequeNo())
 			.note(walletOrder.getNote())
-			.remark(walletFinance.getRemark())
+			.remark(walletOrder.getRemark())
 			.amount(walletOrder.getAmount())
 			.status(walletOrder.getStatus())
 			.errCode(walletOrder.getTunnelErrCode())
@@ -290,7 +289,7 @@ public class ScheduleService {
 		log.info("quartz: 开始更新支付状态[银企直连]");
 
 		List<String> batchNos = walletOrderDao
-			.selectUnFinishBatchNo(TunnelType.YUNST.getValue(), batchSize);
+			.selectUnFinishBatchNo(OrderType.FINANCE.getValue(), batchSize);
 
 		for (String batchNo : batchNos) {
 

@@ -1,8 +1,9 @@
-package com.rfchina.wallet.server;
+package com.rfchina.wallet.server.web;
 
 import com.alibaba.fastjson.JSONObject;
 import com.rfchina.platform.common.security.SecurityCoder;
 import com.rfchina.platform.common.utils.SignUtil;
+import com.rfchina.wallet.server.WalletBaseTest;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import io.swagger.annotations.ApiParam;
 import java.util.HashMap;

@@ -47,15 +47,15 @@ public interface WalletOrderExtDao extends WalletOrderMapper {
 		"where type = #{orderType} and progress = 2 and status = 2",
 		"limit #{batchSize}"
 	})
-	List<String> selectUnFinishBatchNo(@Param("orderType") Byte orderType, Integer batchSize);
+	List<String> selectUnFinishBatchNo(@Param("orderType") Byte orderType,
+		@Param("batchSize") Integer batchSize);
 
 	/**
 	 * 查询指定状态的批次申请单
 	 */
 	@Select({
 		"select * from rf_wallet_order",
-		"where batch_no = #{batchNo} ",
-		"limit 1"
+		"where batch_no = #{batchNo} "
 	})
 	@ResultMap("com.rfchina.wallet.domain.mapper.WalletOrderMapper.BaseResultMap")
 	List<WalletOrder> selectByBatchNo(@Param("batchNo") String batchNo);
@@ -114,7 +114,7 @@ public interface WalletOrderExtDao extends WalletOrderMapper {
 	 */
 	@Update({"update rf_wallet_order"
 		, "set locked = #{destLocked}"
-		, "where id = #{orderId} and locked = #{orgLocked}"
+		, "where batch_no = #{batchNo} and locked = #{orgLocked}"
 	})
 	int updateBatchLock(@Param("batchNo") String batchNo, @Param("orgLocked") Byte orgLocked,
 		@Param("destLocked") Byte destLocked);

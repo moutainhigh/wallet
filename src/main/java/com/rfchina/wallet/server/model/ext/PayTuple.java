@@ -20,4 +20,7 @@ public class PayTuple {
 	@ApiModelProperty(value = "电子凭证号", hidden = true)
 	private Map<String, String> elecMap;
 
+	@ApiModelProperty(value = "银行处理阶段", hidden = true)
+	private String stage;
+
 }
