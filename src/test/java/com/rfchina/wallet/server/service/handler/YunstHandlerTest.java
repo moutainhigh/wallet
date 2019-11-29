@@ -44,7 +44,7 @@ public class YunstHandlerTest extends SpringBaseTest {
 
 	@Test
 	public void createMember() throws Exception {
-		Tuple<Long, Byte> bizUserTuple = genBizUser(null);
+		Tuple<Long, Byte> bizUserTuple = genBizUser(3);
 		Tuple<YunstCreateMemberResult, YunstBaseHandler.YunstMemberType> member = yunstUserHandler.createMember(bizUserTuple.left, bizUserTuple.right);
 
 		assertNotNull(member);
