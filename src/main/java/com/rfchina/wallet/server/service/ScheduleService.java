@@ -296,13 +296,16 @@ public class ScheduleService {
 			.selectUnFinishBatchNo(OrderType.FINANCE.getValue(), batchSize);
 
 		for (String batchNo : batchNos) {
-
-			List<Triple<WalletOrder, WalletFinance, GatewayTrans>> triples = juniorPayService
-				.updateOrderStatus(batchNo);
-			List<PayStatusResp> resps = triples.stream()
-				.map(triple -> getPayStatusMQ(triple.x, triple.y, triple.z))
-				.collect(Collectors.toList());
-			juniorPayService.sendMQ(resps);
+			try {
+				List<Triple<WalletOrder, WalletFinance, GatewayTrans>> triples = juniorPayService
+					.updateOrderStatus(batchNo);
+				List<PayStatusResp> resps = triples.stream()
+					.map(triple -> getPayStatusMQ(triple.x, triple.y, triple.z))
+					.collect(Collectors.toList());
+				juniorPayService.sendMQ(resps);
+			} catch (Exception e) {
+				log.error("", e);
+			}
 		}
 		log.info("quartz: 结束更新支付状态[银企直连]");
 	}

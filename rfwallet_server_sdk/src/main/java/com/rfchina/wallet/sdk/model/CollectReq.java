@@ -34,8 +34,6 @@ public class CollectReq  {
     @ApiModelProperty("附言")
     private String note ;
 
-    @ApiModelProperty("钱包用户登陆态ID")
-    private Long payerWalletId ;
 
     @ApiModelProperty("收款列表")
     private List<Reciever> recievers ;

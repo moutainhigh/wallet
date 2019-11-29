@@ -16,6 +16,8 @@ public class Balance  {
     @ApiModelProperty("渠道出资额(单位分)")
     private Long amount ;
 
+    @ApiModelProperty("钱包用户登陆态ID")
+    private Long payerWalletId ;
 
 }
 
