@@ -212,6 +212,9 @@ public class SeniorPayService {
 
 		// 检查钱包
 		Wallet payerWallet = verifyService.checkSeniorWallet(walletId);
+		if (payerWallet.getWalletBalance().longValue() < amount) {
+			throw new WalletResponseException(EnumWalletResponseCode.WALLET_AMOUNT_NOT_ENOUGH);
+		}
 		// 检查银行卡状态
 		verifyService.checkCard(walletCard, payerWallet);
 
@@ -273,9 +276,17 @@ public class SeniorPayService {
 	public WalletCollectResp collect(CollectReq req, String jumpUrl, String customerIp) {
 
 		// 定义付款人
-		Long payerWalletId = (req.getPayerWalletId() != null) ? req.getPayerWalletId()
+		Balance balancePay = req.getWalletPayMethod().getBalance();
+		Long payerWalletId = (balancePay != null) ? balancePay.getPayerWalletId()
 			: configService.getAnonyPayerWalletId();
-		verifyService.checkSeniorWallet(payerWalletId);
+		Wallet payerWallet = verifyService.checkSeniorWallet(payerWalletId);
+		// 检查钱包余额
+		if(balancePay != null){
+			if (payerWallet.getWalletBalance().longValue() < balancePay.getAmount()) {
+				throw new WalletResponseException(EnumWalletResponseCode.WALLET_AMOUNT_NOT_ENOUGH);
+			}
+		}
+
 
 		// 工单记录
 		String orderNo = IdGenerator.createBizId(PREFIX_COLLECT, 19, id -> {

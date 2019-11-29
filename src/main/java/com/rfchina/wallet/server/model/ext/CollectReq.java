@@ -17,8 +17,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CollectReq {
 
-	@ApiModelProperty(required = true, name = "wallet_id", value = "钱包用户登陆态ID")
-	private Long payerWalletId;
+
 
 	@ApiModelProperty(required = true, name = "biz_no", value = "业务凭证号(业务方定义唯一,最长32字节)", example = "123")
 	private String bizNo;
@@ -95,6 +94,8 @@ public class CollectReq {
 		@NoArgsConstructor
 		@AllArgsConstructor
 		public static class Balance {
+			@ApiModelProperty(required = true, name = "wallet_id", value = "钱包用户登陆态ID")
+			private Long payerWalletId;
 
 			@ApiModelProperty(value = "渠道出资额(单位分)")
 			private Long amount;
