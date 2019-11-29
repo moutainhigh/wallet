@@ -1151,6 +1151,7 @@ public class EnumWallet {
 	 * 企业信息审核状态
 	 */
 	public enum YunstCompanyInfoAuditStatus implements Valuable<Long> {
+		WAITING(1L, "待审核"),
 		SUCCESS( 2L, "审核通过"),
 		FAIL(3L, "审核失败");
 
