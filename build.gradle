@@ -72,7 +72,7 @@ dependencies {
     // 日志工具
     compile('org.slf4j:jcl-over-slf4j:1.7.21')
     compile('com.rfchina.swagger:swagger-starter:1.0.0-SNAPSHOT')
-    compile('com.rfchina:rfchina-commons-zipkin:1.1.4-SNAPSHOT')
+    compile('com.rfchina:rfchina-commons-zipkin:1.1.5-SNAPSHOT')
 
     // 本地依赖
     compile('com.rfchina:rfchina-commons-utils:2.3.7')
@@ -82,7 +82,7 @@ dependencies {
     compile('com.rfchina.biztool:spring-mq:1.0.1')
     compile 'org.tas:post-core:1.0.0'
     compile 'com.rfchina.biztool:redislock:1.0.2'
-    compile 'com.rfchina.biztool:xdiamond-dynamic:1.0.0'
+    compile 'com.rfchina.biztool:xdiamond-dynamic:1.0.1'
     compile 'com.rfchina.biztool:mapper:1.0.0-SNAPSHOT'
     compile 'com.rfchina.biztool:fileserver:1.0.3-SNAPSHOT'
     compile 'com.rfchina.biztool:limiter:1.0.3-SNAPSHOT'

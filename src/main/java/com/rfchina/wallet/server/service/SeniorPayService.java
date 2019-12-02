@@ -1,6 +1,7 @@
 package com.rfchina.wallet.server.service;
 
 import com.rfchina.biztools.generate.IdGenerator;
+import com.rfchina.biztools.lock.SimpleExclusiveLock;
 import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.platform.common.misc.Triple;
 import com.rfchina.platform.common.utils.EnumUtil;
@@ -60,6 +61,7 @@ import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
 import com.rfchina.wallet.server.msic.EnumWallet.DirtyType;
 import com.rfchina.wallet.server.msic.EnumWallet.GwProgress;
 import com.rfchina.wallet.server.msic.EnumWallet.OrderStatus;
+import com.rfchina.wallet.server.msic.LockConstant;
 import com.rfchina.wallet.server.service.handler.common.EBankHandler;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBizHandler;
@@ -141,6 +143,9 @@ public class SeniorPayService {
 	@Autowired
 	private WalletConsumeExtDao walletConsumeDao;
 
+	@Autowired
+	private SimpleExclusiveLock lock;
+
 
 	/**
 	 * 充值
@@ -168,40 +173,45 @@ public class SeniorPayService {
 		WalletPayMethod payMethod = new WalletPayMethod();
 		payMethod.setBankCard(bankCard);
 
-		WalletOrder rechargeOrder = WalletOrder.builder()
-			.orderNo(orderNo)
-			.batchNo(batchNo)
-			.bizNo(IdGenerator.createBizId(PREFIX_RECHARGE, 19, (id) -> true))
-			.walletId(walletId)
-			.type(OrderType.RECHARGE.getValue())
-			.payMethod(payMethod.getMethods())
-			.amount(amount)
-			.progress(GwProgress.WAIT_SEND.getValue())
-			.status(OrderStatus.WAITTING.getValue())
-			.tunnelType(TunnelType.YUNST.getValue())
-			.note("钱包充值")
-			.industryCode(INDUSTRY_CODE)
-			.industryName(INDUSTRY_NAME)
-			.createTime(new Date())
-			.build();
-		walletOrderDao.insertSelective(rechargeOrder);
+		try {
+			lock.acquireLock(LockConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);
+			WalletOrder rechargeOrder = WalletOrder.builder()
+				.orderNo(orderNo)
+				.batchNo(batchNo)
+				.bizNo(IdGenerator.createBizId(PREFIX_RECHARGE, 19, (id) -> true))
+				.walletId(walletId)
+				.type(OrderType.RECHARGE.getValue())
+				.payMethod(payMethod.getMethods())
+				.amount(amount)
+				.progress(GwProgress.WAIT_SEND.getValue())
+				.status(OrderStatus.WAITTING.getValue())
+				.tunnelType(TunnelType.YUNST.getValue())
+				.note("钱包充值")
+				.industryCode(INDUSTRY_CODE)
+				.industryName(INDUSTRY_NAME)
+				.createTime(new Date())
+				.build();
+			walletOrderDao.insertSelective(rechargeOrder);
 
-		// 充值记录
-		WalletRecharge recharge = WalletRecharge.builder()
-			.orderId(rechargeOrder.getId())
-			.validateType(BizValidateType.SMS.getValue())
-			.createTime(new Date())
-			.build();
-		walletRechargeDao.insertSelective(recharge);
-		savePayMethod(recharge.getId(), OrderType.RECHARGE.getValue(), payMethod);
+			// 充值记录
+			WalletRecharge recharge = WalletRecharge.builder()
+				.orderId(rechargeOrder.getId())
+				.validateType(BizValidateType.SMS.getValue())
+				.createTime(new Date())
+				.build();
+			walletRechargeDao.insertSelective(recharge);
+			savePayMethod(recharge.getId(), OrderType.RECHARGE.getValue(), payMethod);
 
-		// 支付人
-		WalletTunnel payer = walletTunnelDao
-			.selectByWalletId(walletId, rechargeOrder.getTunnelType());
+			// 支付人
+			WalletTunnel payer = walletTunnelDao
+				.selectByWalletId(walletId, rechargeOrder.getTunnelType());
 
-		// 充值
-		EBankHandler handler = handlerHelper.selectByTunnelType(rechargeOrder.getTunnelType());
-		return handler.recharge(rechargeOrder, recharge, payer);
+			// 充值
+			EBankHandler handler = handlerHelper.selectByTunnelType(rechargeOrder.getTunnelType());
+			return handler.recharge(rechargeOrder, recharge, payer);
+		} finally {
+			lock.unLock(LockConstant.LOCK_PAY_ORDER + orderNo);
+		}
 	}
 
 	/**
@@ -226,48 +236,53 @@ public class SeniorPayService {
 			return walletOrderDao.selectCountByOrderNo(id) == 0;
 		});
 
-		WalletOrder withdrawOrder = WalletOrder.builder()
-			.orderNo(orderNo)
-			.batchNo(batchNo)
-			.bizNo(IdGenerator.createBizId(PREFIX_WITHDRAW, 19, (id) -> true))
-			.walletId(walletId)
-			.type(OrderType.WITHDRAWAL.getValue())
-			.payMethod(ChannelType.BANKCARD.getValue())
-			.amount(amount)
-			.progress(GwProgress.WAIT_SEND.getValue())
-			.status(OrderStatus.WAITTING.getValue())
-			.tunnelType(TunnelType.YUNST.getValue())
-			.note("钱包提现")
-			.industryCode(INDUSTRY_CODE)
-			.industryName(INDUSTRY_NAME)
-			.createTime(new Date())
-			.build();
-		walletOrderDao.insertSelective(withdrawOrder);
+		try {
+			lock.acquireLock(LockConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);
+			WalletOrder withdrawOrder = WalletOrder.builder()
+				.orderNo(orderNo)
+				.batchNo(batchNo)
+				.bizNo(IdGenerator.createBizId(PREFIX_WITHDRAW, 19, (id) -> true))
+				.walletId(walletId)
+				.type(OrderType.WITHDRAWAL.getValue())
+				.payMethod(ChannelType.BANKCARD.getValue())
+				.amount(amount)
+				.progress(GwProgress.WAIT_SEND.getValue())
+				.status(OrderStatus.WAITTING.getValue())
+				.tunnelType(TunnelType.YUNST.getValue())
+				.note("钱包提现")
+				.industryCode(INDUSTRY_CODE)
+				.industryName(INDUSTRY_NAME)
+				.createTime(new Date())
+				.build();
+			walletOrderDao.insertSelective(withdrawOrder);
 
-		// 提现记录
-		WalletWithdraw withdraw = WalletWithdraw.builder()
-			.orderId(withdrawOrder.getId())
-			.cardId(walletCard.getId())
-			.cardPro(walletCard.getIsPublic().intValue() == 1 ? CardPro.COMPANY.getValue()
-				: CardPro.PERSON.getValue())
-			.bankAccount(walletCard.getBankAccount())
-			.validateType(BizValidateType.PASSWORD.getValue())
-			.createTime(new Date())
-			.build();
-		walletWithdrawDao.insertSelective(withdraw);
+			// 提现记录
+			WalletWithdraw withdraw = WalletWithdraw.builder()
+				.orderId(withdrawOrder.getId())
+				.cardId(walletCard.getId())
+				.cardPro(walletCard.getIsPublic().intValue() == 1 ? CardPro.COMPANY.getValue()
+					: CardPro.PERSON.getValue())
+				.bankAccount(walletCard.getBankAccount())
+				.validateType(BizValidateType.PASSWORD.getValue())
+				.createTime(new Date())
+				.build();
+			walletWithdrawDao.insertSelective(withdraw);
 
-		// 提现人
-		WalletTunnel payer = walletTunnelDao
-			.selectByWalletId(withdrawOrder.getWalletId(), withdrawOrder.getTunnelType());
-		// 充值
-		EBankHandler handler = handlerHelper.selectByTunnelType(withdrawOrder.getTunnelType());
-		WithdrawResp result = handler.withdraw(withdrawOrder, withdraw, payer);
+			// 提现人
+			WalletTunnel payer = walletTunnelDao
+				.selectByWalletId(withdrawOrder.getWalletId(), withdrawOrder.getTunnelType());
+			// 充值
+			EBankHandler handler = handlerHelper.selectByTunnelType(withdrawOrder.getTunnelType());
+			WithdrawResp result = handler.withdraw(withdrawOrder, withdraw, payer);
 
-		String signedParams = ((YunstBizHandler) handler)
-			.pwdGwConfirm(withdrawOrder, payer, jumpUrl, customerIp);
-		signedParams = configService.getYunstPwdConfirmUrl() + "?" + signedParams;
-		result.setSignedParams(signedParams);
-		return result;
+			String signedParams = ((YunstBizHandler) handler)
+				.pwdGwConfirm(withdrawOrder, payer, jumpUrl, customerIp);
+			signedParams = configService.getYunstPwdConfirmUrl() + "?" + signedParams;
+			result.setSignedParams(signedParams);
+			return result;
+		} finally {
+			lock.unLock(LockConstant.LOCK_PAY_ORDER + orderNo);
+		}
 	}
 
 	/**
@@ -281,12 +296,11 @@ public class SeniorPayService {
 			: configService.getAnonyPayerWalletId();
 		Wallet payerWallet = verifyService.checkSeniorWallet(payerWalletId);
 		// 检查钱包余额
-		if(balancePay != null){
+		if (balancePay != null) {
 			if (payerWallet.getWalletBalance().longValue() < balancePay.getAmount()) {
 				throw new WalletResponseException(EnumWalletResponseCode.WALLET_AMOUNT_NOT_ENOUGH);
 			}
 		}
-
 
 		// 工单记录
 		String orderNo = IdGenerator.createBizId(PREFIX_COLLECT, 19, id -> {
@@ -295,71 +309,79 @@ public class SeniorPayService {
 		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> {
 			return walletOrderDao.selectCountByBatchNo(id) == 0;
 		});
-		WalletOrder collectOrder = WalletOrder.builder()
-			.orderNo(orderNo)
-			.batchNo(batchNo)
-			.bizNo(req.getBizNo())
-			.walletId(payerWalletId)
-			.type(OrderType.COLLECT.getValue())
-			.payMethod(req.getWalletPayMethod().getMethods())
-			.amount(req.getAmount())
-			.progress(GwProgress.WAIT_SEND.getValue())
-			.status(OrderStatus.WAITTING.getValue())
-			.tunnelType(TunnelType.YUNST.getValue())
-			.note(req.getNote())
-			.industryCode(req.getIndustryCode())
-			.industryName(req.getIndustryName())
-			.createTime(new Date())
-			.build();
-		walletOrderDao.insertSelective(collectOrder);
 
-		// 生成代收单
-		Byte validateType =
-			req.getValidateType() != null ? req.getValidateType() : BizValidateType.SMS.getValue();
-		WalletCollect collect = WalletCollect.builder()
-			.orderId(collectOrder.getId())
-			.agentWalletId(configService.getAgentEntWalletId())
-			.refundLimit(req.getAmount())
-			.validateType(validateType)
-			.createTime(new Date())
-			.build();
-		walletCollectDao.insertSelective(collect);
-		savePayMethod(collect.getId(), OrderType.COLLECT.getValue(),
-			req.getWalletPayMethod());
+		try {
+			lock.acquireLock(LockConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);
 
-		// 生成清分记录
-		List<WalletCollectInfo> collectInfos = req.getRecievers().stream().map(reciever -> {
-			WalletCollectInfo clearInfo = WalletCollectInfo.builder()
-				.collectId(collect.getId())
-				.payeeWalletId(reciever.getWalletId())
-				.budgetAmount(reciever.getAmount())
-				.clearAmount(0L)
-				.refundAmount(0L)
+			WalletOrder collectOrder = WalletOrder.builder()
+				.orderNo(orderNo)
+				.batchNo(batchNo)
+				.bizNo(req.getBizNo())
+				.walletId(payerWalletId)
+				.type(OrderType.COLLECT.getValue())
+				.payMethod(req.getWalletPayMethod().getMethods())
+				.amount(req.getAmount())
+				.progress(GwProgress.WAIT_SEND.getValue())
+				.status(OrderStatus.WAITTING.getValue())
+				.tunnelType(TunnelType.YUNST.getValue())
+				.note(req.getNote())
+				.industryCode(req.getIndustryCode())
+				.industryName(req.getIndustryName())
 				.createTime(new Date())
 				.build();
-			walletCollectInfoDao.insertSelective(clearInfo);
-			return clearInfo;
-		}).collect(Collectors.toList());
+			walletOrderDao.insertSelective(collectOrder);
 
-		WalletTunnel payer = walletTunnelDao
-			.selectByWalletId(collectOrder.getWalletId(), collectOrder.getTunnelType());
+			// 生成代收单
+			Byte validateType =
+				req.getValidateType() != null ? req.getValidateType()
+					: BizValidateType.SMS.getValue();
+			WalletCollect collect = WalletCollect.builder()
+				.orderId(collectOrder.getId())
+				.agentWalletId(configService.getAgentEntWalletId())
+				.refundLimit(req.getAmount())
+				.validateType(validateType)
+				.createTime(new Date())
+				.build();
+			walletCollectDao.insertSelective(collect);
+			savePayMethod(collect.getId(), OrderType.COLLECT.getValue(),
+				req.getWalletPayMethod());
 
-		EBankHandler handler = handlerHelper.selectByTunnelType(collectOrder.getTunnelType());
-		WalletCollectResp result = handler.collect(collectOrder, collect, collectInfos, payer);
-		// 签名密码验证参数
-		if (collect.getValidateType().byteValue() == BizValidateType.PASSWORD.getValue()) {
-			String signedParams = ((YunstBizHandler) handler)
-				.pwdGwConfirm(collectOrder, payer, jumpUrl, customerIp);
-			signedParams = configService.getYunstPwdConfirmUrl() + "?" + signedParams;
-			result.setSignedParams(signedParams);
-		} else if (collect.getValidateType().byteValue() == BizValidateType.SMS.getValue()) {
-			String signedParams = ((YunstBizHandler) handler)
-				.smsGwConfirm(collectOrder, payer, customerIp);
-			signedParams = configService.getYunstPwdConfirmUrl() + "?" + signedParams;
-			result.setSignedParams(signedParams);
+			// 生成清分记录
+			List<WalletCollectInfo> collectInfos = req.getRecievers().stream().map(reciever -> {
+				WalletCollectInfo clearInfo = WalletCollectInfo.builder()
+					.collectId(collect.getId())
+					.payeeWalletId(reciever.getWalletId())
+					.budgetAmount(reciever.getAmount())
+					.clearAmount(0L)
+					.refundAmount(0L)
+					.createTime(new Date())
+					.build();
+				walletCollectInfoDao.insertSelective(clearInfo);
+				return clearInfo;
+			}).collect(Collectors.toList());
+
+			WalletTunnel payer = walletTunnelDao
+				.selectByWalletId(collectOrder.getWalletId(), collectOrder.getTunnelType());
+
+			EBankHandler handler = handlerHelper.selectByTunnelType(collectOrder.getTunnelType());
+			WalletCollectResp result = handler.collect(collectOrder, collect, collectInfos, payer);
+			// 签名密码验证参数
+			if (collect.getValidateType().byteValue() == BizValidateType.PASSWORD.getValue()) {
+				String signedParams = ((YunstBizHandler) handler)
+					.pwdGwConfirm(collectOrder, payer, jumpUrl, customerIp);
+				signedParams = configService.getYunstPwdConfirmUrl() + "?" + signedParams;
+				result.setSignedParams(signedParams);
+			} else if (collect.getValidateType().byteValue() == BizValidateType.SMS.getValue()) {
+				String signedParams = ((YunstBizHandler) handler)
+					.smsGwConfirm(collectOrder, payer, customerIp);
+				signedParams = configService.getYunstPwdConfirmUrl() + "?" + signedParams;
+				result.setSignedParams(signedParams);
+			}
+
+			return result;
+		} finally {
+			lock.unLock(LockConstant.LOCK_PAY_ORDER + orderNo);
 		}
-
-		return result;
 	}
 
 	/**
@@ -395,40 +417,46 @@ public class SeniorPayService {
 			return walletOrderDao.selectCountByBatchNo(id) == 0;
 		});
 
-		WalletOrder payOrder = WalletOrder.builder()
-			.orderNo(orderNo)
-			.batchNo(batchNo)
-			.bizNo(bizNo)
-			.walletId(receiver.getWalletId())
-			.type(OrderType.AGENT_PAY.getValue())
-			.amount(receiver.getAmount())
-			.progress(GwProgress.WAIT_SEND.getValue())
-			.status(OrderStatus.WAITTING.getValue())
-			.tunnelType(TunnelType.YUNST.getValue())
-			.note(note)
-			.createTime(new Date())
-			.build();
-		walletOrderDao.insertSelective(payOrder);
+		try {
+			lock.acquireLock(LockConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);
 
-		// 代付明细
-		WalletClearing clearing = WalletClearing.builder()
-			.orderId(payOrder.getId())
-			.collectOrderNo(collectOrder.getOrderNo())
-			.collectInfoId(collectInfo.getId())
-			.agentWalletId(configService.getAgentEntWalletId())
-			.amount(receiver.getAmount())
-			.createTime(new Date())
-			.build();
-		walletClearingDao.insertSelective(clearing);
+			WalletOrder payOrder = WalletOrder.builder()
+				.orderNo(orderNo)
+				.batchNo(batchNo)
+				.bizNo(bizNo)
+				.walletId(receiver.getWalletId())
+				.type(OrderType.AGENT_PAY.getValue())
+				.amount(receiver.getAmount())
+				.progress(GwProgress.WAIT_SEND.getValue())
+				.status(OrderStatus.WAITTING.getValue())
+				.tunnelType(TunnelType.YUNST.getValue())
+				.note(note)
+				.createTime(new Date())
+				.build();
+			walletOrderDao.insertSelective(payOrder);
 
-		// 代付给每个收款人
-		EBankHandler handler = handlerHelper.selectByTunnelType(payOrder.getTunnelType());
-		handler.agentPay(payOrder, clearing);
+			// 代付明细
+			WalletClearing clearing = WalletClearing.builder()
+				.orderId(payOrder.getId())
+				.collectOrderNo(collectOrder.getOrderNo())
+				.collectInfoId(collectInfo.getId())
+				.agentWalletId(configService.getAgentEntWalletId())
+				.amount(receiver.getAmount())
+				.createTime(new Date())
+				.build();
+			walletClearingDao.insertSelective(clearing);
 
-		return SettleResp.builder()
-			.order(payOrder)
-			.clearing(clearing)
-			.build();
+			// 代付给每个收款人
+			EBankHandler handler = handlerHelper.selectByTunnelType(payOrder.getTunnelType());
+			handler.agentPay(payOrder, clearing);
+
+			return SettleResp.builder()
+				.order(payOrder)
+				.clearing(clearing)
+				.build();
+		} finally {
+			lock.unLock(LockConstant.LOCK_PAY_ORDER + orderNo);
+		}
 
 	}
 
@@ -475,49 +503,55 @@ public class SeniorPayService {
 			return walletOrderDao.selectCountByBatchNo(id) == 0;
 		});
 
-		WalletOrder refundOrder = WalletOrder.builder()
-			.orderNo(orderNo)
-			.batchNo(batchNo)
-			.bizNo(bizNo)
-			.walletId(collectOrder.getWalletId())
-			.type(OrderType.REFUND.getValue())
-			.amount(refundList.stream().collect(Collectors.summingLong(RefundInfo::getAmount)))
-			.progress(GwProgress.WAIT_SEND.getValue())
-			.status(OrderStatus.WAITTING.getValue())
-			.tunnelType(TunnelType.YUNST.getValue())
-			.createTime(new Date())
-			.build();
-		walletOrderDao.insertSelective(refundOrder);
+		try {
+			lock.acquireLock(LockConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);
 
-		// 记录退款单
-		WalletRefund refund = WalletRefund.builder()
-			.orderId(refundOrder.getId())
-			.collectOrderNo(collectOrder.getOrderNo())
-			.agentWalletId(configService.getAgentEntWalletId())
-			.collectAmount(collectOrder.getAmount())
-			.createTime(new Date())
-			.build();
-		walletRefundDao.insertSelective(refund);
+			WalletOrder refundOrder = WalletOrder.builder()
+				.orderNo(orderNo)
+				.batchNo(batchNo)
+				.bizNo(bizNo)
+				.walletId(collectOrder.getWalletId())
+				.type(OrderType.REFUND.getValue())
+				.amount(refundList.stream().collect(Collectors.summingLong(RefundInfo::getAmount)))
+				.progress(GwProgress.WAIT_SEND.getValue())
+				.status(OrderStatus.WAITTING.getValue())
+				.tunnelType(TunnelType.YUNST.getValue())
+				.createTime(new Date())
+				.build();
+			walletOrderDao.insertSelective(refundOrder);
 
-		// 记录退款明细
-		List<WalletRefundDetail> details = refundList.stream()
-			.map(r -> {
-				WalletCollectInfo info = infoMap.get(r.getWalletId().toString());
-				WalletRefundDetail detail = WalletRefundDetail.builder()
-					.refundId(refund.getId())
-					.payeeWalletId(Long.valueOf(r.getWalletId()))
-					.collectInfoId(info != null ? info.getId() : null)
-					.amount(r.getAmount())
-					.createTime(new Date())
-					.build();
-				walletRefundDetailDao.insertSelective(detail);
-				return detail;
-			}).collect(Collectors.toList());
+			// 记录退款单
+			WalletRefund refund = WalletRefund.builder()
+				.orderId(refundOrder.getId())
+				.collectOrderNo(collectOrder.getOrderNo())
+				.agentWalletId(configService.getAgentEntWalletId())
+				.collectAmount(collectOrder.getAmount())
+				.createTime(new Date())
+				.build();
+			walletRefundDao.insertSelective(refund);
 
-		// 代付给每个收款人
-		EBankHandler handler = handlerHelper.selectByTunnelType(refundOrder.getTunnelType());
-		handler.refund(refundOrder, refund, details);
-		return refundOrder;
+			// 记录退款明细
+			List<WalletRefundDetail> details = refundList.stream()
+				.map(r -> {
+					WalletCollectInfo info = infoMap.get(r.getWalletId().toString());
+					WalletRefundDetail detail = WalletRefundDetail.builder()
+						.refundId(refund.getId())
+						.payeeWalletId(Long.valueOf(r.getWalletId()))
+						.collectInfoId(info != null ? info.getId() : null)
+						.amount(r.getAmount())
+						.createTime(new Date())
+						.build();
+					walletRefundDetailDao.insertSelective(detail);
+					return detail;
+				}).collect(Collectors.toList());
+
+			// 代付给每个收款人
+			EBankHandler handler = handlerHelper.selectByTunnelType(refundOrder.getTunnelType());
+			handler.refund(refundOrder, refund, details);
+			return refundOrder;
+		} finally {
+			lock.unLock(LockConstant.LOCK_PAY_ORDER + orderNo);
+		}
 	}
 
 
@@ -538,45 +572,52 @@ public class SeniorPayService {
 		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> {
 			return walletOrderDao.selectCountByBatchNo(id) == 0;
 		});
-		WalletOrder consumeOrder = WalletOrder.builder()
-			.orderNo(orderNo)
-			.batchNo(batchNo)
-			.bizNo(req.getBizNo())
-			.walletId(payerWalletId)
-			.type(OrderType.DEDUCTION.getValue())
-			.amount(req.getAmount())
-			.progress(GwProgress.WAIT_SEND.getValue())
-			.status(OrderStatus.WAITTING.getValue())
-			.tunnelType(TunnelType.YUNST.getValue())
-			.industryCode(req.getIndustryCode())
-			.industryName(req.getIndustryName())
-			.note(req.getNote())
-			.createTime(new Date())
-			.build();
-		walletOrderDao.insertSelective(consumeOrder);
 
-		// 生成代收单
-		WalletConsume consume = WalletConsume.builder()
-			.orderId(consumeOrder.getId())
-			.payeeWalletId(configService.getAgentEntWalletId())
-			.validateType(BizValidateType.NONE.getValue())
-			.createTime(new Date())
-			.build();
-		walletConsumeDao.insertSelective(consume);
-		WalletCollectMethod method = savePayMethod(consume.getId(),
-			OrderType.DEDUCTION.getValue(),
-			req.getWalletPayMethod());
+		try {
+			lock.acquireLock(LockConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);
 
-		WalletTunnel payer = walletTunnelDao
-			.selectByWalletId(consumeOrder.getWalletId(), consumeOrder.getTunnelType());
-		WalletTunnel payee = walletTunnelDao
-			.selectByWalletId(consume.getPayeeWalletId(), consumeOrder.getTunnelType());
+			WalletOrder consumeOrder = WalletOrder.builder()
+				.orderNo(orderNo)
+				.batchNo(batchNo)
+				.bizNo(req.getBizNo())
+				.walletId(payerWalletId)
+				.type(OrderType.DEDUCTION.getValue())
+				.amount(req.getAmount())
+				.progress(GwProgress.WAIT_SEND.getValue())
+				.status(OrderStatus.WAITTING.getValue())
+				.tunnelType(TunnelType.YUNST.getValue())
+				.industryCode(req.getIndustryCode())
+				.industryName(req.getIndustryName())
+				.note(req.getNote())
+				.createTime(new Date())
+				.build();
+			walletOrderDao.insertSelective(consumeOrder);
 
-		EBankHandler handler = handlerHelper.selectByTunnelType(consumeOrder.getTunnelType());
-		WalletCollectResp result = handler.consume(consumeOrder, consume, payer, payee,
-			Arrays.asList(method));
+			// 生成代收单
+			WalletConsume consume = WalletConsume.builder()
+				.orderId(consumeOrder.getId())
+				.payeeWalletId(configService.getAgentEntWalletId())
+				.validateType(BizValidateType.NONE.getValue())
+				.createTime(new Date())
+				.build();
+			walletConsumeDao.insertSelective(consume);
+			WalletCollectMethod method = savePayMethod(consume.getId(),
+				OrderType.DEDUCTION.getValue(),
+				req.getWalletPayMethod());
 
-		return result;
+			WalletTunnel payer = walletTunnelDao
+				.selectByWalletId(consumeOrder.getWalletId(), consumeOrder.getTunnelType());
+			WalletTunnel payee = walletTunnelDao
+				.selectByWalletId(consume.getPayeeWalletId(), consumeOrder.getTunnelType());
+
+			EBankHandler handler = handlerHelper.selectByTunnelType(consumeOrder.getTunnelType());
+			WalletCollectResp result = handler.consume(consumeOrder, consume, payer, payee,
+				Arrays.asList(method));
+
+			return result;
+		} finally {
+			lock.unLock(LockConstant.LOCK_PAY_ORDER + orderNo);
+		}
 	}
 
 
@@ -698,26 +739,32 @@ public class SeniorPayService {
 	}
 
 	public WalletOrder updateOrderStatus(WalletOrder order) {
-		EBankHandler handler = handlerHelper.selectByTunnelType(order.getTunnelType());
-		List<Triple<WalletOrder, WalletFinance, GatewayTrans>> triples = handler
-			.updateOrderStatus(Arrays.asList(order));
+		try {
+			lock.acquireLock(LockConstant.LOCK_PAY_ORDER + order.getOrderNo(), 5, 0, 1000);
+			EBankHandler handler = handlerHelper.selectByTunnelType(order.getTunnelType());
+			List<Triple<WalletOrder, WalletFinance, GatewayTrans>> triples = handler
+				.updateOrderStatus(Arrays.asList(order));
 
-		WalletTunnel walletTunnel = walletTunnelDao
-			.selectByWalletId(order.getWalletId(), order.getTunnelType());
-		// 通联查余额
-		YunstQueryBalanceResult result = yunstUserHandler.queryBalance(walletTunnel.getBizUserId());
-		// 更新通道余额
-		walletTunnel.setBalance(result.getAllAmount());
-		walletTunnel.setFreezenAmount(result.getFreezenAmount());
-		walletTunnel.setIsDirty(DirtyType.NORMAL.getValue());
-		walletTunnelDao.updateByPrimaryKeySelective(walletTunnel);
-		// 更新钱包余额
-		Wallet wallet = walletDao.selectByPrimaryKey(walletTunnel.getWalletId());
-		wallet.setWalletBalance(walletTunnel.getBalance());
-		wallet.setFreezeAmount(walletTunnel.getFreezenAmount());
-		walletDao.updateByPrimaryKeySelective(wallet);
+			WalletTunnel walletTunnel = walletTunnelDao
+				.selectByWalletId(order.getWalletId(), order.getTunnelType());
+			// 通联查余额
+			YunstQueryBalanceResult result = yunstUserHandler
+				.queryBalance(walletTunnel.getBizUserId());
+			// 更新通道余额
+			walletTunnel.setBalance(result.getAllAmount());
+			walletTunnel.setFreezenAmount(result.getFreezenAmount());
+			walletTunnel.setIsDirty(DirtyType.NORMAL.getValue());
+			walletTunnelDao.updateByPrimaryKeySelective(walletTunnel);
+			// 更新钱包余额
+			Wallet wallet = walletDao.selectByPrimaryKey(walletTunnel.getWalletId());
+			wallet.setWalletBalance(walletTunnel.getBalance());
+			wallet.setFreezeAmount(walletTunnel.getFreezenAmount());
+			walletDao.updateByPrimaryKeySelective(wallet);
 
-		return triples.get(0).x;
+			return triples.get(0).x;
+		} finally {
+			lock.unLock(LockConstant.LOCK_PAY_ORDER + order.getOrderNo());
+		}
 	}
 
 }

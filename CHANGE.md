@@ -4,7 +4,7 @@
 jenkins job: platform-rfwallet-super-server-test
 
 ```
-## 1.1.0_b10_2019112911_Beta
+## 1.1.0_b10_2019112914_Beta
 ### [变动说明]
 - 优化提现余额不足提示语 fixBug:20289
 

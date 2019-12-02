@@ -9,6 +9,7 @@ import com.rfchina.wallet.server.api.ScheduleApi;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import com.rfchina.wallet.server.msic.EnumWallet.LockStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyStatus;
+import com.rfchina.wallet.server.msic.LockConstant;
 import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.ScheduleService;
 import com.rfchina.wallet.server.service.SeniorBalanceService;
@@ -46,8 +47,7 @@ public class ScheduleApiImpl implements ScheduleApi {
 	@Override
 	public void quartzUpdateJunior() {
 
-		String lockName = "quartzUpdateJunior";
-		lockDone(lockName, 900, (date) -> {
+		lockDone(LockConstant.LOCK_QUARTZ_UPDATE_JUNIOR, 900, (date) -> {
 			try {
 				scheduleService.quartzUpdateJunior(configService.getBatchUpdateSize());
 			} catch (Exception e) {
@@ -60,9 +60,8 @@ public class ScheduleApiImpl implements ScheduleApi {
 	@Override
 	public void quartzUpdateSenior() {
 
-		String lockName = "quartzUpdateSenior";
 		int periodSecord = 900;
-		lockDone(lockName, periodSecord, (date) -> {
+		lockDone(LockConstant.LOCK_QUARTZ_UPDATE_SENIOR, periodSecord, (date) -> {
 			try {
 				scheduleService
 					.quartzUpdateSenior(configService.getBatchUpdateSize(), periodSecord);
@@ -76,8 +75,7 @@ public class ScheduleApiImpl implements ScheduleApi {
 	@Override
 	public void quartzPay() {
 
-		String lockName = "quartzPay";
-		lockDone(lockName, 1800, (date -> {
+		lockDone(LockConstant.LOCK_QUARTZ_PAY, 1800, (date -> {
 			// 待处理订单
 			List<String> batchNos = walletOrderExtDao
 				.selectUnSendBatchNo(OrderType.FINANCE.getValue(), configService.getBatchPaySize());
@@ -107,8 +105,8 @@ public class ScheduleApiImpl implements ScheduleApi {
 	@Override
 	public void quartzNotify() {
 
-		String lockName = "quartzNotify";
-		lockDone(lockName, 600, (date) -> {
+
+		lockDone(LockConstant.LOCK_QUARTZ_Notify, 600, (date) -> {
 			List<WalletOrder> walletOrders = walletOrderExtDao
 				.selectByStatusNotNotified(WalletApplyStatus.WAIT_DEAL.getValue(), 200);
 			scheduleService.notifyDeveloper(walletOrders);
@@ -118,8 +116,7 @@ public class ScheduleApiImpl implements ScheduleApi {
 	@Override
 	public void quartzBalance() {
 
-		String lockName = "quartzBalance";
-		lockDone(lockName, 60, (date) -> {
+		lockDone(LockConstant.LOCK_QUARTZ_BALANCE, 60, (date) -> {
 			Date yestoday = DateUtil.getDate2(DateUtil.addDate2(date, -1));
 			seniorBalanceService.doBalance(yestoday);
 		});

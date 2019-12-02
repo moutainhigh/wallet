@@ -89,6 +89,7 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	@Test
 	public void collect() {
 //		Balance balance = Balance.builder()
+//			.payerWalletId(platWalletId)
 //			.amount(1L)
 //			.build();
 		CodePay codePay = CodePay.builder()
@@ -107,7 +108,6 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 			.amount(10L)
 			.build();
 		CollectReq req = CollectReq.builder()
-			.payerWalletId(platWalletId)
 			.bizNo(String.valueOf(System.currentTimeMillis()))
 			.amount(10L)
 			.note("")

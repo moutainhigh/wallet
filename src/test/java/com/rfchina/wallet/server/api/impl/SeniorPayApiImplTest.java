@@ -46,7 +46,6 @@ public class SeniorPayApiImplTest extends SpringApiTest {
 			.amount(2L)
 			.build();
 		CollectReq req = CollectReq.builder()
-			.payerWalletId(payerWalletId)
 			.bizNo(String.valueOf(System.currentTimeMillis()))
 			.amount(3L)
 			.note("")
