@@ -111,7 +111,7 @@ public interface WalletOrderExtDao extends WalletOrderMapper {
 
 	@Select({
 		"<script>",
-		"select * from rf_wallet_apply where 1=1",
+		"select * from rf_wallet_order where 1=1",
 		"<if test=\"walletId != null\"> and wallet_id=#{walletId}</if>",
 		"<if test=\"fromTime!=null\">",
 		"and create_time <![CDATA[>=]]> #{fromTime}", "</if>",
@@ -133,7 +133,7 @@ public interface WalletOrderExtDao extends WalletOrderMapper {
 
 	@Select({
 		"<script>",
-		"select count(1) from rf_wallet_apply where 1=1",
+		"select count(1) from rf_wallet_order where 1=1",
 		"<if test=\"walletId != null\"> and wallet_id=#{walletId}</if>",
 		"<if test=\"fromTime!=null\">",
 		"and create_time <![CDATA[>=]]> #{fromTime}", "</if>",

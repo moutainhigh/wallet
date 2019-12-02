@@ -49,6 +49,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -323,6 +327,11 @@ public class SeniorWalletService {
 		walletChannel.setStatus(
 			EnumDef.WalletTunnelAuditStatus.WAITING_AUDIT.getValue().byteValue());
 		String cardNo = companyBasicInfo.getAccountNo();
+		CardInfo cardInfo = CardInfo.builder()
+			.cardNo(companyBasicInfo.getAccountNo())
+			.parentBankName(companyBasicInfo.getParentBankName())
+			.bankName(companyBasicInfo.getBankName())
+			.build();
 		if (channelType == TunnelType.YUNST.getValue().intValue()) {
 			try {
 				boolean isAuth =
@@ -345,43 +354,7 @@ public class SeniorWalletService {
 						walletChannel.setFailReason(null);
 						walletChannel.setCheckTime(curDate);
 
-						WalletVerifyHis walletVerifyHis = walletVerifyHisExtDao
-							.selectByWalletIdAndRefIdAndType(walletId, walletChannel.getId(),
-								WalletVerifyRefType.COMPANY.getValue().byteValue());
-						if (null == walletVerifyHis) {
-							walletVerifyHisExtDao.insertSelective(
-								WalletVerifyHis.builder().walletId(walletId)
-									.refId(walletChannel.getId()).type(
-									WalletVerifyRefType.COMPANY.getValue().byteValue())
-									.verifyChannel(
-										WalletVerifyChannel.TONGLIAN.getValue().byteValue())
-									.verifyType(
-										WalletVerifyType.COMPANY_VERIFY.getValue().byteValue())
-									.verifyTime(curDate).createTime(curDate).build());
-						}
-
-						List<WalletCard> walletCards = walletCardDao
-							.selectPubAccountByWalletId(walletId);
-						if (walletCards != null && !walletCards.isEmpty()) {
-							walletCardDao
-								.updateWalletCard(walletId, EnumWalletCardStatus.UNBIND.getValue(),
-									EnumWalletCardStatus.BIND.getValue(),
-									EnumPublicAccount.YES.getValue());
-						} else {
-							walletCardDao.insertSelective(
-								WalletCard.builder()
-									.cardType(WalletCardType.DEPOSIT.getValue())
-									.walletId(walletId)
-									.bankName(companyBasicInfo.getParentBankName())
-									.depositBank(companyBasicInfo.getBankName())
-									.bankAccount(cardNo)
-									.verifyChannel(VerifyChannel.YUNST.getValue())
-									.verifyTime(curDate)
-									.isPublic(EnumPublicAccount.YES.getValue().byteValue())
-									.isDef(EnumDefBankCard.YES.getValue().byteValue())
-									.status(EnumWalletCardStatus.BIND.getValue().byteValue())
-									.build());
-						}
+						this.synchronizeCompanyTunnelInfo(walletId, walletChannel, cardInfo);
 					} else if (YunstCompanyInfoAuditStatus.FAIL.getValue() == result.longValue()) {
 						walletChannel.setStatus(
 							EnumDef.WalletTunnelAuditStatus.AUDIT_FAIL.getValue()
@@ -394,27 +367,7 @@ public class SeniorWalletService {
 						EnumDef.WalletTunnelAuditStatus.WAITING_AUDIT.getValue()
 							.byteValue());
 
-					List<WalletCard> walletCards = walletCardDao
-						.selectPubAccountByWalletId(walletId);
-					if (walletCards != null && !walletCards.isEmpty()) {
-						walletCardDao
-							.updateWalletCard(walletId, EnumWalletCardStatus.UNBIND.getValue(),
-								EnumWalletCardStatus.BIND.getValue(),
-								EnumPublicAccount.YES.getValue());
-					} else {
-						walletCardDao.insertSelective(
-							WalletCard.builder()
-								.cardType(WalletCardType.DEPOSIT.getValue())
-								.walletId(walletId)
-								.bankName(companyBasicInfo.getParentBankName())
-								.depositBank(companyBasicInfo.getBankName())
-								.bankAccount(cardNo)
-								.verifyChannel(VerifyChannel.YUNST.getValue())
-								.isPublic(EnumPublicAccount.YES.getValue().byteValue())
-								.isDef(EnumDefBankCard.YES.getValue().byteValue())
-								.status(EnumWalletCardStatus.BIND.getValue().byteValue())
-								.build());
-					}
+					this.synchronizeCompanyTunnelInfo(walletId, walletChannel, cardInfo);
 				}
 				walletChannel.setRemark(remark);
 				walletChannel.setFailReason(null);
@@ -506,6 +459,12 @@ public class SeniorWalletService {
 		Objects.requireNonNull(walletTunnel);
 		CompanyInfoResult memberInfo = (CompanyInfoResult) yunstUserHandler
 			.getMemberInfo(walletTunnel.getBizUserId());
+		if (YunstCompanyInfoAuditStatus.WAITING.getValue().longValue() != memberInfo.getStatus()
+			.longValue()
+			&& WalletTunnelAuditStatus.WAITING_AUDIT.getValue().byteValue() == walletTunnel
+			.getStatus()) {
+			this.synchronizeCompanyTunnelInfo(walletId, walletTunnel, null);
+		}
 		return memberInfo;
 	}
 
@@ -567,4 +526,73 @@ public class SeniorWalletService {
 		wallet.setFreezeAmount(walletTunnel.getFreezenAmount());
 		walletDao.updateByPrimaryKeySelective(wallet);
 	}
+
+
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+	private void synchronizeCompanyTunnelInfo(Long walletId, WalletTunnel walletTunnel,
+		CardInfo cardInfo) {
+		if (EnumDef.WalletTunnelAuditStatus.AUDIT_SUCCESS.getValue()
+			.byteValue() == walletTunnel.getStatus()) {
+			WalletVerifyHis walletVerifyHis = walletVerifyHisExtDao
+				.selectByWalletIdAndRefIdAndType(walletId, walletTunnel.getId(),
+					WalletVerifyRefType.COMPANY.getValue().byteValue());
+			if (null == walletVerifyHis
+				|| walletVerifyHis.getVerifyTime().compareTo(walletTunnel.getCheckTime()) == -1) {
+				walletVerifyHisExtDao.insertSelective(
+					WalletVerifyHis.builder().walletId(walletId)
+						.refId(walletTunnel.getId()).type(
+						WalletVerifyRefType.COMPANY.getValue().byteValue())
+						.verifyChannel(
+							WalletVerifyChannel.TONGLIAN.getValue().byteValue())
+						.verifyType(
+							WalletVerifyType.COMPANY_VERIFY.getValue().byteValue())
+						.verifyTime(walletTunnel.getCheckTime())
+						.createTime(walletTunnel.getCheckTime()).build());
+			}
+		}
+
+		List<WalletCard> walletCards = walletCardDao
+			.selectPubAccountByWalletId(walletId);
+		if (walletCards != null && !walletCards.isEmpty()) {
+			if (Objects.isNull(cardInfo)) {
+				walletCardDao
+					.updateWalletCard(walletId, EnumWalletCardStatus.UNBIND.getValue(),
+						EnumWalletCardStatus.BIND.getValue(),
+						EnumPublicAccount.YES.getValue());
+				return;
+			}
+			walletCardDao
+				.updateWalletCard(walletId, EnumWalletCardStatus.BIND.getValue(),
+					EnumWalletCardStatus.UNBIND.getValue(),
+					EnumPublicAccount.YES.getValue());
+		}
+		walletCardDao.insertSelective(
+			WalletCard.builder()
+				.cardType(WalletCardType.DEPOSIT.getValue())
+				.walletId(walletId)
+				.bankCode(" ")
+				.bankName(cardInfo.getParentBankName())
+				.depositBank(cardInfo.getBankName())
+				.bankAccount(cardInfo.getCardNo())
+				.verifyChannel(VerifyChannel.YUNST.getValue())
+				.verifyTime(walletTunnel.getCheckTime())
+				.isPublic(EnumPublicAccount.YES.getValue().byteValue())
+				.isDef(EnumDefBankCard.YES.getValue().byteValue())
+				.status(EnumWalletCardStatus.BIND.getValue().byteValue())
+				.build());
+
+	}
+
+
+	@Getter
+	@Setter
+	@Builder
+	@ToString
+	static class CardInfo {
+
+		private String cardNo;
+		private String parentBankName;
+		private String bankName;
+	}
+
 }
