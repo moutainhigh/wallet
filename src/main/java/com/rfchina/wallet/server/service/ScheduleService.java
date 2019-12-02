@@ -38,7 +38,7 @@ import com.rfchina.wallet.server.model.ext.PayTuple;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp.WalletInfoRespBuilder;
 import com.rfchina.wallet.server.msic.EnumWallet.CardPro;
-import com.rfchina.wallet.server.msic.EnumWallet.FinanceSubStatus;
+import com.rfchina.wallet.server.msic.EnumWallet.OrderSubStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.GwPayeeType;
 import com.rfchina.wallet.server.msic.EnumWallet.GwProgress;
@@ -200,7 +200,7 @@ public class ScheduleService {
 				walletOrder.setProgress(GwProgress.HAS_RESP.getValue());
 			} else {
 				// 人工处理
-				walletOrder.setSubStatus(FinanceSubStatus.WAIT_DEAL.getValue());
+				walletOrder.setSubStatus(OrderSubStatus.WAIT_DEAL.getValue());
 			}
 			walletOrderDao.updateByPrimaryKeySelective(walletOrder);
 			// 记录网关信息
@@ -421,52 +421,5 @@ public class ScheduleService {
 		}
 	}
 
-	/**
-	 * 查询钱包明细
-	 */
-	public WalletInfoResp queryWalletInfo(Long walletId) {
-		WalletInfoRespBuilder builder = WalletInfoResp.builder();
-
-		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
-		if (wallet == null) {
-			throw new RfchinaResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST
-				, String.valueOf(walletId));
-		}
-
-		if (wallet.getLevel() == EnumWalletLevel.SENIOR.getValue().byteValue()
-			&& wallet.getAuditType() == EnumWalletAuditType.ALLINPAY
-			.getValue().byteValue()) {
-			try {
-				WalletTunnel walletChannel = seniorWalletService
-					.getWalletTunnelInfo(TunnelType.YUNST.getValue(), walletId);
-				wallet.setWalletBalance(walletChannel.getBalance());
-				wallet.setFreezeAmount(walletChannel.getFreezenAmount());
-			} catch (Exception e) {
-				log.error("获取高级钱包渠道信息失败 walletId:{}", walletId);
-				throw new RfchinaResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST
-					, String.valueOf(walletId));
-			}
-		}
-
-		if (WalletType.COMPANY.getValue().byteValue() == wallet.getType()) {
-			WalletCompany walletCompany = walletCompanyDao.selectByWalletId(walletId);
-			builder.companyInfo(walletCompany);
-		} else if (WalletType.PERSON.getValue().byteValue() == wallet.getType()) {
-			WalletPerson walletPerson = walletPersonDao.selectByWalletId(walletId);
-			builder.personInfo(walletPerson);
-		}
-
-		List<WalletCard> walletCardList = walletCardDao
-			.selectByWalletId(walletId);
-
-		WalletCard defCard = Objects.nonNull(walletCardList) && !walletCardList.isEmpty() ?
-			walletCardDao.selectDefCardByWalletId(walletId) : null;
-
-		int bankCardCount = walletCardDao
-			.selectCountByWalletId(walletId, EnumWalletCardStatus.BIND.getValue());
-		return builder.wallet(wallet).defWalletCard(defCard)
-			.bankCardCount(bankCardCount)
-			.build();
-	}
 
 }

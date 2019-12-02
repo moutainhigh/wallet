@@ -1126,9 +1126,9 @@ public class EnumWallet {
 	}
 
 	/**
-	 * 财务转账状态
+	 * 订单子状态
 	 */
-	public enum FinanceSubStatus implements Valuable<Byte> {
+	public enum OrderSubStatus implements Valuable<Byte> {
 		NORMAL((byte) 0, "默认"),
 		WAIT_DEAL((byte) 1, "待人工处理"),
 		WAIT_REDO((byte) 2, "等待重新发起");
@@ -1136,7 +1136,7 @@ public class EnumWallet {
 		private Byte value;
 		private String valueName;
 
-		FinanceSubStatus(Byte value, String valueName) {
+		OrderSubStatus(Byte value, String valueName) {
 			this.value = value;
 			this.valueName = valueName;
 		}

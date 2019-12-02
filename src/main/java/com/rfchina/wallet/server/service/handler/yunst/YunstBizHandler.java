@@ -90,7 +90,9 @@ import com.rfchina.wallet.server.msic.EnumWallet.EnumBizTag;
 import com.rfchina.wallet.server.msic.EnumWallet.EnumYunstDeviceType;
 import com.rfchina.wallet.server.msic.EnumWallet.EnumYunstWithdrawType;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
+import com.rfchina.wallet.server.msic.EnumWallet.GwProgress;
 import com.rfchina.wallet.server.msic.EnumWallet.OrderStatus;
+import com.rfchina.wallet.server.msic.EnumWallet.OrderSubStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.RefundType;
 import com.rfchina.wallet.server.msic.EnumWallet.UniProgress;
 import com.rfchina.wallet.server.msic.EnumWallet.YunstFileType;
@@ -184,9 +186,14 @@ public class YunstBizHandler extends EBankHandler {
 
 		return orders.stream()
 			.map(order -> {
-				WalletOrder walletOrder = updateOrderStatus(order);
-				return new Triple<WalletOrder, WalletFinance, GatewayTrans>(walletOrder, null,
-					null);
+				try {
+					WalletOrder walletOrder = updateOrderStatus(order);
+					return new Triple<WalletOrder, WalletFinance, GatewayTrans>(walletOrder, null,
+						null);
+				} catch (Exception e) {
+					dealUndefinedError(order, e);
+					throw e;
+				}
 			})
 			.collect(Collectors.toList());
 	}
@@ -246,7 +253,7 @@ public class YunstBizHandler extends EBankHandler {
 		} catch (CommonGatewayException e) {
 			dealGatewayError(order, e);
 		} catch (Exception e) {
-			dealUndefinedError(e);
+			dealUndefinedError(order, e);
 		}
 		return null;
 	}
@@ -302,7 +309,7 @@ public class YunstBizHandler extends EBankHandler {
 		} catch (CommonGatewayException e) {
 			dealGatewayError(order, e);
 		} catch (Exception e) {
-			dealUndefinedError(e);
+			dealUndefinedError(order, e);
 		}
 		return null;
 	}
@@ -369,7 +376,7 @@ public class YunstBizHandler extends EBankHandler {
 		} catch (CommonGatewayException e) {
 			dealGatewayError(order, e);
 		} catch (Exception e) {
-			dealUndefinedError(e);
+			dealUndefinedError(order, e);
 		}
 		return null;
 	}
@@ -414,15 +421,11 @@ public class YunstBizHandler extends EBankHandler {
 		} catch (CommonGatewayException e) {
 			dealGatewayError(order, e);
 		} catch (Exception e) {
-			dealUndefinedError(e);
+			dealUndefinedError(order, e);
 			return;
 		}
 	}
 
-	private void dealUndefinedError(Exception e) {
-		log.error("未定义异常", e);
-		throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
-	}
 
 	/**
 	 * 退款
@@ -469,7 +472,7 @@ public class YunstBizHandler extends EBankHandler {
 			dealGatewayError(order, e);
 			return;
 		} catch (Exception e) {
-			dealUndefinedError(e);
+			dealUndefinedError(order, e);
 		}
 
 	}
@@ -523,18 +526,32 @@ public class YunstBizHandler extends EBankHandler {
 		} catch (CommonGatewayException e) {
 			dealGatewayError(order, e);
 		} catch (Exception e) {
-			dealUndefinedError(e);
+			dealUndefinedError(order, e);
 		}
 		return null;
 	}
 
 
-	private void dealGatewayError(WalletOrder order, CommonGatewayException e) {
-		log.error("网关错误", e);
-		order.setTunnelErrCode(e.getBankErrCode());
-		order.setTunnelErrMsg(e.getBankErrMsg());
-		walletOrderDao.updateByPrimaryKeySelective(order);
-		throw e;
+	private void dealGatewayError(WalletOrder walletOrder, CommonGatewayException err) {
+		log.error("网关错误", err);
+		walletOrder.setTunnelErrCode(err.getBankErrCode());
+		walletOrder.setTunnelErrMsg(err.getBankErrMsg());
+		walletOrder.setUserErrMsg("交易异常");
+		walletOrder.setStatus(OrderStatus.FAIL.getValue());
+		walletOrder.setProgress(GwProgress.HAS_RESP.getValue());
+		walletOrder.setSubStatus(OrderSubStatus.WAIT_DEAL.getValue());
+		walletOrderDao.updateByPrimaryKeySelective(walletOrder);
+		throw err;
+	}
+
+
+	private void dealUndefinedError(WalletOrder walletOrder, Exception e) {
+		log.error("未定义异常", e);
+		walletOrder.setUserErrMsg("交易异常");
+		walletOrder.setProgress(GwProgress.HAS_RESP.getValue());
+		walletOrder.setSubStatus(OrderSubStatus.WAIT_DEAL.getValue());
+		walletOrderDao.updateByPrimaryKeySelective(walletOrder);
+		throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
 	}
 
 
@@ -872,4 +889,5 @@ public class YunstBizHandler extends EBankHandler {
 			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
 		}
 	}
+
 }
