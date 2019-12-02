@@ -4,9 +4,12 @@
 jenkins job: platform-rfwallet-super-server-test
 
 ```
-## 1.1.0_b10_2019112914_Beta
+## 1.1.0_b13_2019120214_Beta
 ### [变动说明]
 - 优化提现余额不足提示语 fixBug:20289
+- 增加订单锁
+- 升级动态配置器
+- 升级调用链，增加RabbitMQ监控
 
 ## 1.1.0_b9_2019112718_Beta
 ### [变动说明]
@@ -26,7 +29,7 @@ jenkins job: platform-rfwallet-super-server-test
 
 ## 1.0.4_b1_2019090210_Beta
 ### [变动说明]
-- 调整银企核心的查询时间
+- 调整银企核心的查询时间 
 - 新增推送银行时间和交易结束日期
 
 ## 1.0.3_2019081515_Release
