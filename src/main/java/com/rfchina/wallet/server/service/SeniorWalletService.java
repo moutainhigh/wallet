@@ -463,7 +463,7 @@ public class SeniorWalletService {
 			.longValue()
 			&& WalletTunnelAuditStatus.WAITING_AUDIT.getValue().byteValue() == walletTunnel
 			.getStatus()) {
-			this.synchronizeCompanyTunnelInfo(walletId,walletTunnel,null);
+			this.synchronizeCompanyTunnelInfo(walletId, walletTunnel, null);
 		}
 		return memberInfo;
 	}
@@ -554,26 +554,33 @@ public class SeniorWalletService {
 		List<WalletCard> walletCards = walletCardDao
 			.selectPubAccountByWalletId(walletId);
 		if (walletCards != null && !walletCards.isEmpty()) {
+			if (Objects.isNull(cardInfo)) {
+				walletCardDao
+					.updateWalletCard(walletId, EnumWalletCardStatus.UNBIND.getValue(),
+						EnumWalletCardStatus.BIND.getValue(),
+						EnumPublicAccount.YES.getValue());
+				return;
+			}
 			walletCardDao
-				.updateWalletCard(walletId, EnumWalletCardStatus.UNBIND.getValue(),
-					EnumWalletCardStatus.BIND.getValue(),
+				.updateWalletCard(walletId, EnumWalletCardStatus.BIND.getValue(),
+					EnumWalletCardStatus.UNBIND.getValue(),
 					EnumPublicAccount.YES.getValue());
-		} else {
-			walletCardDao.insertSelective(
-				WalletCard.builder()
-					.cardType(WalletCardType.DEPOSIT.getValue())
-					.walletId(walletId)
-					.bankCode(" ")
-					.bankName(cardInfo.getParentBankName())
-					.depositBank(cardInfo.getBankName())
-					.bankAccount(cardInfo.getCardNo())
-					.verifyChannel(VerifyChannel.YUNST.getValue())
-					.verifyTime(walletTunnel.getCheckTime())
-					.isPublic(EnumPublicAccount.YES.getValue().byteValue())
-					.isDef(EnumDefBankCard.YES.getValue().byteValue())
-					.status(EnumWalletCardStatus.BIND.getValue().byteValue())
-					.build());
 		}
+		walletCardDao.insertSelective(
+			WalletCard.builder()
+				.cardType(WalletCardType.DEPOSIT.getValue())
+				.walletId(walletId)
+				.bankCode(" ")
+				.bankName(cardInfo.getParentBankName())
+				.depositBank(cardInfo.getBankName())
+				.bankAccount(cardInfo.getCardNo())
+				.verifyChannel(VerifyChannel.YUNST.getValue())
+				.verifyTime(walletTunnel.getCheckTime())
+				.isPublic(EnumPublicAccount.YES.getValue().byteValue())
+				.isDef(EnumDefBankCard.YES.getValue().byteValue())
+				.status(EnumWalletCardStatus.BIND.getValue().byteValue())
+				.build());
+
 	}
 
 
