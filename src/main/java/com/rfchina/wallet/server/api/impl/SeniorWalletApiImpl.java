@@ -226,7 +226,7 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 			return seniorWalletService
 				.setPersonPayPassword(walletId, jumpUrl);
 		} catch (Exception e) {
-			log.error("高级钱包返回个人设置支付密码页面链接失败, walletId: {}", walletId);
+			log.error("高级钱包返回个人设置支付密码页面链接失败", e);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
 				"高级钱包返回个人设置支付密码页面链接失败");
 		}
@@ -249,7 +249,7 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 		try {
 			return seniorWalletService.signBalanceProtocol(walletId, jumpUrl);
 		} catch (Exception e) {
-			log.error("高级钱包返回扣款协议链接失败, walletId: {}", walletId);
+			log.error("高级钱包返回扣款协议链接失败", e);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
 				"高级钱包返回扣款协议链接失败");
 		}
