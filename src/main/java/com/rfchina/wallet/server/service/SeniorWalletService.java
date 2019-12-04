@@ -487,6 +487,13 @@ public class SeniorWalletService {
 			updateBalance(walletTunnel);
 		}
 
+		//特殊处理思力账号
+		if (Objects.nonNull(configService.getAgentEntWalletId())
+			&& configService.getAgentEntWalletId() == walletId.longValue()
+			&& WalletTunnelSignContract.MEMBER.getValue().byteValue() == walletTunnel
+			.getIsSignContact()) {
+			walletTunnel.setIsSignContact(WalletTunnelSignContract.BALANCE.getValue().byteValue());
+		}
 		return walletTunnel;
 	}
 

@@ -158,6 +158,7 @@ public class SeniorCardService {
 		if (Objects.nonNull(exsitsCard)) {
 			exsitsCard.setStatus(EnumWalletCardStatus.UNBIND.getValue().byteValue());
 			walletCardDao.updateByPrimaryKeySelective(exsitsCard);
+			cardCount--;
 		}
 
 		WalletCard walletCard = WalletCard.builder().walletId(walletId)

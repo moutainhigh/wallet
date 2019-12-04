@@ -129,6 +129,7 @@ public class YunstNotifyHandler {
 		log.info("处理扣款协议签约通知 rtnVal:{}", rtnVal);
 		String reqSn = rtnVal.getProtocolReqSn();
 		String signStatus = rtnVal.getSignStatus();
+		String protocolNo = rtnVal.getProtocolNo();
 
 		WalletTunnel walletTunnel = walletTunnelExtDao.selectByBanlceProtocolReqSn(reqSn);
 		if (Objects.isNull(walletTunnel)) {
@@ -141,6 +142,7 @@ public class YunstNotifyHandler {
 		if (YUNST_SIGN_SUCCESS.equalsIgnoreCase(signStatus)) {
 			walletTunnel
 				.setIsSignContact(WalletTunnelSignContract.BALANCE.getValue().byteValue());
+			walletTunnel.setBalanceProtocolNo(protocolNo);
 			int effectRows = walletTunnelExtDao.updateByPrimaryKeySelective(walletTunnel);
 			if (effectRows != 1) {
 				log.error("更新扣款协议状态失败:bizUserId:{}", bizUserId);
