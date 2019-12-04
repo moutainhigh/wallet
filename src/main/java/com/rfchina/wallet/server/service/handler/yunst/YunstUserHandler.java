@@ -69,7 +69,8 @@ public class YunstUserHandler extends YunstBaseHandler {
 			.source(TERMINAL_TYPE)
 			.build();
 
-		return new Tuple<>(yunstTpl.execute(req, YunstCreateMemberResult.class), memberType);
+		YunstCreateMemberResult resp = yunstTpl.execute(req, YunstCreateMemberResult.class);
+		return new Tuple<>(resp, memberType);
 	}
 
 	/**

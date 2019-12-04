@@ -84,10 +84,10 @@ public class SeniorPayApiImplTest extends SpringApiTest {
 	public void deduction() {
 
 		Balance balance = Balance.builder()
+			.payerWalletId(payeeWalletId)
 			.amount(1L)
 			.build();
 		DeductionReq req = DeductionReq.builder()
-			.payerWalletId(payeeWalletId)
 			.bizNo(String.valueOf(System.currentTimeMillis()))
 			.amount(1L)
 			.note("")

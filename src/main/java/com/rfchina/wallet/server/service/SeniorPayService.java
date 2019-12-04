@@ -85,8 +85,8 @@ public class SeniorPayService {
 	public static final String PREFIX_AGENT_PAY = "WO";
 	public static final String PREFIX_COLLECT = "WC";
 	public static final String PREFIX_RECHARGE = "WR";
-	public static final String PREFIX_WITHDRAW = "WD";
-	public static final String PREFIX_DEDUCTION = "WS";
+	public static final String PREFIX_WITHDRAW = "WW";
+	public static final String PREFIX_DEDUCTION = "WD";
 
 	public static final String INDUSTRY_CODE = "1910";
 	public static final String INDUSTRY_NAME = "其他";
@@ -563,8 +563,7 @@ public class SeniorPayService {
 	public WalletCollectResp deduction(DeductionReq req) {
 
 		// 定义付款人
-		Long payerWalletId = (req.getPayerWalletId() != null) ? req.getPayerWalletId()
-			: configService.getAnonyPayerWalletId();
+		Long payerWalletId = req.getWalletPayMethod().getBalance().getPayerWalletId();
 		verifyService.checkSeniorWallet(payerWalletId);
 
 		// 工单记录

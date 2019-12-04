@@ -56,8 +56,8 @@ public class SpringBaseTest {
 				configService.getYstSysId(),
 				configService.getYstPassword(), configService.getYstAlias(),
 				configService.getYstVersion(),
-				"/data/env/config/dev-key/yunst/1902271423530473681.pfx",
-				"/data/env/config/dev-key/yunst/TLCert-test.cer"));
+				"/data/env/config/dev-key/yunst2/1911281453448249697.pfx",
+				"/data/env/config/dev-key/yunst2/TLYunstCert_test.cer"));
 		}
 	}
 

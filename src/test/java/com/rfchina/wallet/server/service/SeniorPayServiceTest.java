@@ -1,6 +1,5 @@
 package com.rfchina.wallet.server.service;
 
-import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.model.WalletCard;
@@ -12,17 +11,14 @@ import com.rfchina.wallet.server.model.ext.AgentPayReq;
 import com.rfchina.wallet.server.model.ext.CollectReq;
 import com.rfchina.wallet.server.model.ext.CollectReq.Reciever;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod;
+import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Balance;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.CodePay;
+import com.rfchina.wallet.server.model.ext.DeductionReq;
 import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
 import com.rfchina.wallet.server.model.ext.SettleResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
-import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +39,7 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	private WalletCardDao walletCardDao;
 
 	private Long payerWalletId = 10035L;
-	private Long payeeWalletId = 10035L;
+	private Long payeeWalletId = 10074L;
 	private Long platWalletId = 10000L;
 	private Long cardId = 17L;
 
@@ -79,7 +75,8 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	public void withdraw() {
 		WalletCard walletCard = walletCardDao.selectByPrimaryKey(cardId);
 		WalletOrder withdraw = seniorPayService
-			.withdraw(payerWalletId, walletCard, 1L, "http://192.168.197.75:7777/#/withdrawSuccess", "8.8.8.8");
+			.withdraw(payerWalletId, walletCard, 1L, "http://192.168.197.75:7777/#/withdrawSuccess",
+				"8.8.8.8");
 		log.info("withdraw.resp = {}", JsonUtil.toJSON(withdraw));
 	}
 
@@ -94,8 +91,8 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 //			.build();
 		CodePay codePay = CodePay.builder()
 			.payType((byte) 41)
-			.authcode("134998119558850474")
-			.amount(10L)
+			.authcode("134686334254524314")
+			.amount(1L)
 			.build();
 //		BankCard bankCard = BankCard.builder()
 //			.payType(CollectPayType.BANKCARD.getValue())
@@ -105,11 +102,11 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 
 		Reciever reciever = Reciever.builder()
 			.walletId(payeeWalletId)
-			.amount(10L)
+			.amount(1L)
 			.build();
 		CollectReq req = CollectReq.builder()
 			.bizNo(String.valueOf(System.currentTimeMillis()))
-			.amount(10L)
+			.amount(1L)
 			.note("")
 			.fee(0L)
 			.validateType((byte) 0)
@@ -128,12 +125,12 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	public void agentPay() {
 		AgentPayReq.Reciever reciever = new AgentPayReq.Reciever();
 		reciever.setWalletId(payeeWalletId);
-		reciever.setAmount(10L);
+		reciever.setAmount(1L);
 		reciever.setFeeAmount(0L);
-		WalletOrder order = walletOrderDao.selectByOrderNo("WC20191107748264218");
+		WalletOrder order = walletOrderDao.selectByOrderNo("WC20191204761161144");
 		SettleResp resp = seniorPayService
 			.agentPay(order, String.valueOf(System.currentTimeMillis())
-				, reciever,"note");
+				, reciever, "note");
 		log.info("agent pay {}", resp);
 	}
 
@@ -149,7 +146,23 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 		log.info("refund {}", refund);
 	}
 
-
+	@Test
+	public void deduction() {
+		Balance balance = Balance.builder()
+			.payerWalletId(payeeWalletId)
+			.amount(1L)
+			.build();
+		DeductionReq req = DeductionReq.builder()
+			.bizNo(String.valueOf(System.currentTimeMillis()))
+			.amount(1L)
+			.fee(0L)
+			.walletPayMethod(WalletPayMethod.builder().balance(balance).build())
+			.industryCode("1010")
+			.industryName("保险代理")
+			.build();
+		WalletCollectResp resp = seniorPayService.deduction(req);
+		log.info("deduction {}", resp);
+	}
 
 
 }

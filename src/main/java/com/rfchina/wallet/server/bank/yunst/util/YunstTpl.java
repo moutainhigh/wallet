@@ -38,7 +38,6 @@ public class YunstTpl {
 			return respClz != YunstBaseResp.class ? JsonUtil.toObject(resp.getSignedValue(),
 				respClz, getObjectMapper()) : (R) resp;
 		} else {
-			log.error("通联接口错误, request = {} , response = {}", reqBody, resp);
 			throw new CommonGatewayException(EnumWalletResponseCode.PAY_IN_GATEWAY_RESPONSE_ERROR,
 				resp.getErrorCode(),
 				resp.getMessage());

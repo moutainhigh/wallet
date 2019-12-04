@@ -94,7 +94,7 @@ public class WalletOrder  {
     @ApiModelProperty("通道类型。1: 浦发银企直连，2：通联云商通")
     private Integer tunnelType ;
 
-    @ApiModelProperty("类型，1：财务结算，2：充值，3：提现，4：代收，5：代付，6：退款，7：消费，8：代扣")
+    @ApiModelProperty("类型，1：财务结算，2：充值，3：提现，4：代收，5：代付，6：退款，7：消费, 8：代扣,")
     private Integer type ;
 
     @ApiModelProperty("用户端错误提示")
