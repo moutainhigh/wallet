@@ -4,6 +4,10 @@
 jenkins job: platform-rfwallet-super-server-test
 
 ```  
+## 1.1.0_b16_2019120411_Beta
+### [变动说明]
+- 修复升级卡没有是默认卡问题
+
 ## 1.1.0_b15_2019120317_Beta
 ### [变动说明]
 - 特殊处理思力账号签约状态
