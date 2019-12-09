@@ -58,10 +58,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 	 */
 	public Tuple<YunstCreateMemberResult, YunstMemberType> createMember(Long walletId, Byte source)
 		throws Exception {
-		YunstMemberType memberType = YunstMemberType.PERSON;
-		if (source == 1) {
-			memberType = YunstMemberType.COMPANY;
-		}
+		YunstMemberType memberType = (source == 1)?YunstMemberType.COMPANY:YunstMemberType.PERSON;
 		String bizUserId = transferToYunstBizUserFormat(walletId, source, configService.getEnv());
 		YunstCreateMemberReq req = YunstCreateMemberReq.builder$()
 			.bizUserId(bizUserId)

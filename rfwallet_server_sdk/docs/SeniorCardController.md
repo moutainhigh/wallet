@@ -64,6 +64,7 @@
 |phone|是|银行预留手机号|
 |real_name|是|姓名|
 |wallet_id|是|钱包id|
+|bank_code|否|支行编码|
 |cvv2|否|信用卡cvv2码|
 |validate|否|信用卡到期4位日期|
 

@@ -134,6 +134,7 @@
   "msg": ""//消息
    , "data":  {
     balance:""  , //银行余额
+    balance_protocol_no:""  , //扣款协议号
     balance_protocol_req_sn:""  , //扣款协议请求流水号
     biz_user_id:""  , //业务用户标识
     check_time:""  , //审核时间
@@ -383,6 +384,7 @@
   "msg": ""//消息
    , "data":  {
     balance:""  , //银行余额
+    balance_protocol_no:""  , //扣款协议号
     balance_protocol_req_sn:""  , //扣款协议请求流水号
     biz_user_id:""  , //业务用户标识
     check_time:""  , //审核时间
@@ -427,6 +429,7 @@
   "msg": ""//消息
    , "data":  {
     balance:""  , //银行余额
+    balance_protocol_no:""  , //扣款协议号
     balance_protocol_req_sn:""  , //扣款协议请求流水号
     biz_user_id:""  , //业务用户标识
     check_time:""  , //审核时间
@@ -472,6 +475,7 @@
   "msg": ""//消息
    , "data":  {
     balance:""  , //银行余额
+    balance_protocol_no:""  , //扣款协议号
     balance_protocol_req_sn:""  , //扣款协议请求流水号
     biz_user_id:""  , //业务用户标识
     check_time:""  , //审核时间

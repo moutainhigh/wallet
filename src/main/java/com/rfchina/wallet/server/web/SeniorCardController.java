@@ -32,10 +32,11 @@ public class SeniorCardController {
 		@ApiParam(value = "银行预留手机号", required = true) @RequestParam("phone") String phone,
 		@ApiParam(value = "身份证", required = true) @RequestParam("identity_no") String identityNo,
 		@ApiParam(value = "信用卡到期4位日期", required = false) @RequestParam(value = "validate", required = false) String validate,
-		@ApiParam(value = "信用卡cvv2码", required = false) @RequestParam(value = "cvv2", required = false) String cvv2) {
+		@ApiParam(value = "信用卡cvv2码", required = false) @RequestParam(value = "cvv2", required = false) String cvv2,
+		@ApiParam(value = "支行编码", required = false) @RequestParam(value = "bank_code", required = false) String bankCode) {
 
 		String preBindTicket = seniorCardApi.preBindBandCard(accessToken, walletId,
-			cardNo, realName, phone, identityNo, validate, cvv2);
+			cardNo, realName, phone, identityNo, validate, cvv2, bankCode);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
 			BeanUtil.asPureStringMap("pre_bind_ticket", preBindTicket));
 	}

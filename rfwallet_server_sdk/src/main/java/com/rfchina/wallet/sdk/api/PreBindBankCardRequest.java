@@ -31,6 +31,9 @@ public class PreBindBankCardRequest extends  AbstractApiRequest {
   @ApiModelProperty("钱包id")
   private Long walletId ;
 
+  @ApiModelProperty("支行编码")
+  private String bankCode ;
+
   @ApiModelProperty("信用卡cvv2码")
   private String cvv2 ;
 
@@ -68,6 +71,9 @@ public class PreBindBankCardRequest extends  AbstractApiRequest {
       }
       if(walletId != null){
         parameters.put("wallet_id", walletId.toString());
+      }
+      if(bankCode != null){
+        parameters.put("bank_code", bankCode.toString());
       }
       if(cvv2 != null){
         parameters.put("cvv2", cvv2.toString());

@@ -940,6 +940,9 @@ public class EnumWallet {
 		}
 
 		public byte and(Byte bizTag) {
+			if(bizTag == null){
+				bizTag = 0;
+			}
 			return (byte) (this.value.byteValue() | bizTag.byteValue());
 		}
 	}

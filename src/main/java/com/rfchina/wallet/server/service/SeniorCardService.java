@@ -13,6 +13,7 @@ import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.EnumDef.VerifyChannel;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletCardType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
+import com.rfchina.wallet.domain.model.BankCode;
 import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletPerson;
 import com.rfchina.wallet.domain.model.WalletTunnel;
@@ -28,6 +29,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -71,7 +73,7 @@ public class SeniorCardService {
 	 */
 	public String preBindBandCard(Long walletId,
 		String cardNo, String realName, String phone, String identityNo, String validate,
-		String cvv2) {
+		String cvv2, String bankCode) {
 
 		verifyService.checkSeniorWallet(walletId);
 
@@ -93,8 +95,7 @@ public class SeniorCardService {
 					: WalletCardType.DEPOSIT.getValue())
 				.validate(validate)
 				.cvv2(cvv2)
-				.bankName(result.getBankName())
-				.bankCode(result.getBankCode())
+				.bankCode(bankCode)
 				.build();
 			String preBindTicket = UUID.randomUUID().toString();
 			redisTemplate.opsForValue()
@@ -161,10 +162,12 @@ public class SeniorCardService {
 			cardCount--;
 		}
 
+		// 查银行代码
+		BankCode bankCode = getBank(preBindCardVo.getBankCode());
 		WalletCard walletCard = WalletCard.builder().walletId(walletId)
-			.bankCode(preBindCardVo.getBankCode())
-			.bankName(preBindCardVo.getBankName())
-			.depositBank(null)
+			.bankCode(bankCode != null ? bankCode.getBankCode() : null)
+			.bankName(bankCode != null ? bankCode.getClassName() : null)
+			.depositBank(bankCode != null ? bankCode.getBankName() : null)
 			.bankAccount(preBindCardVo.getCardNo())
 			.depositName(walletPerson.getName())
 			.telephone(preBindCardVo.getPhone())
@@ -178,6 +181,14 @@ public class SeniorCardService {
 			.build();
 		walletCardDao.insertSelective(walletCard);
 
+	}
+
+	private BankCode getBank(String bankCode) {
+		if (StringUtils.isBlank(bankCode)) {
+			return null;
+		}
+		BankCode result = bankCodeDao.selectByBankCode(bankCode);
+		return result != null ? result : null;
 	}
 
 	/**
@@ -203,10 +214,8 @@ public class SeniorCardService {
 
 	/**
 	 * 银行卡列表
-	 * @param walletId
-	 * @return
 	 */
-	public List<WalletCard> cardList(Long walletId){
+	public List<WalletCard> cardList(Long walletId) {
 		return walletCardDao.selectByWalletId(walletId);
 	}
 }

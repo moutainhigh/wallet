@@ -85,7 +85,7 @@ dependencies {
     compile 'com.rfchina.biztool:xdiamond-dynamic:1.0.1'
     compile 'com.rfchina.biztool:mapper:1.0.0-SNAPSHOT'
     compile 'com.rfchina.biztool:fileserver:1.0.3-SNAPSHOT'
-    compile 'com.rfchina.biztool:limiter:1.0.3-SNAPSHOT'
+    compile 'com.rfchina.biztool:limiter:1.0.3'
     compile 'com.rfchina:rfchina-platform-scheduler-spring:1.2.0'
     compile('com.rfchina:rfchina-platform-spring-intergration:2.0.10') {
         exclude group: 'org.springframework.amqp'

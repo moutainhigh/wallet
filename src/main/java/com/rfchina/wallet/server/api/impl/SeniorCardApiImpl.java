@@ -36,10 +36,10 @@ public class SeniorCardApiImpl implements SeniorCardApi {
 		@ParamValid(nullable = false) String realName,
 		@ParamValid(nullable = false) String phone,
 		@ParamValid(nullable = false) String identityNo,
-		String validate, String cvv2) {
+		String validate, String cvv2, String bankCode) {
 
 		return seniorCardService
-			.preBindBandCard(walletId, cardNo, realName, phone, identityNo, validate, cvv2);
+			.preBindBandCard(walletId, cardNo, realName, phone, identityNo, validate, cvv2, bankCode);
 	}
 
 

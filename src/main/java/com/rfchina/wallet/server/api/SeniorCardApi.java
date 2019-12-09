@@ -15,9 +15,10 @@ public interface SeniorCardApi {
 	 * @param identityNo 必填, 身份证号
 	 * @param validate 非必填, 信用卡4位有效期
 	 * @param cvv2 非必填, 信用卡cvv2码
+	 * @param bankCode 支行编码
 	 */
 	String preBindBandCard(String accessToken, Long walletId, String cardNo, String realName,
-		String phone, String identityNo, String validate, String cvv2);
+		String phone, String identityNo, String validate, String cvv2, String bankCode);
 
 	/**
 	 * 高级钱包-确认绑定银行卡

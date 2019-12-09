@@ -2,28 +2,18 @@ package com.rfchina.wallet.server.service;
 
 import com.alibaba.fastjson.JSON;
 import com.rfchina.biztools.mq.PostMq;
-import com.rfchina.platform.common.exception.RfchinaResponseException;
-import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.Triple;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.domain.mapper.ext.BankCodeDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
-import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletAuditType;
-import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletCardStatus;
-import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletLevel;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderType;
-import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.model.GatewayTrans;
-import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletCard;
-import com.rfchina.wallet.domain.model.WalletCompany;
 import com.rfchina.wallet.domain.model.WalletFinance;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletOrderCriteria;
-import com.rfchina.wallet.domain.model.WalletPerson;
-import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
 import com.rfchina.wallet.server.bank.pudong.domain.predicate.ExactErrPredicate;
 import com.rfchina.wallet.server.bank.pudong.domain.util.ExceptionUtil;
@@ -35,16 +25,13 @@ import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletUserExtDao;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.PayTuple;
-import com.rfchina.wallet.server.model.ext.WalletInfoResp;
-import com.rfchina.wallet.server.model.ext.WalletInfoResp.WalletInfoRespBuilder;
 import com.rfchina.wallet.server.msic.EnumWallet.CardPro;
-import com.rfchina.wallet.server.msic.EnumWallet.OrderSubStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.GwPayeeType;
 import com.rfchina.wallet.server.msic.EnumWallet.GwProgress;
 import com.rfchina.wallet.server.msic.EnumWallet.NotifyType;
 import com.rfchina.wallet.server.msic.EnumWallet.OrderStatus;
-import com.rfchina.wallet.server.msic.EnumWallet.WalletType;
+import com.rfchina.wallet.server.msic.EnumWallet.OrderSubStatus;
 import com.rfchina.wallet.server.service.handler.common.EBankHandler;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
 import java.math.BigDecimal;
@@ -52,7 +39,6 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -322,18 +308,17 @@ public class ScheduleService {
 			.map(t -> t.getValue())
 			.collect(Collectors.toList());
 
-		WalletOrderCriteria example = new WalletOrderCriteria();
-		example.setOrderByClause("id asc");
-		example.createCriteria()
-			.andProgressEqualTo(GwProgress.HAS_SEND.getValue())
-			.andStatusEqualTo(OrderStatus.WAITTING.getValue())
-			.andTypeIn(types);
-
 		List<WalletOrder> walletOrders = new ArrayList<>();
-		long beginTime = System.currentTimeMillis();
-		int persistSecond = 0;
+		long maxId = 0;
 		do {
 
+			WalletOrderCriteria example = new WalletOrderCriteria();
+			example.setOrderByClause("id asc");
+			example.createCriteria()
+				.andProgressEqualTo(GwProgress.HAS_SEND.getValue())
+				.andStatusEqualTo(OrderStatus.WAITTING.getValue())
+				.andTypeIn(types)
+				.andIdGreaterThan(maxId);
 			walletOrders = walletOrderDao
 				.selectByExampleWithRowbounds(example, new RowBounds(0, batchSize));
 			for (WalletOrder walletOrder : walletOrders) {
@@ -344,9 +329,11 @@ public class ScheduleService {
 				} catch (Exception e) {
 					log.error("定时更新支付状态, 异常！", e);
 				}
+
+				maxId = walletOrder.getId() > maxId ? walletOrder.getId() : maxId;
 			}
-			persistSecond = (int) ((System.currentTimeMillis() - beginTime) / 1000);
-		} while (!walletOrders.isEmpty() || persistSecond / 4 < periodSecord / 5);
+
+		} while (!walletOrders.isEmpty() );
 		log.info("quartz: 结束更新支付状态[高级钱包]");
 	}
 

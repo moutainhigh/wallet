@@ -32,6 +32,7 @@ import com.rfchina.wallet.server.bank.pudong.domain.response.PubPayQueryRespBody
 import com.rfchina.wallet.server.bank.pudong.domain.response.PubPayQueryRespBody.PayResult;
 import com.rfchina.wallet.server.bank.pudong.domain.response.PubPayRespBody;
 import com.rfchina.wallet.server.bank.pudong.domain.util.ExceptionUtil;
+import com.rfchina.wallet.server.bank.yunst.exception.UnknownException;
 import com.rfchina.wallet.server.mapper.ext.BankCodeExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletFinanceExtDao;
@@ -42,6 +43,7 @@ import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.GwPayeeType;
 import com.rfchina.wallet.server.msic.EnumWallet.GwProgress;
 import com.rfchina.wallet.server.msic.EnumWallet.OrderStatus;
+import com.rfchina.wallet.server.msic.EnumWallet.OrderSubStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.RemitLocation;
 import com.rfchina.wallet.server.msic.EnumWallet.SysFlag;
 import com.rfchina.wallet.server.msic.EnumWallet.TransStatus8804;
@@ -124,213 +126,230 @@ public class Handler8800 extends EBankHandler {
 	public Tuple<GatewayMethod, PayTuple> finance(List<Tuple<WalletOrder, WalletFinance>> tuples)
 		throws Exception {
 
-		if (tuples == null || tuples.isEmpty() || tuples.size() > 20) {
-			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_BATCH_LIMIT);
-		}
+		try {
 
-		Map<String, String> elecMap = new HashMap<>();
-		List<PubPayReq> payReqs = tuples.stream().map(tuple -> {
-
-			WalletOrder walletOrder = tuple.left;
-			WalletFinance walletFinance = tuple.right;
-			// 必须注意，分转换为0.00元
-			BigDecimal bigAmount = new BigDecimal(walletOrder.getAmount())
-				.divide(new BigDecimal("100"), 2, BigDecimal.ROUND_DOWN);
-
-			BankCode bankCode = bankCodeExtDao.selectByCode(walletFinance.getPayeeBankCode());
-			if (bankCode == null) {
+			if (tuples == null || tuples.isEmpty() || tuples.size() > 20) {
 				throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_BATCH_LIMIT);
 			}
 
-			String sysFlag = bankCode.getClassCode().equals(configService.getAcctBankCode()) ?
-				SysFlag.SELF.getValue() : SysFlag.OTHER.getValue();
+			Map<String, String> elecMap = new HashMap<>();
+			List<PubPayReq> payReqs = tuples.stream().map(tuple -> {
+
+				WalletOrder walletOrder = tuple.left;
+				WalletFinance walletFinance = tuple.right;
+				// 必须注意，分转换为0.00元
+				BigDecimal bigAmount = new BigDecimal(walletOrder.getAmount())
+					.divide(new BigDecimal("100"), 2, BigDecimal.ROUND_DOWN);
+
+				BankCode bankCode = bankCodeExtDao.selectByCode(walletFinance.getPayeeBankCode());
+				if (bankCode == null) {
+					throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_BATCH_LIMIT);
+				}
+
+				String sysFlag = bankCode.getClassCode().equals(configService.getAcctBankCode()) ?
+					SysFlag.SELF.getValue() : SysFlag.OTHER.getValue();
 
 //			项目vivi需求，所有同城单改成异地，同城不支持自动处理
 //			String remitLocation = bankCode.getAreaCode().equals(configService.getAcctAreaCode()) ?
 //				RemitLocation.SELF.getValue() : RemitLocation.OTHER.getValue();
-			String remitLocation = RemitLocation.OTHER.getValue();
+				String remitLocation = RemitLocation.OTHER.getValue();
 
-			boolean isOtherRemit = SysFlag.OTHER.getValue().equals(sysFlag)
-				&& RemitLocation.OTHER.getValue().equals(remitLocation);
+				boolean isOtherRemit = SysFlag.OTHER.getValue().equals(sysFlag)
+					&& RemitLocation.OTHER.getValue().equals(remitLocation);
 
-			String payeeBankName =
-				SysFlag.OTHER.getValue().equals(sysFlag) ? bankCode.getBankName() : null;
+				String payeeBankName =
+					SysFlag.OTHER.getValue().equals(sysFlag) ? bankCode.getBankName() : null;
 
-			String elecNo = IdGenerator.createBizId("", 16, id -> {
-				return !gatewayTransService.existElecNo(id);
-			});
-			elecMap.put(walletOrder.getId().toString(), elecNo);
-			return PubPayReq.builder()
-				.elecChequeNo(elecNo)
-				.acctNo(configService.getAcctNo())
-				.acctName(configService.getAcctName())
-				.payeeAcctNo(walletFinance.getPayeeAccount())
-				.payeeName(walletFinance.getPayeeName())
-				.amount(bigAmount.toString())
-				.sysFlag(sysFlag)
-				.remitLocation(remitLocation)
-				.note(walletOrder.getNote())
-				.payeeType(walletFinance.getCardPro().byteValue() == CardPro.COMPANY.getValue()
-					? GwPayeeType.COMPANY.getValue().toString()
-					: GwPayeeType.PERSON.getValue().toString())
-				.payeeBankName(payeeBankName)
-				.payeeBankSelectFlag(isOtherRemit ? "1" : null)
-				.payeeBankNo(isOtherRemit ? walletFinance.getPayeeBankCode() : null)
-				.payPurpose(
-					walletFinance.getPayPurpose() != null ? walletFinance.getPayPurpose() : null)
+				String elecNo = IdGenerator.createBizId("", 16, id -> {
+					return !gatewayTransService.existElecNo(id);
+				});
+				elecMap.put(walletOrder.getId().toString(), elecNo);
+				return PubPayReq.builder()
+					.elecChequeNo(elecNo)
+					.acctNo(configService.getAcctNo())
+					.acctName(configService.getAcctName())
+					.payeeAcctNo(walletFinance.getPayeeAccount())
+					.payeeName(walletFinance.getPayeeName())
+					.amount(bigAmount.toString())
+					.sysFlag(sysFlag)
+					.remitLocation(remitLocation)
+					.note(walletOrder.getNote())
+					.payeeType(walletFinance.getCardPro().byteValue() == CardPro.COMPANY.getValue()
+						? GwPayeeType.COMPANY.getValue().toString()
+						: GwPayeeType.PERSON.getValue().toString())
+					.payeeBankName(payeeBankName)
+					.payeeBankSelectFlag(isOtherRemit ? "1" : null)
+					.payeeBankNo(isOtherRemit ? walletFinance.getPayeeBankCode() : null)
+					.payPurpose(
+						walletFinance.getPayPurpose() != null ? walletFinance.getPayPurpose()
+							: null)
+					.build();
+
+			}).collect(Collectors.toList());
+
+			String packetId = genPkgId();
+			PubPayReqBuilder req = PubPayReqBuilder.builder()
+				.masterId(configService.getMasterId())
+				.packetId(packetId)
+				.authMasterId(configService.getAuditMasterId())
+				.packageNo(tuples.get(0).left.getBatchNo())
+				.payList(payReqs)
 				.build();
 
-		}).collect(Collectors.toList());
+			PubPayRespBody resp = req.lanch(configService.getHostUrl(), configService.getSignUrl(),
+				client);
+			PayTuple payTuple = new PayTuple();
+			payTuple.setAcceptNo(resp.getAcceptNo());
+			payTuple.setPacketId(packetId);
+			payTuple.setElecMap(elecMap);
+			payTuple.setStage(req.getTransCode());
 
-		String packetId = genPkgId();
-		PubPayReqBuilder req = PubPayReqBuilder.builder()
-			.masterId(configService.getMasterId())
-			.packetId(packetId)
-			.authMasterId(configService.getAuditMasterId())
-			.packageNo(tuples.get(0).left.getBatchNo())
-			.payList(payReqs)
-			.build();
-
-		PubPayRespBody resp = req.lanch(configService.getHostUrl(), configService.getSignUrl(),
-			client);
-		PayTuple payTuple = new PayTuple();
-		payTuple.setAcceptNo(resp.getAcceptNo());
-		payTuple.setPacketId(packetId);
-		payTuple.setElecMap(elecMap);
-		payTuple.setStage(req.getTransCode());
-
-		return new Tuple<>(getGatewayMethod(), payTuple);
+			return new Tuple<>(getGatewayMethod(), payTuple);
+		} catch (Exception e) {
+			List<WalletOrder> orders = tuples.stream().map(t -> t.left)
+				.collect(Collectors.toList());
+			dealUndefinedError(orders, e);
+			return null;
+		}
 	}
 
 	public List<Triple<WalletOrder, WalletFinance, GatewayTrans>> updateOrderStatus(
 		List<WalletOrder> walletOrders) {
-
-		List<Triple<WalletOrder, WalletFinance, GatewayTrans>> triples = walletOrders.stream()
-			.map(walletOrder -> {
-				WalletFinance walletFinance = walletFinanceDao.selectByOrderId(walletOrder.getId());
-				GatewayTrans gatewayTrans = gatewayTransService
-					.selOrCrtTrans(walletOrder, walletFinance);
-				return new Triple<>(walletOrder, walletFinance, gatewayTrans);
-			}).collect(Collectors.toList());
-
-		Triple<WalletOrder, WalletFinance, GatewayTrans> firstTriple = triples.get(0);
-
-		GatewayTrans firstTrans = firstTriple.z;
-
-		// 如果包未授权过，则查询授权
-		if (StringUtils.isBlank(firstTrans.getHostAcceptNo())) {
-			// 查询包授权
-			boolean audited = doEBankPackageQuery(triples);
-			// 网银未授权的
-			if (!audited) {
-				return new ArrayList<>();
-			}
-
-			// 查询明细授权
-			doEBankDetailQuery(triples);
-		}
-
-		// 查核心支付结果
-		PubPayQueryBuilder req = PubPayQueryBuilder.builder()
-			.masterId(configService.getMasterId())
-			.packetId(genPkgId())
-			.acctNo(configService.getAcctNo())
-			.beginDate(DateUtil.formatDate(firstTrans.getCreateTime(), "yyyyMMdd"))
-			.endDate(DateUtil.formatDate(firstTrans.getAuditTime(), "yyyyMMdd"))
-			.acceptNo(firstTrans.getHostAcceptNo())
-			.build();
-
-		PubPayQueryRespBody respBody;
 		try {
-			respBody = req.lanch(configService.getHostUrl(), configService.getSignUrl(), client);
-		} catch (Exception e) {
-			log.error("银企直连-网关支付状态查询错误", e);
-			IGatewayError err = ExceptionUtil.explain(e);
-			triples.forEach(triple -> {
-				WalletOrder walletOrder = triple.x;
-				WalletFinance walletFinance = triple.y;
-				if (OrderStatus.WAITTING.getValue() == walletOrder.getStatus()) {
+			List<Triple<WalletOrder, WalletFinance, GatewayTrans>> triples = walletOrders.stream()
+				.map(walletOrder -> {
+					WalletFinance walletFinance = walletFinanceDao
+						.selectByOrderId(walletOrder.getId());
 					GatewayTrans gatewayTrans = gatewayTransService
 						.selOrCrtTrans(walletOrder, walletFinance);
-					gatewayTrans.setStage(err.getTransCode());
-					gatewayTrans.setErrCode(err.getErrCode());
-					gatewayTrans.setSysErrMsg(err.getErrMsg());
-					gatewayTrans.setUserErrMsg("查询交易异常");
-					gatewayTransService.updateTrans(gatewayTrans);
+					return new Triple<>(walletOrder, walletFinance, gatewayTrans);
+				}).collect(Collectors.toList());
+
+			Triple<WalletOrder, WalletFinance, GatewayTrans> firstTriple = triples.get(0);
+
+			GatewayTrans firstTrans = firstTriple.z;
+
+			// 如果包未授权过，则查询授权
+			if (StringUtils.isBlank(firstTrans.getHostAcceptNo())) {
+				// 查询包授权
+				boolean audited = doEBankPackageQuery(triples);
+				// 网银未授权的
+				if (!audited) {
+					return new ArrayList<>();
 				}
-			});
 
-			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_STATUS_QUERY_ERROR);
-		}
+				// 查询明细授权
+				doEBankDetailQuery(triples);
+			}
 
-		if (respBody.getLists() != null && respBody.getLists().getList() != null) {
+			// 查核心支付结果
+			PubPayQueryBuilder req = PubPayQueryBuilder.builder()
+				.masterId(configService.getMasterId())
+				.packetId(genPkgId())
+				.acctNo(configService.getAcctNo())
+				.beginDate(DateUtil.formatDate(firstTrans.getCreateTime(), "yyyyMMdd"))
+				.endDate(DateUtil.formatDate(firstTrans.getAuditTime(), "yyyyMMdd"))
+				.acceptNo(firstTrans.getHostAcceptNo())
+				.build();
 
-			List<PayResult> results = respBody.getLists().getList();
-			// 更新银行回单到流水表
-			return results.stream().map(rs -> {
-
-				Optional<Triple<WalletOrder, WalletFinance, GatewayTrans>> opt = triples.stream()
-					.filter(triple -> {
-						WalletOrder order = triple.x;
-						GatewayTrans trans = triple.z;
-						return rs.getElecChequeNo().equals(trans.getElecChequeNo())
-							&& order.getStatus().byteValue() == OrderStatus.WAITTING.getValue();
-					}).findFirst();
-
-				if (opt.isPresent()) {
-					Triple<WalletOrder, WalletFinance, GatewayTrans> tuple = opt.get();
-					WalletOrder walletOrder = tuple.x;
-					GatewayTrans trans = tuple.z;
-
-					IGatewayError err = extractErrCode(rs.getNote());
-
-					// 如果是终态, 更新到申请单
-					TransStatus8804 transStatus = TransStatus8804.parse(rs.getTransStatus());
-					String userErrMsg = transStatus != null ? transStatus.getDescription()
-						: ("未知状态" + rs.getTransStatus());
-					String sysErrMsg = StringUtils.isNotBlank(err.getErrMsg()) ? err.getErrMsg()
-						: userErrMsg;
-					if (transStatus.isEndStatus()) {
-						OrderStatus status;
-						// 核心拒绝的，需要进一步判断错误码
-						if (TransStatus8804.REJECT.getValue().equals(transStatus.getValue())) {
-							status = exactErrPredicate.test(err) ? OrderStatus.FAIL
-								: OrderStatus.WAITTING;
-						} else {
-							status = OrderStatus.parsePuDong8804(rs.getTransStatus());
-						}
-						walletOrder.setStatus(status.getValue());
-						walletOrder.setProgress(GwProgress.HAS_RESP.getValue());
-						walletOrder.setEndTime(new Date());
-						walletOrder.setTunnelErrMsg(sysErrMsg);
-						walletOrder.setTunnelStatus(rs.getTransStatus());
-						walletOrder.setTunnelErrCode(err.getErrCode());
-						if (StringUtil.isNotBlank(rs.getTransDate())) {
-							Date bizTime = DateUtil
-								.parse(rs.getTransDate(), DateUtil.SHORT_DTAE_PATTERN);
-							trans.setBizTime(bizTime);
-							if (TransStatus8804.FINISH.getValue().equals(transStatus.getValue())) {
-								walletOrder.setTunnelSuccTime(bizTime);
-							}
-						}
-						walletOrderDao.updateByPrimaryKey(walletOrder);
-						trans.setEndTime(new Date());
+			PubPayQueryRespBody respBody;
+			try {
+				respBody = req
+					.lanch(configService.getHostUrl(), configService.getSignUrl(), client);
+			} catch (Exception e) {
+				log.error("银企直连-网关支付状态查询错误", e);
+				IGatewayError err = ExceptionUtil.explain(e);
+				triples.forEach(triple -> {
+					WalletOrder walletOrder = triple.x;
+					WalletFinance walletFinance = triple.y;
+					if (OrderStatus.WAITTING.getValue() == walletOrder.getStatus()) {
+						GatewayTrans gatewayTrans = gatewayTransService
+							.selOrCrtTrans(walletOrder, walletFinance);
+						gatewayTrans.setStage(err.getTransCode());
+						gatewayTrans.setErrCode(err.getErrCode());
+						gatewayTrans.setSysErrMsg(err.getErrMsg());
+						gatewayTrans.setUserErrMsg("查询交易异常");
+						gatewayTransService.updateTrans(gatewayTrans);
 					}
-					// 记录中间状态
-					trans.setSeqNo(rs.getSeqNo());
-					trans.setStage(req.getTransCode());
-					trans.setErrStatus(rs.getTransStatus());
-					trans.setErrCode(err.getErrCode());
-					trans.setSysErrMsg(sysErrMsg);
-					trans.setUserErrMsg(userErrMsg);
-					gatewayTransService.updateTrans(trans);
-					return tuple;
-				}
-				return null;
-			}).filter(rs -> rs != null).collect(Collectors.toList());
-		}
+				});
 
-		return new ArrayList<>();
+				throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_STATUS_QUERY_ERROR);
+			}
+
+			if (respBody.getLists() != null && respBody.getLists().getList() != null) {
+
+				List<PayResult> results = respBody.getLists().getList();
+				// 更新银行回单到流水表
+				return results.stream().map(rs -> {
+
+					Optional<Triple<WalletOrder, WalletFinance, GatewayTrans>> opt = triples
+						.stream()
+						.filter(triple -> {
+							WalletOrder order = triple.x;
+							GatewayTrans trans = triple.z;
+							return rs.getElecChequeNo().equals(trans.getElecChequeNo())
+								&& order.getStatus().byteValue() == OrderStatus.WAITTING.getValue();
+						}).findFirst();
+
+					if (opt.isPresent()) {
+						Triple<WalletOrder, WalletFinance, GatewayTrans> tuple = opt.get();
+						WalletOrder walletOrder = tuple.x;
+						GatewayTrans trans = tuple.z;
+
+						IGatewayError err = extractErrCode(rs.getNote());
+
+						// 如果是终态, 更新到申请单
+						TransStatus8804 transStatus = TransStatus8804.parse(rs.getTransStatus());
+						String userErrMsg = transStatus != null ? transStatus.getDescription()
+							: ("未知状态" + rs.getTransStatus());
+						String sysErrMsg = StringUtils.isNotBlank(err.getErrMsg()) ? err.getErrMsg()
+							: userErrMsg;
+						if (transStatus.isEndStatus()) {
+							OrderStatus status;
+							// 核心拒绝的，需要进一步判断错误码
+							if (TransStatus8804.REJECT.getValue().equals(transStatus.getValue())) {
+								status = exactErrPredicate.test(err) ? OrderStatus.FAIL
+									: OrderStatus.WAITTING;
+							} else {
+								status = OrderStatus.parsePuDong8804(rs.getTransStatus());
+							}
+							walletOrder.setStatus(status.getValue());
+							walletOrder.setProgress(GwProgress.HAS_RESP.getValue());
+							walletOrder.setEndTime(new Date());
+							walletOrder.setTunnelErrMsg(sysErrMsg);
+							walletOrder.setTunnelStatus(rs.getTransStatus());
+							walletOrder.setTunnelErrCode(err.getErrCode());
+							if (StringUtil.isNotBlank(rs.getTransDate())) {
+								Date bizTime = DateUtil
+									.parse(rs.getTransDate(), DateUtil.SHORT_DTAE_PATTERN);
+								trans.setBizTime(bizTime);
+								if (TransStatus8804.FINISH.getValue()
+									.equals(transStatus.getValue())) {
+									walletOrder.setTunnelSuccTime(bizTime);
+								}
+							}
+							walletOrderDao.updateByPrimaryKey(walletOrder);
+							trans.setEndTime(new Date());
+						}
+						// 记录中间状态
+						trans.setSeqNo(rs.getSeqNo());
+						trans.setStage(req.getTransCode());
+						trans.setErrStatus(rs.getTransStatus());
+						trans.setErrCode(err.getErrCode());
+						trans.setSysErrMsg(sysErrMsg);
+						trans.setUserErrMsg(userErrMsg);
+						gatewayTransService.updateTrans(trans);
+						return tuple;
+					}
+					return null;
+				}).filter(rs -> rs != null).collect(Collectors.toList());
+			}
+
+			return new ArrayList<>();
+		} catch (Exception e) {
+			dealUndefinedError(walletOrders, e);
+			return null;
+		}
 	}
 
 
@@ -515,5 +534,16 @@ public class Handler8800 extends EBankHandler {
 		StringBuilder builder = new StringBuilder("SLP");
 		builder.append(idx.toString());
 		return builder.toString();
+	}
+
+	private void dealUndefinedError(List<WalletOrder> orders, Exception e) {
+		log.error("未定义异常", e);
+		for (WalletOrder walletOrder : orders) {
+			walletOrder.setUserErrMsg("交易异常");
+			walletOrder.setProgress(GwProgress.HAS_RESP.getValue());
+			walletOrder.setSubStatus(OrderSubStatus.WAIT_DEAL.getValue());
+			walletOrderDao.updateByPrimaryKeySelective(walletOrder);
+		}
+		throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
 	}
 }

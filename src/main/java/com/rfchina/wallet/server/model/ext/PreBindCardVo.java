@@ -36,9 +36,6 @@ public class PreBindCardVo {
 	@ApiModelProperty("银行卡类型")
 	private Byte cardType;
 
-	@ApiModelProperty("银行名称")
-	private String bankName;
-
 	@ApiModelProperty("银行类型")
 	private String bankCode;
 }
