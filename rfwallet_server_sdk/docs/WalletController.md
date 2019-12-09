@@ -324,6 +324,30 @@
 }
 ```
 
+###  业务查询银行卡信息
+
+请求地址: /wallet_server/v1/u/wallet/query_wallet_card
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|wallet_id|是|钱包ID|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+   , "data": [ {
+} ] 
+}
+```
+
 ###  通过UID查询钱包信息（企业or个人）
 
 请求地址: /wallet_server/v1/m/wallet/query_wallet_info_by_uid
