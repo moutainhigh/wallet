@@ -120,7 +120,7 @@ public interface SeniorWalletApi {
 	 * @param walletId 必填, 钱包id
 	 */
 	YunstMemberInfoResult.CompanyInfoResult seniorWalletGetCompanyInfo(String accessToken,
-		Long walletId);
+		Long walletId, Boolean isManualRefresh);
 
 	/**
 	 * 高级钱包获取个人用户信息

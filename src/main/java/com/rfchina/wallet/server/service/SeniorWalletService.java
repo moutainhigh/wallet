@@ -3,6 +3,7 @@ package com.rfchina.wallet.server.service;
 import com.rfchina.platform.common.exception.RfchinaResponseException;
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.Tuple;
+import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.misc.EnumDef;
@@ -441,7 +442,8 @@ public class SeniorWalletService {
 	/**
 	 * 高级钱包企业会员信息
 	 */
-	public CompanyInfoResult seniorWalletGetCompanyInfo(Long walletId) throws Exception {
+	public CompanyInfoResult seniorWalletGetCompanyInfo(Long walletId, Boolean isManualRefresh)
+		throws Exception {
 		WalletTunnel walletTunnel = walletTunnelDao
 			.selectByTunnelTypeAndWalletId(TunnelType.YUNST.getValue(), walletId);
 		Objects.requireNonNull(walletTunnel);
@@ -452,6 +454,14 @@ public class SeniorWalletService {
 			&& WalletTunnelAuditStatus.WAITING_AUDIT.getValue().byteValue() == walletTunnel
 			.getStatus()) {
 			this.synchronizeCompanyTunnelInfo(walletId, walletTunnel, null);
+		}
+		if (isManualRefresh.booleanValue()) {
+			CardInfo cardInfo = CardInfo.builder().cardNo(memberInfo.getAccountNo())
+				.parentBankName(memberInfo.getParentBankName())
+				.bankName(memberInfo.getBankName()).build();
+			walletTunnel.setCheckTime(DateUtil.parse(memberInfo.getCheckTime(),DateUtil.STANDARD_DTAETIME_PATTERN));
+			walletTunnelDao.updateByPrimaryKey(walletTunnel);
+			this.synchronizeCompanyTunnelInfo(walletId, walletTunnel, cardInfo);
 		}
 		return memberInfo;
 	}
