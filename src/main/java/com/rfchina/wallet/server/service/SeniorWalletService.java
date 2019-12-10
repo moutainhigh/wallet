@@ -460,6 +460,7 @@ public class SeniorWalletService {
 				.parentBankName(memberInfo.getParentBankName())
 				.bankName(memberInfo.getBankName()).build();
 			walletTunnel.setCheckTime(DateUtil.parse(memberInfo.getCheckTime(),DateUtil.STANDARD_DTAETIME_PATTERN));
+			walletTunnel.setSecurityTel(memberInfo.getPhone());
 			walletTunnelDao.updateByPrimaryKey(walletTunnel);
 			this.synchronizeCompanyTunnelInfo(walletId, walletTunnel, cardInfo);
 		}
