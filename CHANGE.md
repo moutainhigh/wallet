@@ -4,6 +4,11 @@
 jenkins job: platform-rfwallet-super-server-test
 
 ```  
+## 1.1.0_b18_2019121014_Beta
+### [变动说明]
+- 绑卡接口增加支行编码
+- 增加修改银行卡支行编码接口
+
 ## 1.1.0_b17_2019121012_Beta
 ### [变动说明]
 - 企业商家资料sdk增加传参
