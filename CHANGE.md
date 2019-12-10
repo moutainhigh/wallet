@@ -4,6 +4,10 @@
 jenkins job: platform-rfwallet-super-server-test
 
 ```  
+## 1.1.0_b17_2019121012_Beta
+### [变动说明]
+- 企业商家资料sdk增加传参
+
 ## 1.1.0_b17_2019120917_Beta
 ### [变动说明]
 - 新增银行卡信息修改接口
