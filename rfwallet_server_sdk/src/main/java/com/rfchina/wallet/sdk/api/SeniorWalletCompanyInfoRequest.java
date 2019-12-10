@@ -16,6 +16,9 @@ public class SeniorWalletCompanyInfoRequest extends  AbstractApiRequest {
   @ApiModelProperty("access_token")
   private String accessToken ;
 
+  @ApiModelProperty("手动更新开关")
+  private Boolean isManualRefresh ;
+
   @ApiModelProperty("钱包id")
   private Long walletId ;
 
@@ -35,6 +38,9 @@ public class SeniorWalletCompanyInfoRequest extends  AbstractApiRequest {
     Map<String, String> parameters = new HashMap<>(2);
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
+      }
+      if(isManualRefresh != null){
+        parameters.put("is_manual_refresh", isManualRefresh.toString());
       }
       if(walletId != null){
         parameters.put("wallet_id", walletId.toString());

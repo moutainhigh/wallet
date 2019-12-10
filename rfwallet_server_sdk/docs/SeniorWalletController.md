@@ -169,6 +169,7 @@
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
 |access_token|是|access_token|
+|is_manual_refresh|是|手动更新开关|
 |wallet_id|是|钱包id|
 
 返回数据
