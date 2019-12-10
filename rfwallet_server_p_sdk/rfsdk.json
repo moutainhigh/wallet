@@ -9,6 +9,6 @@
   "additionalProperties": {
     "apiVersion": "v1.0.0",
     "author": "nzm",
-    "pathsRequired": ["/u/"]
+    "pathsRequired": ["/m/","/p/"]
   }
 }

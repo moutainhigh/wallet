@@ -1,8 +1,8 @@
 buildscript {
     ext {
-        projectVersion = '1.1.0-SNAPSHOT'
+        projectVersion = '1.1.0'
         projectGroup = 'com.rfchina'
-        artifactId = 'platform-sdk2-wallet-server'
+        artifactId = 'platform-sdk2-p-wallet-server'
         lombokVersion = '1.16.10'
         isReleaseVersion = !(projectVersion =~ /-SNAPSHOT$/)
     }
