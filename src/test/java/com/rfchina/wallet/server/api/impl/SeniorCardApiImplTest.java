@@ -18,7 +18,7 @@ public class SeniorCardApiImplTest extends SpringApiTest {
 	public void preBindBandCard() {
 		String resp = seniorCardApi
 			.preBindBandCard(super.accessToken, WALLET_ID, "6214850201481956",
-				"观富昌", CARD_PHONE, "440923198711033434", null, null);
+				"观富昌", CARD_PHONE, "440923198711033434", null, null, null);
 		log.info("预绑卡 {}", resp);
 
 	}
@@ -38,7 +38,7 @@ public class SeniorCardApiImplTest extends SpringApiTest {
 	public void preBindBandCard2() {
 		String resp = seniorCardApi
 			.preBindBandCard(super.accessToken, 10054L, "6222023602016631699",
-				"刘裕", "15088069541", "44011119911012183X", null, null);
+				"刘裕", "15088069541", "44011119911012183X", null, null, null);
 		log.info("预绑卡 {}", resp);
 
 	}

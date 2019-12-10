@@ -47,6 +47,7 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.RowBounds;
+import org.eclipse.jetty.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundSetOperations;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -132,20 +133,35 @@ public class SeniorBalanceService {
 		Set<BalanceVo> diffSet = new HashSet<>(walletDiffSet);
 		diffSet.removeAll(walletMoreSet);
 		saveResult(diffSet, beginDate, endDate, job.getId(), BalanceResultStatus.AMOUNT_NOT_MATCH);
-		// 生成对账文件
-		try {
-			Path path = write2File(date, succSet);
-			byte[] bytes = Files.readAllBytes(path);
-			String fileKey = path.getFileName().toString();
-			fileServer.upload(fileKey, bytes, "text/plain", EnumFileAcl.PUBLIC_READ, null);
-			Files.delete(path);
-			job.setStatus(BalanceJobStatus.SUCC.getValue());
-			job.setWalletFileUrl(fileServer.getSvrEndpoint() + "/_f/" +
-				fileServer.getSrvBucket() + "/" + fileKey);
+
+		// 对账失败时结束
+		if (!tunnelMoreSet.isEmpty() || !walletMoreSet.isEmpty() || !diffSet.isEmpty()) {
+			job.setStatus(BalanceJobStatus.FAIL.getValue());
 			balanceJobDao.updateByPrimaryKeySelective(job);
-		} catch (Exception e) {
-			log.error("上传对账文件异常", e);
+			// 邮件通知对账错误
+			sendErrMail(tunnelMoreSet, walletMoreSet, diffSet);
+		} else {
+			// 生成对账文件
+			try {
+				Path path = write2File(date, succSet);
+				byte[] bytes = Files.readAllBytes(path);
+				String fileKey = path.getFileName().toString();
+				fileServer.upload(fileKey, bytes, "text/plain", EnumFileAcl.PUBLIC_READ, null);
+				Files.delete(path);
+				job.setStatus(BalanceJobStatus.SUCC.getValue());
+				job.setWalletFileUrl(fileServer.getSvrEndpoint() + "/_f/" +
+					fileServer.getSrvBucket() + "/" + fileKey);
+				balanceJobDao.updateByPrimaryKeySelective(job);
+			} catch (Exception e) {
+				log.error("上传对账文件异常", e);
+			}
 		}
+
+
+	}
+
+	private void sendErrMail(Set<BalanceVo> tunnelMoreSet, Set<BalanceVo> walletMoreSet,
+		Set<BalanceVo> diffSet) {
 		// 邮件通知
 		StringBuilder content = new StringBuilder();
 		content.append("通道条目多&nbsp&nbsp")
@@ -178,7 +194,6 @@ public class SeniorBalanceService {
 		} catch (Exception e) {
 			log.error("[钱包服务]通知邮件发送失败, " + content, e);
 		}
-
 	}
 
 	private BalanceJob createJob(Date beginDate, Date endDate) {
@@ -232,18 +247,23 @@ public class SeniorBalanceService {
 			.collect(Collectors.toSet());
 	}
 
+
 	private void saveLocal(String fileUrl, Date beginDate, Date endDate) {
 		// 删除历史数据
 		balanceTunnelDetailDao.deleteByBalanceDate(beginDate, endDate);
 		// 解析保存数据
 		try {
 			long count = 0;
+			String prefix = configService.getOrderNoPrefix();
 			try (BufferedReader reader = Files.newBufferedReader(Paths.get(fileUrl))) {
 
 				String line = reader.readLine();
 				for (line = reader.readLine(); line != null; line = reader.readLine()) {
 					CheckAccount check = StringObject
 						.parseStringObject(line, CheckAccount.class, "\\" + SPLIT_TAG);
+					if (StringUtil.isNotBlank(prefix) && !check.getOrderNo().startsWith(prefix)) {
+						continue;
+					}
 					BalanceTunnelDetail detail = BeanUtil
 						.newInstance(check, BalanceTunnelDetail.class);
 					detail.setTunnelType(TunnelType.YUNST.getValue());

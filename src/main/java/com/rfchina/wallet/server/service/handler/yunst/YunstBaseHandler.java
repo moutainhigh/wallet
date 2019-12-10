@@ -29,7 +29,7 @@ public abstract class YunstBaseHandler {
 				configService.getYstPfxPath(), configService.getYstTlCertPath()));
 	}
 
-	public static String transferToYunstBizUserFormat(Long walletId, Byte type ,String env) {
+	public String transferToYunstBizUserFormat(Long walletId, Byte type ,String env) {
 		switch (type){
 		case 1:
 			return env.toUpperCase() + MEMBER_TYPE_PREFIX_COMPANY + walletId;

@@ -170,6 +170,9 @@ public class ConfigService {
 	@Value("${wallet.notify.contract}")
 	private String notifyContract;
 
+	@Value("${wallet.orderNo.prefix:}")
+	public String orderNoPrefix;
+
 // yunst end
 
 }

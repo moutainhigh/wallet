@@ -27,7 +27,7 @@ public class SeniorWalletTest extends WalletBaseTest {
 	 */
 	@Test
 	public void testWalletUpgrade() {
-		upgradeWallet(2, (byte) 3, 11L);
+		upgradeWallet(2, (byte) 3, 10035L);
 	}
 
 	/**
@@ -59,7 +59,7 @@ public class SeniorWalletTest extends WalletBaseTest {
 	 */
 	@Test
 	public void testSeniorWalletBindPhone() {
-		seniorWalletBindPhone(2, (byte) 3, 11L, "13800138111", "11111");
+		seniorWalletBindPhone(2, (byte) 3, 10035L, "13710819640", "11111");
 	}
 
 	/**
@@ -67,7 +67,7 @@ public class SeniorWalletTest extends WalletBaseTest {
 	 */
 	@Test
 	public void testSeniorWalletAuth() {
-		seniorWalletAuth(2, (byte) 3, 10035L, "观富昌", "6214850201481956", "13710819640", "11111");
+		seniorWalletAuth(2, (byte) 3, 10035L, "观富昌", "6214850201481956", "13710819640", "11111","");
 	}
 
 	/**

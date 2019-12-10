@@ -12,6 +12,7 @@ import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
 import com.rfchina.wallet.domain.model.ext.WalletCardExt;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
+import com.rfchina.wallet.server.model.ext.WalletCardVo;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import java.util.Date;
 import java.util.List;
@@ -126,4 +127,8 @@ public interface WalletApi {
 	WalletUser loginWithVerifyCode(String accessToken, String mobile, String verifyCode,
 		Integer type, String ip);
 
+	/**
+	 * 业务查询银行卡信息
+	 */
+	List<WalletCardVo> queryWalletCard(String accessToken, Long walletId);
 }

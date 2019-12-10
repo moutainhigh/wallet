@@ -11,6 +11,7 @@ import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
 import com.rfchina.wallet.server.api.WalletApi;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
+import com.rfchina.wallet.server.model.ext.WalletCardVo;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import io.swagger.annotations.Api;
@@ -114,26 +115,6 @@ public class WalletController {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
 
-//	@ApiOperation("钱包流水")
-//	@PostMapping(UrlConstant.WALLET_LOG_LIST)
-//	public ResponseValue<Pagination<WalletOrder>> walletLogList(
-//		@RequestParam("access_token") String accessToken,
-//		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
-//		@ApiParam(value = "开始时间") @RequestParam(value = "start_time", required = false)
-//		@DateTimeFormat(pattern = "yyyy-MM-dd") Date startTime,
-//		@ApiParam(value = "结束时间") @RequestParam(value = "end_time", required = false)
-//		@DateTimeFormat(pattern = "yyyy-MM-dd") Date endTime,
-//		@ApiParam(value = "需要查询的数量（数量最大50）", required = true) @RequestParam(value = "limit") int limit,
-//		@ApiParam(value = "查询列表的起始偏移量，从0开始，即offset: 5是指从列表里的第六个开始读取", required = true)
-//		@RequestParam(value = "offset") long offset,
-//		@ApiParam(value = "非必填, false:否, true:是, 是否返回数据总量, 默认false") @RequestParam(value = "stat", required =
-//			false)
-//			Boolean stat) {
-//		Pagination<WalletOrder> page = walletApi
-//			.walletApplyList(accessToken, walletId, startTime, endTime, limit, offset, stat);
-//		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,page);
-//	}
-
 	@ApiOperation("钱包绑定的银行卡列表")
 	@PostMapping(UrlConstant.WALLET_BANK_CARD_LIST)
 	public ResponseValue<List<WalletCard>> bindingBankCardList(
@@ -221,4 +202,14 @@ public class WalletController {
 	}
 
 
+	@ApiOperation("业务查询银行卡信息")
+	@PostMapping(UrlConstant.WALLET_CARD_QUERY)
+	public ResponseValue<List<WalletCardVo>> queryWalletCard(
+		@RequestParam("access_token") String accessToken,
+		@ApiParam(value = "钱包ID", required = true) @RequestParam("wallet_id") Long walletId) {
+
+		List<WalletCardVo> resp = walletApi.queryWalletCard(accessToken, walletId);
+
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, resp);
+	}
 }

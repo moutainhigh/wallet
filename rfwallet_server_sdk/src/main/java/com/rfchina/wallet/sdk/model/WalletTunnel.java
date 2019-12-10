@@ -16,6 +16,9 @@ public class WalletTunnel  {
     @ApiModelProperty("银行余额")
     private Long balance ;
 
+    @ApiModelProperty("扣款协议号")
+    private String balanceProtocolNo ;
+
     @ApiModelProperty("扣款协议请求流水号")
     private String balanceProtocolReqSn ;
 

@@ -940,6 +940,9 @@ public class EnumWallet {
 		}
 
 		public byte and(Byte bizTag) {
+			if(bizTag == null){
+				bizTag = 0;
+			}
 			return (byte) (this.value.byteValue() | bizTag.byteValue());
 		}
 	}
@@ -1066,6 +1069,7 @@ public class EnumWallet {
 	public enum BalanceJobStatus implements Valuable<Byte> {
 		RUNNING((byte) 1, "进行中"),
 		SUCC((byte) 2, "对账成功"),
+		FAIL((byte) 3, "对账失败"),
 		;
 
 		private Byte value;

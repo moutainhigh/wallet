@@ -55,7 +55,7 @@
     tunnel_status:""  , //通道状态
     tunnel_succ_time:""  , //通道成功时间
     tunnel_type:""  , //通道类型。1: 浦发银企直连，2：通联云商通
-    type:""  , //类型，1：财务结算，2：充值，3：提现，4：代收，5：代付，6：退款，7：消费，8：代扣
+    type:""  , //类型，1：财务结算，2：充值，3：提现，4：代收，5：代付，6：退款，7：消费, 8：代扣,
     user_err_msg:""  , //用户端错误提示
     wallet_id:""   //钱包id
 }  ]  , 
@@ -134,6 +134,7 @@
   "msg": ""//消息
    , "data":  {
     balance:""  , //银行余额
+    balance_protocol_no:""  , //扣款协议号
     balance_protocol_req_sn:""  , //扣款协议请求流水号
     biz_user_id:""  , //业务用户标识
     check_time:""  , //审核时间
@@ -383,6 +384,7 @@
   "msg": ""//消息
    , "data":  {
     balance:""  , //银行余额
+    balance_protocol_no:""  , //扣款协议号
     balance_protocol_req_sn:""  , //扣款协议请求流水号
     biz_user_id:""  , //业务用户标识
     check_time:""  , //审核时间
@@ -427,6 +429,7 @@
   "msg": ""//消息
    , "data":  {
     balance:""  , //银行余额
+    balance_protocol_no:""  , //扣款协议号
     balance_protocol_req_sn:""  , //扣款协议请求流水号
     biz_user_id:""  , //业务用户标识
     check_time:""  , //审核时间
@@ -472,6 +475,7 @@
   "msg": ""//消息
    , "data":  {
     balance:""  , //银行余额
+    balance_protocol_no:""  , //扣款协议号
     balance_protocol_req_sn:""  , //扣款协议请求流水号
     biz_user_id:""  , //业务用户标识
     check_time:""  , //审核时间

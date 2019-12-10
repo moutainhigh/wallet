@@ -116,6 +116,7 @@ public class SeniorWalletService {
 					.tunnelUserId(member.left.getUserId())
 					.memberType(member.right.getValue().byteValue());
 			} catch (CommonGatewayException e) {
+				log.error("", e);
 				String errCode = e.getBankErrCode();
 				if (!EnumYunstResponse.ALREADY_EXISTS_MEMEBER.getValue().equals(errCode)) {
 					log.error("开通高级钱包失败, channelType: {}, walletId: {}, source:{}", channelType,
@@ -183,32 +184,19 @@ public class SeniorWalletService {
 		if (channelType == TunnelType.YUNST.getValue().intValue()) {
 			WalletTunnel walletTunnel = walletTunnelDao
 				.selectByTunnelTypeAndWalletId(channelType.byteValue(), walletId);
-
 			Objects.requireNonNull(walletTunnel);
-			if (!StringUtils.isEmpty(walletTunnel.getSecurityTel())) {
-				log.error("已设置安全手机: walletId:{}", walletId);
-				throw new RfchinaResponseException(EnumResponseCode.COMMON_FAILURE,
-					"已设置安全手机");
-			}
-
 			try {
 				yunstUserHandler.bindPhone(walletTunnel.getBizUserId(), mobile, verifyCode);
 			} catch (CommonGatewayException e) {
+				log.error("渠道绑定手机失败: walletId:{}", walletId);
 				if (!EnumYunstResponse.ALREADY_BIND_PHONE.getValue()
 					.equals(e.getBankErrCode())) {
-					log.error("渠道绑定手机失败: walletId:{}", walletId);
 					throw new RfchinaResponseException(EnumResponseCode.COMMON_FAILURE,
 						"渠道绑定手机失败");
 				}
 			}
 			walletTunnel.setSecurityTel(mobile);
-			int effectRows = walletTunnelDao.updateByPrimaryKeySelective(walletTunnel);
-			if (effectRows != 1) {
-				log.error("更新高级钱包手机信息失败:effectRows:{},walletTunnel: {}", effectRows,
-					JsonUtil.toJSON(walletTunnel));
-				throw new RfchinaResponseException(EnumResponseCode.COMMON_FAILURE,
-					"更新高级钱包手机信息失败");
-			}
+			walletTunnelDao.updateByPrimaryKeySelective(walletTunnel);
 		}
 	}
 

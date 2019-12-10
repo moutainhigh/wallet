@@ -15,9 +15,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class DeductionReq {
 
-	@ApiModelProperty(required = true, name = "payer_wallet_id", value = "付款钱包ID")
-	private Long payerWalletId;
-
 	@ApiModelProperty(required = true, name = "biz_no", value = "业务凭证号(业务方定义唯一,最长32字节)", example = "123")
 	private String bizNo;
 

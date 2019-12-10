@@ -51,9 +51,8 @@ public abstract class WalletBaseTest extends BaseTest {
 				configService.getYstSysId(),
 				configService.getYstPassword(), configService.getYstAlias(),
 				configService.getYstVersion(),
-				"/data/env/config/dev-key/yunst/1902271423530473681.pfx",
-				"/data/env/config/dev-key/yunst/TLCert-test.cer"));
-
+				"/data/env/config/dev-key/yunst2/1911281453448249697.pfx",
+				"/data/env/config/dev-key/yunst2/TLYunstCert_test.cer"));
 		}
 	}
 
@@ -271,7 +270,7 @@ public abstract class WalletBaseTest extends BaseTest {
 
 	protected Map<String, Object> seniorWalletAuth(Integer channelType, Byte source, Long walletId,
 		String realName,
-		String idNo, String mobile, String smsVerifyCode) {
+		String idNo, String mobile, String smsVerifyCode, String jumpUrl) {
 		Map<String, String> params = new HashMap<>();
 		params.put("access_token", getAccessToken(appId, appSecret));
 		params.put("channel_type", String.valueOf(channelType));
@@ -281,6 +280,7 @@ public abstract class WalletBaseTest extends BaseTest {
 		params.put("id_no", idNo);
 		params.put("mobile", String.valueOf(mobile));
 		params.put("verify_code", smsVerifyCode);
+		params.put("jump_url", jumpUrl);
 		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
 		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
 		params.put("sign", sign);

@@ -487,15 +487,14 @@ public class YunstBizHandler extends EBankHandler {
 			.formatDate(order.getExpireTime(), DateUtil.STANDARD_DTAETIME_PATTERN) : null;
 		ConsumeApplyReq req = ConsumeApplyReq.builder()
 			.payerId(payer.getBizUserId())
-			.recieverId(payee.getBizUserId())
+			.protocolNo(payer.getBalanceProtocolNo())
+			.receiverId(payee.getBizUserId())
 			.bizOrderNo(order.getOrderNo())
+			.payMethod(getMethodMap(methods, false))
 			.amount(order.getAmount())
 			.fee(0L)
-			.validateType(consume.getValidateType().longValue())
-			.frontUrl(null)
 			.backUrl(configService.getYunstRecallPrefix() + UrlConstant.YUNST_ORDER_RECALL)
 			.orderExpireDatetime(expireTime)
-			.payMethod(getMethodMap(methods, false))
 			.industryCode(order.getIndustryCode())
 			.industryName(order.getIndustryName())
 			.summary(order.getNote())
@@ -559,90 +558,97 @@ public class YunstBizHandler extends EBankHandler {
 	 * 更新状态
 	 */
 	public WalletOrder updateOrderStatus(WalletOrder order) {
-
-		GetOrderDetailResp tunnelOrder = queryOrderDetail(order.getOrderNo());
-		if (!order.getOrderNo().equals(tunnelOrder.getBizOrderNo())) {
-			log.error("订单号不匹配， order = {} , channelOrderNo = {}", order,
-				tunnelOrder.getBizOrderNo());
-			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_STATUS_QUERY_ERROR);
-		}
-		// 通道状态与时间
-		order.setTunnelStatus(String.valueOf(tunnelOrder.getOrderStatus()));
-		Optional.ofNullable(tunnelOrder.getPayDatetime()).ifPresent(paytime -> {
-			order.setTunnelSuccTime(
-				DateUtil.parse(paytime, DateUtil.STANDARD_DTAETIME_PATTERN));
-		});
-		order.setTunnelErrMsg(tunnelOrder.getErrorMessage());
-		YunstOrderStatus orderStatus = EnumUtil
-			.parse(YunstOrderStatus.class, tunnelOrder.getOrderStatus());
-		OrderStatus applyStatus = orderStatus.toUniStatus();
-		order.setStatus(applyStatus.getValue());
-		order.setProgress(UniProgress.RECEIVED.getValue());
-		if (applyStatus.isEndStatus()) {
-			order.setEndTime(new Date());
-		}
-		order.setBizTag(
-			EnumBizTag.RECORD.and(Optional.ofNullable(order.getBizTag()).orElse((byte) 0)));
-		walletOrderDao.updateByPrimaryKeySelective(order);
-
-		// 记录到流水
-		if (OrderStatus.SUCC.getValue().byteValue() == order.getStatus()
-			&& (order.getBizTag() == null || !EnumBizTag.RECORD.contains(order.getBizTag()))) {
-			// 代付
-			if (order.getType().byteValue() == OrderType.AGENT_PAY.getValue()) {
-				MoneyLog moneyLog = MoneyLog.builder()
-					.walletId(order.getWalletId())
-					.orderId(order.getId())
-					.orderNo(order.getOrderNo())
-					.orderType(order.getType())
-					.type(DebitType.DEBIT.getValue())
-					.debitAmount(order.getAmount())
-					.creditAmount(0L)
-					.createTime(new Date())
-					.build();
-				moneyLogDao.insertSelective(moneyLog);
-				WalletClearing clearing = walletClearingDao.selectByOrderId(order.getId());
-				walletCollectInfoDao
-					.accuClearAmount(clearing.getCollectInfoId(), clearing.getAmount());
-			} else {
-				MoneyLogBuilder builder = MoneyLog.builder()
-					.walletId(order.getWalletId())
-					.orderId(order.getId())
-					.orderNo(order.getOrderNo())
-					.orderType(order.getType())
-					.createTime(new Date());
-				if (order.getType().byteValue() == OrderType.RECHARGE.getValue()
-					|| order.getType().byteValue() == OrderType.REFUND.getValue()) {
-					// 充值、退款
-					builder.type(DebitType.DEBIT.getValue());
-					builder.debitAmount(order.getAmount());
-					builder.creditAmount(0L);
-				} else if (order.getType().byteValue() == OrderType.WITHDRAWAL.getValue()
-					|| order.getType().byteValue() == OrderType.COLLECT.getValue()
-					|| order.getType().byteValue() == OrderType.CONSUME.getValue()
-					|| order.getType().byteValue() == OrderType.DEDUCTION.getValue()) {
-					// 提现、代收、消费、代扣
-					builder.type(DebitType.CREDIT.getValue());
-					builder.debitAmount(0L);
-					builder.creditAmount(order.getAmount());
-				}
-				if (order.getType().byteValue() == OrderType.REFUND.getValue()) {
-					WalletRefund refund = walletRefundDao.selectByOrderId(order.getId());
-					List<WalletRefundDetail> details = walletRefundDetailDao
-						.selectByRefundId(refund.getId());
-					details.forEach(detail -> {
-						walletCollectInfoDao
-							.accuRefundAmount(detail.getCollectInfoId(), detail.getAmount());
-					});
-
-				}
-				moneyLogDao.insertSelective(builder.build());
+		try {
+			GetOrderDetailResp tunnelOrder = queryOrderDetail(order.getOrderNo());
+			if (!order.getOrderNo().equals(tunnelOrder.getBizOrderNo())) {
+				log.error("订单号不匹配， order = {} , channelOrderNo = {}", order,
+					tunnelOrder.getBizOrderNo());
+				throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_STATUS_QUERY_ERROR);
+			}
+			// 通道状态与时间
+			order.setTunnelStatus(String.valueOf(tunnelOrder.getOrderStatus()));
+			Optional.ofNullable(tunnelOrder.getPayDatetime()).ifPresent(paytime -> {
+				order.setTunnelSuccTime(
+					DateUtil.parse(paytime, DateUtil.STANDARD_DTAETIME_PATTERN));
+			});
+			order.setTunnelErrMsg(tunnelOrder.getErrorMessage());
+			YunstOrderStatus orderStatus = EnumUtil
+				.parse(YunstOrderStatus.class, tunnelOrder.getOrderStatus());
+			OrderStatus walletOrderStatus = orderStatus.toUniStatus();
+			order.setStatus(walletOrderStatus.getValue());
+			if (walletOrderStatus.isEndStatus()) {
+				order.setProgress(UniProgress.RECEIVED.getValue());
+			}
+			if (walletOrderStatus.isEndStatus()) {
+				order.setEndTime(new Date());
 			}
 
+			walletOrderDao.updateByPrimaryKeySelective(order);
 
+			// 记录到流水
+			if (OrderStatus.SUCC.getValue().byteValue() == order.getStatus()
+				&& (order.getBizTag() == null || !EnumBizTag.RECORD.contains(order.getBizTag()))) {
+				// 代付
+				if (order.getType().byteValue() == OrderType.AGENT_PAY.getValue()) {
+					MoneyLog moneyLog = MoneyLog.builder()
+						.walletId(order.getWalletId())
+						.orderId(order.getId())
+						.orderNo(order.getOrderNo())
+						.orderType(order.getType())
+						.type(DebitType.DEBIT.getValue())
+						.debitAmount(order.getAmount())
+						.creditAmount(0L)
+						.createTime(new Date())
+						.build();
+					moneyLogDao.insertSelective(moneyLog);
+					WalletClearing clearing = walletClearingDao.selectByOrderId(order.getId());
+					walletCollectInfoDao
+						.accuClearAmount(clearing.getCollectInfoId(), clearing.getAmount());
+				} else {
+					MoneyLogBuilder builder = MoneyLog.builder()
+						.walletId(order.getWalletId())
+						.orderId(order.getId())
+						.orderNo(order.getOrderNo())
+						.orderType(order.getType())
+						.createTime(new Date());
+					if (order.getType().byteValue() == OrderType.RECHARGE.getValue()
+						|| order.getType().byteValue() == OrderType.REFUND.getValue()) {
+						// 充值、退款
+						builder.type(DebitType.DEBIT.getValue());
+						builder.debitAmount(order.getAmount());
+						builder.creditAmount(0L);
+					} else if (order.getType().byteValue() == OrderType.WITHDRAWAL.getValue()
+						|| order.getType().byteValue() == OrderType.COLLECT.getValue()
+						|| order.getType().byteValue() == OrderType.CONSUME.getValue()
+						|| order.getType().byteValue() == OrderType.DEDUCTION.getValue()) {
+						// 提现、代收、消费、代扣
+						builder.type(DebitType.CREDIT.getValue());
+						builder.debitAmount(0L);
+						builder.creditAmount(order.getAmount());
+					}
+					if (order.getType().byteValue() == OrderType.REFUND.getValue()) {
+						WalletRefund refund = walletRefundDao.selectByOrderId(order.getId());
+						List<WalletRefundDetail> details = walletRefundDetailDao
+							.selectByRefundId(refund.getId());
+						details.forEach(detail -> {
+							walletCollectInfoDao
+								.accuRefundAmount(detail.getCollectInfoId(), detail.getAmount());
+						});
+
+					}
+					moneyLogDao.insertSelective(builder.build());
+				}
+
+				order.setBizTag(
+					EnumBizTag.RECORD.and(Optional.ofNullable(order.getBizTag()).orElse((byte) 0)));
+				walletOrderDao.updateByPrimaryKeySelective(order);
+			}
+
+			return order;
+		} catch (Exception e) {
+			dealUndefinedError(order, e);
+			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
 		}
-
-		return order;
 	}
 
 

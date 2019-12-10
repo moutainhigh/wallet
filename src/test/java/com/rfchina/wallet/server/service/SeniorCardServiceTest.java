@@ -1,6 +1,14 @@
 package com.rfchina.wallet.server.service;
 
+import com.rfchina.platform.common.misc.Tuple;
+import com.rfchina.platform.common.utils.JsonUtil;
+import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
+import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.SpringBaseTest;
+import com.rfchina.wallet.server.bank.yunst.response.result.YunstCreateMemberResult;
+import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
+import com.rfchina.wallet.server.service.handler.yunst.YunstBaseHandler.YunstMemberType;
+import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +21,15 @@ public class SeniorCardServiceTest extends SpringBaseTest {
 
 	@Autowired
 	private SeniorCardService seniorCardService;
+	@Autowired
+	private YunstUserHandler yunstUserHandler;
+	@Autowired
+	private WalletTunnelExtDao walletTunnelDao;
 
 	@Test
 	public void preBindBandCard() {
 		String resp = seniorCardService.preBindBandCard(WALLET_ID, "6214850201481956",
-			"观富昌", CARD_PHONE, "440923198711033434", null, null);
+			"观富昌", CARD_PHONE, "440923198711033434", null, null, "308581002407");
 		log.info("预绑卡 {}", resp);
 
 	}
@@ -25,11 +37,13 @@ public class SeniorCardServiceTest extends SpringBaseTest {
 	@Test
 	public void confirmBindCard() {
 		seniorCardService.confirmBindCard(WALLET_ID,
-			"459918", "b24cc677-3e05-4e47-8728-9ebc77eb65be");
+			"468590", "fe00db5b-8095-4ce0-8542-e4a54f5b5bf1");
 	}
 
 	@Test
 	public void unBindCard() {
-		seniorCardService.unBindCard( 17L);
+		seniorCardService.unBindCard(17L);
 	}
+
+
 }

@@ -29,7 +29,6 @@ import com.rfchina.wallet.domain.model.WalletRefund;
 import com.rfchina.wallet.domain.model.WalletRefundDetail;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.domain.model.WalletWithdraw;
-import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstQueryBalanceResult;
 import com.rfchina.wallet.server.mapper.ext.WalletClearingExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectExtDao;
@@ -62,7 +61,6 @@ import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
 import com.rfchina.wallet.server.msic.EnumWallet.DirtyType;
 import com.rfchina.wallet.server.msic.EnumWallet.GwProgress;
 import com.rfchina.wallet.server.msic.EnumWallet.OrderStatus;
-import com.rfchina.wallet.server.msic.EnumWallet.OrderSubStatus;
 import com.rfchina.wallet.server.msic.LockConstant;
 import com.rfchina.wallet.server.service.handler.common.EBankHandler;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
@@ -85,8 +83,8 @@ public class SeniorPayService {
 	public static final String PREFIX_AGENT_PAY = "WO";
 	public static final String PREFIX_COLLECT = "WC";
 	public static final String PREFIX_RECHARGE = "WR";
-	public static final String PREFIX_WITHDRAW = "WD";
-	public static final String PREFIX_DEDUCTION = "WS";
+	public static final String PREFIX_WITHDRAW = "WW";
+	public static final String PREFIX_DEDUCTION = "WD";
 
 	public static final String INDUSTRY_CODE = "1910";
 	public static final String INDUSTRY_NAME = "其他";
@@ -160,12 +158,14 @@ public class SeniorPayService {
 		verifyService.checkCard(walletCard, payerWallet);
 
 		// 工单记录
-		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> {
-			return walletOrderDao.selectCountByBatchNo(id) == 0;
-		});
-		String orderNo = IdGenerator.createBizId(PREFIX_RECHARGE, 19, id -> {
-			return walletOrderDao.selectCountByOrderNo(id) == 0;
-		});
+		String batchNo = IdGenerator
+			.createBizId(configService.getOrderNoPrefix() + IdGenerator.PREFIX_WALLET, 20, id -> {
+				return walletOrderDao.selectCountByBatchNo(id) == 0;
+			});
+		String orderNo = IdGenerator
+			.createBizId(configService.getOrderNoPrefix() + PREFIX_RECHARGE, 19, id -> {
+				return walletOrderDao.selectCountByOrderNo(id) == 0;
+			});
 
 		// 支付方式
 		BankCard bankCard = new BankCard();
@@ -231,12 +231,14 @@ public class SeniorPayService {
 		verifyService.checkCard(walletCard, payerWallet);
 
 		// 工单记录
-		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> {
-			return walletOrderDao.selectCountByBatchNo(id) == 0;
-		});
-		String orderNo = IdGenerator.createBizId(PREFIX_WITHDRAW, 19, id -> {
-			return walletOrderDao.selectCountByOrderNo(id) == 0;
-		});
+		String batchNo = IdGenerator
+			.createBizId(configService.getOrderNoPrefix() + IdGenerator.PREFIX_WALLET, 20, id -> {
+				return walletOrderDao.selectCountByBatchNo(id) == 0;
+			});
+		String orderNo = IdGenerator
+			.createBizId(configService.getOrderNoPrefix() + PREFIX_WITHDRAW, 19, id -> {
+				return walletOrderDao.selectCountByOrderNo(id) == 0;
+			});
 
 		try {
 			lock.acquireLock(LockConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);
@@ -305,12 +307,14 @@ public class SeniorPayService {
 		}
 
 		// 工单记录
-		String orderNo = IdGenerator.createBizId(PREFIX_COLLECT, 19, id -> {
-			return walletOrderDao.selectCountByOrderNo(id) == 0;
-		});
-		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> {
-			return walletOrderDao.selectCountByBatchNo(id) == 0;
-		});
+		String orderNo = IdGenerator
+			.createBizId(configService.getOrderNoPrefix() + PREFIX_COLLECT, 19, id -> {
+				return walletOrderDao.selectCountByOrderNo(id) == 0;
+			});
+		String batchNo = IdGenerator
+			.createBizId(configService.getOrderNoPrefix() + IdGenerator.PREFIX_WALLET, 20, id -> {
+				return walletOrderDao.selectCountByBatchNo(id) == 0;
+			});
 
 		try {
 			lock.acquireLock(LockConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);
@@ -412,12 +416,14 @@ public class SeniorPayService {
 		}
 
 		// 工单记录
-		String orderNo = IdGenerator.createBizId(PREFIX_AGENT_PAY, 19, id -> {
-			return walletOrderDao.selectCountByOrderNo(id) == 0;
-		});
-		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> {
-			return walletOrderDao.selectCountByBatchNo(id) == 0;
-		});
+		String orderNo = IdGenerator
+			.createBizId(configService.getOrderNoPrefix() + PREFIX_AGENT_PAY, 19, id -> {
+				return walletOrderDao.selectCountByOrderNo(id) == 0;
+			});
+		String batchNo = IdGenerator
+			.createBizId(configService.getOrderNoPrefix() + IdGenerator.PREFIX_WALLET, 20, id -> {
+				return walletOrderDao.selectCountByBatchNo(id) == 0;
+			});
 
 		try {
 			lock.acquireLock(LockConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);
@@ -498,12 +504,14 @@ public class SeniorPayService {
 			}).collect(Collectors.toMap(c -> c.getPayeeWalletId().toString(), c -> c));
 
 		// 工单记录
-		String orderNo = IdGenerator.createBizId(PREFIX_REFUND, 19, id -> {
-			return walletOrderDao.selectCountByOrderNo(id) == 0;
-		});
-		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> {
-			return walletOrderDao.selectCountByBatchNo(id) == 0;
-		});
+		String orderNo = IdGenerator
+			.createBizId(configService.getOrderNoPrefix() + PREFIX_REFUND, 19, id -> {
+				return walletOrderDao.selectCountByOrderNo(id) == 0;
+			});
+		String batchNo = IdGenerator
+			.createBizId(configService.getOrderNoPrefix() + IdGenerator.PREFIX_WALLET, 20, id -> {
+				return walletOrderDao.selectCountByBatchNo(id) == 0;
+			});
 
 		try {
 			lock.acquireLock(LockConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);
@@ -563,17 +571,18 @@ public class SeniorPayService {
 	public WalletCollectResp deduction(DeductionReq req) {
 
 		// 定义付款人
-		Long payerWalletId = (req.getPayerWalletId() != null) ? req.getPayerWalletId()
-			: configService.getAnonyPayerWalletId();
+		Long payerWalletId = req.getWalletPayMethod().getBalance().getPayerWalletId();
 		verifyService.checkSeniorWallet(payerWalletId);
 
 		// 工单记录
-		String orderNo = IdGenerator.createBizId(PREFIX_DEDUCTION, 19, id -> {
-			return walletOrderDao.selectCountByOrderNo(id) == 0;
-		});
-		String batchNo = IdGenerator.createBizId(IdGenerator.PREFIX_WALLET, 20, id -> {
-			return walletOrderDao.selectCountByBatchNo(id) == 0;
-		});
+		String orderNo = IdGenerator
+			.createBizId(configService.getOrderNoPrefix() + PREFIX_DEDUCTION, 19, id -> {
+				return walletOrderDao.selectCountByOrderNo(id) == 0;
+			});
+		String batchNo = IdGenerator
+			.createBizId(configService.getOrderNoPrefix() + IdGenerator.PREFIX_WALLET, 20, id -> {
+				return walletOrderDao.selectCountByBatchNo(id) == 0;
+			});
 
 		try {
 			lock.acquireLock(LockConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);

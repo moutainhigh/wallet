@@ -250,4 +250,9 @@ public class UrlConstant {
 	 */
 	public static final String YUNST_ORDER_RECALL = VERSION + "/yunst/order_recall";
 
+	/**
+	 * 业务查询银行卡信息
+	 */
+	public static final String WALLET_CARD_QUERY = VERSION + "/u/wallet/query_wallet_card";
+
 }

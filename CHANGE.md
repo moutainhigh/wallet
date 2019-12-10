@@ -4,6 +4,10 @@
 jenkins job: platform-rfwallet-super-server-test
 
 ```  
+## 1.1.0_b17_2019120917_Beta
+### [变动说明]
+- 新增银行卡信息修改接口
+
 ## 1.1.0_b16_2019120411_Beta
 ### [变动说明]
 - 修复升级卡没有是默认卡问题
