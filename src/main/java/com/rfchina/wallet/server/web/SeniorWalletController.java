@@ -207,10 +207,11 @@ public class SeniorWalletController {
 	@PostMapping(UrlConstant.WALLET_SENIOR_COMPANY_INFO)
 	public ResponseValue<YunstMemberInfoResult.CompanyInfoResult> seniorWalletCompanyInfo(
 		@RequestParam("access_token") String accessToken,
-		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId) {
+		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+		@ApiParam(value = "手动更新开关", required = true) @RequestParam(value = "is_manual_refresh", defaultValue = "false") Boolean isManualRefresh) {
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
-			seniorWalletApi.seniorWalletGetCompanyInfo(accessToken, walletId));
+			seniorWalletApi.seniorWalletGetCompanyInfo(accessToken, walletId, isManualRefresh));
 	}
 
 
