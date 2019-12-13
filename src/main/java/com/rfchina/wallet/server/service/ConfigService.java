@@ -112,9 +112,6 @@ public class ConfigService {
 	@Value("${yunst.tlCertPath}")
 	private String ystTlCertPath;
 
-	@Value("${yunst.jumpUrl.prefix}")
-	private String yunstJumpUrlPrefix;
-
 	@Value("${yunst.notify.backUrl}")
 	private String yunstNotifybackUrl;
 
@@ -171,7 +168,13 @@ public class ConfigService {
 	private String notifyContract;
 
 	@Value("${wallet.orderNo.prefix:}")
-	public String orderNoPrefix;
+	private String orderNoPrefix;
+
+	@Value("${wallet.blanklist.host}")
+	private String blanklist;
+
+	@Value("${yunst.jumpUrl.prefix}")
+	private String yunstJumpUrlPrefix;
 
 // yunst end
 

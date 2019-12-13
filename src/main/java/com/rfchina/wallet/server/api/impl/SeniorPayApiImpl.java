@@ -9,6 +9,7 @@ import com.rfchina.platform.common.annotation.ParamVerify;
 import com.rfchina.platform.common.annotation.SignVerify;
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.utils.BeanUtil;
+import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
@@ -32,17 +33,22 @@ import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.SeniorBalanceService;
 import com.rfchina.wallet.server.service.SeniorPayService;
 import com.rfchina.wallet.server.service.VerifyService;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class SeniorPayApiImpl implements SeniorPayApi {
 
 	public static final String PRE_RECHARGE = "wallet:recharge";
@@ -107,8 +113,9 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 
 		WalletCard walletCard = walletCardDao.selectByPrimaryKey(cardId);
 		verifyService.checkCard(walletCard);
+		// 检查回调域名
+		jumpUrl = checkBlankUrl(jumpUrl);
 
-		jumpUrl = configService.getYunstJumpUrlPrefix() + jumpUrl;
 		WithdrawResp withdraw = seniorPayService
 			.withdraw(walletId, walletCard, amount, jumpUrl, customerIp);
 
@@ -131,6 +138,7 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 		@ParamValid(nullable = true) String jumpUrl,
 		@ParamValid(nullable = true) String customerIp,
 		RateSetting rateSetting) {
+
 		// 判断收款人记录不重复
 		Set<String> walletSet = req.getRecievers().stream()
 			.map(receiver -> receiver.getWalletId().toString())
@@ -150,8 +158,10 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 			throw new WalletResponseException(EnumResponseCode.COMMON_INVALID_PARAMS,
 				"walletPayMethod");
 		}
+		// 检查回调域名
+		jumpUrl = checkBlankUrl(jumpUrl);
+
 		// 发起代收
-		jumpUrl = configService.getYunstJumpUrlPrefix() + jumpUrl;
 		WalletCollectResp collect = seniorPayService.collect(req, jumpUrl, customerIp);
 		// 生成票据
 		UnifiedConfirmVo confirmVo = BeanUtil.newInstance(collect, UnifiedConfirmVo.class);
@@ -296,5 +306,23 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 		redisTemplate.opsForValue()
 			.set(PRE_RECHARGE + ticket, confirmVo, 30, TimeUnit.MINUTES);
 		return ticket;
+	}
+
+	public String checkBlankUrl(String jumpUrl) {
+		try {
+			URL url = new URL(jumpUrl);
+			String host = url.getHost();
+			List<String> blankList = JsonUtil.toArray(configService.getBlanklist(), String.class);
+			Optional<String> opt = blankList.stream()
+				.filter(b -> b.equals(host))
+				.findAny();
+			if (opt.isPresent()) {
+				return jumpUrl;
+			}
+		} catch (MalformedURLException e) {
+			log.error("URL格式检查错误", e);
+		}
+		log.error("jumpUrl白名单校验错误 {}",jumpUrl);
+		return configService.getYunstJumpUrlPrefix() + "/#/warning?msg=jumpUrlErr";
 	}
 }
