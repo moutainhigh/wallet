@@ -397,7 +397,8 @@ public class SeniorWalletService {
 			.selectByTunnelTypeAndWalletId(TunnelType.YUNST.getValue(), walletId);
 		Objects.requireNonNull(walletTunnel);
 		Tuple<String, String> balanceProtocolReqResult = yunstUserHandler
-			.generateBalanceProtocolUrl(walletTunnel.getBizUserId(), jumpUrl,walletTunnel.getBalanceProtocolReqSn());
+			.generateBalanceProtocolUrl(walletTunnel.getBizUserId(), jumpUrl,
+				walletTunnel.getBalanceProtocolReqSn());
 		walletTunnel.setBalanceProtocolReqSn(balanceProtocolReqResult.left);
 		walletTunnelDao.updateByPrimaryKeySelective(walletTunnel);
 		return balanceProtocolReqResult.right;
@@ -459,7 +460,8 @@ public class SeniorWalletService {
 			CardInfo cardInfo = CardInfo.builder().cardNo(memberInfo.getAccountNo())
 				.parentBankName(memberInfo.getParentBankName())
 				.bankName(memberInfo.getBankName()).build();
-			walletTunnel.setCheckTime(DateUtil.parse(memberInfo.getCheckTime(),DateUtil.STANDARD_DTAETIME_PATTERN));
+			walletTunnel.setCheckTime(
+				DateUtil.parse(memberInfo.getCheckTime(), DateUtil.STANDARD_DTAETIME_PATTERN));
 			walletTunnel.setSecurityTel(memberInfo.getPhone());
 			walletTunnelDao.updateByPrimaryKey(walletTunnel);
 			this.synchronizeCompanyTunnelInfo(walletId, walletTunnel, cardInfo);
@@ -491,7 +493,8 @@ public class SeniorWalletService {
 			new WalletResponseException(EnumWalletResponseCode.TUNNEL_INFO_NOT_EXISTS,
 				tunnelType + " " + walletId));
 
-		boolean needUpdate = Optional.ofNullable(walletTunnel.getIsDirty())
+		boolean needUpdate = !Optional.ofNullable(walletTunnel.getIsDirty()).isPresent() || Optional
+			.ofNullable(walletTunnel.getIsDirty())
 			.filter(dirty -> dirty != DirtyType.NORMAL.getValue().byteValue()).isPresent();
 
 		if (needUpdate) {
@@ -600,5 +603,6 @@ public class SeniorWalletService {
 		private String parentBankName;
 		private String bankName;
 	}
+
 
 }
