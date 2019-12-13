@@ -28,6 +28,7 @@ import com.rfchina.wallet.server.utils.IdCardGenerator;
 import com.rfchina.wallet.server.utils.RandomUtils;
 import java.net.URLEncoder;
 import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
@@ -142,7 +143,8 @@ public class YunstHandlerTest extends SpringBaseTest {
 //		YunstPersonSetRealNameResult result = yunstUserHandler.personCertification(member.left.getBizUserId(), realName, identityType, identityNo);
 //		logStack(result);
 //		Tuple<String, String> url = yunstUserHandler.generateBalanceProtocolUrl(member.left.getBizUserId(),"/#/success");
-		Tuple<String, String> url = yunstUserHandler.generateBalanceProtocolUrl("DEVWU5099",URLEncoder.encode("/#/createSeniorWalletSuccess","utf-8"));
+		Tuple<String, String> url = yunstUserHandler.generateBalanceProtocolUrl("DEVWU5099",URLEncoder.encode("/#/createSeniorWalletSuccess","utf-8"),
+			UUID.randomUUID().toString().replaceAll("-", ""));
 //		Tuple<String, String> url = yunstUserHandler.generateBalanceProtocolUrl("DEVWU1538","/#/createSeniorWalletSuccess");
 
 		logStack(url);
