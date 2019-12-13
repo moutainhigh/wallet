@@ -397,7 +397,7 @@ public class SeniorWalletService {
 			.selectByTunnelTypeAndWalletId(TunnelType.YUNST.getValue(), walletId);
 		Objects.requireNonNull(walletTunnel);
 		Tuple<String, String> balanceProtocolReqResult = yunstUserHandler
-			.generateBalanceProtocolUrl(walletTunnel.getBizUserId(), jumpUrl);
+			.generateBalanceProtocolUrl(walletTunnel.getBizUserId(), jumpUrl,walletTunnel.getBalanceProtocolReqSn());
 		walletTunnel.setBalanceProtocolReqSn(balanceProtocolReqResult.left);
 		walletTunnelDao.updateByPrimaryKeySelective(walletTunnel);
 		return balanceProtocolReqResult.right;
@@ -460,6 +460,7 @@ public class SeniorWalletService {
 				.parentBankName(memberInfo.getParentBankName())
 				.bankName(memberInfo.getBankName()).build();
 			walletTunnel.setCheckTime(DateUtil.parse(memberInfo.getCheckTime(),DateUtil.STANDARD_DTAETIME_PATTERN));
+			walletTunnel.setSecurityTel(memberInfo.getPhone());
 			walletTunnelDao.updateByPrimaryKey(walletTunnel);
 			this.synchronizeCompanyTunnelInfo(walletId, walletTunnel, cardInfo);
 		}
