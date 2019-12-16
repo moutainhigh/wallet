@@ -16,6 +16,7 @@ import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletPerson;
 import com.rfchina.wallet.domain.model.WalletTunnel;
+import com.rfchina.wallet.domain.model.YunstFeeReport;
 import com.rfchina.wallet.server.api.SeniorWalletApi;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.CompanyInfoResult;
@@ -23,6 +24,7 @@ import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResul
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
+import com.rfchina.wallet.server.mapper.ext.YunstFeeReportExtDao;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletSource;
 import com.rfchina.wallet.server.service.SeniorWalletService;
 import com.rfchina.wallet.server.service.VerifyService;
@@ -51,6 +53,9 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 
 	@Autowired
 	private WalletOrderExtDao walletOrderExtDao;
+
+	@Autowired
+	private YunstFeeReportExtDao yunstFeeReportExtDao;
 
 	@Autowired
 	private VerifyService verifyService;
@@ -260,7 +265,8 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public CompanyInfoResult seniorWalletGetCompanyInfo(String accessToken, Long walletId,Boolean isManualRefresh) {
+	public CompanyInfoResult seniorWalletGetCompanyInfo(String accessToken, Long walletId,
+		Boolean isManualRefresh) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		Objects.requireNonNull(wallet);
 		if (wallet.getLevel() != EnumDef.EnumWalletLevel.SENIOR.getValue().byteValue()) {
@@ -314,6 +320,24 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 			.selectCountByCondition(walletId, fromTime, toTime, tradeType, status, orderNo, bizNo)
 			: 0;
 		return new Pagination.PaginationBuilder<WalletOrder>().data(walletOrderList)
+			.total(total)
+			.offset(offset)
+			.pageLimit(limit)
+			.build();
+	}
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
+	@Override
+	public Pagination<YunstFeeReport> queryYunstFeeReport(String accessToken, int limit, int offset,
+		Boolean stat) {
+		List<YunstFeeReport> reportList = yunstFeeReportExtDao.selectByPage(limit, offset);
+
+		long total = Objects.nonNull(stat) && stat ? yunstFeeReportExtDao
+			.count()
+			: 0;
+		return new Pagination.PaginationBuilder<YunstFeeReport>().data(reportList)
 			.total(total)
 			.offset(offset)
 			.pageLimit(limit)

@@ -743,7 +743,8 @@ public class EnumWallet {
 		SIGN_BALANCE_PROTOCOL("signBalanceProtocol"),
 		CHANGE_BIND_PHONE("updatePhoneByPayPwd"),
 		SET_PAY_PWD("setPayPwd"),
-		PAY("pay"),
+		PERSON_VERIFY("setRealName"),
+		COMPANY_VERIFY("setCompanyInfo"),
 		;
 
 		private String value;

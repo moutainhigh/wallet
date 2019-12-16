@@ -4,6 +4,7 @@ import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletTunnel;
+import com.rfchina.wallet.domain.model.YunstFeeReport;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult;
 import java.util.Date;
@@ -137,5 +138,13 @@ public interface SeniorWalletApi {
 	 */
 	Pagination<WalletOrder> queryWalletOrderDetail(String accessToken, Long walletId, Date fromTime,
 		Date toTime, Integer tradeType, Integer status, String orderNo, String bizNo, int limit,
+		int offset, Boolean stat);
+
+
+	/**
+	 * 通联通道手粗费报表查询
+	 *
+	 */
+	Pagination<YunstFeeReport> queryYunstFeeReport(String accessToken, int limit,
 		int offset, Boolean stat);
 }

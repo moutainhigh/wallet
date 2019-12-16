@@ -1,5 +1,6 @@
 package com.rfchina.wallet.server.service;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.rfchina.platform.common.exception.RfchinaResponseException;
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.Tuple;
@@ -28,6 +29,8 @@ import com.rfchina.wallet.domain.model.WalletPerson;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.domain.model.WalletTunnel.WalletTunnelBuilder;
 import com.rfchina.wallet.domain.model.WalletVerifyHis;
+import com.rfchina.wallet.domain.model.YunstFeeReport;
+import com.rfchina.wallet.domain.model.YunstSdkLog;
 import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstCreateMemberResult;
@@ -40,16 +43,25 @@ import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletVerifyHisExtDao;
+import com.rfchina.wallet.server.mapper.ext.YunstFeeReportExtDao;
+import com.rfchina.wallet.server.mapper.ext.YunstSDKLogExtDao;
 import com.rfchina.wallet.server.msic.EnumWallet.DirtyType;
 import com.rfchina.wallet.server.msic.EnumWallet.EnumYunstResponse;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.YunstCompanyInfoAuditStatus;
+import com.rfchina.wallet.server.msic.EnumWallet.YunstMethodName;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBaseHandler.YunstMemberType;
 import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.TimeZone;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -79,6 +91,12 @@ public class SeniorWalletService {
 
 	@Autowired
 	private WalletVerifyHisExtDao walletVerifyHisExtDao;
+
+	@Autowired
+	private YunstSDKLogExtDao yunstSDKLogExtDao;
+
+	@Autowired
+	private YunstFeeReportExtDao yunstFeeReportExtDao;
 
 	@Autowired
 	private WalletCardExtDao walletCardDao;
@@ -605,4 +623,59 @@ public class SeniorWalletService {
 	}
 
 
+	public void statisticsTLFee(String ym) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
+		try {
+			Date fromDate = sdf.parse(ym);
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(fromDate);
+			calendar.set(Calendar.DAY_OF_MONTH, 1);
+			calendar.add(Calendar.MONTH, 1);
+			Date endDate = calendar.getTime();
+			//个人验证流水
+			long personVerifyLogCount = yunstSDKLogExtDao
+				.countByMethodNameAndTime(YunstMethodName.PERSON_VERIFY.getValue(), fromDate,
+					endDate);
+			//企业验证流水
+			List<YunstSdkLog> companyVerifyLog = yunstSDKLogExtDao
+				.selectByMethodNameAndTime(YunstMethodName.COMPANY_VERIFY.getValue(), fromDate,
+					endDate);
+
+			long companyVerifyLogOnlineCount = companyVerifyLog.stream().filter(
+				l -> YunstCompanyInfoAuditStatus.SUCCESS.getValue().longValue() == JsonUtil
+					.toObject(l.getResponse(), YunstSetCompanyInfoResult.class, objectMapper -> {
+						objectMapper.setTimeZone(TimeZone.getDefault());
+						objectMapper
+							.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+					}).getResult()).count();
+			//提现次数流水
+
+			//支付手续费流水
+
+			//充值水续费流水
+
+			yunstFeeReportExtDao.updateToHistory(ym);
+
+			yunstFeeReportExtDao.insertSelective(YunstFeeReport.builder()
+				.statTime(ym)
+				.dataStatus((byte)1)
+				.payFeeAmount(0L)
+				.rechargeFeeAmount(0L)
+				.withdrawFeeAmount(0L)
+				.personVerifyCount(personVerifyLogCount)
+				.companyVerifyCount(companyVerifyLogOnlineCount)
+				.createTime(new Date())
+				.build());
+
+			Map<String, Object> resultMap = new HashMap<>();
+			resultMap.put("person_verify_count", personVerifyLogCount);
+			resultMap.put("company_verify_count", companyVerifyLogOnlineCount);
+			resultMap.put("withdraw_count", null);
+			resultMap.put("pay_fee_count", null);
+			resultMap.put("recharge_fee_count", null);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return;
+	}
 }

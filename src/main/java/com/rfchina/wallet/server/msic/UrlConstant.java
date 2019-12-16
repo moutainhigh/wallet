@@ -98,6 +98,11 @@ public class UrlConstant {
 	public static final String QUARTZ_BALANCE = VERSION + "/schedule/quartz_balance";
 
 	/**
+	 * 定时统计通联通道手续费
+	 */
+	public static final String QUARTZ_YUNST_FEE_REPORT = VERSION + "/schedule/yunst_fee_report";
+
+	/**
 	 * 查询钱包信息（企业or个人）
 	 */
 	public static final String WALLET_QUERY_INFO = VERSION + "/m/wallet/query_wallet_info";
@@ -239,6 +244,10 @@ public class UrlConstant {
 	 * 高级钱包余额明细
 	 */
 	public static final String WALLET_SENIOR_ORDER_DETAIL= VERSION + "/m/senior/wallet/order_detail";
+	/**
+	 * 通联通道手续费报表
+	 */
+	public static final String WALLET_SENIOR_YUNST_FEE_REPORT= VERSION + "/m/senior/yunst/fee_report";
 
 	/**
 	 * 云商通统一回调
