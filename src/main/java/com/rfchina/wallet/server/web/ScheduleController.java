@@ -100,16 +100,16 @@ public class ScheduleController {
 
 	@RequestMapping(value = UrlConstant.QUARTZ_YUNST_FEE_REPORT, method = RequestMethod.POST)
 	@FuScheduleTaskReporter
-	public String quartzYunstFeeReprot(
+	public String quartzYunstFeeReport(
 		@RequestParam("schedule_id") String scheduleId,
 		@RequestParam("timestamp") String timestamp,
 		@RequestParam("sign") String sign) {
 
-		log.info("scheduler: 开始执行任务[{}]", "quartzYunstFeeReprot");
+		log.info("scheduler: 开始执行任务[{}]", "quartzYunstFeeReport");
 
-		scheduleApi.quartzBalance();
+		scheduleApi.quartzYunstFeeReport();
 
-		log.info("scheduler: 完成任务[{}]", "quartzYunstFeeReprot");
+		log.info("scheduler: 完成任务[{}]", "quartzYunstFeeReport");
 
 		return "success";
 	}

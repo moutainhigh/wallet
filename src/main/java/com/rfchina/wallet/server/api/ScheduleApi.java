@@ -25,6 +25,6 @@ public interface ScheduleApi {
 	/**
 	 * 定时统计通联通道手续费
 	 */
-	void quartzYunstFeeReprot();
+	void quartzYunstFeeReport();
 
 }

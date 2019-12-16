@@ -129,7 +129,7 @@ public class ScheduleApiImpl implements ScheduleApi {
 
 
 	@Override
-	public void quartzYunstFeeReprot() {
+	public void quartzYunstFeeReport() {
 
 		lockDone(LockConstant.LOCK_QUARTZ_YUNST_FEE_REPORT, 60, (date) -> {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
