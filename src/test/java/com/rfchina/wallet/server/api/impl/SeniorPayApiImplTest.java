@@ -106,4 +106,10 @@ public class SeniorPayApiImplTest extends SpringApiTest {
 		seniorPayApi.smsConfirm(super.accessToken, "021013e9-12a5-4267-9caa-e485d9972038", "669805",
 			"192.168.197.28");
 	}
+
+	@Test
+	public void checkBlankUrl() {
+		String url = ((SeniorPayApiImpl) seniorPayApi).checkBlankUrl("http://www.rfchina.com/index");
+		log.info(url);
+	}
 }

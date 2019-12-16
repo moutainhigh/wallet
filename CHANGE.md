@@ -4,6 +4,10 @@
 jenkins job: platform-rfwallet-super-server-test
 
 ```  
+## 1.1.0_b20_2019121318_Beta
+### [变动说明]
+- 增加回跳白名单功能
+
 ## 1.1.0_b19_2019121316_Beta
 ### [变动说明]
 - 增加通联sdk调用流水记录

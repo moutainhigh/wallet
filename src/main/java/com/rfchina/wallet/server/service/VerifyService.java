@@ -40,7 +40,8 @@ public class VerifyService {
 		Optional<Wallet> opt = Optional.ofNullable(wallet);
 
 		opt.orElseThrow(
-			() -> new WalletResponseException(EnumWalletResponseCode.WALLET_ACCOUNT_NOT_EXIST));
+			() -> new WalletResponseException(EnumWalletResponseCode.WALLET_ACCOUNT_NOT_EXIST,
+				String.valueOf(walletId)));
 
 		opt.filter(w -> w.getLevel() == EnumDef.EnumWalletLevel.SENIOR.getValue().byteValue())
 			.orElseThrow(
