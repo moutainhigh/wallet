@@ -16,6 +16,7 @@ import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.ScheduleService;
 import com.rfchina.wallet.server.service.SeniorBalanceService;
 import com.rfchina.wallet.server.service.SeniorChargingService;
+import com.rfchina.wallet.server.service.SeniorWalletService;
 import com.rfchina.wallet.server.service.WalletService;
 import java.util.Calendar;
 import java.util.Date;

@@ -138,4 +138,7 @@ public interface SeniorWalletApi {
 	Pagination<WalletOrder> queryWalletOrderDetail(String accessToken, Long walletId, Date fromTime,
 		Date toTime, Integer tradeType, Integer status, String orderNo, String bizNo, int limit,
 		int offset, Boolean stat);
+
+
+
 }

@@ -604,5 +604,4 @@ public class SeniorWalletService {
 		private String bankName;
 	}
 
-
 }

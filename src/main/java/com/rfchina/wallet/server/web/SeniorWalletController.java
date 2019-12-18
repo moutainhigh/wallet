@@ -237,4 +237,7 @@ public class SeniorWalletController {
 				toTime, tradeType, status, orderNo, bizNo, limit, offset, stat));
 	}
 
+
+
+
 }

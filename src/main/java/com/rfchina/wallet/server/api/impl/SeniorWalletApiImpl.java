@@ -52,6 +52,7 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@Autowired
 	private WalletOrderExtDao walletOrderExtDao;
 
+
 	@Autowired
 	private VerifyService verifyService;
 
@@ -260,7 +261,8 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public CompanyInfoResult seniorWalletGetCompanyInfo(String accessToken, Long walletId,Boolean isManualRefresh) {
+	public CompanyInfoResult seniorWalletGetCompanyInfo(String accessToken, Long walletId,
+		Boolean isManualRefresh) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		Objects.requireNonNull(wallet);
 		if (wallet.getLevel() != EnumDef.EnumWalletLevel.SENIOR.getValue().byteValue()) {
@@ -319,4 +321,5 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 			.pageLimit(limit)
 			.build();
 	}
+
 }
