@@ -23,5 +23,8 @@ public class BankCard {
 
 	@ApiModelProperty(value = "渠道出资额(单位分)")
 	private Long amount;
+
+	@ApiModelProperty(value = "银行卡类型 1-储蓄卡 2-信用卡")
+	private Byte cardType;
 }
 

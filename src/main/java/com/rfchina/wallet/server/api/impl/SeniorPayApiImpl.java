@@ -43,6 +43,8 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jetty.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -114,7 +116,9 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 		WalletCard walletCard = walletCardDao.selectByPrimaryKey(cardId);
 		verifyService.checkCard(walletCard);
 		// 检查回调域名
-		jumpUrl = checkBlankUrl(jumpUrl);
+		if (StringUtils.isNotBlank(jumpUrl)) {
+			jumpUrl = checkBlankUrl(jumpUrl);
+		}
 
 		WithdrawResp withdraw = seniorPayService
 			.withdraw(walletId, walletCard, amount, jumpUrl, customerIp);
@@ -159,7 +163,9 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 				"walletPayMethod");
 		}
 		// 检查回调域名
-		jumpUrl = checkBlankUrl(jumpUrl);
+		if (StringUtil.isNotBlank(jumpUrl)) {
+			jumpUrl = checkBlankUrl(jumpUrl);
+		}
 
 		// 发起代收
 		WalletCollectResp collect = seniorPayService.collect(req, jumpUrl, customerIp);
@@ -322,7 +328,7 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 		} catch (MalformedURLException e) {
 			log.error("URL格式检查错误", e);
 		}
-		log.error("jumpUrl白名单校验错误 {}",jumpUrl);
+		log.error("jumpUrl白名单校验错误 {}", jumpUrl);
 		return configService.getYunstJumpUrlPrefix() + "/#/warning?msg=jumpUrlErr";
 	}
 }

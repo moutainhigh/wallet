@@ -1,8 +1,10 @@
 package com.rfchina.wallet.server.model.ext;
 
+import com.rfchina.wallet.domain.misc.EnumDef.WalletCardType;
 import com.rfchina.wallet.server.msic.EnumWallet.ChannelType;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -16,7 +18,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CollectReq {
-
 
 
 	@ApiModelProperty(required = true, name = "biz_no", value = "业务凭证号(业务方定义唯一,最长32字节)", example = "123")
@@ -88,12 +89,30 @@ public class CollectReq {
 			return method;
 		}
 
+		@ApiModelProperty(hidden = true)
+		public BigDecimal getRate() {
+			BigDecimal bigDecimal = new BigDecimal("0");
+			if (balance != null) {
+			} else if (wechat != null) {
+				bigDecimal = bigDecimal.add(new BigDecimal("0.0033"));
+			} else if (alipay != null) {
+				bigDecimal = bigDecimal.add(new BigDecimal("0.0033"));
+			} else if (codePay != null) {
+			} else if (bankCard != null) {
+				bigDecimal = bigDecimal.add(new BigDecimal(
+					(WalletCardType.CREDIT.getValue().equals(bankCard.cardType)) ? "0.0055"
+						: "0.0025"));
+			}
+			return bigDecimal;
+		}
+
 		@ApiModel
 		@Data
 		@Builder
 		@NoArgsConstructor
 		@AllArgsConstructor
 		public static class Balance {
+
 			@ApiModelProperty(required = true, name = "wallet_id", value = "钱包用户登陆态ID")
 			private Long payerWalletId;
 
@@ -168,6 +187,7 @@ public class CollectReq {
 		@NoArgsConstructor
 		@AllArgsConstructor
 		public static class BankCard {
+
 			@ApiModelProperty(name = "pay_type", value = "51：银行卡快捷支付")
 			private Byte payType;
 
@@ -176,6 +196,10 @@ public class CollectReq {
 
 			@ApiModelProperty(value = "渠道出资额(单位分)")
 			private Long amount;
+
+			@ApiModelProperty(value = "银行卡类型 1-储蓄卡 2-信用卡")
+			private Byte cardType;
+
 		}
 
 	}

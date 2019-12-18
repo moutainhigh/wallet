@@ -1,9 +1,11 @@
 package com.rfchina.wallet.server.api.impl;
 
+import com.rfchina.biztools.functionnal.LockDone;
 import com.rfchina.biztools.lock.SimpleExclusiveLock;
 import com.rfchina.platform.common.annotation.Log;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderType;
+import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.server.api.ScheduleApi;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
@@ -13,10 +15,11 @@ import com.rfchina.wallet.server.msic.LockConstant;
 import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.ScheduleService;
 import com.rfchina.wallet.server.service.SeniorBalanceService;
+import com.rfchina.wallet.server.service.SeniorChargingService;
 import com.rfchina.wallet.server.service.WalletService;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-import java.util.function.Consumer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -43,11 +46,14 @@ public class ScheduleApiImpl implements ScheduleApi {
 	@Autowired
 	private ScheduleService scheduleService;
 
+	@Autowired
+	private SeniorChargingService seniorChargingService;
+
 	@Log
 	@Override
 	public void quartzUpdateJunior() {
 
-		lockDone(LockConstant.LOCK_QUARTZ_UPDATE_JUNIOR, 900, (date) -> {
+		new LockDone(lock).apply(LockConstant.LOCK_QUARTZ_UPDATE_JUNIOR, 900, () -> {
 			try {
 				scheduleService.quartzUpdateJunior(configService.getBatchUpdateSize());
 			} catch (Exception e) {
@@ -60,11 +66,10 @@ public class ScheduleApiImpl implements ScheduleApi {
 	@Override
 	public void quartzUpdateSenior() {
 
-		int periodSecord = 900;
-		lockDone(LockConstant.LOCK_QUARTZ_UPDATE_SENIOR, periodSecord, (date) -> {
+		new LockDone(lock).apply(LockConstant.LOCK_QUARTZ_UPDATE_SENIOR, 900, () -> {
 			try {
 				scheduleService
-					.quartzUpdateSenior(configService.getBatchUpdateSize(), periodSecord);
+					.quartzUpdateSenior(configService.getBatchUpdateSize());
 			} catch (Exception e) {
 				log.error("", e);
 			}
@@ -75,7 +80,7 @@ public class ScheduleApiImpl implements ScheduleApi {
 	@Override
 	public void quartzPay() {
 
-		lockDone(LockConstant.LOCK_QUARTZ_PAY, 1800, (date -> {
+		new LockDone(lock).apply(LockConstant.LOCK_QUARTZ_PAY, 1800, () -> {
 			// 待处理订单
 			List<String> batchNos = walletOrderExtDao
 				.selectUnSendBatchNo(OrderType.FINANCE.getValue(), configService.getBatchPaySize());
@@ -99,14 +104,13 @@ public class ScheduleApiImpl implements ScheduleApi {
 						LockStatus.UNLOCK.getValue());
 				}
 			});
-		}));
+		});
 	}
 
 	@Override
 	public void quartzNotify() {
 
-
-		lockDone(LockConstant.LOCK_QUARTZ_Notify, 600, (date) -> {
+		new LockDone(lock).apply(LockConstant.LOCK_QUARTZ_Notify, 600, () -> {
 			List<WalletOrder> walletOrders = walletOrderExtDao
 				.selectByStatusNotNotified(WalletApplyStatus.WAIT_DEAL.getValue(), 200);
 			scheduleService.notifyDeveloper(walletOrders);
@@ -116,22 +120,27 @@ public class ScheduleApiImpl implements ScheduleApi {
 	@Override
 	public void quartzBalance() {
 
-		lockDone(LockConstant.LOCK_QUARTZ_BALANCE, 60, (date) -> {
-			Date yestoday = DateUtil.getDate2(DateUtil.addDate2(date, -1));
+		new LockDone(lock).apply(LockConstant.LOCK_QUARTZ_BALANCE, 60, () -> {
+			Date yestoday = DateUtil.getDate2(DateUtil.addDate2(new Date(), -1));
 			seniorBalanceService.doBalance(yestoday);
 		});
 	}
 
-	private void lockDone(String lockName, Integer expireSecord, Consumer<Date> consumer) {
-		boolean succ = lock.acquireLock(lockName, expireSecord, 0, 1);
-		if (succ) {
-			try {
-				consumer.accept(new Date());
-			} finally {
-				lock.unLock(lockName);
-			}
-		} else {
-			log.warn("获取分布式锁失败， 跳过执行的{}任务", lockName);
-		}
+	@Override
+	public void quartzCharging() {
+
+		new LockDone(lock).apply(LockConstant.LOCK_QUARTZ_BALANCE, 60, () -> {
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTime(new Date());
+			calendar.set(Calendar.HOUR_OF_DAY, 0);
+			calendar.set(Calendar.MINUTE, 0);
+			calendar.set(Calendar.SECOND, 0);
+			calendar.set(Calendar.MILLISECOND, 0);
+			calendar.add(Calendar.MONTH, -1);
+			calendar.set(Calendar.DAY_OF_MONTH, 1);
+			Date theDay = calendar.getTime();
+			seniorChargingService.doExtract(TunnelType.YUNST, theDay);
+			seniorChargingService.doCharging(TunnelType.YUNST, theDay);
+		});
 	}
 }

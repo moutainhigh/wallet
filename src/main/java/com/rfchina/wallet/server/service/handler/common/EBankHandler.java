@@ -20,6 +20,7 @@ import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.model.ext.WithdrawResp;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
+import java.math.RoundingMode;
 import java.util.Date;
 import java.util.List;
 
@@ -110,6 +111,10 @@ public abstract class EBankHandler {
 	 */
 	public String downloadBalanceFile(Date date) {
 		throw new RuntimeException();
+	}
+
+	public static RoundingMode getRoundingMode(){
+		return RoundingMode.HALF_UP;
 	}
 
 }
