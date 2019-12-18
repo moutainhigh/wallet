@@ -8,23 +8,16 @@ import com.rfchina.platform.common.json.ObjectSetter;
 import com.rfchina.platform.common.misc.ResponseCode;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
-import com.rfchina.wallet.domain.mapper.YunstSdkLogMapper;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
-import com.rfchina.wallet.domain.model.YunstSdkLog;
 import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
 import com.rfchina.wallet.server.bank.yunst.request.YunstBaseReq;
 import com.rfchina.wallet.server.bank.yunst.response.YunstBaseResp;
-import java.util.Date;
 import java.util.Map;
 import java.util.TimeZone;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 
 @Slf4j
 public class YunstTpl {
-
-	@Autowired
-	private YunstSdkLogMapper yunstSdkLogMapper;
 
 	public static final String RESP_OK = "OK";
 
@@ -37,15 +30,6 @@ public class YunstTpl {
 		String respPkg = YunClient.request(reqPkg);
 		log.info("【通联】接收响应 {}", respPkg);
 
-		yunstSdkLogMapper.insertSelective(
-			YunstSdkLog.builder()
-				.request(JsonUtil.toJSON(reqPkg))
-				.response(respPkg)
-				.createTime(new Date())
-				.yunstServiceName(reqPkg.getService())
-				.yunstMethodName(reqPkg.getMethod())
-				.build()
-		);
 
 		// 解析结果
 		YunstBaseResp resp = JsonUtil.toObject(respPkg, YunstBaseResp.class, getObjectMapper());

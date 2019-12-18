@@ -8,7 +8,6 @@ import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletTunnel;
-import com.rfchina.wallet.domain.model.YunstFeeReport;
 import com.rfchina.wallet.server.api.SeniorWalletApi;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult;
@@ -240,16 +239,5 @@ public class SeniorWalletController {
 
 
 
-	@ApiOperation("高级钱包-通联手续费")
-	@PostMapping(UrlConstant.WALLET_SENIOR_YUNST_FEE_REPORT)
-	public ResponseValue<Pagination<YunstFeeReport>> yunstFeeReport(
-		@RequestParam("access_token") String accessToken,
-		@ApiParam(value = "每页限制") @RequestParam(value = "limit") int limit,
-		@ApiParam(value = "起始页偏移量") @RequestParam(value = "offset") int offset,
-		@ApiParam(value = "是否统计", required = false) @RequestParam(value = "stat", required = false) Boolean stat) {
-
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
-			seniorWalletApi.queryYunstFeeReport(accessToken, limit, offset, stat));
-	}
 
 }

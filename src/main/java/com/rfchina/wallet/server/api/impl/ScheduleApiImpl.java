@@ -15,7 +15,6 @@ import com.rfchina.wallet.server.service.ScheduleService;
 import com.rfchina.wallet.server.service.SeniorBalanceService;
 import com.rfchina.wallet.server.service.SeniorWalletService;
 import com.rfchina.wallet.server.service.WalletService;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
@@ -128,16 +127,6 @@ public class ScheduleApiImpl implements ScheduleApi {
 	}
 
 
-	@Override
-	public void quartzYunstFeeReport() {
-
-		lockDone(LockConstant.LOCK_QUARTZ_YUNST_FEE_REPORT, 60, (date) -> {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
-			String ym = sdf.format(new Date());
-			log.info("统计{}通联通道手续费",ym);
-			seniorWalletService.statisticsTLFee(ym);
-		});
-	}
 	private void lockDone(String lockName, Integer expireSecord, Consumer<Date> consumer) {
 		boolean succ = lock.acquireLock(lockName, expireSecord, 0, 1);
 		if (succ) {
