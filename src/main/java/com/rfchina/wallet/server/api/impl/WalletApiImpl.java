@@ -1,6 +1,5 @@
 package com.rfchina.wallet.server.api.impl;
 
-import com.rfchina.biztools.lock.SimpleExclusiveLock;
 import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.passport.token.EnumTokenType;
 import com.rfchina.passport.token.TokenVerify;
@@ -67,9 +66,6 @@ public class WalletApiImpl implements WalletApi {
 
 	@Autowired
 	private ConfigService configService;
-
-	@Autowired
-	private SimpleExclusiveLock lock;
 
 	@Autowired
 	private WalletCardDao walletCardDao;

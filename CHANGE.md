@@ -4,6 +4,10 @@
 jenkins job: platform-rfwallet-super-server-test
 
 ```  
+## 1.1.0_b21_2019121818_Beta
+### [变动说明]
+- 增加通联手续费报表
+
 ## 1.1.0_b20_2019121318_Beta
 ### [变动说明]
 - 增加回跳白名单功能

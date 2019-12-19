@@ -36,7 +36,7 @@ import com.rfchina.wallet.server.bank.yunst.response.result.YunstSetCompanyInfoR
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstUnBindBankCardResult;
 import com.rfchina.wallet.server.bank.yunst.util.YunstTpl;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
-import com.rfchina.wallet.server.msic.EnumWallet.YunstIdType;
+import com.rfchina.wallet.server.msic.EnumYunst.YunstIdType;
 import java.util.TimeZone;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;

@@ -629,72 +629,6 @@ public class EnumWallet {
 		}
 	}
 
-//	/**
-//	 * 清算业务状态。1：待清算 2：已清算
-//	 */
-//	public enum ClearingStatus implements Valuable<Byte> {
-//		WAITING((byte) 1, "未清算"),
-//		CLEARED((byte) 2, "已清算"),
-//		FAIL((byte) 3, "交易失败"),
-//		;
-//
-//		private Byte value;
-//		private String valueName;
-//
-//		ClearingStatus(Byte value, String valueName) {
-//			this.value = value;
-//			this.valueName = valueName;
-//		}
-//
-//		@Override
-//		public Byte getValue() {
-//			return value;
-//		}
-//	}
-
-//	/**
-//	 * 分帐状态。1：未清算 2：部分清算 3：已清算
-//	 */
-//	public enum ClearInfoStatus implements Valuable<Byte> {
-//		WAITING((byte) 1, "未清算"),
-//		PARTAL((byte) 2, "部分清算"),
-//		FINISH((byte) 3, "已清算");
-//
-//		private Byte value;
-//		private String valueName;
-//
-//		ClearInfoStatus(Byte value, String valueName) {
-//			this.value = value;
-//			this.valueName = valueName;
-//		}
-//
-//		@Override
-//		public Byte getValue() {
-//			return value;
-//		}
-//	}
-
-//	/**
-//	 * 退款状态。1：未退款 2：已退款 3:交易失败
-//	 */
-//	public enum RefundStatus implements Valuable<Byte> {
-//		WAITING((byte) 1, "未退款"),
-//		REFUNDED((byte) 2, "已退款"),
-//		FAIL((byte) 3, "交易失败");
-//
-//		private Byte value;
-//		private String valueName;
-//
-//		RefundStatus(Byte value, String valueName) {
-//			this.value = value;
-//			this.valueName = valueName;
-//		}
-//
-//		@Override
-//		public Byte getValue() {
-//			return value;
-//		}
-//	}
 
 	/**
 	 * 退款方式
@@ -717,88 +651,6 @@ public class EnumWallet {
 		}
 	}
 
-
-	public enum YunstServiceName implements Valuable<String> {
-		MEMBER("MemberService"),
-		ORDER("OrderService"),
-		MEMBER_PWD("MemberPwdService"),
-		ORDER_SERVICE(" OrderService "),
-		;
-
-		private String value;
-
-		YunstServiceName(String value) {
-			this.value = value;
-		}
-
-		@Override
-		public String getValue() {
-			return value;
-		}
-	}
-
-	public enum YunstMethodName implements Valuable<String> {
-		VERIFY_RESULT("verifyResult"),
-		SIGN_CONTRACT("signContract"),
-		SIGN_BALANCE_PROTOCOL("signBalanceProtocol"),
-		CHANGE_BIND_PHONE("updatePhoneByPayPwd"),
-		SET_PAY_PWD("setPayPwd"),
-		PERSON_VERIFY("setRealName"),
-		COMPANY_VERIFY("setCompanyInfo"),
-		;
-
-		private String value;
-
-		YunstMethodName(String value) {
-			this.value = value;
-		}
-
-		@Override
-		public String getValue() {
-			return value;
-		}
-	}
-
-	/**
-	 * 订单状态 1:未支付 3:交易失败 4:交易成功 5:交易成功-发生退款 6:关闭 99:进行中
-	 */
-	public enum YunstOrderStatus implements Valuable<Long> {
-		NO_PAY(1L, "未支付"),
-		FAIL(3L, "交易失败"),
-		SUCC(4L, "交易成功"),
-		SUCC_REFUND(5L, "交易成功-发生退款"),
-		CLOSED(6L, "关闭"),
-		RUNNING(99L, "进行中"),
-		;
-
-		private Long value;
-		private String valueName;
-
-		YunstOrderStatus(Long value, String valueName) {
-			this.value = value;
-			this.valueName = valueName;
-		}
-
-		@Override
-		public Long getValue() {
-			return this.value;
-		}
-
-		public OrderStatus toUniStatus() {
-			switch (this) {
-				case SUCC:
-					return OrderStatus.SUCC;
-				case SUCC_REFUND:
-					return OrderStatus.SUCC;
-				case FAIL:
-					return OrderStatus.FAIL;
-				case CLOSED:
-					return OrderStatus.CLOSED;
-				default:
-					return OrderStatus.WAITTING;
-			}
-		}
-	}
 
 	/**
 	 * 进度。1：待发送 2：已发送 3：已接收结果',
@@ -824,97 +676,6 @@ public class EnumWallet {
 
 	}
 
-	/**
-	 * 通联sdk返回枚举
-	 */
-	public enum EnumYunstResponse implements Valuable<String> {
-		ALREADY_EXISTS_MEMEBER("30000","用户已存在"),
-		ALREADY_BIND_PHONE("30024", "已绑定手机"),
-		ALREADY_REALNAME_AUTH("30007", "已实名验证"),
-		;
-
-		private String value;
-		private String valueName;
-
-		EnumYunstResponse(String value, String valueName) {
-			this.value = value;
-			this.valueName = valueName;
-		}
-
-		@Override
-		public String getValue() {
-			return this.value;
-		}
-
-	}
-
-	/**
-	 * 通联设备类型
-	 */
-	public enum EnumYunstDeviceType implements Valuable<Long> {
-		MOBILE(1L, "移动"),
-		PC(2L, "PC");
-
-		private Long value;
-		private String valueName;
-
-		EnumYunstDeviceType(Long value, String valueName) {
-			this.value = value;
-			this.valueName = valueName;
-		}
-
-		@Override
-		public Long getValue() {
-			return this.value;
-		}
-
-	}
-
-	/**
-	 * 通联银行卡/账户属性
-	 */
-//	public enum EnumYunstCardPro implements Valuable<Long> {
-//		PERSON(0L, "个人银行卡"),
-//		ENTERPRICE(1L, "企业对公账户");
-//
-//		private Long value;
-//		private String valueName;
-//
-//		EnumYunstCardPro(Long value, String valueName) {
-//			this.value = value;
-//			this.valueName = valueName;
-//		}
-//
-//		@Override
-//		public Long getValue() {
-//			return this.value;
-//		}
-//
-//	}
-
-	/**
-	 * 通联提现方式 D0：D+0 到账 D1：D+1 到账 T1customized：T+1 到账，仅工作日代付 D0customized：D+0 到账，根据平台资金头寸付款 默认为 D0
-	 */
-	public enum EnumYunstWithdrawType implements Valuable<String> {
-		D0("D0", "D+0 到账"),
-		D1("D1", "D+1 到账"),
-		T1_CUSTOMIZED("T1customized", "T+1 到账，仅工作日代付"),
-		D0_CUSTOMIZED("D0customized", "D+0 到账，根据平台资金头寸付款");
-
-		private String value;
-		private String valueName;
-
-		EnumYunstWithdrawType(String value, String valueName) {
-			this.value = value;
-			this.valueName = valueName;
-		}
-
-		@Override
-		public String getValue() {
-			return this.value;
-		}
-
-	}
 
 	/**
 	 * 业务标签
@@ -941,7 +702,7 @@ public class EnumWallet {
 		}
 
 		public byte and(Byte bizTag) {
-			if(bizTag == null){
+			if (bizTag == null) {
 				bizTag = 0;
 			}
 			return (byte) (this.value.byteValue() | bizTag.byteValue());
@@ -970,52 +731,7 @@ public class EnumWallet {
 	}
 
 
-	/**
-	 * 证件类型
-	 */
-	public enum YunstIdType implements Valuable<Long> {
-		/**
-		 * 身份证
-		 */
-		ID_CARD(1L),
-		;
 
-		private Long value;
-
-		YunstIdType(Long value) {
-			this.value = value;
-		}
-
-		@Override
-		public Long getValue() {
-			return value;
-		}
-	}
-
-	/**
-	 * 文件类型
-	 */
-	public enum YunstFileType implements Valuable<Long> {
-		/**
-		 * 身份证
-		 */
-		DETAIL(1L, "明细"),
-		SUMMARY(2L, "汇总"),
-		;
-
-		private Long value;
-		private String valueName;
-
-		YunstFileType(Long value, String valueName) {
-			this.value = value;
-			this.valueName = valueName;
-		}
-
-		@Override
-		public Long getValue() {
-			return this.value;
-		}
-	}
 
 
 	/**
@@ -1157,7 +873,7 @@ public class EnumWallet {
 	 */
 	public enum YunstCompanyInfoAuditStatus implements Valuable<Long> {
 		WAITING(1L, "待审核"),
-		SUCCESS( 2L, "审核通过"),
+		SUCCESS(2L, "审核通过"),
 		FAIL(3L, "审核失败");
 
 		private Long value;
@@ -1173,4 +889,23 @@ public class EnumWallet {
 			return value;
 		}
 	}
+
+	public enum GatewayInvokeStatus implements Valuable<Byte> {
+		SUCC((byte) 1, "成功"),
+		FAIL((byte) 2, "失败");
+
+		private Byte value;
+		private String valueName;
+
+		GatewayInvokeStatus(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}
+	}
+
 }

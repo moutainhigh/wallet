@@ -87,16 +87,16 @@ import com.rfchina.wallet.server.model.ext.WithdrawResp;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
 import com.rfchina.wallet.server.msic.EnumWallet.DebitType;
 import com.rfchina.wallet.server.msic.EnumWallet.EnumBizTag;
-import com.rfchina.wallet.server.msic.EnumWallet.EnumYunstDeviceType;
-import com.rfchina.wallet.server.msic.EnumWallet.EnumYunstWithdrawType;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.GwProgress;
 import com.rfchina.wallet.server.msic.EnumWallet.OrderStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.OrderSubStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.RefundType;
 import com.rfchina.wallet.server.msic.EnumWallet.UniProgress;
-import com.rfchina.wallet.server.msic.EnumWallet.YunstFileType;
-import com.rfchina.wallet.server.msic.EnumWallet.YunstOrderStatus;
+import com.rfchina.wallet.server.msic.EnumYunst.EnumYunstDeviceType;
+import com.rfchina.wallet.server.msic.EnumYunst.EnumYunstWithdrawType;
+import com.rfchina.wallet.server.msic.EnumYunst.YunstFileType;
+import com.rfchina.wallet.server.msic.EnumYunst.YunstOrderStatus;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.GatewayTransService;
@@ -857,6 +857,9 @@ public class YunstBizHandler extends EBankHandler {
 			return resp.getUrl();
 		} catch (Exception e) {
 			log.error("通联-接口异常", e);
+			if (e instanceof CommonGatewayException) {
+				throw (CommonGatewayException) e;
+			}
 			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
 		}
 	};
@@ -872,6 +875,9 @@ public class YunstBizHandler extends EBankHandler {
 			return fileUrl;
 		} catch (Exception e) {
 			log.error("文件下载错误", e);
+			if (e instanceof CommonGatewayException) {
+				throw (CommonGatewayException) e;
+			}
 			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
 		}
 	};
@@ -892,6 +898,9 @@ public class YunstBizHandler extends EBankHandler {
 			return resp.getCardBinInfo();
 		} catch (Exception e) {
 			log.error("通联-接口异常", e);
+			if (e instanceof CommonGatewayException) {
+				throw (CommonGatewayException) e;
+			}
 			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
 		}
 	}

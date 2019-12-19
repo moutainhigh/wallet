@@ -16,7 +16,7 @@ public class ScheduleServiceTest extends SpringBaseTest {
 
 	@Test
 	public void quartzUpdateSenior() {
-		scheduleService.quartzUpdateSenior(100,1);
+		scheduleService.quartzUpdateSenior(100);
 	}
 
 	@Test

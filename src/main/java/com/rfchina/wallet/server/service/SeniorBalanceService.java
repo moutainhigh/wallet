@@ -91,77 +91,104 @@ public class SeniorBalanceService {
 	 * 对账
 	 */
 	public void doBalance(Date date) {
+		String statDate = DateUtil.formatDate(date, "yyyy-MM-dd");
+		try {
+			// 下载数据
+			EBankHandler handler = handlerHelper.selectByTunnelType(TunnelType.YUNST.getValue());
+			String fileUrl = handler.downloadBalanceFile(date);
 
-		// 下载数据
-		EBankHandler handler = handlerHelper.selectByTunnelType(TunnelType.YUNST.getValue());
-		String fileUrl = handler.downloadBalanceFile(date);
+			Date beginDate = DateUtil.getDate2(date);
+			Date endDate = DateUtil.getDate(date);
+			// 保存数据
+			saveLocal(fileUrl, beginDate, endDate);
+			// 加载数据
+			String keyPrefix =
+				"wallet:balance:" + DateUtil.formatDate(date, DateUtil.STANDARD_DTAE_PATTERN);
+			String tunnelKey = keyPrefix + ":tunnelDetails";
+			String walletKey = keyPrefix + ":walletOrders";
+			Tuple<BoundSetOperations<String, String>, BoundSetOperations<String, String>> tuple = loadData(
+				tunnelKey, walletKey, beginDate, endDate);
+			BoundSetOperations<String, String> tunnelOps = tuple.left;
+			BoundSetOperations<String, String> walletOps = tuple.right;
+			// 集合比较
+			String tunnelDiffKey = keyPrefix + ":tunnelDiff";
+			String walletDiffKey = keyPrefix + ":walletDiff";
+			String succDiffKey = keyPrefix + ":succ";
+			Set<BalanceVo> tunnelDiffSet = diffSet(tunnelOps, walletKey, tunnelDiffKey);
+			Set<BalanceVo> walletDiffSet = diffSet(walletOps, tunnelKey, walletDiffKey);
+			Set<BalanceVo> succSet = diffSet(tunnelOps, tunnelDiffKey, succDiffKey);
 
-		Date beginDate = DateUtil.getDate2(date);
-		Date endDate = DateUtil.getDate(date);
-		// 保存数据
-		saveLocal(fileUrl, beginDate, endDate);
-		// 加载数据
-		String keyPrefix =
-			"wallet:balance:" + DateUtil.formatDate(date, DateUtil.STANDARD_DTAE_PATTERN);
-		String tunnelKey = keyPrefix + ":tunnelDetails";
-		String walletKey = keyPrefix + ":walletOrders";
-		Tuple<BoundSetOperations<String, String>, BoundSetOperations<String, String>> tuple = loadData(
-			tunnelKey, walletKey, beginDate, endDate);
-		BoundSetOperations<String, String> tunnelOps = tuple.left;
-		BoundSetOperations<String, String> walletOps = tuple.right;
-		// 集合比较
-		String tunnelDiffKey = keyPrefix + ":tunnelDiff";
-		String walletDiffKey = keyPrefix + ":walletDiff";
-		String succDiffKey = keyPrefix + ":succ";
-		Set<BalanceVo> tunnelDiffSet = diffSet(tunnelOps, walletKey, tunnelDiffKey);
-		Set<BalanceVo> walletDiffSet = diffSet(walletOps, tunnelKey, walletDiffKey);
-		Set<BalanceVo> succSet = diffSet(tunnelOps, tunnelDiffKey, succDiffKey);
+			// 创建JOB
+			BalanceJob job = createJob(beginDate, endDate);
+			// 完全匹配
+			saveResult(succSet, beginDate, endDate, job.getId(), BalanceResultStatus.SUCC);
+			// 通道条目多
+			Set<BalanceVo> tunnelMoreSet = new HashSet<>(tunnelDiffSet);
+			tunnelMoreSet.removeAll(walletDiffSet);
+			saveResult(tunnelMoreSet, beginDate, endDate, job.getId(),
+				BalanceResultStatus.TUNNEL_MORE);
+			// 钱包条目多
+			Set<BalanceVo> walletMoreSet = new HashSet<>(walletDiffSet);
+			walletMoreSet.removeAll(tunnelDiffSet);
+			saveResult(walletMoreSet, beginDate, endDate, job.getId(),
+				BalanceResultStatus.WALLET_MORE);
+			// 金额不匹配
+			Set<BalanceVo> diffSet = new HashSet<>(walletDiffSet);
+			diffSet.removeAll(walletMoreSet);
+			saveResult(diffSet, beginDate, endDate, job.getId(),
+				BalanceResultStatus.AMOUNT_NOT_MATCH);
 
-		// 创建JOB
-		BalanceJob job = createJob(beginDate, endDate);
-		// 完全匹配
-		saveResult(succSet, beginDate, endDate, job.getId(), BalanceResultStatus.SUCC);
-		// 通道条目多
-		Set<BalanceVo> tunnelMoreSet = new HashSet<>(tunnelDiffSet);
-		tunnelMoreSet.removeAll(walletDiffSet);
-		saveResult(tunnelMoreSet, beginDate, endDate, job.getId(), BalanceResultStatus.TUNNEL_MORE);
-		// 钱包条目多
-		Set<BalanceVo> walletMoreSet = new HashSet<>(walletDiffSet);
-		walletMoreSet.removeAll(tunnelDiffSet);
-		saveResult(walletMoreSet, beginDate, endDate, job.getId(), BalanceResultStatus.WALLET_MORE);
-		// 金额不匹配
-		Set<BalanceVo> diffSet = new HashSet<>(walletDiffSet);
-		diffSet.removeAll(walletMoreSet);
-		saveResult(diffSet, beginDate, endDate, job.getId(), BalanceResultStatus.AMOUNT_NOT_MATCH);
-
-		// 对账失败时结束
-		if (!tunnelMoreSet.isEmpty() || !walletMoreSet.isEmpty() || !diffSet.isEmpty()) {
-			job.setStatus(BalanceJobStatus.FAIL.getValue());
-			balanceJobDao.updateByPrimaryKeySelective(job);
-			// 邮件通知对账错误
-			sendErrMail(tunnelMoreSet, walletMoreSet, diffSet);
-		} else {
-			// 生成对账文件
-			try {
-				Path path = write2File(date, succSet);
-				byte[] bytes = Files.readAllBytes(path);
-				String fileKey = path.getFileName().toString();
-				fileServer.upload(fileKey, bytes, "text/plain", EnumFileAcl.PUBLIC_READ, null);
-				Files.delete(path);
-				job.setStatus(BalanceJobStatus.SUCC.getValue());
-				job.setWalletFileUrl(fileServer.getSvrEndpoint() + "/_f/" +
-					fileServer.getSrvBucket() + "/" + fileKey);
+			// 对账失败时结束
+			if (!tunnelMoreSet.isEmpty() || !walletMoreSet.isEmpty() || !diffSet.isEmpty()) {
+				job.setStatus(BalanceJobStatus.FAIL.getValue());
 				balanceJobDao.updateByPrimaryKeySelective(job);
-			} catch (Exception e) {
-				log.error("上传对账文件异常", e);
+				// 邮件通知对账错误
+				sendFailMail(statDate, tunnelMoreSet, walletMoreSet, diffSet);
+			} else {
+				// 生成对账文件
+				try {
+					Path path = write2File(date, succSet);
+					byte[] bytes = Files.readAllBytes(path);
+					String fileKey = path.getFileName().toString();
+					fileServer.upload(fileKey, bytes, "text/plain", EnumFileAcl.PUBLIC_READ, null);
+					Files.delete(path);
+					job.setStatus(BalanceJobStatus.SUCC.getValue());
+					job.setWalletFileUrl(fileServer.getSvrEndpoint() + "/_f/" +
+						fileServer.getSrvBucket() + "/" + fileKey);
+					balanceJobDao.updateByPrimaryKeySelective(job);
+				} catch (Exception e) {
+					log.error("上传对账文件异常", e);
+				}
 			}
+		} catch (Exception e) {
+			log.error("对账失败 " + statDate, e);
+			sendErrMail(statDate, e.toString());
 		}
-
 
 	}
 
-	private void sendErrMail(Set<BalanceVo> tunnelMoreSet, Set<BalanceVo> walletMoreSet,
-		Set<BalanceVo> diffSet) {
+	private void sendErrMail(String statDate, String errMsg) {
+		// 发送通知邮件
+		try {
+			EmailUtil.EmailBody emailBody = new EmailUtil.EmailBody(
+				"**********[钱包服务]对账异常通知 " + statDate, errMsg, configService.getEmailSender(),
+				configService.getEmailSender());
+			String errorContract = configService.getNotifyContract();
+			if (StringUtils.isNotBlank(errorContract)) {
+				for (String email : errorContract.split(",")) {
+					emailBody.addReceiver(email, email);
+				}
+				EmailUtil.send(emailBody, () -> javaMailSender.createMimeMessage(),
+					(m) -> javaMailSender.send(m));
+			}
+		} catch (Exception e) {
+			log.error("[钱包服务]通知邮件发送失败, " + errMsg, e);
+		}
+
+	}
+
+	private void sendFailMail(String statDate, Set<BalanceVo> tunnelMoreSet,
+		Set<BalanceVo> walletMoreSet, Set<BalanceVo> diffSet) {
 		// 邮件通知
 		StringBuilder content = new StringBuilder();
 		content.append("通道条目多&nbsp&nbsp")
@@ -177,7 +204,7 @@ public class SeniorBalanceService {
 		// 发送通知邮件
 		try {
 			EmailUtil.EmailBody emailBody = new EmailUtil.EmailBody(
-				"**********[钱包服务]对账通知",
+				"**********[钱包服务]对账异常通知 " + statDate,
 				content.toString(),
 				configService.getEmailSender(),
 				configService.getEmailSender()

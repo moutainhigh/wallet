@@ -299,7 +299,7 @@ public class ScheduleService {
 	/**
 	 * 定时更新支付状态
 	 */
-	public void quartzUpdateSenior(Integer batchSize, Integer periodSecord) {
+	public void quartzUpdateSenior(Integer batchSize) {
 
 		log.info("quartz: 开始更新支付状态[高级钱包]");
 

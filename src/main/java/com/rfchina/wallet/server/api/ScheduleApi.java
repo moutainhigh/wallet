@@ -22,5 +22,9 @@ public interface ScheduleApi {
 	 */
 	void quartzBalance();
 
+	/**
+	 * 定时计费
+	 */
+	void quartzCharging();
 
 }

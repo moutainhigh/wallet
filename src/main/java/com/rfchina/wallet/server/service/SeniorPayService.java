@@ -66,6 +66,8 @@ import com.rfchina.wallet.server.service.handler.common.EBankHandler;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBizHandler;
 import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -318,7 +320,9 @@ public class SeniorPayService {
 
 		try {
 			lock.acquireLock(LockConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);
-
+			BigDecimal tunnelFee = new BigDecimal(req.getAmount())
+				.multiply(req.getWalletPayMethod().getRate())
+				.setScale(0, EBankHandler.getRoundingMode());
 			WalletOrder collectOrder = WalletOrder.builder()
 				.orderNo(orderNo)
 				.batchNo(batchNo)
@@ -330,6 +334,7 @@ public class SeniorPayService {
 				.progress(GwProgress.WAIT_SEND.getValue())
 				.status(OrderStatus.WAITTING.getValue())
 				.tunnelType(TunnelType.YUNST.getValue())
+				.tunnelFee(tunnelFee.longValue())
 				.note(req.getNote())
 				.industryCode(req.getIndustryCode())
 				.industryName(req.getIndustryName())
