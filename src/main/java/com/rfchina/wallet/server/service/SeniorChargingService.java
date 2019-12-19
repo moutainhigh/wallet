@@ -22,6 +22,7 @@ import com.rfchina.wallet.server.mapper.ext.StatChargingDetailExtDao;
 import com.rfchina.wallet.server.mapper.ext.StatChargingExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import com.rfchina.wallet.server.model.ext.ChargingVo;
+import com.rfchina.wallet.server.model.ext.StatChargingDetailVo;
 import com.rfchina.wallet.server.model.ext.SumOfFeeVo;
 import com.rfchina.wallet.server.msic.EnumWallet.OrderStatus;
 import com.rfchina.wallet.server.msic.EnumYunst.YunstMethodName;
@@ -29,6 +30,7 @@ import com.rfchina.wallet.server.msic.EnumYunst.YunstServiceName;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -198,7 +200,7 @@ public class SeniorChargingService {
 
 	}
 
-	public Pagination<StatChargingDetail> queryChargingDetail(Date startTime, Date endTime,
+	public Pagination<StatChargingDetailVo> queryChargingDetail(Date startTime, Date endTime,
 		Integer limit,
 		Integer offset, Boolean stat) {
 		StatChargingDetailCriteria example = new StatChargingDetailCriteria();
@@ -208,13 +210,16 @@ public class SeniorChargingService {
 			.andDeletedEqualTo((byte) 0);
 		List<StatChargingDetail> data = statChargingDetailDao
 			.selectByExampleWithRowbounds(example, new RowBounds(offset, limit));
+		List<StatChargingDetailVo> list = data.stream()
+			.map(item -> BeanUtil.newInstance(item, StatChargingDetailVo.class))
+			.collect(Collectors.toList());
 		Long total = 0L;
 		if (stat) {
 			total = statChargingDetailDao.countByExample(example);
 		}
-		return new Pagination.PaginationBuilder<StatChargingDetail>()
+		return new Pagination.PaginationBuilder<StatChargingDetailVo>()
 			.total(total)
-			.data(data)
+			.data(list)
 			.offset(offset)
 			.pageLimit(limit)
 			.build();

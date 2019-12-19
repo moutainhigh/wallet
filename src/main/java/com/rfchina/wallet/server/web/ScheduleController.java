@@ -3,6 +3,7 @@ package com.rfchina.wallet.server.web;
 import com.rfchina.scheduler.annotation.FuScheduleTaskReporter;
 import com.rfchina.wallet.server.api.ScheduleApi;
 import com.rfchina.wallet.server.msic.UrlConstant;
+import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
