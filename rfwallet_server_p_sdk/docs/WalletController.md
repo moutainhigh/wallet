@@ -302,6 +302,28 @@
     title:""  , //钱包标题，通常是姓名或公司名
     type:""  , //钱包类型， 1：企业钱包，2：个人钱包
     wallet_balance:""   //钱包余额
+}  , 
+    wallet_tunnel:{
+    balance:""  , //银行余额
+    balance_protocol_no:""  , //扣款协议号
+    balance_protocol_req_sn:""  , //扣款协议请求流水号
+    biz_user_id:""  , //业务用户标识
+    check_time:""  , //审核时间
+    create_time:""  , //创建日期
+    fail_reason:""  , //失败原因
+    freezen_amount:""  , //冻结金额
+    has_pay_password:""  , //是否设置支付密码 1-是 2-否
+    id:""  , //id
+    is_dirty:""  , //脏数据标识 1：正常 2：脏数据
+    is_sign_contact:""  , //签订通联会员协议 0-未签订 1-签订电子会员协议 2-签订扣款协议
+    member_type:""  , //银行用户类型。2：企业会员 3：个人会员
+    pic_url:""  , //审核图片地址
+    remark:""  , //备注
+    security_tel:""  , //安全手机
+    status:""  , //资料审核状态。1: 未提交审核, 2：待审核 ，3：审核成功，4：审核失败
+    tunnel_type:""  , //渠道类型。1: 浦发银企直连，2：通联云商通
+    tunnel_user_id:""  , //银行用户标识
+    wallet_id:""   //钱包id
 }   
 }  
 }
@@ -384,6 +406,28 @@
     title:""  , //钱包标题，通常是姓名或公司名
     type:""  , //钱包类型， 1：企业钱包，2：个人钱包
     wallet_balance:""   //钱包余额
+}  , 
+    wallet_tunnel:{
+    balance:""  , //银行余额
+    balance_protocol_no:""  , //扣款协议号
+    balance_protocol_req_sn:""  , //扣款协议请求流水号
+    biz_user_id:""  , //业务用户标识
+    check_time:""  , //审核时间
+    create_time:""  , //创建日期
+    fail_reason:""  , //失败原因
+    freezen_amount:""  , //冻结金额
+    has_pay_password:""  , //是否设置支付密码 1-是 2-否
+    id:""  , //id
+    is_dirty:""  , //脏数据标识 1：正常 2：脏数据
+    is_sign_contact:""  , //签订通联会员协议 0-未签订 1-签订电子会员协议 2-签订扣款协议
+    member_type:""  , //银行用户类型。2：企业会员 3：个人会员
+    pic_url:""  , //审核图片地址
+    remark:""  , //备注
+    security_tel:""  , //安全手机
+    status:""  , //资料审核状态。1: 未提交审核, 2：待审核 ，3：审核成功，4：审核失败
+    tunnel_type:""  , //渠道类型。1: 浦发银企直连，2：通联云商通
+    tunnel_user_id:""  , //银行用户标识
+    wallet_id:""   //钱包id
 }   
 }  
 }

@@ -217,10 +217,12 @@ public class WalletService {
 			&& wallet.getAuditType() == EnumWalletAuditType.ALLINPAY
 			.getValue().byteValue()) {
 			try {
-				WalletTunnel walletChannel = seniorWalletService
+				WalletTunnel walletTunnel = seniorWalletService
 					.getWalletTunnelInfo(TunnelType.YUNST.getValue(), walletId);
-				wallet.setWalletBalance(walletChannel.getBalance());
-				wallet.setFreezeAmount(walletChannel.getFreezenAmount());
+				wallet.setWalletBalance(walletTunnel.getBalance());
+				wallet.setFreezeAmount(walletTunnel.getFreezenAmount());
+
+				builder.walletTunnel(walletTunnel);
 			} catch (Exception e) {
 				log.error("获取高级钱包渠道信息失败 walletId:{}", walletId);
 				throw new RfchinaResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST
