@@ -11,6 +11,7 @@ import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.domain.model.StatCharging;
 import com.rfchina.wallet.domain.model.StatChargingDetail;
 import com.rfchina.wallet.server.api.SeniorChargingApi;
+import com.rfchina.wallet.server.model.ext.StatChargingDetailVo;
 import com.rfchina.wallet.server.service.SeniorChargingService;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,7 @@ public class SeniorChargingApiImpl implements SeniorChargingApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public Pagination<StatChargingDetail> queryChargingDetail(String accessToken, Date startTime,
+	public Pagination<StatChargingDetailVo> queryChargingDetail(String accessToken, Date startTime,
 		Date endTime, Integer limit, Integer offset, Boolean stat) {
 		return seniorChargingService.queryChargingDetail(startTime, endTime, limit, offset, stat);
 	}

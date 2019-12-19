@@ -51,6 +51,7 @@
     sub_status:""  , //0：默认 1:待人工处理 2:等待重新发起
     tunnel_err_code:""  , //通道错误码
     tunnel_err_msg:""  , //系统错误信息
+    tunnel_fee:""  , //通道手续费
     tunnel_order_no:""  , //渠道订单号
     tunnel_status:""  , //通道状态
     tunnel_succ_time:""  , //通道成功时间
@@ -169,6 +170,7 @@
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
 |access_token|是|access_token|
+|is_manual_refresh|是|手动更新开关|
 |wallet_id|是|钱包id|
 
 返回数据

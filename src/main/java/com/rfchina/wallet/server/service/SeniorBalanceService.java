@@ -92,13 +92,15 @@ public class SeniorBalanceService {
 	 */
 	public void doBalance(Date date) {
 		String statDate = DateUtil.formatDate(date, "yyyy-MM-dd");
+		Date beginDate = DateUtil.getDate2(date);
+		Date endDate = DateUtil.getDate(date);
+		// 创建JOB
+		BalanceJob job = createJob(beginDate, endDate);
 		try {
 			// 下载数据
 			EBankHandler handler = handlerHelper.selectByTunnelType(TunnelType.YUNST.getValue());
 			String fileUrl = handler.downloadBalanceFile(date);
 
-			Date beginDate = DateUtil.getDate2(date);
-			Date endDate = DateUtil.getDate(date);
 			// 保存数据
 			saveLocal(fileUrl, beginDate, endDate);
 			// 加载数据
@@ -118,8 +120,6 @@ public class SeniorBalanceService {
 			Set<BalanceVo> walletDiffSet = diffSet(walletOps, tunnelKey, walletDiffKey);
 			Set<BalanceVo> succSet = diffSet(tunnelOps, tunnelDiffKey, succDiffKey);
 
-			// 创建JOB
-			BalanceJob job = createJob(beginDate, endDate);
 			// 完全匹配
 			saveResult(succSet, beginDate, endDate, job.getId(), BalanceResultStatus.SUCC);
 			// 通道条目多
@@ -140,8 +140,7 @@ public class SeniorBalanceService {
 
 			// 对账失败时结束
 			if (!tunnelMoreSet.isEmpty() || !walletMoreSet.isEmpty() || !diffSet.isEmpty()) {
-				job.setStatus(BalanceJobStatus.FAIL.getValue());
-				balanceJobDao.updateByPrimaryKeySelective(job);
+				jobFail(job);
 				// 邮件通知对账错误
 				sendFailMail(statDate, tunnelMoreSet, walletMoreSet, diffSet);
 			} else {
@@ -162,9 +161,15 @@ public class SeniorBalanceService {
 			}
 		} catch (Exception e) {
 			log.error("对账失败 " + statDate, e);
+			jobFail(job);
 			sendErrMail(statDate, e.toString());
 		}
 
+	}
+
+	private void jobFail(BalanceJob job) {
+		job.setStatus(BalanceJobStatus.FAIL.getValue());
+		balanceJobDao.updateByPrimaryKeySelective(job);
 	}
 
 	private void sendErrMail(String statDate, String errMsg) {

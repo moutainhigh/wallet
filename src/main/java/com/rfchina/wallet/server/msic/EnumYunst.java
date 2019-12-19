@@ -186,32 +186,38 @@ public class EnumYunst {
 	}
 
 	public enum YunstMethodName implements Valuable<String> {
-		VERIFY_RESULT("verifyResult"),
-		SIGN_CONTRACT("signContract"),
-		SIGN_BALANCE_PROTOCOL("signBalanceProtocol"),
-		CHANGE_BIND_PHONE("updatePhoneByPayPwd"),
-		SET_PAY_PWD("setPayPwd"),
-		PAY("pay"),
-		PERSON_VERIFY("setRealName"),
-		COMPANY_VERIFY("setCompanyInfo"),
-		RECHARGE("depositApply"),
-		WITHDRAW("withdrawApply"),
-		CONSUME("consumeApply"),
-		COLLECT("agentCollectApply"),
-		AGENT_PAY("signalAgentPay"),
-		REFUND("refund"),
-		DEDUCTION("consumeProtocolApply"),
+		VERIFY_RESULT("verifyResult", ""),
+		SIGN_CONTRACT("signContract", ""),
+		SIGN_BALANCE_PROTOCOL("signBalanceProtocol", ""),
+		CHANGE_BIND_PHONE("updatePhoneByPayPwd", ""),
+		SET_PAY_PWD("setPayPwd", ""),
+		PAY("pay", ""),
+		PERSON_VERIFY("setRealName", "个人实名"),
+		COMPANY_VERIFY("setCompanyInfo", "企业实名"),
+		RECHARGE("depositApply", "充值"),
+		WITHDRAW("withdrawApply", "提现"),
+		CONSUME("consumeApply", "消费"),
+		COLLECT("agentCollectApply", "代收"),
+		AGENT_PAY("signalAgentPay", "代付"),
+		REFUND("refund", "退款"),
+		DEDUCTION("consumeProtocolApply", "协议消费"),
 		;
 
 		private String value;
+		private String valueName;
 
-		YunstMethodName(String value) {
+		YunstMethodName(String value, String valueName) {
 			this.value = value;
+			this.valueName = valueName;
 		}
 
 		@Override
 		public String getValue() {
 			return value;
+		}
+
+		public String getValueName() {
+			return valueName;
 		}
 	}
 
