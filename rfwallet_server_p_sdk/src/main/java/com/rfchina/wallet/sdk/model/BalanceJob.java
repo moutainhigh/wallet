@@ -25,7 +25,7 @@ public class BalanceJob  {
     @ApiModelProperty("id")
     private Long id ;
 
-    @ApiModelProperty("状态 1：进行中 2：对账完成")
+    @ApiModelProperty("状态 1：进行中 2：对账完成 3:对账失败")
     private Integer status ;
 
     @ApiModelProperty("对账文件")

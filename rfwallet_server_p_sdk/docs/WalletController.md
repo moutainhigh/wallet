@@ -54,105 +54,6 @@
 }
 ```
 
-###  银行地区列表
-
-请求地址: /wallet_server/v1/wallet/bank/area_list
-
-请求类型: POST
-
-请求参数:
-
-
-| 参数名 | 是否必须 | 描述 |
-|:-- |:-- |:--   |
-|class_code|是|银行类型编码|
-
-返回数据
-```
-{
-  "code": 1001,//状态码
-  "msg": ""//消息
-   , "data": [ {
-} ] 
-}
-```
-
-###  银行类别列表
-
-请求地址: /wallet_server/v1/wallet/bank/class_list
-
-请求类型: POST
-
-请求参数:
-
-
-
-返回数据
-```
-{
-  "code": 1001,//状态码
-  "msg": ""//消息
-   , "data": [ {
-} ] 
-}
-```
-
-###  银行支行列表
-
-请求地址: /wallet_server/v1/wallet/bank/bank_list
-
-请求类型: POST
-
-请求参数:
-
-
-| 参数名 | 是否必须 | 描述 |
-|:-- |:-- |:--   |
-|area_code|是|地区编码|
-|class_code|是|银行类型编码|
-
-返回数据
-```
-{
-  "code": 1001,//状态码
-  "msg": ""//消息
-   , "data": [ {
-} ] 
-}
-```
-
-###  银行支行信息
-
-请求地址: /wallet_server/v1/wallet/bank/bank
-
-请求类型: POST
-
-请求参数:
-
-
-| 参数名 | 是否必须 | 描述 |
-|:-- |:-- |:--   |
-|bank_code|是|银行编码|
-
-返回数据
-```
-{
-  "code": 1001,//状态码
-  "msg": ""//消息
-   , "data":  {
-    area_code:""  , //所属地区
-    bank_code:""  , //银行行号
-    bank_name:""  , //银行名称
-    city_name:""  , //所属省市
-    class_code:""  , //所属分类代码
-    class_name:""  , //所属分类行名
-    id:""  , //ID
-    province_name:""  , //所属地区
-    weight:""   //
-}  
-}
-```
-
 ###  绑定银行卡(对公)
 
 请求地址: /wallet_server/v1/m/wallet/bank_card/bind
@@ -313,30 +214,6 @@
 |access_token|是|access_token|
 |batch_no|否|钱包批次号|
 |biz_no|否|业务凭证号(业务方定义唯一)|
-
-返回数据
-```
-{
-  "code": 1001,//状态码
-  "msg": ""//消息
-   , "data": [ {
-} ] 
-}
-```
-
-###  业务查询银行卡信息
-
-请求地址: /wallet_server/v1/u/wallet/query_wallet_card
-
-请求类型: POST
-
-请求参数:
-
-
-| 参数名 | 是否必须 | 描述 |
-|:-- |:-- |:--   |
-|access_token|是|access_token|
-|wallet_id|是|钱包ID|
 
 返回数据
 ```

@@ -1,12 +1,11 @@
 package com.rfchina.wallet.sdk.api;
 
+import com.rfchina.platform.sdk2.request.AbstractApiRequest;
+import com.rfchina.wallet.sdk.model.CompanyInfoResult;
+import io.swagger.annotations.ApiModelProperty;
 import java.util.HashMap;
 import java.util.Map;
-import com.rfchina.wallet.sdk.model.*;
-import com.rfchina.platform.sdk2.request.AbstractApiRequest;
 import lombok.Builder;
-import io.swagger.annotations.ApiModelProperty;
-import java.util.List;
 
 
 /** 高级钱包-企业信息 */
@@ -21,6 +20,9 @@ public class SeniorWalletCompanyInfoRequest extends  AbstractApiRequest {
 
   @ApiModelProperty("钱包id")
   private Long walletId ;
+
+  @ApiModelProperty("新对公账号")
+  private String publicAccountNo ;
 
 
   @Override
@@ -44,6 +46,9 @@ public class SeniorWalletCompanyInfoRequest extends  AbstractApiRequest {
       }
       if(walletId != null){
         parameters.put("wallet_id", walletId.toString());
+      }
+      if(publicAccountNo != null){
+        parameters.put("public_account_no", publicAccountNo.toString());
       }
     return parameters;
   }
