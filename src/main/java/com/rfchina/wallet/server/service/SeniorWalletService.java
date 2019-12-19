@@ -443,7 +443,8 @@ public class SeniorWalletService {
 	/**
 	 * 高级钱包企业会员信息
 	 */
-	public CompanyInfoResult seniorWalletGetCompanyInfo(Long walletId, Boolean isManualRefresh)
+	public CompanyInfoResult seniorWalletGetCompanyInfo(Long walletId, Boolean isManualRefresh,
+		String mchPublicAccountNo)
 		throws Exception {
 		WalletTunnel walletTunnel = walletTunnelDao
 			.selectByTunnelTypeAndWalletId(TunnelType.YUNST.getValue(), walletId);
@@ -457,7 +458,7 @@ public class SeniorWalletService {
 			this.synchronizeCompanyTunnelInfo(walletId, walletTunnel, null);
 		}
 		if (isManualRefresh.booleanValue()) {
-			CardInfo cardInfo = CardInfo.builder().cardNo(memberInfo.getAccountNo())
+			CardInfo cardInfo = CardInfo.builder().cardNo(mchPublicAccountNo)
 				.parentBankName(memberInfo.getParentBankName())
 				.bankName(memberInfo.getBankName()).build();
 			walletTunnel.setCheckTime(
@@ -563,17 +564,10 @@ public class SeniorWalletService {
 		List<WalletCard> walletCards = walletCardDao
 			.selectPubAccountByWalletId(walletId);
 		if (walletCards != null && !walletCards.isEmpty()) {
-			if (Objects.isNull(cardInfo)) {
-				walletCardDao
-					.updateWalletCard(walletId, EnumWalletCardStatus.UNBIND.getValue(),
-						EnumWalletCardStatus.BIND.getValue(),
-						EnumPublicAccount.YES.getValue());
-				return;
-			}
 			walletCardDao
-				.updateWalletCard(walletId, EnumWalletCardStatus.BIND.getValue(),
-					EnumWalletCardStatus.UNBIND.getValue(),
-					EnumPublicAccount.YES.getValue());
+				.updateWalletCard(walletId, EnumWalletCardStatus.UNBIND.getValue(),
+					EnumWalletCardStatus.BIND.getValue(),
+					EnumPublicAccount.YES.getValue(),EnumDefBankCard.NO.getValue());
 		}
 		walletCardDao.insertSelective(
 			WalletCard.builder()

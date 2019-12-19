@@ -208,10 +208,12 @@ public class SeniorWalletController {
 	public ResponseValue<YunstMemberInfoResult.CompanyInfoResult> seniorWalletCompanyInfo(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
-		@ApiParam(value = "手动更新开关", required = true) @RequestParam(value = "is_manual_refresh", defaultValue = "false") Boolean isManualRefresh) {
+		@ApiParam(value = "手动更新开关", required = true) @RequestParam(value = "is_manual_refresh", defaultValue = "false") Boolean isManualRefresh,
+		@ApiParam(value = "新对公账号", required = false) @RequestParam(value = "public_account_no", required = false) String newPublicAccountNo) {
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
-			seniorWalletApi.seniorWalletGetCompanyInfo(accessToken, walletId, isManualRefresh));
+			seniorWalletApi.seniorWalletGetCompanyInfo(accessToken, walletId, isManualRefresh,
+				newPublicAccountNo));
 	}
 
 
@@ -236,8 +238,6 @@ public class SeniorWalletController {
 			seniorWalletApi.queryWalletOrderDetail(accessToken, walletId, fromTime,
 				toTime, tradeType, status, orderNo, bizNo, limit, offset, stat));
 	}
-
-
 
 
 }

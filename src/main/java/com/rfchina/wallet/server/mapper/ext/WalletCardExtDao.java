@@ -25,7 +25,8 @@ public interface WalletCardExtDao extends WalletCardMapper {
 
 	@Update({"<script>", "update rf_wallet_card set status = #{newStatus}",
 		"<if test=\"isPublic != null\">, is_public = #{isPublic} </if>",
+		"<if test=\"isDef != null\">, is_def = #{isDef} </if>",
 		" where wallet_id = #{walletId} and status = #{oldStatus}", "</script>"})
 	int updateWalletCard(@Param("walletId") Long walletId, @Param("newStatus") Integer newStatus,
-		@Param("oldStatus") Integer var3, @Param("isPublic") Integer isPublic);
+		@Param("oldStatus") Integer oldStatus, @Param("isPublic") Integer isPublic, @Param("isDef") Integer isDef);
 }

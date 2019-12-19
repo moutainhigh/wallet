@@ -3,7 +3,6 @@ package com.rfchina.wallet.server.service.handler.yunst;
 import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.domain.misc.EnumDef;
-import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletCardStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelSetPayPwd;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelSignContract;
@@ -91,8 +90,6 @@ public class YunstNotifyHandler {
 			walletTunnel
 				.setStatus(EnumDef.WalletTunnelAuditStatus.AUDIT_FAIL.getValue().byteValue());
 			walletTunnel.setFailReason(failReason);
-
-			walletCard.setStatus(EnumWalletCardStatus.UNBIND.getValue().byteValue());
 		}
 
 		int effectRows = walletTunnelExtDao.updateByPrimaryKeySelective(walletTunnel);
