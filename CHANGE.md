@@ -4,6 +4,10 @@
 jenkins job: platform-rfwallet-super-server-test
 
 ```  
+## 1.1.0_b22_2019121911_Beta
+### [变动说明]
+- 修复二次线下审核对公账号bug
+
 ## 1.1.0_b21_2019121818_Beta
 ### [变动说明]
 - 增加通联手续费报表
