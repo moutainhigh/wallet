@@ -22,6 +22,9 @@ public class SeniorWalletCompanyInfoRequest extends  AbstractApiRequest {
   @ApiModelProperty("钱包id")
   private Long walletId ;
 
+  @ApiModelProperty("新对公账号")
+  private String publicAccountNo ;
+
 
   @Override
   public String getApiUrl() {
@@ -44,6 +47,9 @@ public class SeniorWalletCompanyInfoRequest extends  AbstractApiRequest {
       }
       if(walletId != null){
         parameters.put("wallet_id", walletId.toString());
+      }
+      if(publicAccountNo != null){
+        parameters.put("public_account_no", publicAccountNo.toString());
       }
     return parameters;
   }

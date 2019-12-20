@@ -36,7 +36,7 @@ import com.rfchina.wallet.server.bank.yunst.response.result.YunstSetCompanyInfoR
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstUnBindBankCardResult;
 import com.rfchina.wallet.server.bank.yunst.util.YunstTpl;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
-import com.rfchina.wallet.server.msic.EnumWallet.YunstIdType;
+import com.rfchina.wallet.server.msic.EnumYunst.YunstIdType;
 import java.util.TimeZone;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -134,12 +134,14 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 委托扣款协议签约(生成前端H5 url)
 	 */
-	public Tuple<String, String> generateBalanceProtocolUrl(String bizUserId, String jumpUrl) {
+	public Tuple<String, String> generateBalanceProtocolUrl(String bizUserId, String jumpUrl, String protocolReqSn) {
 
 		WalletTunnel agentEnt = walletTunnelDao
 			.selectByWalletId(configService.getAgentEntWalletId(), TunnelType.YUNST.getValue());
 
-		String protocolReqSn = UUID.randomUUID().toString().replaceAll("-", "");
+		if (StringUtils.isBlank(protocolReqSn)){
+			protocolReqSn = UUID.randomUUID().toString().replaceAll("-", "");
+		}
 		YunstBalanceProtocolReq req = YunstBalanceProtocolReq.builder$()
 			.protocolReqSn(protocolReqSn)
 			.payerId(bizUserId)

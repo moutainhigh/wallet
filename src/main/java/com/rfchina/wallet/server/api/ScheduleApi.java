@@ -1,5 +1,7 @@
 package com.rfchina.wallet.server.api;
 
+import java.util.Date;
+
 public interface ScheduleApi {
 	/**
 	 * 定时更新支付状态
@@ -20,5 +22,11 @@ public interface ScheduleApi {
 	/**
 	 * 定时对账
 	 */
-	void quartzBalance();
+	void quartzBalance(String balanceDate);
+
+	/**
+	 * 定时计费
+	 */
+	void quartzCharging();
+
 }

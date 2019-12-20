@@ -82,6 +82,9 @@ public class WalletOrder  {
     @ApiModelProperty("系统错误信息")
     private String tunnelErrMsg ;
 
+    @ApiModelProperty("通道手续费")
+    private Long tunnelFee ;
+
     @ApiModelProperty("渠道订单号")
     private String tunnelOrderNo ;
 

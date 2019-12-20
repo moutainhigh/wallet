@@ -52,6 +52,7 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@Autowired
 	private WalletOrderExtDao walletOrderExtDao;
 
+
 	@Autowired
 	private VerifyService verifyService;
 
@@ -260,7 +261,8 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public CompanyInfoResult seniorWalletGetCompanyInfo(String accessToken, Long walletId,Boolean isManualRefresh) {
+	public CompanyInfoResult seniorWalletGetCompanyInfo(String accessToken, Long walletId,
+		Boolean isManualRefresh, String newPublicAccountNo) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		Objects.requireNonNull(wallet);
 		if (wallet.getLevel() != EnumDef.EnumWalletLevel.SENIOR.getValue().byteValue()) {
@@ -270,7 +272,8 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 		}
 
 		try {
-			return seniorWalletService.seniorWalletGetCompanyInfo(walletId, isManualRefresh);
+			return seniorWalletService
+				.seniorWalletGetCompanyInfo(walletId, isManualRefresh, newPublicAccountNo);
 		} catch (Exception e) {
 			log.error("高级钱包获取企业会员信息失败", e);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
@@ -319,4 +322,5 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 			.pageLimit(limit)
 			.build();
 	}
+
 }

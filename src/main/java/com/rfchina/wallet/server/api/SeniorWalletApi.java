@@ -120,7 +120,7 @@ public interface SeniorWalletApi {
 	 * @param walletId 必填, 钱包id
 	 */
 	YunstMemberInfoResult.CompanyInfoResult seniorWalletGetCompanyInfo(String accessToken,
-		Long walletId, Boolean isManualRefresh);
+		Long walletId, Boolean isManualRefresh,String newPublicAccountNo);
 
 	/**
 	 * 高级钱包获取个人用户信息
@@ -138,4 +138,7 @@ public interface SeniorWalletApi {
 	Pagination<WalletOrder> queryWalletOrderDetail(String accessToken, Long walletId, Date fromTime,
 		Date toTime, Integer tradeType, Integer status, String orderNo, String bizNo, int limit,
 		int offset, Boolean stat);
+
+
+
 }

@@ -54,6 +54,7 @@
     sub_status:""  , //0：默认 1:待人工处理 2:等待重新发起
     tunnel_err_code:""  , //通道错误码
     tunnel_err_msg:""  , //系统错误信息
+    tunnel_fee:""  , //通道手续费
     tunnel_order_no:""  , //渠道订单号
     tunnel_status:""  , //通道状态
     tunnel_succ_time:""  , //通道成功时间
@@ -90,7 +91,7 @@
     create_time:""  , //创建日期
     deleted:""  , //是否删除 0：正常 1：已删除
     id:""  , //id
-    status:""  , //状态 1：进行中 2：对账完成
+    status:""  , //状态 1：进行中 2：对账完成 3:对账失败
     wallet_file_url:""   //对账文件
 }  
 }
@@ -145,6 +146,7 @@
     trade_no:""  , //交易编号
     tunnel_err_code:""  , //通道错误码
     tunnel_err_msg:""  , //系统错误信息
+    tunnel_fee:""  , //通道手续费
     tunnel_order_no:""  , //渠道订单号
     tunnel_status:""  , //通道状态
     tunnel_succ_time:""  , //通道成功时间
@@ -204,6 +206,7 @@
     trade_no:""  , //交易编号
     tunnel_err_code:""  , //通道错误码
     tunnel_err_msg:""  , //系统错误信息
+    tunnel_fee:""  , //通道手续费
     tunnel_order_no:""  , //渠道订单号
     tunnel_status:""  , //通道状态
     tunnel_succ_time:""  , //通道成功时间
@@ -259,6 +262,7 @@
     sub_status:""  , //0：默认 1:待人工处理 2:等待重新发起
     tunnel_err_code:""  , //通道错误码
     tunnel_err_msg:""  , //系统错误信息
+    tunnel_fee:""  , //通道手续费
     tunnel_order_no:""  , //渠道订单号
     tunnel_status:""  , //通道状态
     tunnel_succ_time:""  , //通道成功时间
@@ -321,6 +325,7 @@
     trade_no:""  , //交易编号
     tunnel_err_code:""  , //通道错误码
     tunnel_err_msg:""  , //系统错误信息
+    tunnel_fee:""  , //通道手续费
     tunnel_order_no:""  , //渠道订单号
     tunnel_status:""  , //通道状态
     tunnel_succ_time:""  , //通道成功时间
@@ -378,6 +383,7 @@
     sub_status:""  , //0：默认 1:待人工处理 2:等待重新发起
     tunnel_err_code:""  , //通道错误码
     tunnel_err_msg:""  , //系统错误信息
+    tunnel_fee:""  , //通道手续费
     tunnel_order_no:""  , //渠道订单号
     tunnel_status:""  , //通道状态
     tunnel_succ_time:""  , //通道成功时间
@@ -487,6 +493,7 @@
     ticket:""  , //业务票据
     tunnel_err_code:""  , //通道错误码
     tunnel_err_msg:""  , //系统错误信息
+    tunnel_fee:""  , //通道手续费
     tunnel_order_no:""  , //渠道订单号
     tunnel_status:""  , //通道状态
     tunnel_succ_time:""  , //通道成功时间
