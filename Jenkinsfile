@@ -29,7 +29,7 @@ podTemplate(label: label) {
      }
 
      stage('Docker') {
-        container('kubectl'){
+        container('docker'){
            withCredentials([usernamePassword(
                 credentialsId: 'dockerhub',
                 usernameVariable: 'user',
