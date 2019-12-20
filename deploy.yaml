@@ -1,34 +1,34 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: #{service_name}
-  namespace: #{team_ns}
+  name: %{service_name}
+  namespace: %{team_ns}
 spec:
   selector:
     matchLabels:
-      app: #{service_name}
-  replicas: #{replicas}
+      app: %{service_name}
+  replicas: %{replicas}
   template:
     metadata:
       labels:
-        app: #{service_name}
+        app: %{service_name}
     spec:
       containers:
-        - name: #{service_name}
-          image: #{docker_hub}/#{service_name}:#{build_tag}
+        - name: %{service_name}
+          image: %{docker_hub}/%{service_name}:%{build_tag}
 #          imagePullPolicy: Always
           ports:
             - containerPort: 8080
           livenessProbe:
             httpGet:
-              path: #{live_path}
+              path: %{live_path}
               port: 8080
             initialDelaySeconds: 3
             periodSeconds: 3
             timeoutSeconds: 1
           readinessProbe:
             httpGet:
-              path: #{live_path}
+              path: %{live_path}
               port: 8080
             initialDelaySeconds: 3
             periodSeconds: 3
@@ -39,23 +39,23 @@ spec:
             limits:
               memory: "1536Mi"
           volumeMounts:
-            - name: #{service_name}-logs
-              mountPath: #{app_path}/logs
-              subPath: #{service_name}/logs
-            - name: #{service_name}-files
-              mountPath: #{app_path}/files
-              subPath: #{service_name}/files
-            - name: #{service_name}-temp
-              mountPath: #{app_path}/temp
-              subPath: #{service_name}/temp
+            - name: %{service_name}-logs
+              mountPath: %{app_path}/logs
+              subPath: %{service_name}/logs
+            - name: %{service_name}-files
+              mountPath: %{app_path}/files
+              subPath: %{service_name}/files
+            - name: %{service_name}-temp
+              mountPath: %{app_path}/temp
+              subPath: %{service_name}/temp
       volumes:
-        - name: #{service_name}-logs
+        - name: %{service_name}-logs
           persistentVolumeClaim:
             claimName: logs
-        - name: #{service_name}-files
+        - name: %{service_name}-files
           persistentVolumeClaim:
             claimName: logs
-        - name: #{service_name}-temp
+        - name: %{service_name}-temp
           persistentVolumeClaim:
             claimName: logs
 
@@ -64,27 +64,27 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: #{service_name}
-  namespace: #{team_ns}
+  name: %{service_name}
+  namespace: %{team_ns}
 spec:
   ports:
-    - port: #{service_port}
+    - port: %{service_port}
       targetPort: 8080
   selector:
-    app: #{service_name}
+    app: %{service_name}
 
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: #{service_name}
-  namespace: #{team_ns}
+  name: %{service_name}
+  namespace: %{team_ns}
 spec:
   rules:
-    - host: #{host_name}
+    - host: %{host_name}
       http:
         paths:
-          - path: /#{service_name}
+          - path: /%{service_name}
             backend:
-              serviceName: #{service_name}
-              servicePort: #{service_port}
+              serviceName: %{service_name}
+              servicePort: %{service_port}
