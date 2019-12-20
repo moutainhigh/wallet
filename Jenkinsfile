@@ -18,7 +18,7 @@ podTemplate(label: label) {
   node(label){
 
      stage('Scm') {
-        cleanWs()""
+        cleanWs()
         checkout scm
      }
 
