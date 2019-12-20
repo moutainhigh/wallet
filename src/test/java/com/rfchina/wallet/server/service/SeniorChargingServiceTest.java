@@ -37,7 +37,7 @@ public class SeniorChargingServiceTest extends SpringBaseTest {
 		Date startTime = DateUtil.getDate2(DateUtil.getFirstDayOfMonth(new Date()));
 		Date endTime = DateUtil.getDate(DateUtil.getLastDayOfMonth(new Date()));
 		Pagination<StatChargingDetail> page = seniorChargingService
-			.queryChargingDetail(startTime, endTime, 100, 0, true);
+			.queryChargingDetail(startTime, endTime, 100, 0, true, asc);
 		assertNotNull(page);
 		log.info("{}", page);
 	}

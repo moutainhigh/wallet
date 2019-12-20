@@ -1,11 +1,12 @@
 package com.rfchina.wallet.sdk.api;
 
-import com.rfchina.platform.sdk2.request.AbstractApiRequest;
-import com.rfchina.wallet.sdk.model.PayInResp;
-import io.swagger.annotations.ApiModelProperty;
 import java.util.HashMap;
 import java.util.Map;
+import com.rfchina.wallet.sdk.model.*;
+import com.rfchina.platform.sdk2.request.AbstractApiRequest;
 import lombok.Builder;
+import io.swagger.annotations.ApiModelProperty;
+import java.util.List;
 
 
 /** 初级钱包-思力出钱 */

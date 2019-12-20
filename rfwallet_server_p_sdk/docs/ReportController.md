@@ -9,12 +9,13 @@
 
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
-|access_token|是|access_token|
-|end_time|是|end_time|
-|limit|是|limit|
-|offset|是|offset|
-|start_time|是|start_time|
-|stat|是|stat|
+|access_token|是|访问令牌|
+|asc|是|升序排序|
+|end_time|是|结束时间|
+|limit|是|必填，需要查询的数量（数量最大50）|
+|offset|是|必填，查询列表的起始偏移量，从0开始，即offset: 5是指从列表里的第六个开始读取。|
+|start_time|是|开始时间|
+|stat|是|非必填, false:否, true:是, 是否返回数据总量, 默认false|
 
 返回数据
 ```
@@ -27,6 +28,7 @@
     biz_time:""  , //业务时间
     create_time:""  , //创建日期
     deleted:""  , //是否删除 0：正常 1：已删除
+    event:""  , //事件
     id:""  , //id
     local_tunnel_fee:""  , //本地的通道手续费
     method_name:""  , //方法名
@@ -55,10 +57,10 @@
 
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
-|access_token|是|access_token|
-|limit|是|limit|
-|offset|是|offset|
-|stat|是|stat|
+|access_token|是|访问令牌|
+|limit|是|必填，需要查询的数量（数量最大50）|
+|offset|是|必填，查询列表的起始偏移量，从0开始，即offset: 5是指从列表里的第六个开始读取。|
+|stat|是|非必填, false:否, true:是, 是否返回数据总量, 默认false|
 
 返回数据
 ```
@@ -99,9 +101,9 @@
 
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
-|access_token|是|access_token|
-|end_time|是|end_time|
-|start_time|是|start_time|
+|access_token|是|访问令牌|
+|end_time|是|结束时间|
+|start_time|是|开始时间|
 
 返回数据
 ```

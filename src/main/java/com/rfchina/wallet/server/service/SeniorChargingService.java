@@ -7,7 +7,6 @@ import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderType;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
-import com.rfchina.wallet.domain.model.BalanceTunnelDetail;
 import com.rfchina.wallet.domain.model.GatewayLog;
 import com.rfchina.wallet.domain.model.GatewayLogCriteria;
 import com.rfchina.wallet.domain.model.StatCharging;
@@ -201,10 +200,9 @@ public class SeniorChargingService {
 	}
 
 	public Pagination<StatChargingDetailVo> queryChargingDetail(Date startTime, Date endTime,
-		Integer limit,
-		Integer offset, Boolean stat) {
+		Integer limit, Integer offset, Boolean stat, Boolean asc) {
 		StatChargingDetailCriteria example = new StatChargingDetailCriteria();
-		example.setOrderByClause("id desc");
+		example.setOrderByClause(asc ? "id asc" : "id desc");
 		example.createCriteria()
 			.andBizTimeBetween(startTime, endTime)
 			.andDeletedEqualTo((byte) 0);

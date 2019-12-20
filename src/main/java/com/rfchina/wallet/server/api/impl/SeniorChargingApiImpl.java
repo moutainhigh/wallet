@@ -9,7 +9,6 @@ import com.rfchina.platform.common.annotation.SignVerify;
 import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.domain.model.StatCharging;
-import com.rfchina.wallet.domain.model.StatChargingDetail;
 import com.rfchina.wallet.server.api.SeniorChargingApi;
 import com.rfchina.wallet.server.model.ext.StatChargingDetailVo;
 import com.rfchina.wallet.server.service.SeniorChargingService;
@@ -39,9 +38,12 @@ public class SeniorChargingApiImpl implements SeniorChargingApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public Pagination<StatChargingDetailVo> queryChargingDetail(String accessToken, Date startTime,
-		Date endTime, Integer limit, Integer offset, Boolean stat) {
-		return seniorChargingService.queryChargingDetail(startTime, endTime, limit, offset, stat);
+	public Pagination<StatChargingDetailVo> queryChargingDetail(String accessToken, String startTime,
+		String endTime, Integer limit, Integer offset, Boolean stat, Boolean asc) {
+		return seniorChargingService.queryChargingDetail(
+			DateUtil.parse(startTime, DateUtil.STANDARD_DTAE_PATTERN),
+			DateUtil.parse(endTime, DateUtil.STANDARD_DTAE_PATTERN),
+			limit, offset, stat, asc);
 	}
 
 	@Log

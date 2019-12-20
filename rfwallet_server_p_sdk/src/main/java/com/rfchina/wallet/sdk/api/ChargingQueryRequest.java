@@ -13,16 +13,16 @@ import java.util.List;
 @Builder
 public class ChargingQueryRequest extends  AbstractApiRequest {
 
-  @ApiModelProperty("access_token")
+  @ApiModelProperty("访问令牌")
   private String accessToken ;
 
-  @ApiModelProperty("limit")
+  @ApiModelProperty("必填，需要查询的数量（数量最大50）")
   private Integer limit ;
 
-  @ApiModelProperty("offset")
+  @ApiModelProperty("必填，查询列表的起始偏移量，从0开始，即offset: 5是指从列表里的第六个开始读取。")
   private Integer offset ;
 
-  @ApiModelProperty("stat")
+  @ApiModelProperty("非必填, false:否, true:是, 是否返回数据总量, 默认false")
   private Boolean stat ;
 
 

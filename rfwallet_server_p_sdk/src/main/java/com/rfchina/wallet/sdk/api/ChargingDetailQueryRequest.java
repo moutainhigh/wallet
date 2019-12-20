@@ -13,22 +13,25 @@ import java.util.List;
 @Builder
 public class ChargingDetailQueryRequest extends  AbstractApiRequest {
 
-  @ApiModelProperty("access_token")
+  @ApiModelProperty("访问令牌")
   private String accessToken ;
 
-  @ApiModelProperty("end_time")
+  @ApiModelProperty("升序排序")
+  private Boolean asc ;
+
+  @ApiModelProperty("结束时间")
   private String endTime ;
 
-  @ApiModelProperty("limit")
+  @ApiModelProperty("必填，需要查询的数量（数量最大50）")
   private Integer limit ;
 
-  @ApiModelProperty("offset")
+  @ApiModelProperty("必填，查询列表的起始偏移量，从0开始，即offset: 5是指从列表里的第六个开始读取。")
   private Integer offset ;
 
-  @ApiModelProperty("start_time")
+  @ApiModelProperty("开始时间")
   private String startTime ;
 
-  @ApiModelProperty("stat")
+  @ApiModelProperty("非必填, false:否, true:是, 是否返回数据总量, 默认false")
   private Boolean stat ;
 
 
@@ -47,6 +50,9 @@ public class ChargingDetailQueryRequest extends  AbstractApiRequest {
     Map<String, String> parameters = new HashMap<>(2);
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
+      }
+      if(asc != null){
+        parameters.put("asc", asc.toString());
       }
       if(endTime != null){
         parameters.put("end_time", endTime.toString());

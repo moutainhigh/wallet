@@ -13,13 +13,13 @@ import java.util.List;
 @Builder
 public class ChargingRedoRequest extends  AbstractApiRequest {
 
-  @ApiModelProperty("access_token")
+  @ApiModelProperty("访问令牌")
   private String accessToken ;
 
-  @ApiModelProperty("end_time")
+  @ApiModelProperty("结束时间")
   private String endTime ;
 
-  @ApiModelProperty("start_time")
+  @ApiModelProperty("开始时间")
   private String startTime ;
 
 

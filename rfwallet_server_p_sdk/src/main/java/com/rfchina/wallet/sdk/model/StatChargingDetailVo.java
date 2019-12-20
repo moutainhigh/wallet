@@ -25,6 +25,9 @@ public class StatChargingDetailVo  {
     @ApiModelProperty("是否删除 0：正常 1：已删除")
     private Integer deleted ;
 
+    @ApiModelProperty("事件")
+    private String event ;
+
     @ApiModelProperty("id")
     private Long id ;
 
