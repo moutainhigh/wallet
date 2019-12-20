@@ -29,7 +29,6 @@ podTemplate(label: label) {
      }
 
      stage('Docker') {
-        container('docker'){
            withCredentials([usernamePassword(
                 credentialsId: 'dockerhub',
                 usernameVariable: 'user',
@@ -43,7 +42,6 @@ podTemplate(label: label) {
                docker push ${docker_hub}/platform/${service_name}:${build_tag}
                """
            }
-         }
      }
 
      stage('Deploy') {
