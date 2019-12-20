@@ -1,4 +1,4 @@
-def label = "gradle-docker"
+def label = "pipeline"
 
 def yaml_file = "deploy.yaml"
 def docker_hub = "hub.thinkinpower.net"
