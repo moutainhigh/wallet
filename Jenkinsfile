@@ -30,9 +30,9 @@ podTemplate(label: label) {
 
      stage('Docker') {
          withCredentials([usernamePassword(
-           credentialsId: 'docker-commitor',
-           usernameVariable: 'docker_user',
-           passwordVariable: 'docker_passwd')]) {
+              credentialsId: 'dockerhub',
+              usernameVariable: 'user',
+              passwordVariable: 'pass')]) {
            sh """
              sed -i "s/#{jar_path}/${jar_path}/g" ${docker_file}
              sed -i "s/#{jar_name}/${jar_name}/g" ${docker_file}
