@@ -16,7 +16,6 @@ import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.ScheduleService;
 import com.rfchina.wallet.server.service.SeniorBalanceService;
 import com.rfchina.wallet.server.service.SeniorChargingService;
-import com.rfchina.wallet.server.service.SeniorWalletService;
 import com.rfchina.wallet.server.service.WalletService;
 import java.util.Calendar;
 import java.util.Date;
@@ -119,11 +118,13 @@ public class ScheduleApiImpl implements ScheduleApi {
 	}
 
 	@Override
-	public void quartzBalance() {
+	public void quartzBalance(String balanceDate) {
 
+		Date theDay = (balanceDate == null) ?
+			DateUtil.getDate2(DateUtil.addDate2(new Date(), -1))
+			: DateUtil.parse(balanceDate, DateUtil.STANDARD_DTAE_PATTERN);
 		new LockDone(lock).apply(LockConstant.LOCK_QUARTZ_BALANCE, 60, () -> {
-			Date yestoday = DateUtil.getDate2(DateUtil.addDate2(new Date(), -1));
-			seniorBalanceService.doBalance(yestoday);
+			seniorBalanceService.doBalance(theDay);
 		});
 	}
 

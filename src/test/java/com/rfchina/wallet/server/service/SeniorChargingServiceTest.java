@@ -8,6 +8,7 @@ import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.model.StatCharging;
 import com.rfchina.wallet.domain.model.StatChargingDetail;
 import com.rfchina.wallet.server.SpringBaseTest;
+import com.rfchina.wallet.server.model.ext.StatChargingDetailVo;
 import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -36,8 +37,8 @@ public class SeniorChargingServiceTest extends SpringBaseTest {
 	public void queryChargingDetail() {
 		Date startTime = DateUtil.getDate2(DateUtil.getFirstDayOfMonth(new Date()));
 		Date endTime = DateUtil.getDate(DateUtil.getLastDayOfMonth(new Date()));
-		Pagination<StatChargingDetail> page = seniorChargingService
-			.queryChargingDetail(startTime, endTime, 100, 0, true, asc);
+		Pagination<StatChargingDetailVo> page = seniorChargingService
+			.queryChargingDetail(startTime, endTime, 100, 0, true, true);
 		assertNotNull(page);
 		log.info("{}", page);
 	}

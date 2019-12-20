@@ -85,12 +85,13 @@ public class ScheduleController {
 	@FuScheduleTaskReporter
 	public String quartzBalance(
 		@RequestParam("schedule_id") String scheduleId,
+		@RequestParam(value = "balance_date",required = false) String balanceDate,
 		@RequestParam("timestamp") String timestamp,
 		@RequestParam("sign") String sign) {
 
 		log.info("scheduler: 开始执行任务[{}]", "quartzBalance");
 
-		scheduleApi.quartzBalance();
+		scheduleApi.quartzBalance(balanceDate);
 
 		log.info("scheduler: 完成任务[{}]", "quartzBalance");
 

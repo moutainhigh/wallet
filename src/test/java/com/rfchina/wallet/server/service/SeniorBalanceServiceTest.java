@@ -15,7 +15,7 @@ public class SeniorBalanceServiceTest extends SpringBaseTest {
 
 	@Test
 	public void balance() {
-		for (int i = 0; i < 30; i++) {
+		for (int i = 0; i < 1; i++) {
 			try {
 				seniorBalanceService.doBalance(DateUtil.addDate2(new Date(), -i - 1));
 			}catch (Exception e){

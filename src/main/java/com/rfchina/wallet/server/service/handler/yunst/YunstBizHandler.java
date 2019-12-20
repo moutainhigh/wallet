@@ -101,6 +101,7 @@ import com.rfchina.wallet.server.msic.UrlConstant;
 import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.GatewayTransService;
 import com.rfchina.wallet.server.service.handler.common.EBankHandler;
+import java.io.File;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Date;
@@ -869,8 +870,12 @@ public class YunstBizHandler extends EBankHandler {
 		try {
 			URL url = new URL(resourceUrl);
 			String uri = url.getFile();
-			String fileUrl =
-				configService.getStorageDir() + "/yunst/" + uri.substring(uri.lastIndexOf("/"));
+			String dir = configService.getStorageDir() + "/yunst/";
+			String fileUrl = dir + uri.substring(uri.lastIndexOf("/"));
+			File file = new File(dir);
+			if(!file.exists()){
+				file.mkdirs();
+			}
 			HttpFile.download(url, fileUrl);
 			return fileUrl;
 		} catch (Exception e) {

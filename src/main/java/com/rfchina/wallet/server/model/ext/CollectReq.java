@@ -2,6 +2,7 @@ package com.rfchina.wallet.server.model.ext;
 
 import com.rfchina.wallet.domain.misc.EnumDef.WalletCardType;
 import com.rfchina.wallet.server.msic.EnumWallet.ChannelType;
+import com.rfchina.wallet.server.service.ConfigService;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.math.BigDecimal;
@@ -90,18 +91,18 @@ public class CollectReq {
 		}
 
 		@ApiModelProperty(hidden = true)
-		public BigDecimal getRate() {
+		public BigDecimal getRate(ConfigService configService) {
 			BigDecimal bigDecimal = new BigDecimal("0");
 			if (balance != null) {
 			} else if (wechat != null) {
-				bigDecimal = bigDecimal.add(new BigDecimal("0.0033"));
+				bigDecimal = bigDecimal.add(new BigDecimal(configService.getWechatRate()));
 			} else if (alipay != null) {
-				bigDecimal = bigDecimal.add(new BigDecimal("0.0033"));
+				bigDecimal = bigDecimal.add(new BigDecimal(configService.getAlipayRate()));
 			} else if (codePay != null) {
 			} else if (bankCard != null) {
 				bigDecimal = bigDecimal.add(new BigDecimal(
-					(WalletCardType.CREDIT.getValue().equals(bankCard.cardType)) ? "0.0055"
-						: "0.0025"));
+					(WalletCardType.CREDIT.getValue().equals(bankCard.cardType)) ?
+						configService.getCreditCardRate() : configService.getDebitCardRate()));
 			}
 			return bigDecimal;
 		}

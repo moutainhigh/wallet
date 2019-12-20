@@ -43,7 +43,7 @@ public interface StatChargingDetailExtDao extends StatChargingDetailMapper {
 
 	@Update({
 		"update rf_stat_charging_detail a,rf_balance_tunnel_detail b",
-		"set a.third_tunnel_fee = b.channel_fee_amount ",
+		"set a.third_tunnel_fee = case when b.tunnel_order_type = '退款' and b.channel_fee_amount > 0 then 0 - b.channel_fee_amount else b.channel_fee_amount end ",
 		"where a.biz_time >= #{startTime} and a.biz_time <= #{endTime} and a.deleted = 0 and a.order_no = b.order_no and b.deleted = 0"
 	})
 	void updateTunnelDetail(@Param("startTime") Date startTime, @Param("endTime") Date endTime);
