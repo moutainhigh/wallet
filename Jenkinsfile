@@ -7,12 +7,12 @@ def service_port = 8118
 def team_ns = "platform"
 def replicas = 2
 def host_name = "wallet.thinkinpower.net"
-def live_path = "/index"
+def live_path = "\/index"
 
 def docker_file = "Dockerfile"
-def jar_path = "build/libs"
+def jar_path = "build\/libs"
 def jar_name = "rfwallet_server-1.0.0-SNAPSHOT.jar"
-def app_path = "/data/service/rfwallet_server"
+def app_path = "\/data\/service\/rfwallet_server"
 
 podTemplate(label: label) {
   node(label){
