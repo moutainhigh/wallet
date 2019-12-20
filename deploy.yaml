@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: %{service_name}
-          image: %{docker_hub}/%{service_name}:%{build_tag}
+          image: %{docker_hub}/platform/%{service_name}:%{build_tag}
 #          imagePullPolicy: Always
           ports:
             - containerPort: 8080
