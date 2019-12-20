@@ -29,18 +29,20 @@ podTemplate(label: label) {
      }
 
      stage('Docker') {
-         withCredentials([usernamePassword(
-              credentialsId: 'dockerhub',
-              usernameVariable: 'user',
-              passwordVariable: 'pass')]) {
-           sh """
-             sed -i "s#%{jar_path}#${jar_path}#g" ${docker_file}
-             sed -i "s#%{jar_name}#${jar_name}#g" ${docker_file}
-             sed -i "s#%{app_path}#${app_path}#g" ${docker_file}
-             docker login -u ${user} -p ${pass} ${docker_hub}
-             docker build -t ${docker_hub}/${service_name}:${build_tag} build
-             docker push ${docker_hub}/${service_name}:${build_tag}
-             """
+        container('kubectl'){
+           withCredentials([usernamePassword(
+                credentialsId: 'dockerhub',
+                usernameVariable: 'user',
+                passwordVariable: 'pass')]) {
+             sh """
+               sed -i "s#%{jar_path}#${jar_path}#g" ${docker_file}
+               sed -i "s#%{jar_name}#${jar_name}#g" ${docker_file}
+               sed -i "s#%{app_path}#${app_path}#g" ${docker_file}
+               docker login -u ${user} -p ${pass} ${docker_hub}
+               docker build -t ${docker_hub}/${service_name}:${build_tag} build
+               docker push ${docker_hub}/${service_name}:${build_tag}
+               """
+           }
          }
      }
 
