@@ -88,7 +88,7 @@ public class UrlConstant {
 	public static final String QUARTZ_UPDATE_SENIOR_STATUS = VERSION + "/schedule/quartz_update_senior_status";
 
 	/**
-	 * 定时支付
+	 * 定时邮件通知挂起单
 	 */
 	public static final String QUARTZ_NOTIFY = VERSION + "/schedule/quartz_notify";
 

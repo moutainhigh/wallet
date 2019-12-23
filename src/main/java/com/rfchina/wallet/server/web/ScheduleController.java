@@ -3,7 +3,6 @@ package com.rfchina.wallet.server.web;
 import com.rfchina.scheduler.annotation.FuScheduleTaskReporter;
 import com.rfchina.wallet.server.api.ScheduleApi;
 import com.rfchina.wallet.server.msic.UrlConstant;
-import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,11 +25,11 @@ public class ScheduleController {
 		@RequestParam("timestamp") String timestamp,
 		@RequestParam("sign") String sign) {
 
-		log.info("scheduler: 开始执行订单状态更新任务");
+		log.info("scheduler: 开始执行任务[{}]", "quartzUpdateJunior");
 
 		scheduleApi.quartzUpdateJunior();
 
-		log.info("scheduler: 完成执行订单状态更新任务");
+		log.info("scheduler:  完成任务[{}]", "quartzUpdateJunior");
 		return "success";
 	}
 
@@ -41,11 +40,11 @@ public class ScheduleController {
 		@RequestParam("timestamp") String timestamp,
 		@RequestParam("sign") String sign) {
 
-		log.info("scheduler: 开始执行订单状态更新任务");
+		log.info("scheduler: 开始执行任务[{}]", "quartzUpdateSenior");
 
 		scheduleApi.quartzUpdateSenior();
 
-		log.info("scheduler: 完成执行订单状态更新任务");
+		log.info("scheduler:  完成任务[{}]", "quartzUpdateSenior");
 		return "success";
 	}
 
@@ -85,7 +84,7 @@ public class ScheduleController {
 	@FuScheduleTaskReporter
 	public String quartzBalance(
 		@RequestParam("schedule_id") String scheduleId,
-		@RequestParam(value = "balance_date",required = false) String balanceDate,
+		@RequestParam(value = "balance_date", required = false) String balanceDate,
 		@RequestParam("timestamp") String timestamp,
 		@RequestParam("sign") String sign) {
 
