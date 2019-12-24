@@ -2,6 +2,7 @@ package com.rfchina.wallet.server.web;
 
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.ResponseValue;
+import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.wallet.domain.model.BankCode;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletCard;
@@ -72,6 +73,24 @@ public class WalletController {
 		WalletInfoResp resp = walletApi.queryWalletInfoByUserId(accessToken, userId);
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, resp);
+	}
+
+
+	@ApiOperation("钱包列表")
+	@PostMapping(UrlConstant.WALLET_LIST)
+	public ResponseValue<Pagination<Wallet>> walletList(
+		@ApiParam(name = "access_token", value = "访问令牌", required = true) @RequestParam("access_token") String accessToken,
+		@ApiParam(name = "title", value = "钱包名字") @RequestParam(value = "title", required = false) String title,
+		@ApiParam(name = "type", value = "钱包类型， 1：企业钱包，2：个人钱包") @RequestParam(value = "type", required = false) Byte type,
+		@ApiParam(name = "wallet_level", value = "钱包等级 1： 初级钱包，2： 高级钱包") @RequestParam(value = "wallet_level", required = false) Byte walletLevel,
+		@ApiParam(name = "status", value = "钱包状态: 1:待审核，2：激活,3：禁用") @RequestParam(value = "status", required = false) Byte status,
+		@ApiParam(name = "limit", value = "必填，需要查询的数量（数量最大50）", required = true) @RequestParam("limit") Integer limit,
+		@ApiParam(name = "offset", value = "必填，查询列表的起始偏移量，从0开始，即offset: 5是指从列表里的第六个开始读取。", required = true) @RequestParam("offset") Integer offset,
+		@ApiParam(name = "stat", value = "非必填, false:否, true:是, 是否返回数据总量, 默认false", required = true) @RequestParam("stat") Boolean stat) {
+
+		Pagination<Wallet> page = walletApi
+			.walletList(accessToken, title, type, walletLevel, status, limit, offset, stat);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, page);
 	}
 
 	@ApiOperation("开通未审核的钱包")

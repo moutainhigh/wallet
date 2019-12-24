@@ -114,3 +114,38 @@
 }
 ```
 
+###  当月手续费报表
+
+请求地址: /wallet_server/v1/m/report/cur_charging_query
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|访问令牌|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+   , "data":  {
+    charging_date:""  , //统计日期
+    company_verify_count:""  , //公司验证次数
+    create_time:""  , //创建日期
+    deleted:""  , //是否删除 0：正常 1：已删除
+    id:""  , //id
+    local_pay_fee:""  , //本地的支付手续费,单位分
+    local_recharge_fee:""  , //本地的充值手续费,单位分
+    person_verify_count:""  , //个人验证次数
+    third_pay_fee:""  , //第三方的支付手续费,单位分
+    third_recharge_fee:""  , //第三方的充值手续费,单位分
+    tunnel_type:""  , //渠道类型。1: 浦发银企直连，2：通联云商通
+    withdraw_count:""   //提现次数
+}  
+}
+```
+

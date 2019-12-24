@@ -99,6 +99,16 @@ public class WalletApiImpl implements WalletApi {
 	}
 
 	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
+	@Override
+	public Pagination<Wallet> walletList(String accessToken, String title, Byte type,
+		Byte walletLevel,
+		Byte status, Integer limit, Integer offset, Boolean stat) {
+		return walletService.walletList(title, type, walletLevel, status, limit, offset, stat);
+	}
+
+	@Log
 	@PostMq(routingKey = MqConstant.WALLET_CREATE)
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify

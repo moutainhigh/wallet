@@ -6,7 +6,6 @@ import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult;
-import java.util.Date;
 
 public interface SeniorWalletApi {
 
@@ -135,8 +134,7 @@ public interface SeniorWalletApi {
 	 *
 	 * @param walletId 必填, 钱包id
 	 */
-	Pagination<WalletOrder> queryWalletOrderDetail(String accessToken, Long walletId, Date fromTime,
-		Date toTime, Integer tradeType, Integer status, String orderNo, String bizNo, int limit,
+	Pagination<WalletOrder> queryWalletOrderDetail(String accessToken, Long walletId, int limit,
 		int offset, Boolean stat);
 
 

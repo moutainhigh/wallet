@@ -113,6 +113,11 @@ public class UrlConstant {
 	public static final String WALLET_QUERY_INFO_BY_UID = VERSION + "/m/wallet/query_wallet_info_by_uid";
 
 	/**
+	 * 查询钱包列表
+	 */
+	public static final String WALLET_LIST = VERSION + "/m/wallet/wallet_list";
+
+	/**
 	 * 开通未审核的钱包
 	 */
 	public static final String CREATE_WALLET = VERSION + "/m/wallet/create_wallet";
@@ -274,5 +279,10 @@ public class UrlConstant {
 	 * 手续费重做
 	 */
 	public static final String REPORT_CHARGING_REDO = VERSION + "/m/report/charging_redo";
+
+	/**
+	 * 当月手续费报表
+	 */
+	public static final String REPORT_CUR_CHARGING_QUERY = VERSION + "/m/report/cur_charging_query";
 
 }

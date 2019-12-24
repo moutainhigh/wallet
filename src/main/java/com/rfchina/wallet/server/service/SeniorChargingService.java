@@ -29,6 +29,7 @@ import com.rfchina.wallet.server.msic.EnumYunst.YunstServiceName;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -183,7 +184,8 @@ public class SeniorChargingService {
 		StatChargingCriteria example = new StatChargingCriteria();
 		example.setOrderByClause("id desc");
 		example.createCriteria()
-			.andDeletedEqualTo((byte) 0);
+			.andDeletedEqualTo((byte) 0)
+			.andChargingDateLessThan(DateUtil.getFirstDayOfMonth(new Date()));
 		List<StatCharging> data = statChargingDao
 			.selectByExampleWithRowbounds(example, new RowBounds(offset, limit));
 		Long total = 0L;
@@ -197,6 +199,15 @@ public class SeniorChargingService {
 			.pageLimit(limit)
 			.build();
 
+	}
+
+	public StatCharging queryChargingByDate(Date date) {
+		StatChargingCriteria example = new StatChargingCriteria();
+		example.createCriteria()
+			.andChargingDateEqualTo(date);
+		List<StatCharging> data = statChargingDao.selectByExample(example);
+
+		return (Objects.nonNull(data) && !data.isEmpty()) ? data.get(0) : new StatCharging();
 	}
 
 	public Pagination<StatChargingDetailVo> queryChargingDetail(Date startTime, Date endTime,
