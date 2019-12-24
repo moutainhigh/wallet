@@ -47,8 +47,8 @@ podTemplate(label: label) {
      stage('Deploy') {
          withKubeConfig([credentialsId: 'pipeline']) {
             sh """
-              sed -i "s#%{build_tag}#${build_tag}#g" ${docker_file}
-              sed -i "s#%{app_path}#${app_path}#g" ${docker_file}
+              sed -i "s#%{build_tag}#${build_tag}#g" ${yaml_file}
+              sed -i "s#%{app_path}#${app_path}#g" ${yaml_file}
               sed -i "s#%{docker_hub}#${docker_hub}#g" ${yaml_file}
               sed -i "s#%{service_name}#${service_name}#g" ${yaml_file}
               sed -i "s#%{service_port}#${service_port}#g" ${yaml_file}
