@@ -2,7 +2,7 @@ def label = "pipeline"
 
 def yaml_file = "deploy.yaml"
 def docker_hub = "hub.thinkinpower.net"
-def service_name = "rfwallet_server"
+def service_name = "rfwallet-server"
 def service_port = 8118
 def team_ns = "platform"
 def replicas = 2
