@@ -84,7 +84,7 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 		WalletTunnel walletTunnel = null;
 		try {
 			walletTunnel = seniorWalletService
-				.createSeniorWallet(channelType, walletId, source);
+				.createTunnel(channelType, walletId, source);
 		} catch (Exception e) {
 			log.error("用户创建高级钱包失败，walletId:{}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
@@ -191,7 +191,7 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 			log.info("未创建高级钱包用户: walletId:{}", walletId);
 			try {
 				walletTunnel = seniorWalletService
-					.createSeniorWallet(channelType, walletId, WalletSource.FHT_CORP.getValue());
+					.createTunnel(channelType, walletId, WalletSource.FHT_CORP.getValue());
 			} catch (Exception e) {
 				log.error("高级钱包企业创建高级钱包失败", e);
 				throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,

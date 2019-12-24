@@ -94,7 +94,7 @@ public class SeniorWalletService {
 	 * 升级高级钱包
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-	public WalletTunnel createSeniorWallet(Integer channelType, Long walletId, Byte source)
+	public WalletTunnel createTunnel(Integer channelType, Long walletId, Byte source)
 		throws Exception {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		Objects.requireNonNull(wallet);
