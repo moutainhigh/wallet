@@ -59,33 +59,3 @@ spec:
           persistentVolumeClaim:
             claimName: logs-claim
 
-
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: %{service_name}
-  namespace: %{team_ns}
-spec:
-  ports:
-    - port: %{service_port}
-      targetPort: 8080
-  selector:
-    app: %{service_name}
-
----
-apiVersion: extensions/v1beta1
-kind: Ingress
-metadata:
-  name: %{service_name}
-  namespace: %{team_ns}
-spec:
-  rules:
-    - host: %{host_name}
-      http:
-        paths:
-          - path: /%{service_name}
-            backend:
-              serviceName: %{service_name}
-              servicePort: %{service_port}
