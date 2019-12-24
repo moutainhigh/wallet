@@ -38,7 +38,7 @@ podTemplate(label: label) {
                sed -i "s#%{jar_name}#${jar_name}#g" ${docker_file}
                sed -i "s#%{app_path}#${app_path}#g" ${docker_file}
                docker login -u ${user} -p ${pass} ${docker_hub}
-               docker build -t ${docker_hub}/${service_name}:${build_tag} .
+               docker build -t ${docker_hub}/platform/${service_name}:${build_tag} .
                docker push ${docker_hub}/platform/${service_name}:${build_tag}
                """
            }
