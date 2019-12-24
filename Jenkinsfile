@@ -47,6 +47,8 @@ podTemplate(label: label) {
      stage('Deploy') {
          withKubeConfig([credentialsId: 'pipeline']) {
             sh """
+              sed -i "s#%{build_tag}#${build_tag}#g" ${docker_file}
+              sed -i "s#%{app_path}#${app_path}#g" ${docker_file}
               sed -i "s#%{docker_hub}#${docker_hub}#g" ${yaml_file}
               sed -i "s#%{service_name}#${service_name}#g" ${yaml_file}
               sed -i "s#%{service_port}#${service_port}#g" ${yaml_file}
@@ -54,7 +56,8 @@ podTemplate(label: label) {
               sed -i "s#%{replicas}#${replicas}#g" ${yaml_file}
               sed -i "s#%{host_name}#${host_name}#g" ${yaml_file}
               sed -i "s#%{live_path}#${live_path}#g" ${yaml_file}
-              kubectl apply -f ${yaml_file} -n ${team_ns}
+              cat  ${yaml_file}
+              kubectl apply -f ${yaml_file}
               """
          }
      }

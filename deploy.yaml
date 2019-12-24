@@ -1,3 +1,26 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: %{team_ns}
+---
+
+
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: logs-claim
+  namespace: %{team_ns}
+  annotations:
+    volume.beta.kubernetes.io/storage-class: ceph
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 30Gi
+---
+
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -51,13 +74,14 @@ spec:
       volumes:
         - name: %{service_name}-logs
           persistentVolumeClaim:
-            claimName: logs
+            claimName: logs-claim
         - name: %{service_name}-files
           persistentVolumeClaim:
-            claimName: logs
+            claimName: logs-claim
         - name: %{service_name}-temp
           persistentVolumeClaim:
-            claimName: logs
+            claimName: logs-claim
+
 
 
 ---
