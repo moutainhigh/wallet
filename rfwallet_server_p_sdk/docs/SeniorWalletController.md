@@ -10,15 +10,9 @@
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
 |access_token|是|access_token|
-|biz_no|否|关联订单号|
-|from_time|否|交易时间开始|
 |limit|否|每页限制|
 |offset|否|起始页偏移量|
-|order_no|否|钱包订单号|
 |stat|否|是否统计|
-|status|否|状态|
-|to_time|否|交易时间结束|
-|trade_type|否|交易类型|
 |wallet_id|否|钱包id|
 
 返回数据

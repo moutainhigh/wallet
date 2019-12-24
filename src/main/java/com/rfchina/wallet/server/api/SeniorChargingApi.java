@@ -14,4 +14,6 @@ public interface SeniorChargingApi {
 		String endTime, Integer limit, Integer offset, Boolean stat, Boolean asc);
 
 	void chargingRedo(String accessToken, Date startTime, Date endTime);
+
+	StatCharging queryChargingByDate(String accessToken, Date date);
 }

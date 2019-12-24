@@ -262,6 +262,25 @@ public class WalletService {
 		return queryWalletInfo(walletUser.getWalletId());
 	}
 
+	public Pagination<Wallet> walletList(String title, Byte type, Byte walletLevel,
+		Byte status, Integer limit, Integer offset, Boolean stat) {
+		List<Wallet> list = walletDao
+			.selectByCondition(title, type, walletLevel, status, limit, offset);
+
+		Long total = 0L;
+		if (stat) {
+			total = walletDao.countByCondition(title, type, walletLevel, status);
+		}
+		return new Pagination.PaginationBuilder<Wallet>()
+			.total(total)
+			.data(list)
+			.offset(offset)
+			.pageLimit(limit)
+			.build();
+	}
+
+
+
 	/**
 	 * 开通未审核的钱包
 	 */

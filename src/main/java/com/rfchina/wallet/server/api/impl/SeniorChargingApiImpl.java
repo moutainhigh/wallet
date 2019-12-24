@@ -38,7 +38,8 @@ public class SeniorChargingApiImpl implements SeniorChargingApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public Pagination<StatChargingDetailVo> queryChargingDetail(String accessToken, String startTime,
+	public Pagination<StatChargingDetailVo> queryChargingDetail(String accessToken,
+		String startTime,
 		String endTime, Integer limit, Integer offset, Boolean stat, Boolean asc) {
 		return seniorChargingService.queryChargingDetail(
 			DateUtil.parse(startTime, DateUtil.STANDARD_DTAE_PATTERN),
@@ -57,5 +58,13 @@ public class SeniorChargingApiImpl implements SeniorChargingApi {
 		new LockDone(lock).apply(key, 30, () -> {
 			seniorChargingService.chargingRedo(startTime, endTime);
 		});
+	}
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
+	@Override
+	public StatCharging queryChargingByDate(String accessToken, Date date) {
+		return seniorChargingService.queryChargingByDate(date);
 	}
 }
