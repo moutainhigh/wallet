@@ -30,8 +30,8 @@ spec:
             httpGet:
               path: %{live_path}
               port: 8080
-            initialDelaySeconds: 3
-            periodSeconds: 3
+            initialDelaySeconds: 30
+            periodSeconds: 10
             timeoutSeconds: 1
           resources:
             requests:
@@ -50,12 +50,24 @@ spec:
               subPath: %{service_name}/temp
       volumes:
         - name: %{service_name}-logs
-          persistentVolumeClaim:
-            claimName: logs-claim
+          flexVolume:
+            driver: ceph.rook.io/rook
+            fsType: ceph
+            options:
+              fsName: myfs
+              clusterNamespace: rook-ceph
         - name: %{service_name}-files
-          persistentVolumeClaim:
-            claimName: logs-claim
+          flexVolume:
+            driver: ceph.rook.io/rook
+            fsType: ceph
+            options:
+              fsName: myfs
+              clusterNamespace: rook-ceph
         - name: %{service_name}-temp
-          persistentVolumeClaim:
-            claimName: logs-claim
+          flexVolume:
+            driver: ceph.rook.io/rook
+            fsType: ceph
+            options:
+              fsName: myfs
+              clusterNamespace: rook-ceph
 
