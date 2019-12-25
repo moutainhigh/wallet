@@ -188,7 +188,8 @@ public class SeniorChargingService {
 		StatChargingCriteria example = new StatChargingCriteria();
 		example.setOrderByClause("id desc");
 		example.createCriteria()
-			.andDeletedEqualTo((byte) 0);
+			.andDeletedEqualTo((byte) 0)
+			.andChargingDateLessThan(DateUtil.getDate2(DateUtil.getFirstDayOfMonth(new Date())));
 		List<StatCharging> data = statChargingDao
 			.selectByExampleWithRowbounds(example, new RowBounds(offset, limit));
 		Long total = 0L;
