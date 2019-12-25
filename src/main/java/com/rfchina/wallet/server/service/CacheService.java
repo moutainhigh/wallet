@@ -101,10 +101,10 @@ public class CacheService {
 	}
 
 
-	public Long getStatisticsYunstVerify(String methodName) {
+	public int getStatisticsYunstVerify(String methodName) {
 		String key = CACHE_KEY_YUNST_VERIFY + ":methodName=" + methodName + ":date=" + DateUtil
 			.formatDate(new Date(), "yyyy-MM");
-		return (long)Optional.ofNullable(redisTemplate.boundValueOps(key).get()).orElse(0L);
+		return (int)Optional.ofNullable(redisTemplate.boundValueOps(key).get()).orElse(0L);
 	}
 
 }
