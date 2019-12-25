@@ -15,5 +15,5 @@ public interface SeniorChargingApi {
 
 	void chargingRedo(String accessToken, Date startTime, Date endTime);
 
-	StatCharging queryChargingByDate(String accessToken, Date date);
+	StatCharging queryChargingByCurrentMonth(String accessToken);
 }

@@ -1,6 +1,11 @@
 package com.rfchina.wallet.server.service;
 
+import com.rfchina.platform.common.utils.DateUtil;
+import java.util.Date;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
@@ -13,6 +18,10 @@ public class CacheService {
 
 	@Autowired
 	private RedisTemplate redisTemplate;
+
+	@Autowired
+	@Qualifier("cacheExec")
+	private ExecutorService cachExecutor;
 
 	/**
 	 * 缓存名称
@@ -40,6 +49,11 @@ public class CacheService {
 	 * 报文流水号
 	 */
 	private final static String CACHE_KEY_WALLET_PKGIDX = CACHE_NAME_WALLET + ":pkg_idx";
+
+	/**
+	 * 报文流水号
+	 */
+	private final static String CACHE_KEY_YUNST_VERIFY = CACHE_NAME_WALLET + ":yunst_verify";
 
 	/**
 	 * set调用发送短信验证码返回的token
@@ -72,5 +86,25 @@ public class CacheService {
 		return ops.increment(CACHE_KEY_WALLET_PKGIDX, 1);
 	}
 
+
+	public void statisticsYunstVerify(String methodName) {
+		cachExecutor.execute(() -> {
+			String key = CACHE_KEY_YUNST_VERIFY + ":methodName=" + methodName + ":date=" + DateUtil
+				.formatDate(new Date(), "yyyy-MM");
+			if (redisTemplate.hasKey(key)){
+				redisTemplate.boundValueOps(key).set(1L,31,TimeUnit.DAYS);
+			}else{
+				redisTemplate.boundValueOps(key).increment();
+			}
+		});
+
+	}
+
+
+	public Long getStatisticsYunstVerify(String methodName) {
+		String key = CACHE_KEY_YUNST_VERIFY + ":methodName=" + methodName + ":date=" + DateUtil
+			.formatDate(new Date(), "yyyy-MM");
+		return (long)Optional.ofNullable(redisTemplate.boundValueOps(key).get()).orElse(0L);
+	}
 
 }
