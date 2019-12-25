@@ -92,7 +92,7 @@ public class CacheService {
 			String key = CACHE_KEY_YUNST_VERIFY + ":methodName=" + methodName + ":date=" + DateUtil
 				.formatDate(new Date(), "yyyy-MM");
 			if (!redisTemplate.hasKey(key)){
-				redisTemplate.boundValueOps(key).set(1L,31,TimeUnit.DAYS);
+				redisTemplate.boundValueOps(key).set(1,31,TimeUnit.DAYS);
 			}else{
 				redisTemplate.boundValueOps(key).increment();
 			}
@@ -104,7 +104,7 @@ public class CacheService {
 	public int getStatisticsYunstVerify(String methodName) {
 		String key = CACHE_KEY_YUNST_VERIFY + ":methodName=" + methodName + ":date=" + DateUtil
 			.formatDate(new Date(), "yyyy-MM");
-		return (int)Optional.ofNullable(redisTemplate.boundValueOps(key).get()).orElse(0L);
+		return (int)Optional.ofNullable(redisTemplate.boundValueOps(key).get()).orElse(0);
 	}
 
 }
