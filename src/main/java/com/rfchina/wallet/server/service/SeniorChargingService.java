@@ -236,20 +236,19 @@ public class SeniorChargingService {
 					.selectByExampleWithRowbounds(example, new RowBounds(0, 300));
 				return walletOrders;
 			}, (walletOrder) -> {
+				long tunnelFee = Optional.ofNullable(walletOrder.getTunnelFee()).orElse(0L);
 				if (OrderType.RECHARGE.getValue().equals(walletOrder.getType())) {
 					long sumOfRechargeTunnelFee = Optional.ofNullable(sumOfRecharge.getLocalTunnelFee()).orElse(0L);
-					sumOfRecharge.setLocalTunnelFee(sumOfRechargeTunnelFee + walletOrder.getTunnelFee());
+					sumOfRecharge.setLocalTunnelFee(sumOfRechargeTunnelFee + tunnelFee);
 				} else if (OrderType.WITHDRAWAL.getValue().equals(walletOrder.getType())) {
 					countOfWithdraw.getAndIncrement();
 				} else if (OrderType.COLLECT.getValue().equals(walletOrder.getType())) {
 					long sumOfPayTunnelFee = Optional.ofNullable(sumOfPay.getLocalTunnelFee()).orElse(0L);
-					sumOfPay.setLocalTunnelFee(sumOfPayTunnelFee + walletOrder.getTunnelFee());
+					sumOfPay.setLocalTunnelFee(sumOfPayTunnelFee + tunnelFee);
 				}  else if (OrderType.REFUND.getValue().equals(walletOrder.getType())) {
 					long sumOfPayTunnelFee = Optional.ofNullable(sumOfPay.getLocalTunnelFee()).orElse(0L);
-					sumOfPay.setLocalTunnelFee(sumOfPayTunnelFee + walletOrder.getTunnelFee());
+					sumOfPay.setLocalTunnelFee(sumOfPayTunnelFee + tunnelFee);
 				}
-
-				ChargingVo chargingVo = BeanUtil.newInstance(walletOrder, ChargingVo.class);
 
 				return walletOrder.getId();
 			});
