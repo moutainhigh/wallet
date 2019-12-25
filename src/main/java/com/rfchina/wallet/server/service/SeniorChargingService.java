@@ -29,7 +29,6 @@ import com.rfchina.wallet.server.msic.EnumYunst.YunstServiceName;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -189,8 +188,7 @@ public class SeniorChargingService {
 		StatChargingCriteria example = new StatChargingCriteria();
 		example.setOrderByClause("id desc");
 		example.createCriteria()
-			.andDeletedEqualTo((byte) 0)
-			.andChargingDateLessThan(DateUtil.getFirstDayOfMonth(new Date()));
+			.andDeletedEqualTo((byte) 0);
 		List<StatCharging> data = statChargingDao
 			.selectByExampleWithRowbounds(example, new RowBounds(offset, limit));
 		Long total = 0L;
@@ -219,7 +217,8 @@ public class SeniorChargingService {
 		SumOfFeeVo sumOfPay = new SumOfFeeVo();
 
 		Date lastDay = new Date();
-		Date firstDay = DateUtil.getFirstDayOfMonth(lastDay);
+		Date firstDay = DateUtil.getDate2(DateUtil.getFirstDayOfMonth(lastDay));
+
 		new MaxIdIterator<WalletOrder>()
 			.apply((maxId) -> {
 				WalletOrderCriteria example = new WalletOrderCriteria();
@@ -267,15 +266,6 @@ public class SeniorChargingService {
 		return statCharging;
 	}
 
-	public StatCharging queryChargingByDate(Date date) {
-		StatChargingCriteria example = new StatChargingCriteria();
-		example.createCriteria()
-			.andChargingDateEqualTo(date);
-		List<StatCharging> data = statChargingDao.selectByExample(example);
-
-		return (Objects.nonNull(data) && !data.isEmpty()) ? data.get(0) : new StatCharging();
-	}
-
 	public Pagination<StatChargingDetailVo> queryChargingDetail(Date startTime, Date endTime,
 		Integer limit, Integer offset, Boolean stat, Boolean asc) {
 		StatChargingDetailCriteria example = new StatChargingDetailCriteria();
@@ -308,4 +298,5 @@ public class SeniorChargingService {
 			doCharging(TunnelType.YUNST, theDay);
 		});
 	}
+
 }
