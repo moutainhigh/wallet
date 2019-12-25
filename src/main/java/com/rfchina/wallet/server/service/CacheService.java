@@ -91,7 +91,7 @@ public class CacheService {
 		cachExecutor.execute(() -> {
 			String key = CACHE_KEY_YUNST_VERIFY + ":methodName=" + methodName + ":date=" + DateUtil
 				.formatDate(new Date(), "yyyy-MM");
-			if (redisTemplate.hasKey(key)){
+			if (!redisTemplate.hasKey(key)){
 				redisTemplate.boundValueOps(key).set(1L,31,TimeUnit.DAYS);
 			}else{
 				redisTemplate.boundValueOps(key).increment();
