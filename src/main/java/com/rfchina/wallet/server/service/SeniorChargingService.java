@@ -212,9 +212,9 @@ public class SeniorChargingService {
 		// 提现次数
 		AtomicLong countOfWithdraw = new AtomicLong(0L);
 		// 充值手续费
-		SumOfFeeVo sumOfRecharge = new SumOfFeeVo();
+		AtomicLong sumOfRecharge = new AtomicLong(0L);
 		// 支付手续费
-		SumOfFeeVo sumOfPay = new SumOfFeeVo();
+		AtomicLong sumOfPay = new AtomicLong(0L);
 
 		Date lastDay = new Date();
 		Date firstDay = DateUtil.getDate2(DateUtil.getFirstDayOfMonth(lastDay));
@@ -237,16 +237,13 @@ public class SeniorChargingService {
 			}, (walletOrder) -> {
 				long tunnelFee = Optional.ofNullable(walletOrder.getTunnelFee()).orElse(0L);
 				if (OrderType.RECHARGE.getValue().equals(walletOrder.getType())) {
-					long sumOfRechargeTunnelFee = Optional.ofNullable(sumOfRecharge.getLocalTunnelFee()).orElse(0L);
-					sumOfRecharge.setLocalTunnelFee(sumOfRechargeTunnelFee + tunnelFee);
+					sumOfRecharge.set(sumOfRecharge.get() + tunnelFee);
 				} else if (OrderType.WITHDRAWAL.getValue().equals(walletOrder.getType())) {
 					countOfWithdraw.getAndIncrement();
 				} else if (OrderType.COLLECT.getValue().equals(walletOrder.getType())) {
-					long sumOfPayTunnelFee = Optional.ofNullable(sumOfPay.getLocalTunnelFee()).orElse(0L);
-					sumOfPay.setLocalTunnelFee(sumOfPayTunnelFee + tunnelFee);
+					sumOfPay.set(sumOfPay.get() + tunnelFee);
 				}  else if (OrderType.REFUND.getValue().equals(walletOrder.getType())) {
-					long sumOfPayTunnelFee = Optional.ofNullable(sumOfPay.getLocalTunnelFee()).orElse(0L);
-					sumOfPay.setLocalTunnelFee(sumOfPayTunnelFee + tunnelFee);
+					sumOfPay.set(sumOfPay.get() + tunnelFee);
 				}
 
 				return walletOrder.getId();
@@ -254,10 +251,10 @@ public class SeniorChargingService {
 		StatCharging statCharging = StatCharging.builder()
 			.tunnelType(TunnelType.YUNST.getValue())
 			.chargingDate(firstDay)
-			.localPayFee(sumOfPay != null ? sumOfPay.getLocalTunnelFee() : null)
-			.thirdPayFee(sumOfPay != null ? sumOfPay.getThirdTunnelFee() : null)
-			.localRechargeFee(sumOfRecharge != null ? sumOfRecharge.getLocalTunnelFee() : null)
-			.thirdRechargeFee(sumOfRecharge != null ? sumOfRecharge.getThirdTunnelFee() : null)
+			.localPayFee(sumOfPay.get())
+			.thirdPayFee(null)
+			.localRechargeFee(sumOfRecharge.get())
+			.thirdRechargeFee(null)
 			.withdrawCount(countOfWithdraw.get())
 			.personVerifyCount(countOfPersonVerify)
 			.companyVerifyCount(countOfCompanyVerify)
