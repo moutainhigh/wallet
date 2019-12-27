@@ -4,6 +4,10 @@
 jenkins job: platform-rfwallet-super-server-test
 
 ```  
+## 1.1.0_b26_2019123010_Beta
+### [变动说明]
+- 通道认证同步到用户中心
+
 ## 1.1.0_b25_2019122715_Beta
 ### [变动说明]
 - 增加交易流水sdk查询条件传参
