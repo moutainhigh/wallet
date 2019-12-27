@@ -92,8 +92,11 @@ dependencies {
         exclude group: 'org.springframework.amqp'
     }
     compile 'com.rfchina:rfchina-platform-passport-common:1.2.1'
+
+    // SDK
     compile 'com.rfchina:internal-sdk:3.2.0'
     compile 'com.rfchina:platform-sdk:3.1.9'
+    compile 'com.rfchina:platform-sdk2-p-user:1.0.1'
 
     // 测试依赖
     testCompile('org.springframework.boot:spring-boot-starter-test')

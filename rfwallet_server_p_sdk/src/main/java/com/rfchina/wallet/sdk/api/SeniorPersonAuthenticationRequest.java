@@ -11,13 +11,10 @@ import java.util.List;
 
 /** 高级钱包-个人认证 */
 @Builder
-public class SeniorWalletPersonAuthenticationRequest extends  AbstractApiRequest {
+public class SeniorPersonAuthenticationRequest extends  AbstractApiRequest {
 
   @ApiModelProperty("access_token")
   private String accessToken ;
-
-  @ApiModelProperty("渠道类型 1:浦发银企直连,2:通联云商通")
-  private Integer channelType ;
 
   @ApiModelProperty("身份证号")
   private String idNo ;
@@ -30,6 +27,12 @@ public class SeniorWalletPersonAuthenticationRequest extends  AbstractApiRequest
 
   @ApiModelProperty("姓名")
   private String realName ;
+
+  @ApiModelProperty("渠道类型 1:浦发银企直连,2:通联云商通")
+  private Integer tunnelType ;
+
+  @ApiModelProperty("用户id")
+  private Long userId ;
 
   @ApiModelProperty("短信验证码")
   private String verifyCode ;
@@ -54,9 +57,6 @@ public class SeniorWalletPersonAuthenticationRequest extends  AbstractApiRequest
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
       }
-      if(channelType != null){
-        parameters.put("channel_type", channelType.toString());
-      }
       if(idNo != null){
         parameters.put("id_no", idNo.toString());
       }
@@ -68,6 +68,12 @@ public class SeniorWalletPersonAuthenticationRequest extends  AbstractApiRequest
       }
       if(realName != null){
         parameters.put("real_name", realName.toString());
+      }
+      if(tunnelType != null){
+        parameters.put("tunnel_type", tunnelType.toString());
+      }
+      if(userId != null){
+        parameters.put("user_id", userId.toString());
       }
       if(verifyCode != null){
         parameters.put("verify_code", verifyCode.toString());

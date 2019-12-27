@@ -11,7 +11,7 @@ import java.util.List;
 
 /** 升级高级钱包 */
 @Builder
-public class SeniorWalletUpgradeRequest extends  AbstractApiRequest {
+public class SeniorWalletCreateTunnelRequest extends  AbstractApiRequest {
 
   @ApiModelProperty("access_token")
   private String accessToken ;

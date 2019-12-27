@@ -108,7 +108,7 @@ public class SeniorCardService {
 				throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_CREDIT_INVALID);
 			}
 			log.error("高级钱包-银行卡验证失败, walletId: {}", walletId);
-			throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_INFO_INVALID);
+			throw e;
 		} catch (Exception e) {
 			log.error("高级钱包-银行卡验证失败, walletId: {}", walletId);
 			throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_INFO_INVALID);
@@ -145,7 +145,7 @@ public class SeniorCardService {
 				throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_CREDIT_INVALID);
 			}
 			log.error("高级钱包-确认绑定银行卡, walletId: {}", walletId);
-			throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_INFO_INVALID);
+			throw e;
 		} catch (Exception e) {
 			log.error("高级钱包-确认绑定银行卡, walletId: {}", walletId);
 			throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_INFO_INVALID);
