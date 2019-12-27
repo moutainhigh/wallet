@@ -6,8 +6,10 @@ import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
+import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletPerson;
 import com.rfchina.wallet.domain.model.WalletTunnel;
+import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
 import com.rfchina.wallet.server.bank.yunst.exception.UnknownException;
 import com.rfchina.wallet.server.bank.yunst.request.UpdatePayPwdReq;
 import com.rfchina.wallet.server.bank.yunst.request.UpdatePhoneByPayPwdReq;
@@ -36,6 +38,9 @@ import com.rfchina.wallet.server.bank.yunst.response.result.YunstSetCompanyInfoR
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstUnBindBankCardResult;
 import com.rfchina.wallet.server.bank.yunst.util.YunstTpl;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
+import com.rfchina.wallet.server.msic.EnumWallet.GwProgress;
+import com.rfchina.wallet.server.msic.EnumWallet.OrderSubStatus;
+import com.rfchina.wallet.server.msic.EnumYunst.EnumYunstResponse;
 import com.rfchina.wallet.server.msic.EnumYunst.YunstIdType;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -178,15 +183,24 @@ public class YunstUserHandler extends YunstBaseHandler {
 	 * 绑定手机
 	 */
 	public YunstBindPhoneResult bindPhone(String bizUserId, String phone,
-		String verificationCode)
-		throws Exception {
+		String verificationCode) throws Exception {
+
 		YunstBindPhoneReq req = YunstBindPhoneReq.builder$()
 			.bizUserId(bizUserId)
 			.phone(phone)
 			.verificationCode(verificationCode)
 			.build();
-		YunstBindPhoneResult result = yunstTpl.execute(req, YunstBindPhoneResult.class);
-		return result;
+		try {
+			return yunstTpl.execute(req, YunstBindPhoneResult.class);
+		} catch (CommonGatewayException e) {
+			if (EnumYunstResponse.ALREADY_BIND_PHONE.getValue().equals(e.getBankErrCode())) {
+				log.warn("高级钱包-通道已绑定手机: bizUserId:{}", bizUserId);
+			}
+			throw e;
+		} catch (Exception e) {
+			log.error("未定义异常", e);
+			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
+		}
 	}
 
 	/**
@@ -245,20 +259,36 @@ public class YunstUserHandler extends YunstBaseHandler {
 	 * 个人实名认证
 	 */
 	public YunstPersonSetRealNameResult personCertification(String bizUserId,
-		String realName,
-		Long identityType,
-		String identityNo) throws Exception {
+		String realName, Long identityType, String identityNo) throws Exception{
+		try {
+			identityNo = RSAUtil.encrypt(identityNo);
+		} catch (Exception e) {
+			log.error("身份证加密失败", e);
+			throw e;
+		}
 		YunstPersonSetRealNameReq req = YunstPersonSetRealNameReq.builder$()
 			.bizUserId(bizUserId)
 			.isAuth(true)
 			.name(realName)
 			.identityType(identityType)
-			.identityNo(RSAUtil.encrypt(identityNo))
+			.identityNo(identityNo)
 			.build();
 
-		YunstPersonSetRealNameResult result = yunstTpl
-			.execute(req, YunstPersonSetRealNameResult.class);
-		return result;
+		try {
+			YunstPersonSetRealNameResult result = yunstTpl.execute(req,
+				YunstPersonSetRealNameResult.class);
+			return result;
+		} catch (CommonGatewayException e) {
+			if (EnumYunstResponse.ALREADY_REALNAME_AUTH.getValue().equals(e.getBankErrCode())) {
+				log.warn("高级钱包-通道已实名, bizUserId:{}", bizUserId);
+			}else{
+				log.error("高级钱包-实名验证失败, bizUserId:{}", bizUserId);
+			}
+			throw e;
+		} catch (Exception e) {
+			log.error("未定义异常", e);
+			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
+		}
 	}
 
 	/**
