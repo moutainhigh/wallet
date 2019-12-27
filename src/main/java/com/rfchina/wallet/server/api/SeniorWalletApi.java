@@ -6,6 +6,7 @@ import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult;
+import java.util.Date;
 
 public interface SeniorWalletApi {
 
@@ -118,7 +119,7 @@ public interface SeniorWalletApi {
 	 * @param walletId 必填, 钱包id
 	 */
 	YunstMemberInfoResult.CompanyInfoResult seniorWalletGetCompanyInfo(String accessToken,
-		Long walletId, Boolean isManualRefresh,String newPublicAccountNo);
+		Long walletId, Boolean isManualRefresh, String newPublicAccountNo);
 
 	/**
 	 * 高级钱包获取个人用户信息
@@ -133,9 +134,8 @@ public interface SeniorWalletApi {
 	 *
 	 * @param walletId 必填, 钱包id
 	 */
-	Pagination<WalletOrder> queryWalletOrderDetail(String accessToken, Long walletId, int limit,
-		int offset, Boolean stat);
-
+	Pagination<WalletOrder> queryWalletOrderDetail(String accessToken, Long walletId, Date fromTime,
+		Date endTime, Byte tradeType, Byte status, int limit, int offset, Boolean stat);
 
 	/**
 	 * 高级钱包-用户绑定钱包身份
