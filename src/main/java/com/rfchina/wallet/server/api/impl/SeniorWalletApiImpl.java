@@ -10,9 +10,11 @@ import com.rfchina.platform.common.exception.RfchinaResponseException;
 import com.rfchina.platform.common.misc.ResponseCode;
 import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.platform.common.utils.RegexUtil;
+import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
+import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletPerson;
@@ -29,6 +31,7 @@ import com.rfchina.wallet.server.service.SeniorWalletService;
 import com.rfchina.wallet.server.service.VerifyService;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -213,6 +216,24 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
+	@ParamVerify
+	@Override
+	public void personIdBind(
+		@ParamValid(nullable = false) String accessToken,
+		@ParamValid(nullable = false) Long walletId,
+		@ParamValid(nullable = false) Long userId) {
+
+		WalletPerson walletPerson = walletPersonDao.selectByWalletId(walletId);
+		if(walletPerson == null || walletPerson.getIdNo() == null){
+			throw new WalletResponseException(EnumWalletResponseCode.WALLET_NOT_AUTH);
+		}
+		seniorWalletService.syncRealInfo(userId,walletPerson.getName(),walletPerson.getIdNo());
+	}
+
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
 	@Override
 	public WalletTunnel seniorWalletCompanyAudit(String accessToken, Integer channelType,
 		Integer auditType, Long walletId,
@@ -353,5 +374,6 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 			.pageLimit(limit)
 			.build();
 	}
+
 
 }

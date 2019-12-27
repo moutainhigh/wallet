@@ -192,6 +192,10 @@ public class UrlConstant {
 	 */
 	public static final String WALLET_SENIOR_PERSON_AUTHENTICATION = VERSION + "/m/senior/wallet/person_authentication";
 	/**
+	 * 高级钱包-用户绑定钱包身份
+	 * */
+	public static final String WALLET_SENIOR_PERSON_IDBIND = VERSION + "/m/senior/wallet/person_idbind";
+	/**
 	 * 高级钱包绑定手机
 	 */
 	public static final String WALLET_SENIOR_BIND_PHONE = VERSION + "/m/senior/wallet/bind_phone";

@@ -222,7 +222,7 @@ public class SeniorWalletService {
 	/**
 	 * 同步认证信息
 	 */
-	private void syncRealInfo(Long uid,String name,String idNo) {
+	public void syncRealInfo(Long uid,String name,String idNo) {
 		try {
 			SyncRealInfoRequest req = SyncRealInfoRequest.builder()
 				.accessToken(appService.getAccessToken())

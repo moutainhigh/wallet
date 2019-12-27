@@ -120,6 +120,17 @@ public class SeniorWalletController {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, pageVo);
 	}
 
+	@ApiOperation("高级钱包-用户绑定钱包身份")
+	@PostMapping(UrlConstant.WALLET_SENIOR_PERSON_IDBIND)
+	public ResponseValue seniorPersonIdBind(
+		@RequestParam("access_token") String accessToken,
+		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+		@ApiParam(value = "用户id", required = true) @RequestParam("user_id") Long userId) {
+
+		seniorWalletApi.personIdBind(accessToken, walletId, userId);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
+	}
+
 	@ApiOperation("高级钱包-商家资料审核（通道）")
 	@PostMapping(UrlConstant.WALLET_SENIOR_COMPANY_INFO_AUDIT)
 	public ResponseValue<WalletTunnel> seniorWalletCompanyInfoAudit(

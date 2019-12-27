@@ -137,5 +137,8 @@ public interface SeniorWalletApi {
 		int offset, Boolean stat);
 
 
-
+	/**
+	 * 高级钱包-用户绑定钱包身份
+	 */
+	void personIdBind(String accessToken, Long walletId, Long userId);
 }
