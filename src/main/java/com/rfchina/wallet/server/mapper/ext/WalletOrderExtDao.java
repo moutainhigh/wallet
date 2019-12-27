@@ -127,7 +127,7 @@ public interface WalletOrderExtDao extends WalletOrderMapper {
 	@ResultMap("com.rfchina.wallet.domain.mapper.WalletOrderMapper.BaseResultMap")
 	List<WalletOrder> selectByCondition(@Param("walletId") Long walletId,
 		@Param("fromTime") Date fromTime, @Param("toTime") Date toTime,
-		@Param("tradeType") Integer tradeType, @Param("status") Integer status,
+		@Param("tradeType") Byte tradeType, @Param("status") Byte status,
 		@Param("orderNo") String orderNo, @Param("bizNo") String bizNo, @Param("limit") int limit,
 		@Param("offset") int offset);
 
@@ -147,7 +147,7 @@ public interface WalletOrderExtDao extends WalletOrderMapper {
 	})
 	int selectCountByCondition(@Param("walletId") Long walletId,
 		@Param("fromTime") Date fromTime, @Param("toTime") Date toTime,
-		@Param("tradeType") Integer tradeType, @Param("status") Integer status,
+		@Param("tradeType") Byte tradeType, @Param("status") Byte status,
 		@Param("orderNo") String orderNo, @Param("bizNo") String bizNo);
 
 
