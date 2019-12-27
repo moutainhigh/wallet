@@ -4,6 +4,10 @@
 jenkins job: platform-rfwallet-super-server-test
 
 ```  
+## 1.1.0_b25_2019122715_Beta
+### [变动说明]
+- 增加交易流水sdk查询条件传参
+
 ## 1.1.0_b24_2019122511_Beta
 ### [变动说明]
 - 增加实时统计通道手续费,验证次数
