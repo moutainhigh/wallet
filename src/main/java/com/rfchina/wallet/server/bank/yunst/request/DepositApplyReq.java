@@ -46,7 +46,7 @@ public class DepositApplyReq implements YunstBaseReq {
 	@ApiModelProperty(required = true, value = "后台通知地址")
 	private String backUrl;
 
-	@ApiModelProperty(value = "后台通知地址")
+	@ApiModelProperty(value = "订单过期时间  格式：yyyy-MM-dd HH:mm:ss")
 	private String orderExpireDatetime;
 
 	@ApiModelProperty(required = true, value = "支付方式")

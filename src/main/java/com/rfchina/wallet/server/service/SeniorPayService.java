@@ -68,9 +68,11 @@ import com.rfchina.wallet.server.service.handler.yunst.YunstBizHandler;
 import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -178,6 +180,7 @@ public class SeniorPayService {
 
 		try {
 			lock.acquireLock(LockConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);
+
 			BigDecimal tunnelFee = new BigDecimal(amount)
 				.multiply(payMethod.getRate(configService))
 				.setScale(0, EBankHandler.getRoundingMode());
@@ -189,6 +192,7 @@ public class SeniorPayService {
 				.type(OrderType.RECHARGE.getValue())
 				.payMethod(payMethod.getMethods())
 				.amount(amount)
+				.expireTime(getDefExpireTime(null))
 				.progress(GwProgress.WAIT_SEND.getValue())
 				.status(OrderStatus.WAITTING.getValue())
 				.tunnelType(TunnelType.YUNST.getValue())
@@ -334,6 +338,7 @@ public class SeniorPayService {
 				.type(OrderType.COLLECT.getValue())
 				.payMethod(req.getWalletPayMethod().getMethods())
 				.amount(req.getAmount())
+				.expireTime(getDefExpireTime(req.getExpireTime()))
 				.progress(GwProgress.WAIT_SEND.getValue())
 				.status(OrderStatus.WAITTING.getValue())
 				.tunnelType(TunnelType.YUNST.getValue())
@@ -848,4 +853,20 @@ public class SeniorPayService {
 		}
 	}
 
+
+
+
+	/**
+	 * 计算超时时间
+	 */
+	private Date getDefExpireTime(Date expire) {
+
+		return Optional.ofNullable(expire)
+			.orElseGet(() -> {
+				Calendar calendar = Calendar.getInstance();
+				calendar.setTime(new Date());
+				calendar.add(Calendar.MINUTE, 60);
+				return calendar.getTime();
+			});
+	}
 }
