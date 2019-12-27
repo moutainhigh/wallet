@@ -63,8 +63,7 @@ public class SeniorChargingApiImpl implements SeniorChargingApi {
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
-	@Override
-	public StatCharging queryChargingByDate(String accessToken, Date date) {
-		return seniorChargingService.queryChargingByDate(date);
+	public StatCharging queryChargingByCurrentMonth(String accessToken) {
+		return seniorChargingService.queryChargingByCurrentMonth();
 	}
 }

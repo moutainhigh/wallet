@@ -71,10 +71,7 @@ public class ReportController {
 	@PostMapping(UrlConstant.REPORT_CUR_CHARGING_QUERY)
 	public ResponseValue<StatCharging> curMonthChargingQuery(
 		@ApiParam(name = "access_token", value = "访问令牌", required = true) @RequestParam("access_token") String accessToken) {
-		Date endTime = new Date();
-		Date startTime = DateUtil.getFirstDayOfMonth(endTime);
-		seniorChargingApi.chargingRedo(accessToken, startTime, endTime);
-		StatCharging statCharging = seniorChargingApi.queryChargingByDate(accessToken, startTime);
+		StatCharging statCharging = seniorChargingApi.queryChargingByCurrentMonth(accessToken);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, statCharging);
 	}
 }

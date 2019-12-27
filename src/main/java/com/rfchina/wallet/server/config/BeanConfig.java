@@ -5,12 +5,14 @@ import com.rfchina.passport.misc.SessionThreadLocal;
 import com.rfchina.platform.biztools.fileserver.FileServerAutoConfig;
 import com.rfchina.platform.spring.SpringContext;
 import com.rfchina.wallet.server.bank.pudong.domain.predicate.ExactErrPredicate;
-import com.rfchina.wallet.server.bank.pudong.domain.predicate.UserRedoPredicate;
 import io.github.xdiamond.client.annotation.OneKeyListener;
 import io.github.xdiamond.client.event.ConfigEvent;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -66,4 +68,10 @@ public class BeanConfig {
 		exactErrPredicate.parseText(event.getValue());
 	}
 
+	@Bean
+	@Qualifier(value = "cacheExec")
+	public ExecutorService cacheSrvExec() {
+		return Executors.newFixedThreadPool(2,
+			new BasicThreadFactory.Builder().namingPattern("CacheExec_%d").build());
+	}
 }
