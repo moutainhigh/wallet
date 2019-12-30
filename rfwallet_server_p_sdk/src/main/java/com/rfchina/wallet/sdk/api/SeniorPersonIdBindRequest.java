@@ -30,7 +30,7 @@ public class SeniorPersonIdBindRequest extends  AbstractApiRequest {
 
   @Override
   public Class<?> getResponseModelClass() {
-    return PageVo.class;
+    return Map.class;
   }
 
   @Override
