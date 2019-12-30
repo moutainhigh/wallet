@@ -13,6 +13,7 @@ import com.rfchina.platform.common.utils.RegexUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.BankCodeDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
+import com.rfchina.wallet.domain.mapper.ext.WalletFinanceDao;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletAuditType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletCardStatus;
@@ -111,7 +112,7 @@ public class WalletService {
 	private WalletOrderExtDao walletOrderDao;
 
 	@Autowired
-	private WalletFinanceExtDao walletFinanceDao;
+	private WalletFinanceDao walletFinanceDao;
 
 	@Autowired
 	private GatewayTransExtDao gatewayTransDao;

@@ -8,10 +8,5 @@ import org.apache.ibatis.annotations.Select;
 
 public interface WalletFinanceExtDao extends WalletFinanceMapper {
 
-	@Select({
-		"select * from rf_wallet_finance",
-		"where order_id = #{orderId}"
-	})
-	@ResultMap("com.rfchina.wallet.domain.mapper.WalletFinanceMapper.BaseResultMap")
-	WalletFinance selectByOrderId(@Param("orderId") Long orderId);
+
 }

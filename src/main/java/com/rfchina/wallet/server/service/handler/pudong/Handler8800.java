@@ -9,6 +9,7 @@ import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EnumUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
+import com.rfchina.wallet.domain.mapper.ext.WalletFinanceDao;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.BankCode;
@@ -106,7 +107,7 @@ public class Handler8800 extends EBankHandler {
 	private GatewayTransService gatewayTransService;
 
 	@Autowired
-	private WalletFinanceExtDao walletFinanceDao;
+	private WalletFinanceDao walletFinanceDao;
 
 	@Autowired
 	private WalletOrderExtDao walletOrderDao;

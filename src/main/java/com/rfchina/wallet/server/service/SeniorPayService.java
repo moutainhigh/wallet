@@ -211,7 +211,8 @@ public class SeniorPayService {
 				.createTime(new Date())
 				.build();
 			walletRechargeDao.insertSelective(recharge);
-			savePayMethod(recharge.getId(), OrderType.RECHARGE.getValue(), payMethod);
+			savePayMethod(recharge.getOrderId(), recharge.getId(), OrderType.RECHARGE.getValue(),
+				payMethod);
 
 			// 支付人
 			WalletTunnel payer = walletTunnelDao
@@ -362,7 +363,7 @@ public class SeniorPayService {
 				.createTime(new Date())
 				.build();
 			walletCollectDao.insertSelective(collect);
-			savePayMethod(collect.getId(), OrderType.COLLECT.getValue(),
+			savePayMethod(collect.getOrderId(), collect.getId(), OrderType.COLLECT.getValue(),
 				req.getWalletPayMethod());
 
 			// 生成清分记录
@@ -640,9 +641,8 @@ public class SeniorPayService {
 				.createTime(new Date())
 				.build();
 			walletConsumeDao.insertSelective(consume);
-			WalletCollectMethod method = savePayMethod(consume.getId(),
-				OrderType.DEDUCTION.getValue(),
-				req.getWalletPayMethod());
+			WalletCollectMethod method = savePayMethod(consume.getOrderId(), consume.getId(),
+				OrderType.DEDUCTION.getValue(), req.getWalletPayMethod());
 
 			WalletTunnel payer = walletTunnelDao
 				.selectByWalletId(consumeOrder.getWalletId(), consumeOrder.getTunnelType());
@@ -690,11 +690,12 @@ public class SeniorPayService {
 	/**
 	 * 保存支付方式
 	 */
-	private WalletCollectMethod savePayMethod(Long collectId, Byte type,
+	private WalletCollectMethod savePayMethod(Long orderId, Long collectId, Byte type,
 		WalletPayMethod payMethod) {
 		// 支付方式
 		WalletCollectMethodBuilder builder = WalletCollectMethod.builder()
 			.refId(collectId)
+			.orderId(orderId)
 			.type(type);
 		if (payMethod.getBalance() != null) {
 			Balance balance = payMethod.getBalance();
@@ -852,8 +853,6 @@ public class SeniorPayService {
 			lock.unLock(LockConstant.LOCK_PAY_ORDER + order.getOrderNo());
 		}
 	}
-
-
 
 
 	/**
