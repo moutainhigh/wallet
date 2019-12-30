@@ -165,6 +165,7 @@ public class SeniorCardService {
 		// 查银行代码
 		BankCode bankCode = getBank(preBindCardVo.getBankCode());
 		WalletCard walletCard = WalletCard.builder().walletId(walletId)
+			.bankClass(bankCode != null ? bankCode.getClassCode() : null)
 			.bankCode(bankCode != null ? bankCode.getBankCode() : null)
 			.bankName(bankCode != null ? bankCode.getClassName() : null)
 			.depositBank(bankCode != null ? bankCode.getBankName() : null)
