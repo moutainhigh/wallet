@@ -14,6 +14,7 @@ import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletProgress;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletOrder;
@@ -199,6 +200,8 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 				// 未绑手机
 				if (StringUtils.isEmpty(walletTunnel.getSecurityTel())) {
 					seniorWalletService.seniorWalletBindPhone(walletTunnel, mobile, verifyCode);
+					walletDao.addProgress(walletTunnel.getWalletId(),
+						WalletProgress.TUNNEL_BIND_MOBILE.getValue());
 				}
 				// 用户实名
 				seniorWalletService.personAudit(userId,walletTunnel,realName,idNo);

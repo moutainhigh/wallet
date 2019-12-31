@@ -41,8 +41,8 @@ public class NotifyService {
 		String json = JsonUtil.toJSON(params);
 		log.info("Yunst notify: {}", json);
 
-		if (!veryfySign(params)){
-			throw new WalletResponseException(EnumResponseCode.COMMON_FAILURE,"verify sign");
+		if (!veryfySign(params)) {
+			throw new WalletResponseException(EnumResponseCode.COMMON_FAILURE, "verify sign");
 		}
 		ChannelNotify channelNotify = ChannelNotify.builder()
 			.channelType(TunnelType.YUNST.getValue().intValue())
@@ -50,8 +50,6 @@ public class NotifyService {
 			.createTime(new Date())
 			.build();
 		channelNotifyDao.insertSelective(channelNotify);
-
-
 
 		YunstNotify yunstNotify = JsonUtil
 			.toObject(params.get("rps"), YunstNotify.class, getObjectMapper());
@@ -71,7 +69,6 @@ public class NotifyService {
 					.toObject(rtnValJson, YunstNotify.CompanyAuditResult.class,
 						getObjectMapper());
 				yunstNotifyHandler.handleVerfiyResult(channelNotify, rtnVal);
-
 
 			} else if (YunstMethodName.SIGN_CONTRACT.getValue().equals(methodName)) {
 				if (YUNST_NOTIFY_SUCCESS.equals(yunstNotify.getStatus()) && StringUtils
@@ -128,14 +125,14 @@ public class NotifyService {
 		};
 	}
 
-//
-	private boolean veryfySign(Map<String, String> params){
+	//
+	private boolean veryfySign(Map<String, String> params) {
 		String sysid = params.get("sysid");
 		String rps = params.get("rps");
 		String timestamp = params.get("timestamp");
 		String sign = params.get("sign");
 		try {
-			return RSAUtil.verify(sysid+rps+timestamp, sign);
+			return RSAUtil.verify(sysid + rps + timestamp, sign);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return false;

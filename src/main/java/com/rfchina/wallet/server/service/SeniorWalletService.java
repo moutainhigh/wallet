@@ -19,6 +19,7 @@ import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletCardStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.EnumDef.VerifyChannel;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletCardType;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletProgress;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletSource;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelAuditStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelSignContract;
@@ -62,11 +63,9 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 @Slf4j
 @Service
@@ -317,6 +316,9 @@ public class SeniorWalletService {
 		auditType += EnumWalletAuditType.ALLINPAY.getValue().byteValue();
 		wallet.setAuditType(auditType);
 		wallet.setLevel(EnumDef.EnumWalletLevel.SENIOR.getValue());
+		Integer progress = Optional.ofNullable(wallet.getProgress()).orElse(0)
+			| WalletProgress.TUNNEL_VALIDATE.getValue();
+		wallet.setProgress(progress);
 		walletDao.updateByPrimaryKeySelective(wallet);
 	}
 
