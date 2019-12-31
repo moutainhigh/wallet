@@ -12,6 +12,7 @@ import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletCardStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.EnumDef.VerifyChannel;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletCardType;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletProgress;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.BankCode;
 import com.rfchina.wallet.domain.model.WalletCard;
@@ -181,7 +182,8 @@ public class SeniorCardService {
 			.cardType(preBindCardVo.getCardType())
 			.build();
 		walletCardDao.insertSelective(walletCard);
-
+		// 绑卡进度
+		walletDao.addProgress(walletId, WalletProgress.WALLET_BIND_CARD.getValue());
 	}
 
 	private BankCode getBank(String bankCode) {

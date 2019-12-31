@@ -2,8 +2,10 @@ package com.rfchina.wallet.server.service.handler.yunst;
 
 import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.platform.common.utils.DateUtil;
+import com.rfchina.wallet.domain.mapper.ext.WalletDao;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletProgress;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelSetPayPwd;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelSignContract;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyChannel;
@@ -21,6 +23,7 @@ import com.rfchina.wallet.server.mapper.ext.WalletVerifyHisExtDao;
 import com.rfchina.wallet.server.model.ext.SLWalletMqMessage;
 import com.rfchina.wallet.server.msic.EnumWallet.YunstCompanyInfoAuditStatus;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,6 +41,9 @@ public class YunstNotifyHandler {
 	private WalletCardExtDao walletCardDao;
 	@Autowired
 	private YunstBizHandler yunstBizHandler;
+
+	@Autowired
+	private WalletDao walletDao;
 
 	@PostMq(routingKey = MqConstant.WALLET_SENIOR_COMPANY_AUDIT)
 	public SLWalletMqMessage handleVerfiyResult(ChannelNotify channelNotify,
@@ -86,6 +92,9 @@ public class YunstNotifyHandler {
 						.createTime(walletTunnel.getCheckTime()).build());
 			}
 			walletCard.setVerifyTime(DateUtil.parse(checkTime, DateUtil.STANDARD_DTAETIME_PATTERN));
+			Optional.ofNullable(walletTunnel)
+				.ifPresent(c -> walletDao.addProgress(c.getWalletId(),
+					WalletProgress.TUNNEL_VALIDATE.getValue()));
 		} else if (result == YunstCompanyInfoAuditStatus.FAIL.getValue().longValue()) {
 			walletTunnel
 				.setStatus(EnumDef.WalletTunnelAuditStatus.AUDIT_FAIL.getValue().byteValue());
@@ -112,7 +121,9 @@ public class YunstNotifyHandler {
 		channelNotify.setBizUserId(bizUserId);
 		WalletTunnel walletChannel = walletTunnelExtDao.selectByTunnelTypeAndBizUserId(
 			TunnelType.YUNST.getValue().intValue(), bizUserId);
-
+		Optional.ofNullable(walletChannel)
+			.ifPresent(c -> walletDao.addProgress(c.getWalletId(),
+				WalletProgress.TUNNEL_SIGN.getValue()));
 		walletChannel.setIsSignContact(WalletTunnelSignContract.MEMBER.getValue().byteValue());
 
 		int effectRows = walletTunnelExtDao.updateByPrimaryKeySelective(walletChannel);
@@ -156,7 +167,9 @@ public class YunstNotifyHandler {
 		channelNotify.setBizUserId(bizUserId);
 		WalletTunnel walletChannel = walletTunnelExtDao.selectByTunnelTypeAndBizUserId(
 			TunnelType.YUNST.getValue().intValue(), bizUserId);
-
+		Optional.ofNullable(walletChannel)
+			.ifPresent(c -> walletDao.addProgress(c.getWalletId(),
+				WalletProgress.TUNNEL_BIND_MOBILE.getValue()));
 		walletChannel.setSecurityTel(newPhone);
 
 		int effectRows = walletTunnelExtDao.updateByPrimaryKeySelective(walletChannel);
@@ -172,7 +185,9 @@ public class YunstNotifyHandler {
 		channelNotify.setBizUserId(bizUserId);
 		WalletTunnel walletChannel = walletTunnelExtDao.selectByTunnelTypeAndBizUserId(
 			TunnelType.YUNST.getValue().intValue(), bizUserId);
-
+		Optional.ofNullable(walletChannel)
+			.ifPresent(c -> walletDao.addProgress(c.getWalletId(),
+				WalletProgress.TUNNEL_SET_PASSWORD.getValue()));
 		walletChannel.setHasPayPassword(WalletTunnelSetPayPwd.YES.getValue().byteValue());
 
 		int effectRows = walletTunnelExtDao.updateByPrimaryKeySelective(walletChannel);
