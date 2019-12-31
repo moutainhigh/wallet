@@ -1,9 +1,12 @@
 package com.rfchina.wallet.server.service;
 
+import com.allinpay.yunst.sdk.util.RSAUtil;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rfchina.platform.common.json.ObjectSetter;
+import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.utils.JsonUtil;
+import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.model.ChannelNotify;
 import com.rfchina.wallet.server.bank.yunst.response.YunstNotify;
@@ -38,12 +41,17 @@ public class NotifyService {
 		String json = JsonUtil.toJSON(params);
 		log.info("Yunst notify: {}", json);
 
+		if (!veryfySign(params)){
+			throw new WalletResponseException(EnumResponseCode.COMMON_FAILURE,"verify sign");
+		}
 		ChannelNotify channelNotify = ChannelNotify.builder()
 			.channelType(TunnelType.YUNST.getValue().intValue())
 			.content(json)
 			.createTime(new Date())
 			.build();
 		channelNotifyDao.insertSelective(channelNotify);
+
+
 
 		YunstNotify yunstNotify = JsonUtil
 			.toObject(params.get("rps"), YunstNotify.class, getObjectMapper());
@@ -121,6 +129,17 @@ public class NotifyService {
 	}
 
 //
-
+	private boolean veryfySign(Map<String, String> params){
+		String sysid = params.get("sysid");
+		String rps = params.get("rps");
+		String timestamp = params.get("timestamp");
+		String sign = params.get("sign");
+		try {
+			return RSAUtil.verify(sysid+rps+timestamp, sign);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}
 
 }
