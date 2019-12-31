@@ -40,6 +40,12 @@ public interface WalletApi {
 	WalletInfoResp queryWalletInfoByUserId(String accessToken, Long userId);
 
 	/**
+	 * 查询钱包列表
+	 */
+	Pagination<Wallet> walletList(String accessToken, String title, Byte type, Byte walletLevel,
+		Byte status, Integer limit, Integer offset, Boolean stat);
+
+	/**
 	 * 开通未审核的钱包
 	 */
 	Wallet createWallet(String accessToken, Byte type, String title, Byte source);

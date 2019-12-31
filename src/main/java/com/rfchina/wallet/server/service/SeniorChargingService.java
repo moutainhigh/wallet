@@ -29,6 +29,8 @@ import com.rfchina.wallet.server.msic.EnumYunst.YunstServiceName;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +53,9 @@ public class SeniorChargingService {
 
 	@Autowired
 	private BalanceTunnelDetailExtDao balanceTunnelDetailDao;
+
+	@Autowired
+	private CacheService cacheService;
 
 	/**
 	 * 计算报表
@@ -183,7 +188,8 @@ public class SeniorChargingService {
 		StatChargingCriteria example = new StatChargingCriteria();
 		example.setOrderByClause("id desc");
 		example.createCriteria()
-			.andDeletedEqualTo((byte) 0);
+			.andDeletedEqualTo((byte) 0)
+			.andChargingDateLessThan(DateUtil.getDate2(DateUtil.getFirstDayOfMonth(new Date())));
 		List<StatCharging> data = statChargingDao
 			.selectByExampleWithRowbounds(example, new RowBounds(offset, limit));
 		Long total = 0L;
@@ -197,6 +203,65 @@ public class SeniorChargingService {
 			.pageLimit(limit)
 			.build();
 
+	}
+
+	public StatCharging queryChargingByCurrentMonth(){
+		// 个人验证次数
+		long countOfPersonVerify = cacheService.getStatisticsYunstVerify(YunstMethodName.PERSON_VERIFY.getValue());
+		// 公司验证次数
+		long countOfCompanyVerify = cacheService.getStatisticsYunstVerify(YunstMethodName.COMPANY_VERIFY.getValue());
+		// 提现次数
+		AtomicLong countOfWithdraw = new AtomicLong(0L);
+		// 充值手续费
+		AtomicLong sumOfRecharge = new AtomicLong(0L);
+		// 支付手续费
+		AtomicLong sumOfPay = new AtomicLong(0L);
+
+		Date lastDay = new Date();
+		Date firstDay = DateUtil.getDate2(DateUtil.getFirstDayOfMonth(lastDay));
+
+		new MaxIdIterator<WalletOrder>()
+			.apply((maxId) -> {
+				WalletOrderCriteria example = new WalletOrderCriteria();
+				example.setOrderByClause("id asc");
+				example.createCriteria()
+					.andIdGreaterThan(maxId)
+					.andTunnelTypeEqualTo(TunnelType.YUNST.getValue())
+					.andStatusEqualTo(OrderStatus.SUCC.getValue())
+					.andTunnelSuccTimeBetween(firstDay, lastDay)
+					.andTypeIn(Arrays.asList(OrderType.RECHARGE.getValue(),
+						OrderType.WITHDRAWAL.getValue(), OrderType.COLLECT.getValue(),
+						OrderType.REFUND.getValue()));
+				List<WalletOrder> walletOrders = walletOrderDao
+					.selectByExampleWithRowbounds(example, new RowBounds(0, 300));
+				return walletOrders;
+			}, (walletOrder) -> {
+				long tunnelFee = Optional.ofNullable(walletOrder.getTunnelFee()).orElse(0L);
+				if (OrderType.RECHARGE.getValue().equals(walletOrder.getType())) {
+					sumOfRecharge.set(sumOfRecharge.get() + tunnelFee);
+				} else if (OrderType.WITHDRAWAL.getValue().equals(walletOrder.getType())) {
+					countOfWithdraw.getAndIncrement();
+				} else if (OrderType.COLLECT.getValue().equals(walletOrder.getType())) {
+					sumOfPay.set(sumOfPay.get() + tunnelFee);
+				}  else if (OrderType.REFUND.getValue().equals(walletOrder.getType())) {
+					sumOfPay.set(sumOfPay.get() + tunnelFee);
+				}
+
+				return walletOrder.getId();
+			});
+		StatCharging statCharging = StatCharging.builder()
+			.tunnelType(TunnelType.YUNST.getValue())
+			.chargingDate(firstDay)
+			.localPayFee(sumOfPay.get())
+			.thirdPayFee(null)
+			.localRechargeFee(sumOfRecharge.get())
+			.thirdRechargeFee(null)
+			.withdrawCount(countOfWithdraw.get())
+			.personVerifyCount(countOfPersonVerify)
+			.companyVerifyCount(countOfCompanyVerify)
+			.build();
+
+		return statCharging;
 	}
 
 	public Pagination<StatChargingDetailVo> queryChargingDetail(Date startTime, Date endTime,
@@ -231,4 +296,5 @@ public class SeniorChargingService {
 			doCharging(TunnelType.YUNST, theDay);
 		});
 	}
+
 }

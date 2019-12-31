@@ -25,4 +25,11 @@ public class ApiClientConfig {
 		return new ApiClient(serverUrl, appId, platformSecret);
 	}
 
+	@Bean(name = "apiTemplate")
+	public com.rfchina.platform.sdk2.ApiClient apiTemplate(@Value("${app.base.url}") String serverUrl,
+		@Value("${platform.app.id}") String appId,
+		@Value("${platform.app.secret}") String platformSecret) {
+		return new com.rfchina.platform.sdk2.ApiClient(serverUrl, Long.valueOf(appId), platformSecret);
+	}
+
 }

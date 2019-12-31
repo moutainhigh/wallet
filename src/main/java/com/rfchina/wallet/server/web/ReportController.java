@@ -65,4 +65,13 @@ public class ReportController {
 		seniorChargingApi.chargingRedo(accessToken, startTime, endTime);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
+
+
+	@ApiOperation("当月手续费报表")
+	@PostMapping(UrlConstant.REPORT_CUR_CHARGING_QUERY)
+	public ResponseValue<StatCharging> curMonthChargingQuery(
+		@ApiParam(name = "access_token", value = "访问令牌", required = true) @RequestParam("access_token") String accessToken) {
+		StatCharging statCharging = seniorChargingApi.queryChargingByCurrentMonth(accessToken);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, statCharging);
+	}
 }

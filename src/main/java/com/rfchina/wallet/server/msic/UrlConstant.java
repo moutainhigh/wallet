@@ -88,7 +88,7 @@ public class UrlConstant {
 	public static final String QUARTZ_UPDATE_SENIOR_STATUS = VERSION + "/schedule/quartz_update_senior_status";
 
 	/**
-	 * 定时支付
+	 * 定时邮件通知挂起单
 	 */
 	public static final String QUARTZ_NOTIFY = VERSION + "/schedule/quartz_notify";
 
@@ -111,6 +111,11 @@ public class UrlConstant {
 	 * 查询钱包信息（企业or个人）
 	 */
 	public static final String WALLET_QUERY_INFO_BY_UID = VERSION + "/m/wallet/query_wallet_info_by_uid";
+
+	/**
+	 * 查询钱包列表
+	 */
+	public static final String WALLET_LIST = VERSION + "/m/wallet/wallet_list";
 
 	/**
 	 * 开通未审核的钱包
@@ -186,6 +191,10 @@ public class UrlConstant {
 	 * 高级钱包个人认证
 	 */
 	public static final String WALLET_SENIOR_PERSON_AUTHENTICATION = VERSION + "/m/senior/wallet/person_authentication";
+	/**
+	 * 高级钱包-用户绑定钱包身份
+	 * */
+	public static final String WALLET_SENIOR_PERSON_IDBIND = VERSION + "/m/senior/wallet/person_idbind";
 	/**
 	 * 高级钱包绑定手机
 	 */
@@ -274,5 +283,10 @@ public class UrlConstant {
 	 * 手续费重做
 	 */
 	public static final String REPORT_CHARGING_REDO = VERSION + "/m/report/charging_redo";
+
+	/**
+	 * 当月手续费报表
+	 */
+	public static final String REPORT_CUR_CHARGING_QUERY = VERSION + "/m/report/cur_charging_query";
 
 }

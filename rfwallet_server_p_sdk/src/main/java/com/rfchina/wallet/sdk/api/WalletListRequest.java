@@ -9,46 +9,43 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 
 
-/** 高级钱包-余额明细 */
+/** 钱包列表 */
 @Builder
-public class SeniorOrderDetailRequest extends  AbstractApiRequest {
+public class WalletListRequest extends  AbstractApiRequest {
 
-  @ApiModelProperty("access_token")
+  @ApiModelProperty("访问令牌")
   private String accessToken ;
 
-  @ApiModelProperty("交易时间开始")
-  private String fromTime ;
-
-  @ApiModelProperty("每页限制")
+  @ApiModelProperty("必填，需要查询的数量（数量最大50）")
   private Integer limit ;
 
-  @ApiModelProperty("起始页偏移量")
+  @ApiModelProperty("必填，查询列表的起始偏移量，从0开始，即offset: 5是指从列表里的第六个开始读取。")
   private Integer offset ;
 
-  @ApiModelProperty("是否统计")
+  @ApiModelProperty("非必填, false:否, true:是, 是否返回数据总量, 默认false")
   private Boolean stat ;
 
-  @ApiModelProperty("状态")
+  @ApiModelProperty("钱包状态: 1:待审核，2：激活,3：禁用")
   private Integer status ;
 
-  @ApiModelProperty("交易时间结束")
-  private String toTime ;
+  @ApiModelProperty("钱包名字")
+  private String title ;
 
-  @ApiModelProperty("交易类型")
-  private Integer tradeType ;
+  @ApiModelProperty("钱包类型， 1：企业钱包，2：个人钱包")
+  private Integer type ;
 
-  @ApiModelProperty("钱包id")
-  private Long walletId ;
+  @ApiModelProperty("钱包等级 1： 初级钱包，2： 高级钱包")
+  private Integer walletLevel ;
 
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/senior/wallet/order_detail";
+    return "/wallet_server/v1/m/wallet/wallet_list";
   }
 
   @Override
   public Class<?> getResponseModelClass() {
-    return PaginationWalletOrder.class;
+    return PaginationWallet.class;
   }
 
   @Override
@@ -56,9 +53,6 @@ public class SeniorOrderDetailRequest extends  AbstractApiRequest {
     Map<String, String> parameters = new HashMap<>(2);
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
-      }
-      if(fromTime != null){
-        parameters.put("from_time", fromTime.toString());
       }
       if(limit != null){
         parameters.put("limit", limit.toString());
@@ -72,14 +66,14 @@ public class SeniorOrderDetailRequest extends  AbstractApiRequest {
       if(status != null){
         parameters.put("status", status.toString());
       }
-      if(toTime != null){
-        parameters.put("to_time", toTime.toString());
+      if(title != null){
+        parameters.put("title", title.toString());
       }
-      if(tradeType != null){
-        parameters.put("trade_type", tradeType.toString());
+      if(type != null){
+        parameters.put("type", type.toString());
       }
-      if(walletId != null){
-        parameters.put("wallet_id", walletId.toString());
+      if(walletLevel != null){
+        parameters.put("wallet_level", walletLevel.toString());
       }
     return parameters;
   }

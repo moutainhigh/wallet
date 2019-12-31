@@ -7,6 +7,7 @@ import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.domain.mapper.ext.BankCodeDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
+import com.rfchina.wallet.domain.mapper.ext.WalletFinanceDao;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderType;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.model.GatewayTrans;
@@ -98,7 +99,7 @@ public class ScheduleService {
 	private WalletOrderExtDao walletOrderDao;
 
 	@Autowired
-	private WalletFinanceExtDao walletFinanceDao;
+	private WalletFinanceDao walletFinanceDao;
 
 	@Autowired
 	private JuniorPayService juniorPayService;

@@ -12,6 +12,7 @@ import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletCardStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.EnumDef.VerifyChannel;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletCardType;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletProgress;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.BankCode;
 import com.rfchina.wallet.domain.model.WalletCard;
@@ -108,7 +109,7 @@ public class SeniorCardService {
 				throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_CREDIT_INVALID);
 			}
 			log.error("高级钱包-银行卡验证失败, walletId: {}", walletId);
-			throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_INFO_INVALID);
+			throw e;
 		} catch (Exception e) {
 			log.error("高级钱包-银行卡验证失败, walletId: {}", walletId);
 			throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_INFO_INVALID);
@@ -145,7 +146,7 @@ public class SeniorCardService {
 				throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_CREDIT_INVALID);
 			}
 			log.error("高级钱包-确认绑定银行卡, walletId: {}", walletId);
-			throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_INFO_INVALID);
+			throw e;
 		} catch (Exception e) {
 			log.error("高级钱包-确认绑定银行卡, walletId: {}", walletId);
 			throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_INFO_INVALID);
@@ -165,6 +166,7 @@ public class SeniorCardService {
 		// 查银行代码
 		BankCode bankCode = getBank(preBindCardVo.getBankCode());
 		WalletCard walletCard = WalletCard.builder().walletId(walletId)
+			.bankClass(bankCode != null ? bankCode.getClassCode() : null)
 			.bankCode(bankCode != null ? bankCode.getBankCode() : null)
 			.bankName(bankCode != null ? bankCode.getClassName() : null)
 			.depositBank(bankCode != null ? bankCode.getBankName() : null)
@@ -180,7 +182,8 @@ public class SeniorCardService {
 			.cardType(preBindCardVo.getCardType())
 			.build();
 		walletCardDao.insertSelective(walletCard);
-
+		// 绑卡进度
+		walletDao.addProgress(walletId, WalletProgress.WALLET_BIND_CARD.getValue());
 	}
 
 	private BankCode getBank(String bankCode) {

@@ -26,7 +26,7 @@ public interface SeniorWalletApi {
 	 * @param source 必填, 钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户
 	 * @param walletId 必填, 钱包id
 	 */
-	WalletTunnel seniorWalletUpgrade(String accessToken, Byte source, Integer channelType,
+	WalletTunnel seniorWalletCreateTunnel(String accessToken, Byte source, Integer channelType,
 		Long walletId);
 
 	/**
@@ -56,23 +56,22 @@ public interface SeniorWalletApi {
 	 * @param mobile 必填, 电话
 	 * @param verifyCode 必填, 短信验证码
 	 */
-	Wallet seniorWalletBindPhone(String accessToken, Integer channelType, Long walletId,
+	Wallet bindPhone(String accessToken, Byte channelType, Long walletId,
 		String mobile, String verifyCode);
 
 	/**
 	 * 高级钱包个人认证
 	 *
-	 * @param channelType 必填, 渠道类型.1: 浦发银企直连，2：通联云商通
+	 * @param tunnelType 必填, 渠道类型.1: 浦发银企直连，2：通联云商通
 	 * @param walletId 必填, 钱包id
-	 * @param realName 必填, 真实姓名
+	 * @param name 必填, 真实姓名
 	 * @param idNo 必填, 身份证
 	 * @param mobile 必填, 电话
 	 * @param verifyCode 必填, 短信验证码
 	 * @param jumpUrl 必填,前端跳转地址
 	 */
-	String seniorWalletPersonAuthentication(String accessToken, Integer channelType,
-		Long walletId, String realName, String idNo, String mobile, String verifyCode,
-		String jumpUrl);
+	String personAudit(String accessToken, Byte tunnelType, Long walletId, Long userId,
+		String name, String idNo, String mobile, String verifyCode, String jumpUrl);
 
 	/**
 	 * 高级钱包商家资料审核
@@ -120,7 +119,7 @@ public interface SeniorWalletApi {
 	 * @param walletId 必填, 钱包id
 	 */
 	YunstMemberInfoResult.CompanyInfoResult seniorWalletGetCompanyInfo(String accessToken,
-		Long walletId, Boolean isManualRefresh,String newPublicAccountNo);
+		Long walletId, Boolean isManualRefresh, String newPublicAccountNo);
 
 	/**
 	 * 高级钱包获取个人用户信息
@@ -136,9 +135,10 @@ public interface SeniorWalletApi {
 	 * @param walletId 必填, 钱包id
 	 */
 	Pagination<WalletOrder> queryWalletOrderDetail(String accessToken, Long walletId, Date fromTime,
-		Date toTime, Integer tradeType, Integer status, String orderNo, String bizNo, int limit,
-		int offset, Boolean stat);
+		Date endTime, Byte tradeType, Byte status, int limit, int offset, Boolean stat);
 
-
-
+	/**
+	 * 高级钱包-用户绑定钱包身份
+	 */
+	void personIdBind(String accessToken, Long walletId, Long userId);
 }

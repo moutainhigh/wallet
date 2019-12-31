@@ -16,6 +16,8 @@ import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
 import com.rfchina.wallet.server.bank.yunst.request.YunstBaseReq;
 import com.rfchina.wallet.server.bank.yunst.response.YunstBaseResp;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayInvokeStatus;
+import com.rfchina.wallet.server.msic.EnumYunst.YunstMethodName;
+import com.rfchina.wallet.server.service.CacheService;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TimeZone;
@@ -28,6 +30,9 @@ public class YunstTpl {
 
 	@Autowired
 	private GatewayLogMapper gatewayLogDao;
+
+	@Autowired
+	private CacheService cacheService;
 
 	public static final String RESP_OK = "OK";
 
@@ -95,6 +100,13 @@ public class YunstTpl {
 				.resp(respBody)
 				.build();
 			gatewayLogDao.insertSelective(gatewayLog);
+
+			if (YunstMethodName.PERSON_VERIFY.getValue().equals(gatewayLog.getMethodName())
+				||
+				YunstMethodName.COMPANY_VERIFY.getValue().equals(gatewayLog.getMethodName())
+					&& gatewayLog.getIsAuth() == (byte) 1) {
+				cacheService.statisticsYunstVerify(gatewayLog.getMethodName());
+			}
 		} catch (Exception e) {
 			log.error("保存网关日志失败", e);
 		}

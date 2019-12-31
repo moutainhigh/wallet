@@ -10,11 +10,9 @@
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
 |access_token|是|access_token|
-|biz_no|否|关联订单号|
 |from_time|否|交易时间开始|
 |limit|否|每页限制|
 |offset|否|起始页偏移量|
-|order_no|否|钱包订单号|
 |stat|否|是否统计|
 |status|否|状态|
 |to_time|否|交易时间结束|
@@ -65,6 +63,62 @@
     total:""  , //
     total_page:""   //
 }  
+}
+```
+
+###  高级钱包-个人认证
+
+请求地址: /wallet_server/v1/m/senior/wallet/person_authentication
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|id_no|是|身份证号|
+|jump_url|是|前端跳转地址|
+|mobile|是|手机号码|
+|real_name|是|姓名|
+|tunnel_type|是|渠道类型 1:浦发银企直连,2:通联云商通|
+|user_id|是|用户id|
+|verify_code|是|短信验证码|
+|wallet_id|是|钱包id|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+   , "data":  {
+    url:""   //
+}  
+}
+```
+
+###  高级钱包-用户绑定钱包身份
+
+请求地址: /wallet_server/v1/m/senior/wallet/person_idbind
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|user_id|是|用户id|
+|wallet_id|是|钱包id|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+  
 }
 ```
 
@@ -210,9 +264,9 @@
 }
 ```
 
-###  高级钱包-个人认证
+###  升级高级钱包
 
-请求地址: /wallet_server/v1/m/senior/wallet/person_authentication
+请求地址: /wallet_server/v1/m/wallet/upgrade_wallet
 
 请求类型: POST
 
@@ -223,11 +277,7 @@
 |:-- |:-- |:--   |
 |access_token|是|access_token|
 |channel_type|是|渠道类型 1:浦发银企直连,2:通联云商通|
-|id_no|是|身份证号|
-|jump_url|是|前端跳转地址|
-|mobile|是|手机号码|
-|real_name|是|姓名|
-|verify_code|是|短信验证码|
+|source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
 |wallet_id|是|钱包id|
 
 返回数据
@@ -236,7 +286,26 @@
   "code": 1001,//状态码
   "msg": ""//消息
    , "data":  {
-    url:""   //
+    balance:""  , //银行余额
+    balance_protocol_no:""  , //扣款协议号
+    balance_protocol_req_sn:""  , //扣款协议请求流水号
+    biz_user_id:""  , //业务用户标识
+    check_time:""  , //审核时间
+    create_time:""  , //创建日期
+    fail_reason:""  , //失败原因
+    freezen_amount:""  , //冻结金额
+    has_pay_password:""  , //是否设置支付密码 1-是 2-否
+    id:""  , //id
+    is_dirty:""  , //脏数据标识 1：正常 2：脏数据
+    is_sign_contact:""  , //签订通联会员协议 0-未签订 1-签订电子会员协议 2-签订扣款协议
+    member_type:""  , //银行用户类型。2：企业会员 3：个人会员
+    pic_url:""  , //审核图片地址
+    remark:""  , //备注
+    security_tel:""  , //安全手机
+    status:""  , //资料审核状态。1: 未提交审核, 2：待审核 ，3：审核成功，4：审核失败
+    tunnel_type:""  , //渠道类型。1: 浦发银企直连，2：通联云商通
+    tunnel_user_id:""  , //银行用户标识
+    wallet_id:""   //钱包id
 }  
 }
 ```
@@ -423,52 +492,6 @@
 |:-- |:-- |:--   |
 |access_token|是|access_token|
 |tunnel_type|是|渠道类型 1:浦发银企直连,2:通联云商通|
-|wallet_id|是|钱包id|
-
-返回数据
-```
-{
-  "code": 1001,//状态码
-  "msg": ""//消息
-   , "data":  {
-    balance:""  , //银行余额
-    balance_protocol_no:""  , //扣款协议号
-    balance_protocol_req_sn:""  , //扣款协议请求流水号
-    biz_user_id:""  , //业务用户标识
-    check_time:""  , //审核时间
-    create_time:""  , //创建日期
-    fail_reason:""  , //失败原因
-    freezen_amount:""  , //冻结金额
-    has_pay_password:""  , //是否设置支付密码 1-是 2-否
-    id:""  , //id
-    is_dirty:""  , //脏数据标识 1：正常 2：脏数据
-    is_sign_contact:""  , //签订通联会员协议 0-未签订 1-签订电子会员协议 2-签订扣款协议
-    member_type:""  , //银行用户类型。2：企业会员 3：个人会员
-    pic_url:""  , //审核图片地址
-    remark:""  , //备注
-    security_tel:""  , //安全手机
-    status:""  , //资料审核状态。1: 未提交审核, 2：待审核 ，3：审核成功，4：审核失败
-    tunnel_type:""  , //渠道类型。1: 浦发银企直连，2：通联云商通
-    tunnel_user_id:""  , //银行用户标识
-    wallet_id:""   //钱包id
-}  
-}
-```
-
-###  升级高级钱包
-
-请求地址: /wallet_server/v1/m/wallet/upgrade_wallet
-
-请求类型: POST
-
-请求参数:
-
-
-| 参数名 | 是否必须 | 描述 |
-|:-- |:-- |:--   |
-|access_token|是|access_token|
-|channel_type|是|渠道类型 1:浦发银企直连,2:通联云商通|
-|source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
 |wallet_id|是|钱包id|
 
 返回数据

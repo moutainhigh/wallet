@@ -33,7 +33,7 @@ public class SeniorWalletController {
 
 	@ApiOperation("升级高级钱包")
 	@PostMapping(UrlConstant.WALLET_UPGRADE)
-	public ResponseValue<WalletTunnel> seniorWalletUpgrade(
+	public ResponseValue<WalletTunnel> seniorWalletCreateTunnel(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = true, example = "1") @RequestParam("channel_type")
 			Integer channelType,
@@ -43,7 +43,7 @@ public class SeniorWalletController {
 		throws Exception {
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
-			seniorWalletApi.seniorWalletUpgrade(accessToken, source, channelType, walletId));
+			seniorWalletApi.seniorWalletCreateTunnel(accessToken, source, channelType, walletId));
 	}
 
 	@ApiOperation("高级钱包渠道信息")
@@ -94,35 +94,43 @@ public class SeniorWalletController {
 	@PostMapping(UrlConstant.WALLET_SENIOR_BIND_PHONE)
 	public ResponseValue<Wallet> seniorWalletBindPhone(
 		@RequestParam("access_token") String accessToken,
-		@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = true, example = "1") @RequestParam("channel_type")
-			Integer channelType,
+		@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = true, example = "1") @RequestParam("channel_type") Byte channelType,
 		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
 		@ApiParam(value = "手机号码", required = true) @RequestParam("mobile") String mobile,
 		@ApiParam(value = "短信验证码", required = true) @RequestParam("verify_code") String verifyCode) {
 
 		return new ResponseValue<Wallet>(EnumResponseCode.COMMON_SUCCESS,
-			seniorWalletApi
-				.seniorWalletBindPhone(accessToken, channelType, walletId, mobile,
-					verifyCode));
+			seniorWalletApi.bindPhone(accessToken, channelType, walletId, mobile, verifyCode));
 	}
 
 	@ApiOperation("高级钱包-个人认证")
 	@PostMapping(UrlConstant.WALLET_SENIOR_PERSON_AUTHENTICATION)
-	public ResponseValue<PageVo> seniorWalletPersonAuthentication(
+	public ResponseValue<PageVo> seniorPersonAuthentication(
 		@RequestParam("access_token") String accessToken,
-		@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = true, example = "1") @RequestParam("channel_type")
-			Integer channelType,
+		@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = true, example = "1") @RequestParam("tunnel_type") Byte tunnelType,
 		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+		@ApiParam(value = "用户id", required = true) @RequestParam("user_id") Long userId,
 		@ApiParam(value = "姓名", required = true) @RequestParam("real_name") String realName,
 		@ApiParam(value = "身份证号", required = true) @RequestParam("id_no") String idNo,
 		@ApiParam(value = "手机号码", required = true) @RequestParam("mobile") String mobile,
 		@ApiParam(value = "短信验证码", required = true) @RequestParam("verify_code") String verifyCode,
 		@ApiParam(value = "前端跳转地址", required = true) @RequestParam("jump_url") String jumpUrl) {
-		String tongLianUrl = seniorWalletApi
-			.seniorWalletPersonAuthentication(accessToken, channelType, walletId,
-				realName, idNo, mobile, verifyCode, jumpUrl);
-		PageVo pageVo = PageVo.builder().url(tongLianUrl).build();
+
+		String protocolUrl = seniorWalletApi.personAudit(accessToken, tunnelType, walletId, userId,
+			realName, idNo, mobile, verifyCode, jumpUrl);
+		PageVo pageVo = PageVo.builder().url(protocolUrl).build();
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, pageVo);
+	}
+
+	@ApiOperation("高级钱包-用户绑定钱包身份")
+	@PostMapping(UrlConstant.WALLET_SENIOR_PERSON_IDBIND)
+	public ResponseValue seniorPersonIdBind(
+		@RequestParam("access_token") String accessToken,
+		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+		@ApiParam(value = "用户id", required = true) @RequestParam("user_id") Long userId) {
+
+		seniorWalletApi.personIdBind(accessToken, walletId, userId);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
 
 	@ApiOperation("高级钱包-商家资料审核（通道）")
@@ -226,17 +234,14 @@ public class SeniorWalletController {
 			Date fromTime,
 		@ApiParam(value = "交易时间结束", required = false) @RequestParam(value = "to_time", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd")
 			Date toTime,
-		@ApiParam(value = "交易类型", required = false) @RequestParam(value = "trade_type", required = false) Integer tradeType,
-		@ApiParam(value = "状态", required = false) @RequestParam(value = "status", required = false) Integer status,
-		@ApiParam(value = "钱包订单号", required = false) @RequestParam(value = "order_no", required = false) String orderNo,
-		@ApiParam(value = "关联订单号", required = false) @RequestParam(value = "biz_no", required = false) String bizNo,
+		@ApiParam(value = "交易类型", required = false) @RequestParam(value = "trade_type", required = false) Byte tradeType,
+		@ApiParam(value = "状态", required = false) @RequestParam(value = "status", required = false) Byte status,
 		@ApiParam(value = "每页限制", required = false) @RequestParam(value = "limit") int limit,
 		@ApiParam(value = "起始页偏移量", required = false) @RequestParam(value = "offset") int offset,
 		@ApiParam(value = "是否统计", required = false) @RequestParam(value = "stat", required = false) Boolean stat) {
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
-			seniorWalletApi.queryWalletOrderDetail(accessToken, walletId, fromTime,
-				toTime, tradeType, status, orderNo, bizNo, limit, offset, stat));
+			seniorWalletApi.queryWalletOrderDetail(accessToken, walletId,fromTime,toTime,tradeType,status, limit, offset, stat));
 	}
 
 

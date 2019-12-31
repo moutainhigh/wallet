@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rfchina.platform.common.json.ObjectSetter;
 import com.rfchina.platform.common.utils.JsonUtil;
+import com.rfchina.wallet.domain.mapper.ext.WalletDao;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.model.ChannelNotify;
 import com.rfchina.wallet.server.bank.yunst.response.YunstNotify;
@@ -32,6 +33,7 @@ public class NotifyService {
 	private YunstNotifyHandler yunstNotifyHandler;
 	@Autowired
 	private YunstBizHandler yunstBizHandler;
+
 
 
 	public ChannelNotify yunstNotify(Map<String, String> params) {
@@ -63,7 +65,6 @@ public class NotifyService {
 					.toObject(rtnValJson, YunstNotify.CompanyAuditResult.class,
 						getObjectMapper());
 				yunstNotifyHandler.handleVerfiyResult(channelNotify, rtnVal);
-
 
 			} else if (YunstMethodName.SIGN_CONTRACT.getValue().equals(methodName)) {
 				if (YUNST_NOTIFY_SUCCESS.equals(yunstNotify.getStatus()) && StringUtils
