@@ -209,6 +209,13 @@ public class SeniorCardService {
 			walletCard.setStatus(EnumWalletCardStatus.UNBIND.getValue().byteValue());
 			walletCard.setLastUpdTime(new Date());
 			walletCardDao.updateByPrimaryKeySelective(walletCard);
+			// 未绑卡更新进度
+			int count = walletCardDao.selectCountByWalletId(walletCard.getWalletId(),
+				EnumWalletCardStatus.BIND.getValue());
+			if (count == 0) {
+				walletDao.removeProgress(walletCard.getWalletId(),
+					WalletProgress.WALLET_BIND_CARD.getValue());
+			}
 		} catch (Exception e) {
 			log.error("高级钱包银行卡解绑失败, cardId: {}", cardId);
 			throw new WalletResponseException(EnumWalletResponseCode.BANK_CARD_UNBIND_ERROR);
