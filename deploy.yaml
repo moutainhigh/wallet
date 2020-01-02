@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: %{service_name}
+  namespace: %{team_ns}
+spec:
+  selector:
+    matchLabels:
+      app: %{service_name}
+  replicas: %{replicas}
+  template:
+    metadata:
+      labels:
+        app: %{service_name}
+    spec:
+      containers:
+        - name: %{service_name}
+          image: %{docker_hub}/platform/%{service_name}:%{build_tag}
+#          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: %{live_path}
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 3
+            timeoutSeconds: 1
+          readinessProbe:
+            httpGet:
+              path: %{live_path}
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 1
+          resources:
+            requests:
+              memory: "256Mi"
+            limits:
+              memory: "1536Mi"
+          volumeMounts:
+            - name: %{service_name}-logs
+              mountPath: %{app_path}/logs
+              subPath: %{service_name}/logs
+            - name: %{service_name}-files
+              mountPath: %{app_path}/files
+              subPath: %{service_name}/files
+            - name: %{service_name}-temp
+              mountPath: %{app_path}/temp
+              subPath: %{service_name}/temp
+      volumes:
+        - name: %{service_name}-logs
+          flexVolume:
+            driver: ceph.rook.io/rook
+            fsType: ceph
+            options:
+              fsName: myfs
+              clusterNamespace: rook-ceph
+        - name: %{service_name}-files
+          flexVolume:
+            driver: ceph.rook.io/rook
+            fsType: ceph
+            options:
+              fsName: myfs
+              clusterNamespace: rook-ceph
+        - name: %{service_name}-temp
+          flexVolume:
+            driver: ceph.rook.io/rook
+            fsType: ceph
+            options:
+              fsName: myfs
+              clusterNamespace: rook-ceph
+

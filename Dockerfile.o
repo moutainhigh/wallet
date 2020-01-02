@@ -1,0 +1,7 @@
+from openjdk:8-jre-alpine
+maintainer nzm "niezengming@rfchina.com"
+
+workdir /data/service/rfwallet_server
+copy  build/libs/rfwallet_server-1.0.0-SNAPSHOT.jar /data/service/rfwallet_server
+
+entrypoint ["java","-jar","rfwallet_server-1.0.0-SNAPSHOT.jar"]
