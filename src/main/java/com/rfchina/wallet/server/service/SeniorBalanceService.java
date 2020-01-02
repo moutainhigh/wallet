@@ -140,6 +140,7 @@ public class SeniorBalanceService {
 
 			// 对账失败时结束
 			if (!tunnelMoreSet.isEmpty() || !walletMoreSet.isEmpty() || !diffSet.isEmpty()) {
+				log.error("对账失败 {} , {} , {}",tunnelMoreSet,walletMoreSet,diffSet);
 				jobFail(job);
 				// 邮件通知对账错误
 				sendFailMail(statDate, tunnelMoreSet, walletMoreSet, diffSet);
