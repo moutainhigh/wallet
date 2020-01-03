@@ -10,16 +10,13 @@ import com.rfchina.wallet.server.bank.yunst.response.RpsResp;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import com.rfchina.wallet.server.service.NotifyService;
 import com.rfchina.wallet.server.service.SeniorPayService;
-import com.rfchina.wallet.server.service.SeniorWalletService;
-import com.rfchina.wallet.server.service.handler.yunst.YunstBizHandler;
 import com.rfchina.wallet.server.service.handler.yunst.YunstNotifyHandler;
+import java.util.Map;
 import java.util.stream.Collectors;
+import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import javax.servlet.http.HttpServletRequest;
-import java.util.Map;
 
 @RestController
 public class YunstRecallController {
@@ -67,8 +64,6 @@ public class YunstRecallController {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS.getValue(),
 			"Receive Yunst order recall");
 	}
-
-
 
 
 }

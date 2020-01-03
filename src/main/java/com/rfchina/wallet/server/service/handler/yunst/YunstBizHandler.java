@@ -75,6 +75,7 @@ import com.rfchina.wallet.server.mapper.ext.WalletCollectExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectInfoExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectMethodExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletConsumeExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRechargeExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRefundDetailExtDao;
@@ -170,6 +171,9 @@ public class YunstBizHandler extends EBankHandler {
 
 	@Autowired
 	private MoneyLogMapper moneyLogDao;
+
+	@Autowired
+	private WalletExtDao walletDao;
 
 
 	public boolean isSupportTunnelType(Byte tunnelType) {
@@ -589,6 +593,18 @@ public class YunstBizHandler extends EBankHandler {
 			// 记录到流水
 			if (OrderStatus.SUCC.getValue().byteValue() == order.getStatus()
 				&& (order.getBizTag() == null || !EnumBizTag.RECORD.contains(order.getBizTag()))) {
+
+				order.setBizTag(
+					EnumBizTag.RECORD.and(Optional.ofNullable(order.getBizTag()).orElse((byte) 0)));
+				if (order.getType().byteValue() == OrderType.RECHARGE.getValue()) {
+					walletDao.accRecharge(order.getWalletId(), order.getAmount());
+				} else if (order.getType().byteValue() == OrderType.COLLECT.getValue()
+					|| order.getType().byteValue() == OrderType.CONSUME.getValue()) {
+					walletDao.accPay(order.getWalletId(), order.getAmount());
+				}
+
+				walletOrderDao.updateByPrimaryKeySelective(order);
+
 				// 代付
 				if (order.getType().byteValue() == OrderType.AGENT_PAY.getValue()) {
 					MoneyLog moneyLog = MoneyLog.builder()
@@ -640,9 +656,7 @@ public class YunstBizHandler extends EBankHandler {
 					moneyLogDao.insertSelective(builder.build());
 				}
 
-				order.setBizTag(
-					EnumBizTag.RECORD.and(Optional.ofNullable(order.getBizTag()).orElse((byte) 0)));
-				walletOrderDao.updateByPrimaryKeySelective(order);
+
 			}
 
 			return order;
@@ -873,7 +887,7 @@ public class YunstBizHandler extends EBankHandler {
 			String dir = configService.getStorageDir() + "/yunst/";
 			String fileUrl = dir + uri.substring(uri.lastIndexOf("/"));
 			File file = new File(dir);
-			if(!file.exists()){
+			if (!file.exists()) {
 				file.mkdirs();
 			}
 			HttpFile.download(url, fileUrl);
