@@ -594,6 +594,7 @@ public class YunstBizHandler extends EBankHandler {
 			if (OrderStatus.SUCC.getValue().byteValue() == order.getStatus()
 				&& (order.getBizTag() == null || !EnumBizTag.RECORD.contains(order.getBizTag()))) {
 
+				// 累计
 				order.setBizTag(
 					EnumBizTag.RECORD.and(Optional.ofNullable(order.getBizTag()).orElse((byte) 0)));
 				if (order.getType().byteValue() == OrderType.RECHARGE.getValue()) {
@@ -602,7 +603,6 @@ public class YunstBizHandler extends EBankHandler {
 					|| order.getType().byteValue() == OrderType.CONSUME.getValue()) {
 					walletDao.accPay(order.getWalletId(), order.getAmount());
 				}
-
 				walletOrderDao.updateByPrimaryKeySelective(order);
 
 				// 代付

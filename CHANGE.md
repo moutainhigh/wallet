@@ -4,6 +4,11 @@
 jenkins job: platform-rfwallet-super-server-test
 
 ```  
+## 1.1.0_b27_2020010315_Beta
+### [变动说明]
+- 更新累计重置支付
+- 通联分环境对账
+
 ## 1.1.0_b26_2020010216_Beta
 ### [变动说明]
 - 通道认证同步到用户中心
