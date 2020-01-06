@@ -2,7 +2,6 @@
 ```
 测试环境
 jenkins job: platform-rfwallet-super-server-test
-
 ```  
 ## 1.1.0_b27_2020010315_Beta
 ### [变动说明]

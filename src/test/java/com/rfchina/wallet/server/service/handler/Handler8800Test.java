@@ -4,11 +4,11 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import com.rfchina.platform.common.misc.Tuple;
+import com.rfchina.wallet.domain.mapper.ext.WalletFinanceDao;
 import com.rfchina.wallet.domain.model.WalletFinance;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.server.SpringBaseTest;
 import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
-import com.rfchina.wallet.server.mapper.ext.WalletFinanceExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import com.rfchina.wallet.server.model.ext.PayTuple;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
@@ -26,7 +26,7 @@ public class Handler8800Test extends SpringBaseTest {
 	private WalletOrderExtDao walletOrderDao;
 
 	@Autowired
-	private WalletFinanceExtDao walletFinanceDao;
+	private WalletFinanceDao walletFinanceDao;
 
 
 	@Test

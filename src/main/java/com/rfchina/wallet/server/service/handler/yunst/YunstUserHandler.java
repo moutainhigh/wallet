@@ -6,11 +6,11 @@ import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
-import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletPerson;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
 import com.rfchina.wallet.server.bank.yunst.exception.UnknownException;
+import com.rfchina.wallet.server.bank.yunst.request.QueryBalanceReq;
 import com.rfchina.wallet.server.bank.yunst.request.UpdatePayPwdReq;
 import com.rfchina.wallet.server.bank.yunst.request.UpdatePhoneByPayPwdReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstApplyBindBankCardReq;
@@ -20,7 +20,6 @@ import com.rfchina.wallet.server.bank.yunst.request.YunstBindPhoneReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstCreateMemberReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstGetMemberInfoReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstPersonSetRealNameReq;
-import com.rfchina.wallet.server.bank.yunst.request.QueryBalanceReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSMSVerificationCodeReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetPayPwdReq;
@@ -38,8 +37,6 @@ import com.rfchina.wallet.server.bank.yunst.response.result.YunstSetCompanyInfoR
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstUnBindBankCardResult;
 import com.rfchina.wallet.server.bank.yunst.util.YunstTpl;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
-import com.rfchina.wallet.server.msic.EnumWallet.GwProgress;
-import com.rfchina.wallet.server.msic.EnumWallet.OrderSubStatus;
 import com.rfchina.wallet.server.msic.EnumYunst.EnumYunstResponse;
 import com.rfchina.wallet.server.msic.EnumYunst.YunstIdType;
 import java.util.TimeZone;
@@ -63,7 +60,8 @@ public class YunstUserHandler extends YunstBaseHandler {
 	 */
 	public Tuple<YunstCreateMemberResult, YunstMemberType> createMember(Long walletId, Byte source)
 		throws Exception {
-		YunstMemberType memberType = (source == 1)?YunstMemberType.COMPANY:YunstMemberType.PERSON;
+		YunstMemberType memberType =
+			(source == 1) ? YunstMemberType.COMPANY : YunstMemberType.PERSON;
 		String bizUserId = transferToYunstBizUserFormat(walletId, source, configService.getEnv());
 		YunstCreateMemberReq req = YunstCreateMemberReq.builder$()
 			.bizUserId(bizUserId)
@@ -139,12 +137,13 @@ public class YunstUserHandler extends YunstBaseHandler {
 	/**
 	 * 委托扣款协议签约(生成前端H5 url)
 	 */
-	public Tuple<String, String> generateBalanceProtocolUrl(String bizUserId, String jumpUrl, String protocolReqSn) {
+	public Tuple<String, String> generateBalanceProtocolUrl(String bizUserId, String jumpUrl,
+		String protocolReqSn) {
 
 		WalletTunnel agentEnt = walletTunnelDao
 			.selectByWalletId(configService.getAgentEntWalletId(), TunnelType.YUNST.getValue());
 
-		if (StringUtils.isBlank(protocolReqSn)){
+		if (StringUtils.isBlank(protocolReqSn)) {
 			protocolReqSn = UUID.randomUUID().toString().replaceAll("-", "");
 		}
 		YunstBalanceProtocolReq req = YunstBalanceProtocolReq.builder$()
@@ -259,7 +258,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 	 * 个人实名认证
 	 */
 	public YunstPersonSetRealNameResult personCertification(String bizUserId,
-		String realName, Long identityType, String identityNo) throws Exception{
+		String realName, Long identityType, String identityNo) throws Exception {
 		try {
 			identityNo = RSAUtil.encrypt(identityNo);
 		} catch (Exception e) {
@@ -281,7 +280,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 		} catch (CommonGatewayException e) {
 			if (EnumYunstResponse.ALREADY_REALNAME_AUTH.getValue().equals(e.getBankErrCode())) {
 				log.warn("高级钱包-通道已实名, bizUserId:{}", bizUserId);
-			}else{
+			} else {
 				log.error("高级钱包-实名验证失败, bizUserId:{}", bizUserId);
 			}
 			throw e;

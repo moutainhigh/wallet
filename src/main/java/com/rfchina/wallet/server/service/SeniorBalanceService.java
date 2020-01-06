@@ -8,6 +8,7 @@ import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EmailUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
+import com.rfchina.wallet.domain.misc.EnumDef.OrderStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.BalanceJob;
@@ -26,11 +27,11 @@ import com.rfchina.wallet.server.model.ext.BalanceVo;
 import com.rfchina.wallet.server.model.ext.WalletOrderVo;
 import com.rfchina.wallet.server.msic.EnumWallet.BalanceJobStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.BalanceResultStatus;
-import com.rfchina.wallet.server.msic.EnumWallet.OrderStatus;
 import com.rfchina.wallet.server.service.handler.common.EBankHandler;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -245,6 +246,10 @@ public class SeniorBalanceService {
 		String balanceFile = configService.getStorageDir() + "/result/" + DateUtil
 			.formatDate(date, DateUtil.STANDARD_DTAE_PATTERN) + ".csv";
 		Path path = Paths.get(balanceFile);
+		File parent = path.getParent().toFile();
+		if (!parent.exists()) {
+			parent.mkdirs();
+		}
 		try (BufferedWriter writer = Files
 			.newBufferedWriter(path, Charset.forName("UTF-8"),
 				StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {

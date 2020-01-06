@@ -10,6 +10,8 @@ import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EnumUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.MoneyLogMapper;
+import com.rfchina.wallet.domain.misc.EnumDef.OrderStatus;
+import com.rfchina.wallet.domain.misc.EnumDef.OrderSubStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderType;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
@@ -90,8 +92,6 @@ import com.rfchina.wallet.server.msic.EnumWallet.DebitType;
 import com.rfchina.wallet.server.msic.EnumWallet.EnumBizTag;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.GwProgress;
-import com.rfchina.wallet.server.msic.EnumWallet.OrderStatus;
-import com.rfchina.wallet.server.msic.EnumWallet.OrderSubStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.RefundType;
 import com.rfchina.wallet.server.msic.EnumWallet.UniProgress;
 import com.rfchina.wallet.server.msic.EnumYunst.EnumYunstDeviceType;
@@ -115,6 +115,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Slf4j
@@ -562,6 +564,7 @@ public class YunstBizHandler extends EBankHandler {
 	/**
 	 * 更新状态
 	 */
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 	public WalletOrder updateOrderStatus(WalletOrder order) {
 		try {
 			GetOrderDetailResp tunnelOrder = queryOrderDetail(order.getOrderNo());
@@ -597,10 +600,10 @@ public class YunstBizHandler extends EBankHandler {
 				// 累计
 				order.setBizTag(
 					EnumBizTag.RECORD.and(Optional.ofNullable(order.getBizTag()).orElse((byte) 0)));
-				if (order.getType().byteValue() == OrderType.RECHARGE.getValue()) {
+				if (order.getType().byteValue() == OrderType.RECHARGE.getValue().byteValue()) {
 					walletDao.accRecharge(order.getWalletId(), order.getAmount());
-				} else if (order.getType().byteValue() == OrderType.COLLECT.getValue()
-					|| order.getType().byteValue() == OrderType.CONSUME.getValue()) {
+				} else if (order.getType().byteValue() == OrderType.COLLECT.getValue().byteValue()
+					|| order.getType().byteValue() == OrderType.CONSUME.getValue().byteValue()) {
 					walletDao.accPay(order.getWalletId(), order.getAmount());
 				}
 				walletOrderDao.updateByPrimaryKeySelective(order);

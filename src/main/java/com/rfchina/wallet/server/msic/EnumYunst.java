@@ -1,7 +1,7 @@
 package com.rfchina.wallet.server.msic;
 
 import com.rfchina.platform.common.utils.Valuable;
-import com.rfchina.wallet.server.msic.EnumWallet.OrderStatus;
+import com.rfchina.wallet.domain.misc.EnumDef.OrderStatus;
 
 public class EnumYunst {
 
