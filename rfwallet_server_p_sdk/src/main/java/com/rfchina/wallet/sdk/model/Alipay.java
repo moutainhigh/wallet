@@ -22,6 +22,8 @@ public class Alipay  {
     @ApiModelProperty("支付宝JS支付user_id")
     private String userId ;
 
+    @ApiModelProperty(required = true, value = "收银宝子商户号")
+    private String vspCusid;
 
 }
 

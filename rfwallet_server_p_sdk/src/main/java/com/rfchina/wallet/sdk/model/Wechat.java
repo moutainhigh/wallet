@@ -31,6 +31,7 @@ public class Wechat  {
     @ApiModelProperty("微信端应用ID:appid（H5支付）")
     private String subAppId ;
 
-
+    @ApiModelProperty(required = true, value = "收银宝子商户号")
+    private String vspCusid;
 }
 

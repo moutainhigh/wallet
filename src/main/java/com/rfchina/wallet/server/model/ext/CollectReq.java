@@ -145,6 +145,9 @@ public class CollectReq {
 
 			@ApiModelProperty(name = "scene_info", value = "场景信息（H5支付）")
 			private String sceneInfo;
+
+			@ApiModelProperty(required = true, value = "收银宝子商户号")
+			private String vspCusid;
 		}
 
 		@ApiModel
@@ -163,6 +166,8 @@ public class CollectReq {
 			@ApiModelProperty(name = "user_id", value = "支付宝JS支付user_id")
 			private String userId;
 
+			@ApiModelProperty(required = true, value = "收银宝子商户号")
+			private String vspCusid;
 		}
 
 		@ApiModel
@@ -180,6 +185,9 @@ public class CollectReq {
 
 			@ApiModelProperty(value = "支付授权码，支付宝被扫刷卡支付时,用户的付款二维码")
 			private String authcode;
+
+			@ApiModelProperty(required = true, value = "收银宝子商户号")
+			private String vspCusid;
 		}
 
 		@ApiModel

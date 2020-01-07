@@ -690,6 +690,7 @@ public class YunstBizHandler extends EBankHandler {
 					.subAppId(m.getAppId())
 					.amount(m.getAmount())
 					.acct(m.getOpenId())
+					.vspCusid(m.getSellerId())
 					.build();
 				payMethod.put(Wechat.KEY_MiniProgram, miniProgram);
 			} else if (CollectPayType.WECHAT_APPOPEN.getValue().byteValue() ==
@@ -718,6 +719,7 @@ public class YunstBizHandler extends EBankHandler {
 					.subAppId(m.getAppId())
 					.amount(m.getAmount())
 					.acct(m.getOpenId())
+					.vspCusid(m.getSellerId())
 					.build();
 				payMethod.put(Wechat.KEY_WechatPublic, wechatPublic);
 			} else if (CollectPayType.WECHAT_ScanWeixin.getValue().byteValue() ==
@@ -725,6 +727,7 @@ public class YunstBizHandler extends EBankHandler {
 				ScanWeixin scanWeixin = ScanWeixin.builder()
 					.limitPay(isRecharge ? "no_credit" : "")
 					.amount(m.getAmount())
+					.vspCusid(m.getSellerId())
 					.build();
 				payMethod.put(Wechat.KEY_ScanWeixin, scanWeixin);
 			} else if (CollectPayType.ALIPAY_ScanAlipay.getValue().byteValue() ==
@@ -732,6 +735,7 @@ public class YunstBizHandler extends EBankHandler {
 				ScanAlipay scanAlipay = ScanAlipay.builder()
 					.limitPay(isRecharge ? "no_credit" : "")
 					.amount(m.getAmount())
+					.vspCusid(m.getSellerId())
 					.build();
 				payMethod.put(Alipay.KEY_ScanAlipay, scanAlipay);
 			} else if (CollectPayType.ALIPAY_Service.getValue().byteValue() ==
@@ -739,6 +743,7 @@ public class YunstBizHandler extends EBankHandler {
 				AlipayService alipayService = AlipayService.builder()
 					.amount(m.getAmount())
 					.acct(m.getOpenId())
+					.vspCusid(m.getSellerId())
 					.build();
 				payMethod.put(Alipay.KEY_AlipayService, alipayService);
 			} else if (CollectPayType.ALIPAY_AppOpen.getValue().byteValue() ==
@@ -753,6 +758,7 @@ public class YunstBizHandler extends EBankHandler {
 					.limitPay(isRecharge ? "no_credit" : "")
 					.amount(m.getAmount())
 					.authcode(m.getSceneInfo())
+					.vspCusid(m.getSellerId())
 					.build();
 				payMethod.put(CodePay.KEY_CodePayVsp, codePayVsp);
 			} else if (CollectPayType.BANKCARD.getValue().byteValue() ==

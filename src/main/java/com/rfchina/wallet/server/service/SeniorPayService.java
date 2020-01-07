@@ -721,27 +721,29 @@ public class SeniorPayService {
 				.openId(wechat.getOpenId())
 				.cusIp(wechat.getCusip())
 				.appId(wechat.getSubAppId())
-				.sceneInfo(wechat.getSceneInfo());
+				.sceneInfo(wechat.getSceneInfo())
+				.sellerId(wechat.getVspCusid());
 		} else if (payMethod.getAlipay() != null) {
 			Alipay alipay = payMethod.getAlipay();
 			builder.channelType(ChannelType.ALIPAY.getValue())
 				.payType(alipay.getPayType())
 				.amount(alipay.getAmount())
-				.openId(alipay.getUserId());
+				.openId(alipay.getUserId())
+				.sellerId(alipay.getVspCusid());
 		} else if (payMethod.getCodePay() != null) {
 			CodePay codePay = payMethod.getCodePay();
 			builder.channelType(ChannelType.CODEPAY.getValue())
 				.payType(codePay.getPayType())
 				.amount(codePay.getAmount())
-				.sceneInfo(codePay.getAuthcode());
+				.sceneInfo(codePay.getAuthcode())
+				.sellerId(codePay.getVspCusid());
 		} else if (payMethod.getBankCard() != null) {
 			BankCard bankCard = payMethod.getBankCard();
 			builder.channelType(ChannelType.BANKCARD.getValue())
 				.payType(CollectPayType.BANKCARD.getValue())
 				.amount(bankCard.getAmount())
 				.openId(bankCard.getBankCardNo())
-				.cardType(bankCard.getCardType())
-			;
+				.cardType(bankCard.getCardType());
 		}
 		WalletCollectMethod method = builder.build();
 		walletCollectMethodDao.insertSelective(method);
@@ -767,6 +769,7 @@ public class SeniorPayService {
 				.cusip(collectMethod.getCusIp())
 				.subAppId(collectMethod.getAppId())
 				.sceneInfo(collectMethod.getSceneInfo())
+				.vspCusid(collectMethod.getSellerId())
 				.build();
 			builder.wechat(wechat);
 		} else if (ChannelType.ALIPAY.getValue().equals(collectMethod.getChannelType())) {
@@ -774,6 +777,7 @@ public class SeniorPayService {
 				.payType(collectMethod.getPayType())
 				.amount(collectMethod.getAmount())
 				.userId(collectMethod.getOpenId())
+				.vspCusid(collectMethod.getSellerId())
 				.build();
 			builder.alipay(alipay);
 		} else if (ChannelType.CODEPAY.getValue().equals(collectMethod.getChannelType())) {
@@ -781,6 +785,7 @@ public class SeniorPayService {
 				.payType(collectMethod.getPayType())
 				.amount(collectMethod.getAmount())
 				.authcode(collectMethod.getSceneInfo())
+				.vspCusid(collectMethod.getSellerId())
 				.build();
 			builder.codePay(codePay);
 		} else if (ChannelType.BANKCARD.getValue().equals(collectMethod.getChannelType())) {

@@ -1,17 +1,10 @@
 package com.rfchina.wallet.server.bank.yunst.request;
 
-import com.rfchina.wallet.server.model.ext.CollectReq;
-import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod;
-import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Alipay;
-import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Balance;
-import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Wechat;
-import com.rfchina.wallet.server.msic.EnumWallet;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 import java.util.Map;
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 
 @ApiModel(description = "4.2.5 托管代收申请(标准版)")
@@ -124,11 +117,11 @@ public class CollectApplyReq implements YunstBaseReq {
 		@ApiModel
 		public static class Wechat {
 
-			public static String KEY_MiniProgram = "WECHATPAY_MINIPROGRAM";
+			public static String KEY_MiniProgram = "WECHATPAY_MINIPROGRAM_ORG";
 			public static String KEY_AppOpen = "WECHATPAY_APP_OPEN";
 			public static String KEY_H5Open = "WECHATPAY_H5_OPEN";
-			public static String KEY_WechatPublic = "WECHAT_PUBLIC";
-			public static String KEY_ScanWeixin = "SCAN_WEIXIN";
+			public static String KEY_WechatPublic = "WECHAT_PUBLIC_ORG";
+			public static String KEY_ScanWeixin = "SCAN_WEIXIN_ORG";
 
 			@ApiModel(description = "微信小程序支付（收银宝）")
 			@Getter
@@ -146,6 +139,9 @@ public class CollectApplyReq implements YunstBaseReq {
 
 				@ApiModelProperty(required = true, value = "微信JS支付openid——微信分配")
 				private String acct;
+
+				@ApiModelProperty(required = true, value = "收银宝子商户号")
+				private String vspCusid;
 			}
 
 			@ApiModel(description = "微信原生APP支付")
@@ -204,6 +200,9 @@ public class CollectApplyReq implements YunstBaseReq {
 				@ApiModelProperty(required = true, value = "微信JS支付openid——微信分配")
 				private String acct;
 
+				@ApiModelProperty(required = true, value = "收银宝子商户号")
+				private String vspCusid;
+
 			}
 
 			@ApiModel(description = "微信扫码支付(正扫)")
@@ -216,6 +215,9 @@ public class CollectApplyReq implements YunstBaseReq {
 
 				@ApiModelProperty(required = true, value = "支付金额,单位:分")
 				private Long amount;
+
+				@ApiModelProperty(required = true, value = "收银宝子商户号")
+				private String vspCusid;
 			}
 
 		}
@@ -223,8 +225,8 @@ public class CollectApplyReq implements YunstBaseReq {
 		@ApiModel
 		public static class Alipay {
 
-			public static String KEY_ScanAlipay = "SCAN_ALIPAY";
-			public static String KEY_AlipayService = "ALIPAY_SERVICE";
+			public static String KEY_ScanAlipay = "SCAN_ALIPAY_ORG";
+			public static String KEY_AlipayService = "ALIPAY_SERVICE_ORG";
 			public static String KEY_AppOpen = "ALIPAY_APP_OPEN";
 
 			@ApiModel(description = "支付宝扫码支付(正扫)")
@@ -237,6 +239,9 @@ public class CollectApplyReq implements YunstBaseReq {
 
 				@ApiModelProperty(required = true, value = "支付金额,单位:分")
 				private Long amount;
+
+				@ApiModelProperty(required = true, value = "收银宝子商户号")
+				private String vspCusid;
 			}
 
 			@ApiModel(description = "支付宝JS支付(生活号)")
@@ -249,6 +254,9 @@ public class CollectApplyReq implements YunstBaseReq {
 
 				@ApiModelProperty(required = true, value = "支付宝JS支付user_id")
 				private String acct;
+
+				@ApiModelProperty(required = true, value = "收银宝子商户号")
+				private String vspCusid;
 			}
 
 			@ApiModel(description = "支付宝原生")
@@ -271,7 +279,7 @@ public class CollectApplyReq implements YunstBaseReq {
 		@ApiModel
 		public static class CodePay {
 
-			public static String KEY_CodePayVsp = "CODEPAY_VSP";
+			public static String KEY_CodePayVsp = "CODEPAY_VSP_ORG";
 
 			@ApiModel(description = "收银宝刷卡支付（被扫）")
 			@Getter
@@ -281,11 +289,14 @@ public class CollectApplyReq implements YunstBaseReq {
 				@ApiModelProperty(required = true, value = "支付金额,单位:分")
 				private Long amount;
 
-				@ApiModelProperty(value = "支付授权码，支付宝被扫刷卡支付时,用户的付款二维码")
+				@ApiModelProperty(required = true, value = "支付授权码，支付宝被扫刷卡支付时,用户的付款二维码")
 				private String authcode;
 
 				@ApiModelProperty(required = true, value = "非贷记卡:no_credit 借、贷记卡:””需要传空字符串")
 				private String limitPay;
+
+				@ApiModelProperty(required = true, value = "收银宝子商户号")
+				private String vspCusid;
 			}
 		}
 
