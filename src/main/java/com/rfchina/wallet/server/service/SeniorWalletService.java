@@ -9,6 +9,7 @@ import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.platform.sdk2.ApiClient;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.misc.EnumDef;
+import com.rfchina.wallet.domain.misc.EnumDef.DirtyType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumDefBankCard;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumIdType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumPublicAccount;
@@ -21,6 +22,7 @@ import com.rfchina.wallet.domain.misc.EnumDef.VerifyChannel;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletCardType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletProgress;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletSource;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelAuditStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelSignContract;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyChannel;
@@ -46,8 +48,6 @@ import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletVerifyHisExtDao;
-import com.rfchina.wallet.server.msic.EnumWallet.DirtyType;
-import com.rfchina.wallet.server.msic.EnumWallet.WalletStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.YunstCompanyInfoAuditStatus;
 import com.rfchina.wallet.server.msic.EnumYunst.EnumYunstResponse;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBaseHandler.YunstMemberType;
@@ -221,7 +221,7 @@ public class SeniorWalletService {
 	/**
 	 * 同步认证信息
 	 */
-	public void syncRealInfo(Long uid,String name,String idNo) {
+	public void syncRealInfo(Long uid, String name, String idNo) {
 		try {
 			SyncRealInfoRequest req = SyncRealInfoRequest.builder()
 				.accessToken(appService.getAccessToken())
@@ -231,7 +231,7 @@ public class SeniorWalletService {
 				.uid(uid)
 				.build();
 			apiTemplate.execute(req);
-		}catch (Exception e){
+		} catch (Exception e) {
 			log.error("同步用户实名信息失败 " + uid + name, e);
 		}
 	}
@@ -259,7 +259,8 @@ public class SeniorWalletService {
 	 * 更新个人验证信息
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-	public void updatePersionAuditInfo(WalletTunnel walletTunnel,String name,String idNo, String mobile){
+	public void updatePersionAuditInfo(WalletTunnel walletTunnel, String name, String idNo,
+		String mobile) {
 		// 更新审核成功
 		walletTunnel.setStatus(
 			EnumDef.WalletTunnelAuditStatus.AUDIT_SUCCESS.getValue().byteValue());
@@ -585,7 +586,7 @@ public class SeniorWalletService {
 			walletCardDao
 				.updateWalletCard(walletId, EnumWalletCardStatus.UNBIND.getValue(),
 					EnumWalletCardStatus.BIND.getValue(),
-					EnumPublicAccount.YES.getValue(),EnumDefBankCard.NO.getValue());
+					EnumPublicAccount.YES.getValue(), EnumDefBankCard.NO.getValue());
 		}
 		walletCardDao.insertSelective(
 			WalletCard.builder()

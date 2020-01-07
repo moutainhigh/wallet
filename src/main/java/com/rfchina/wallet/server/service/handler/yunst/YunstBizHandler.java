@@ -10,6 +10,8 @@ import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EnumUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.MoneyLogMapper;
+import com.rfchina.wallet.domain.misc.EnumDef.OrderStatus;
+import com.rfchina.wallet.domain.misc.EnumDef.OrderSubStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderType;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
@@ -75,6 +77,7 @@ import com.rfchina.wallet.server.mapper.ext.WalletCollectExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectInfoExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectMethodExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletConsumeExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRechargeExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRefundDetailExtDao;
@@ -89,8 +92,6 @@ import com.rfchina.wallet.server.msic.EnumWallet.DebitType;
 import com.rfchina.wallet.server.msic.EnumWallet.EnumBizTag;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.GwProgress;
-import com.rfchina.wallet.server.msic.EnumWallet.OrderStatus;
-import com.rfchina.wallet.server.msic.EnumWallet.OrderSubStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.RefundType;
 import com.rfchina.wallet.server.msic.EnumWallet.UniProgress;
 import com.rfchina.wallet.server.msic.EnumYunst.EnumYunstDeviceType;
@@ -114,6 +115,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @Slf4j
@@ -170,6 +173,9 @@ public class YunstBizHandler extends EBankHandler {
 
 	@Autowired
 	private MoneyLogMapper moneyLogDao;
+
+	@Autowired
+	private WalletExtDao walletDao;
 
 
 	public boolean isSupportTunnelType(Byte tunnelType) {
@@ -558,6 +564,7 @@ public class YunstBizHandler extends EBankHandler {
 	/**
 	 * 更新状态
 	 */
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 	public WalletOrder updateOrderStatus(WalletOrder order) {
 		try {
 			GetOrderDetailResp tunnelOrder = queryOrderDetail(order.getOrderNo());
@@ -589,6 +596,18 @@ public class YunstBizHandler extends EBankHandler {
 			// 记录到流水
 			if (OrderStatus.SUCC.getValue().byteValue() == order.getStatus()
 				&& (order.getBizTag() == null || !EnumBizTag.RECORD.contains(order.getBizTag()))) {
+
+				// 累计
+				order.setBizTag(
+					EnumBizTag.RECORD.and(Optional.ofNullable(order.getBizTag()).orElse((byte) 0)));
+				if (order.getType().byteValue() == OrderType.RECHARGE.getValue().byteValue()) {
+					walletDao.accRecharge(order.getWalletId(), order.getAmount());
+				} else if (order.getType().byteValue() == OrderType.COLLECT.getValue().byteValue()
+					|| order.getType().byteValue() == OrderType.CONSUME.getValue().byteValue()) {
+					walletDao.accPay(order.getWalletId(), order.getAmount());
+				}
+				walletOrderDao.updateByPrimaryKeySelective(order);
+
 				// 代付
 				if (order.getType().byteValue() == OrderType.AGENT_PAY.getValue()) {
 					MoneyLog moneyLog = MoneyLog.builder()
@@ -640,9 +659,7 @@ public class YunstBizHandler extends EBankHandler {
 					moneyLogDao.insertSelective(builder.build());
 				}
 
-				order.setBizTag(
-					EnumBizTag.RECORD.and(Optional.ofNullable(order.getBizTag()).orElse((byte) 0)));
-				walletOrderDao.updateByPrimaryKeySelective(order);
+
 			}
 
 			return order;
@@ -873,7 +890,7 @@ public class YunstBizHandler extends EBankHandler {
 			String dir = configService.getStorageDir() + "/yunst/";
 			String fileUrl = dir + uri.substring(uri.lastIndexOf("/"));
 			File file = new File(dir);
-			if(!file.exists()){
+			if (!file.exists()) {
 				file.mkdirs();
 			}
 			HttpFile.download(url, fileUrl);

@@ -57,4 +57,18 @@ public interface WalletExtDao extends WalletMapper {
 	})
 	long countByCondition(@Param("title") String title, @Param("type") Byte type,
 		@Param("walletLevel") Byte walletLevel, @Param("status") Byte status);
+
+	@Update({
+		"update rf_wallet ",
+		"set recharge_amount = recharge_amount + #{amount} , recharge_count = recharge_count + 1",
+		"where id = #{walletId}"
+	})
+	int accRecharge(@Param("walletId") Long walletId, @Param("amount") Long amount);
+
+	@Update({
+		"update rf_wallet ",
+		"set pay_amount = pay_amount + #{amount} , pay_count = pay_count + 1",
+		"where id = #{walletId}"
+	})
+	int accPay(@Param("walletId") Long walletId, @Param("amount") Long amount);
 }

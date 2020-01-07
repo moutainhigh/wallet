@@ -5,27 +5,6 @@ import com.rfchina.platform.common.utils.Valuable;
 
 public class EnumWallet {
 
-	/**
-	 * 钱包状态: 1:待审核，2：激活,3：禁用
-	 */
-	public enum WalletStatus implements Valuable<Byte> {
-		WAIT_AUDIT((byte) 1, "待审核"),
-		ACTIVE((byte) 2, "激活"),
-		UNVALID((byte) 3, "禁用");
-
-		private Byte value;
-		private String valueName;
-
-		WalletStatus(Byte value, String valueName) {
-			this.value = value;
-			this.valueName = valueName;
-		}
-
-		@Override
-		public Byte getValue() {
-			return value;
-		}
-	}
 
 	/**
 	 * 收款人账户类型
@@ -274,48 +253,6 @@ public class EnumWallet {
 		}
 	}
 
-	/**
-	 * 钱包类型， 1：企业钱包，2：个人钱包
-	 */
-	public enum WalletType implements Valuable<Byte> {
-		COMPANY((byte) 1, "企业钱包"),
-		PERSON((byte) 2, "个人钱包");
-
-		private Byte value;
-		private String valueName;
-
-		WalletType(Byte value, String valueName) {
-			this.value = value;
-			this.valueName = valueName;
-		}
-
-		@Override
-		public Byte getValue() {
-			return value;
-		}
-	}
-
-	/**
-	 * 钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 个人用户
-	 */
-	public enum WalletSource implements Valuable<Byte> {
-		FHT_CORP((byte) 1, "富慧通-企业商家"),
-		FHT_PERSON((byte) 2, "富慧通-个人商家"),
-		USER((byte) 3, "个人用户");
-
-		private Byte value;
-		private String valueName;
-
-		WalletSource(Byte value, String valueName) {
-			this.value = value;
-			this.valueName = valueName;
-		}
-
-		@Override
-		public Byte getValue() {
-			return value;
-		}
-	}
 
 	/**
 	 * 交易类型.1:代收 2:代付
@@ -551,51 +488,7 @@ public class EnumWallet {
 		}
 	}
 
-	/**
-	 * 订单状态。 2：进行中，3：交易成功，4：交易失败
-	 */
-	public enum OrderStatus implements Valuable<Byte> {
-		WAITTING((byte) 2, "进行中"),
-		SUCC((byte) 3, "交易成功"),
-		FAIL((byte) 4, "交易失败"),
-		CLOSED((byte) 5, "交易关闭（超时或其他）"),
-		;
 
-		private Byte value;
-		private String valueName;
-
-		OrderStatus(Byte value, String valueName) {
-			this.value = value;
-			this.valueName = valueName;
-		}
-
-		@Override
-		public Byte getValue() {
-			return value;
-		}
-
-		public boolean isEndStatus() {
-			return this.value.byteValue() == SUCC.getValue().byteValue()
-				|| this.value.byteValue() == FAIL.getValue().byteValue()
-				|| this.value.byteValue() == CLOSED.getValue().byteValue();
-		}
-
-		/**
-		 * 0-待补录：该笔支付需要柜员手工补录必要支付信息； 1-待记帐：该笔支付已经处在等待柜员处理记账； 2-待复核：该笔支付处于等待柜员处理复核阶段；
-		 * 3-待授权：该笔支付处于等待客户进行网银授权阶段； 4-完成：该笔支付处理成功，客户记账成功； 8-拒绝：该笔支付处理失败，被拒绝；如果对外支付时被人民银行退票则也会将该笔支付状态置为拒绝，同时冲回客户扣出的钱款；
-		 * 9-撤销：该笔支付已被撤销；客户和柜员都可以对待处理的支付进行撤销动作；
-		 */
-		public static OrderStatus parsePuDong8804(String tranStatus) {
-			switch (tranStatus) {
-				case "4":
-					return SUCC;
-				case "9":
-					return CLOSED;
-				default:
-					return WAITTING;
-			}
-		}
-	}
 
 	/**
 	 * 钱包余额 21：微信小程序 22：微信原生APP 23：微信原生H5 24：微信JS支付(公众号) 25：微信扫码支付(正扫) 31：支付宝扫码支付(正扫)
@@ -730,32 +623,6 @@ public class EnumWallet {
 		}
 	}
 
-
-
-
-
-	/**
-	 * 脏数据标识 1：正常 2：
-	 */
-	public enum DirtyType implements Valuable<Byte> {
-		NORMAL((byte) 1, "正常"),
-		DIRTY((byte) 2, "脏数据"),
-		;
-
-		private Byte value;
-		private String valueName;
-
-		DirtyType(Byte value, String valueName) {
-			this.value = value;
-			this.valueName = valueName;
-		}
-
-		@Override
-		public Byte getValue() {
-			return this.value;
-		}
-	}
-
 	/**
 	 * 对账结果状态
 	 */
@@ -846,27 +713,6 @@ public class EnumWallet {
 		}
 	}
 
-	/**
-	 * 订单子状态
-	 */
-	public enum OrderSubStatus implements Valuable<Byte> {
-		NORMAL((byte) 0, "默认"),
-		WAIT_DEAL((byte) 1, "待人工处理"),
-		WAIT_REDO((byte) 2, "等待重新发起");
-
-		private Byte value;
-		private String valueName;
-
-		OrderSubStatus(Byte value, String valueName) {
-			this.value = value;
-			this.valueName = valueName;
-		}
-
-		@Override
-		public Byte getValue() {
-			return value;
-		}
-	}
 
 	/**
 	 * 企业信息审核状态

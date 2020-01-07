@@ -2,10 +2,12 @@ package com.rfchina.wallet.server.service;
 
 import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.biztools.mq.PostMq;
+import com.rfchina.passport.misc.SessionThreadLocal;
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.Triple;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
+import com.rfchina.wallet.domain.misc.EnumDef.OrderStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderType;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.MqConstant;
@@ -21,7 +23,6 @@ import com.rfchina.wallet.server.model.ext.PayInReq;
 import com.rfchina.wallet.server.model.ext.PayInResp;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.msic.EnumWallet.GwProgress;
-import com.rfchina.wallet.server.msic.EnumWallet.OrderStatus;
 import com.rfchina.wallet.server.service.handler.common.EBankHandler;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
 import java.util.Date;
@@ -62,6 +63,9 @@ public class JuniorPayService {
 
 	@Autowired
 	private WalletFinanceExtDao walletFinanceDao;
+
+	@Autowired
+	private SessionThreadLocal sessionThreadLocal;
 
 	/**
 	 * 出佣到个人钱包
@@ -106,6 +110,7 @@ public class JuniorPayService {
 				.progress(GwProgress.WAIT_SEND.getValue())
 				.status(OrderStatus.WAITTING.getValue())
 				.tunnelType(TunnelType.PUDONG.getValue())
+				.sourceAppId(sessionThreadLocal.getApp().getId())
 				.createTime(new Date())
 				.build();
 			walletOrderDao.insertSelective(order);

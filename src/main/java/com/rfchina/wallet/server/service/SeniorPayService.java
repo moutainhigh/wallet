@@ -3,11 +3,14 @@ package com.rfchina.wallet.server.service;
 import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.biztools.lock.SimpleExclusiveLock;
 import com.rfchina.biztools.mq.PostMq;
+import com.rfchina.passport.misc.SessionThreadLocal;
 import com.rfchina.platform.common.misc.Triple;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
 import com.rfchina.wallet.domain.misc.EnumDef.BizValidateType;
+import com.rfchina.wallet.domain.misc.EnumDef.DirtyType;
+import com.rfchina.wallet.domain.misc.EnumDef.OrderStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderType;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.MqConstant;
@@ -58,9 +61,7 @@ import com.rfchina.wallet.server.model.ext.WithdrawResp;
 import com.rfchina.wallet.server.msic.EnumWallet.CardPro;
 import com.rfchina.wallet.server.msic.EnumWallet.ChannelType;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
-import com.rfchina.wallet.server.msic.EnumWallet.DirtyType;
 import com.rfchina.wallet.server.msic.EnumWallet.GwProgress;
-import com.rfchina.wallet.server.msic.EnumWallet.OrderStatus;
 import com.rfchina.wallet.server.msic.LockConstant;
 import com.rfchina.wallet.server.service.handler.common.EBankHandler;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
@@ -149,6 +150,10 @@ public class SeniorPayService {
 	@Autowired
 	private SimpleExclusiveLock lock;
 
+	@Autowired
+	private SessionThreadLocal sessionThreadLocal;
+
+
 
 	/**
 	 * 充值
@@ -198,6 +203,7 @@ public class SeniorPayService {
 				.tunnelType(TunnelType.YUNST.getValue())
 				.tunnelFee(tunnelFee.longValue())
 				.note("钱包充值")
+				.sourceAppId(sessionThreadLocal.getApp().getId())
 				.industryCode(INDUSTRY_CODE)
 				.industryName(INDUSTRY_NAME)
 				.createTime(new Date())
@@ -264,6 +270,7 @@ public class SeniorPayService {
 				.status(OrderStatus.WAITTING.getValue())
 				.tunnelType(TunnelType.YUNST.getValue())
 				.note("钱包提现")
+				.sourceAppId(sessionThreadLocal.getApp().getId())
 				.industryCode(INDUSTRY_CODE)
 				.industryName(INDUSTRY_NAME)
 				.createTime(new Date())
@@ -345,6 +352,7 @@ public class SeniorPayService {
 				.tunnelType(TunnelType.YUNST.getValue())
 				.tunnelFee(tunnelFee.longValue())
 				.note(req.getNote())
+				.sourceAppId(sessionThreadLocal.getApp().getId())
 				.industryCode(req.getIndustryCode())
 				.industryName(req.getIndustryName())
 				.createTime(new Date())
@@ -453,6 +461,7 @@ public class SeniorPayService {
 				.status(OrderStatus.WAITTING.getValue())
 				.tunnelType(TunnelType.YUNST.getValue())
 				.note(note)
+				.sourceAppId(sessionThreadLocal.getApp().getId())
 				.createTime(new Date())
 				.build();
 			walletOrderDao.insertSelective(payOrder);
@@ -555,6 +564,7 @@ public class SeniorPayService {
 				.status(OrderStatus.WAITTING.getValue())
 				.tunnelType(TunnelType.YUNST.getValue())
 				.tunnelFee(0 - tunnelFee.longValue())
+				.sourceAppId(sessionThreadLocal.getApp().getId())
 				.createTime(new Date())
 				.build();
 			walletOrderDao.insertSelective(refundOrder);
@@ -629,6 +639,7 @@ public class SeniorPayService {
 				.industryCode(req.getIndustryCode())
 				.industryName(req.getIndustryName())
 				.note(req.getNote())
+				.sourceAppId(sessionThreadLocal.getApp().getId())
 				.createTime(new Date())
 				.build();
 			walletOrderDao.insertSelective(consumeOrder);

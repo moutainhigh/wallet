@@ -8,6 +8,7 @@ import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EmailUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
+import com.rfchina.wallet.domain.misc.EnumDef.OrderStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.BalanceJob;
@@ -26,11 +27,11 @@ import com.rfchina.wallet.server.model.ext.BalanceVo;
 import com.rfchina.wallet.server.model.ext.WalletOrderVo;
 import com.rfchina.wallet.server.msic.EnumWallet.BalanceJobStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.BalanceResultStatus;
-import com.rfchina.wallet.server.msic.EnumWallet.OrderStatus;
 import com.rfchina.wallet.server.service.handler.common.EBankHandler;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -140,6 +141,7 @@ public class SeniorBalanceService {
 
 			// 对账失败时结束
 			if (!tunnelMoreSet.isEmpty() || !walletMoreSet.isEmpty() || !diffSet.isEmpty()) {
+				log.error("对账失败 {} , {} , {}", tunnelMoreSet, walletMoreSet, diffSet);
 				jobFail(job);
 				// 邮件通知对账错误
 				sendFailMail(statDate, tunnelMoreSet, walletMoreSet, diffSet);
@@ -244,6 +246,10 @@ public class SeniorBalanceService {
 		String balanceFile = configService.getStorageDir() + "/result/" + DateUtil
 			.formatDate(date, DateUtil.STANDARD_DTAE_PATTERN) + ".csv";
 		Path path = Paths.get(balanceFile);
+		File parent = path.getParent().toFile();
+		if (!parent.exists()) {
+			parent.mkdirs();
+		}
 		try (BufferedWriter writer = Files
 			.newBufferedWriter(path, Charset.forName("UTF-8"),
 				StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
@@ -258,6 +264,7 @@ public class SeniorBalanceService {
 				String orderNo = orderNos.get(offset);
 				WalletOrder order = walletOrderDao.selectByOrderNo(orderNo);
 				WalletOrderVo orderVo = BeanUtil.newInstance(order, WalletOrderVo.class);
+
 				String line = StringObject.toObjectString(orderVo, WalletOrderVo.class, SPLIT_TAG);
 				writer.write(line + end);
 			}
@@ -343,8 +350,12 @@ public class SeniorBalanceService {
 				List<BalanceTunnelDetail> list = balanceTunnelDetailDao
 					.selectByExampleWithRowbounds(tunnelExample, new RowBounds(offset, limit));
 				return list.stream()
-					.map(v -> v.getOrderNo() + SPLIT_TAG + v.getTotalAmount())
-					.collect(Collectors.toList());
+					.map(v -> {
+						return "product".equalsIgnoreCase(configService.getEnv()) ?
+							v.getOrderNo() + SPLIT_TAG + v.getTotalAmount().longValue() + SPLIT_TAG
+								+ v.getChannelFeeAmount().longValue()
+							: v.getOrderNo() + SPLIT_TAG + v.getTotalAmount().longValue();
+					}).collect(Collectors.toList());
 			});
 		// 加载钱包数据
 		WalletOrderCriteria OrderExample = new WalletOrderCriteria();
@@ -358,8 +369,12 @@ public class SeniorBalanceService {
 				List<WalletOrder> orders = walletOrderDao
 					.selectByExampleWithRowbounds(OrderExample, new RowBounds(offset, limit));
 				return orders.stream()
-					.map(order -> order.getOrderNo() + SPLIT_TAG + order.getAmount())
-					.collect(Collectors.toList());
+					.map(order -> {
+						return "product".equalsIgnoreCase(configService.getEnv()) ?
+							order.getOrderNo() + SPLIT_TAG + order.getAmount().longValue()
+								+ SPLIT_TAG + (0 - order.getTunnelFee().longValue()) :
+							order.getOrderNo() + SPLIT_TAG + order.getAmount().longValue();
+					}).collect(Collectors.toList());
 			});
 
 		log.info("Redis加载数据 tunnel = {}, wallet = {}", tunnelOps.size(), walletOps.size());
