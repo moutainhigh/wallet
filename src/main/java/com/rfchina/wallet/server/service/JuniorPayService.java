@@ -2,6 +2,7 @@ package com.rfchina.wallet.server.service;
 
 import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.biztools.mq.PostMq;
+import com.rfchina.passport.misc.SessionThreadLocal;
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.Triple;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
@@ -63,6 +64,9 @@ public class JuniorPayService {
 	@Autowired
 	private WalletFinanceExtDao walletFinanceDao;
 
+	@Autowired
+	private SessionThreadLocal sessionThreadLocal;
+
 	/**
 	 * 出佣到个人钱包
 	 */
@@ -106,6 +110,7 @@ public class JuniorPayService {
 				.progress(GwProgress.WAIT_SEND.getValue())
 				.status(OrderStatus.WAITTING.getValue())
 				.tunnelType(TunnelType.PUDONG.getValue())
+				.sourceAppId(sessionThreadLocal.getApp().getId())
 				.createTime(new Date())
 				.build();
 			walletOrderDao.insertSelective(order);

@@ -264,6 +264,7 @@ public class SeniorBalanceService {
 				String orderNo = orderNos.get(offset);
 				WalletOrder order = walletOrderDao.selectByOrderNo(orderNo);
 				WalletOrderVo orderVo = BeanUtil.newInstance(order, WalletOrderVo.class);
+
 				String line = StringObject.toObjectString(orderVo, WalletOrderVo.class, SPLIT_TAG);
 				writer.write(line + end);
 			}
@@ -371,7 +372,7 @@ public class SeniorBalanceService {
 					.map(order -> {
 						return "product".equalsIgnoreCase(configService.getEnv()) ?
 							order.getOrderNo() + SPLIT_TAG + order.getAmount().longValue()
-								+ SPLIT_TAG + order.getTunnelFee().longValue() :
+								+ SPLIT_TAG + (0 - order.getTunnelFee().longValue()) :
 							order.getOrderNo() + SPLIT_TAG + order.getAmount().longValue();
 					}).collect(Collectors.toList());
 			});
