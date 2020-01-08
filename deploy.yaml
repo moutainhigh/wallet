@@ -37,7 +37,7 @@ spec:
             requests:
               memory: "256Mi"
             limits:
-              memory: "1536Mi"
+              memory: "%{memory_max}"
           volumeMounts:
             - name: %{service_name}-logs
               mountPath: %{app_path}/logs
