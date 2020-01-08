@@ -4,4 +4,4 @@ maintainer nzm "niezengming@rfchina.com"
 workdir %{app_path}
 copy  %{jar_path}/%{jar_name} %{app_path}
 
-entrypoint ["java","-jar","%{jar_name}"]
+entrypoint java -jar $JAVA_OPTS %{jar_name}

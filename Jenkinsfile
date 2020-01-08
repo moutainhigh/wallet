@@ -2,12 +2,11 @@ def label = "pipeline"
 
 def yaml_file = "deploy.yaml"
 def docker_hub = "hub.thinkinpower.net"
-def service_name = "rfwallet-server"
-def service_port = 8118
+def service_name = "wallet-server"
 def team_ns = "platform"
 def replicas = 2
-def host_name = "wallet.thinkinpower.net"
 def live_path = "/index"
+def memory_max = "1536Mi"
 
 def docker_file = "Dockerfile"
 def jar_path = "build/libs"
@@ -51,11 +50,10 @@ podTemplate(label: label) {
               sed -i "s#%{app_path}#${app_path}#g" ${yaml_file}
               sed -i "s#%{docker_hub}#${docker_hub}#g" ${yaml_file}
               sed -i "s#%{service_name}#${service_name}#g" ${yaml_file}
-              sed -i "s#%{service_port}#${service_port}#g" ${yaml_file}
               sed -i "s#%{team_ns}#${team_ns}#g" ${yaml_file}
               sed -i "s#%{replicas}#${replicas}#g" ${yaml_file}
-              sed -i "s#%{host_name}#${host_name}#g" ${yaml_file}
               sed -i "s#%{live_path}#${live_path}#g" ${yaml_file}
+              sed -i "s#%{memory_max}#${memory_max}#g" ${yaml_file}
               cat  ${yaml_file}
               kubectl apply -f ${yaml_file}
               """
