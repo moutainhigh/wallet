@@ -258,9 +258,10 @@ public class YunstUserHandler extends YunstBaseHandler {
 	 * 个人实名认证
 	 */
 	public YunstPersonSetRealNameResult personCertification(String bizUserId,
-		String realName, Long identityType, String identityNo) throws Exception {
+		String realName, Long identityType, String idNo) throws Exception {
+		String identityNo;
 		try {
-			identityNo = RSAUtil.encrypt(identityNo);
+			identityNo = RSAUtil.encrypt(idNo);
 		} catch (Exception e) {
 			log.error("身份证加密失败", e);
 			throw e;

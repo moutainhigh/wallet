@@ -17,6 +17,12 @@ spec:
         - name: %{service_name}
           image: %{docker_hub}/platform/%{service_name}:%{build_tag}
 #          imagePullPolicy: Always
+          env:
+            - name: JAVA_OPTS
+              valueFrom:
+                configMapKeyRef:
+                  name: java-opts
+                  key: JAVA_OPTS
           ports:
             - containerPort: 8080
           livenessProbe:
@@ -39,35 +45,20 @@ spec:
             limits:
               memory: "%{memory_max}"
           volumeMounts:
-            - name: %{service_name}-logs
+            - name: %{service_name}
               mountPath: %{app_path}/logs
               subPath: %{service_name}/logs
-            - name: %{service_name}-files
+            - name: %{service_name}
               mountPath: %{app_path}/files
               subPath: %{service_name}/files
-            - name: %{service_name}-temp
+            - name: %{service_name}
               mountPath: %{app_path}/temp
               subPath: %{service_name}/temp
       volumes:
-        - name: %{service_name}-logs
+        - name: %{service_name}
           flexVolume:
             driver: ceph.rook.io/rook
             fsType: ceph
             options:
               fsName: myfs
               clusterNamespace: rook-ceph
-        - name: %{service_name}-files
-          flexVolume:
-            driver: ceph.rook.io/rook
-            fsType: ceph
-            options:
-              fsName: myfs
-              clusterNamespace: rook-ceph
-        - name: %{service_name}-temp
-          flexVolume:
-            driver: ceph.rook.io/rook
-            fsType: ceph
-            options:
-              fsName: myfs
-              clusterNamespace: rook-ceph
-
