@@ -231,6 +231,7 @@ public class SeniorWalletService {
 				.uid(uid)
 				.build();
 			apiTemplate.execute(req);
+			log.info("同步用户实名 {}", name);
 		} catch (Exception e) {
 			log.error("同步用户实名信息失败 " + uid + name, e);
 		}
