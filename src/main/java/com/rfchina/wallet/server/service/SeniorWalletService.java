@@ -231,7 +231,7 @@ public class SeniorWalletService {
 				.uid(uid)
 				.build();
 			apiTemplate.execute(req);
-			log.info("同步用户实名 {}", name);
+			log.info("同步用户实名 {}, {}", uid, name);
 		} catch (Exception e) {
 			log.error("同步用户实名信息失败 " + uid + name, e);
 		}
@@ -248,7 +248,7 @@ public class SeniorWalletService {
 			YunstPersonSetRealNameResult result = yunstUserHandler.personCertification(
 				walletTunnel.getBizUserId(), name, EnumIdType.ID_CARD.getValue().longValue(),
 				idNo);
-			syncRealInfo(userId, result.getName(), result.getIdentityNo());
+			syncRealInfo(userId, result.getName(), idNo);
 		} catch (CommonGatewayException e) {
 			if (!EnumYunstResponse.ALREADY_REALNAME_AUTH.getValue().equals(e.getBankErrCode())) {
 				throw e;
