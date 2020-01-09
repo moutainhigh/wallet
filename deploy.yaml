@@ -17,12 +17,9 @@ spec:
         - name: %{service_name}
           image: %{docker_hub}/platform/%{service_name}:%{build_tag}
 #          imagePullPolicy: Always
-          env:
-            - name: JAVA_OPTS
-              valueFrom:
-                configMapKeyRef:
-                  name: java-opts
-                  key: JAVA_OPTS
+          envFrom:
+            - configMapRef:
+                name: java-opts
           ports:
             - containerPort: 8080
           livenessProbe:
@@ -54,6 +51,8 @@ spec:
             - name: %{service_name}
               mountPath: %{app_path}/temp
               subPath: %{service_name}/temp
+            - name: yunst-cert
+              mountPath: %{app_path}/yunst
       volumes:
         - name: %{service_name}
           flexVolume:
@@ -62,3 +61,6 @@ spec:
             options:
               fsName: myfs
               clusterNamespace: rook-ceph
+        - name: yunst-cert
+          configMap:
+            name: yunst-cert
