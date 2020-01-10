@@ -215,13 +215,10 @@ public class SeniorWalletController {
 	@PostMapping(UrlConstant.WALLET_SENIOR_COMPANY_INFO)
 	public ResponseValue<YunstMemberInfoResult.CompanyInfoResult> seniorWalletCompanyInfo(
 		@RequestParam("access_token") String accessToken,
-		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
-		@ApiParam(value = "手动更新开关", required = true) @RequestParam(value = "is_manual_refresh", defaultValue = "false") Boolean isManualRefresh,
-		@ApiParam(value = "新对公账号", required = false) @RequestParam(value = "public_account_no", required = false) String newPublicAccountNo) {
+		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId) {
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
-			seniorWalletApi.seniorWalletGetCompanyInfo(accessToken, walletId, isManualRefresh,
-				newPublicAccountNo));
+			seniorWalletApi.seniorWalletGetCompanyInfo(accessToken, walletId));
 	}
 
 
@@ -245,4 +242,21 @@ public class SeniorWalletController {
 	}
 
 
+	@ApiOperation("高级钱包-线下确认更新企业信息")
+	@PostMapping(UrlConstant.WALLET_SENIOR_UPDATE_COMPANY_INFO_OFFLINE)
+	public ResponseValue<YunstMemberInfoResult.CompanyInfoResult> seniorWalletCompanyInfoAuditOffline(
+		@RequestParam("access_token") String accessToken,
+		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+		@ApiParam(value = "企业信息(json)", required = true) @RequestParam("company_basic_info") String companyBasicInfo) {
+
+		YunstMemberInfoResult.CompanyInfoResult result = seniorWalletApi
+			.seniorWalletCompanyAuditOffline(accessToken,  walletId,
+				JsonUtil.toObject(companyBasicInfo, YunstSetCompanyInfoReq.CompanyBasicInfo.class,
+					objectMapper -> {
+						objectMapper.setTimeZone(TimeZone.getDefault());
+						objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+							false);
+					}));
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result);
+	}
 }

@@ -43,9 +43,11 @@
     order_no:""  , //订单号
     pay_method:""  , //支付方式 1：余额 2：微信 4：支付宝 8:刷卡支付 16：银行卡
     progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
+    remain_amount:""  , //交易余额
     remark:""  , //备注
+    source_app_id:""  , //来源APPID
     start_time:""  , //开始时间
-    status:""  , //交易状态。 2：进行中，3：交易成功，4：交易失败
+    status:""  , //交易状态。 2：进行中，3：交易成功，4：交易失败，5：交易关闭（超时或其他）
     sub_status:""  , //0：默认 1:待人工处理 2:等待重新发起
     tunnel_err_code:""  , //通道错误码
     tunnel_err_msg:""  , //系统错误信息
@@ -154,6 +156,7 @@
     level:""  , //钱包等级，1： 初级钱包，2： 高级钱包
     pay_amount:""  , //累计支付金额
     pay_count:""  , //累计支付次数
+    progress:""  , //钱包进度，组合字段 1:通道已注册会员 2:通道已绑定手机 4:通道已实名 8:通道已签约 16:已设置支付密码 32:已绑卡
     recharge_amount:""  , //累计充值金额
     recharge_count:""  , //累计充值次数
     source:""  , //钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户
@@ -161,6 +164,57 @@
     title:""  , //钱包标题，通常是姓名或公司名
     type:""  , //钱包类型， 1：企业钱包，2：个人钱包
     wallet_balance:""   //钱包余额
+}  
+}
+```
+
+###  高级钱包-线下确认更新企业信息
+
+请求地址: /wallet_server/v1/m/senior/wallet/update_company_info_offline
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|company_basic_info|是|企业信息(json)|
+|wallet_id|是|钱包id|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+   , "data":  {
+    account_no:""  , //企业对公账户账号
+    auth_type:""  , //认证类型(三证或一证)
+    bank_city_no:""  , //开户行地区代码
+    bank_name:""  , //开户行支行名称
+    business_license:""  , //营业执照号(三证)
+    check_time:""  , //审核时间
+    city:""  , //开户行所在市
+    company_address:""  , //企业地址
+    company_name:""  , //企业名称
+    exp_license:""  , //统一社会信用/营业执照号到期时间 格式:yyyy-MM-dd
+    fail_reason:""  , //审核失败原因
+    identity_type:""  , //法人证件类型
+    is_sign_contract:""  , //是否已签电子协议
+    legal_ids:""  , //法人证件号码
+    legal_name:""  , //法人姓名
+    legal_phone:""  , //法人手机号码
+    organization_code:""  , //组织机构代码(三证)
+    parent_bank_name:""  , //开户银行名称
+    phone:""  , //手机号码
+    province:""  , //开户行所在省
+    remark:""  , //备注
+    status:""  , //审核状态
+    tax_register:""  , //税务登记证(三证)
+    telephone:""  , //联系电话
+    uni_credit:""  , //统一社会信用(一证)
+    union_bank:""   //支付行号,12位数字
 }  
 }
 ```
@@ -224,9 +278,7 @@
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
 |access_token|是|access_token|
-|is_manual_refresh|是|手动更新开关|
 |wallet_id|是|钱包id|
-|public_account_no|否|新对公账号|
 
 返回数据
 ```

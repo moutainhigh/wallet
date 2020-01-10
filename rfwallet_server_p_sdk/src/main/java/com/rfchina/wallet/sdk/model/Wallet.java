@@ -40,6 +40,9 @@ public class Wallet  {
     @ApiModelProperty("累计支付次数")
     private Integer payCount ;
 
+    @ApiModelProperty("钱包进度，组合字段 1:通道已注册会员 2:通道已绑定手机 4:通道已实名 8:通道已签约 16:已设置支付密码 32:已绑卡")
+    private Integer progress ;
+
     @ApiModelProperty("累计充值金额")
     private Long rechargeAmount ;
 
