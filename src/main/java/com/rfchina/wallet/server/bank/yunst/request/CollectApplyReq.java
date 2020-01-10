@@ -117,11 +117,11 @@ public class CollectApplyReq implements YunstBaseReq {
 		@ApiModel
 		public static class Wechat {
 
-			public static String KEY_MiniProgram = "WECHATPAY_MINIPROGRAM_ORG";
+			public static String KEY_MiniProgram = "WECHATPAY_MINIPROGRAM";
 			public static String KEY_AppOpen = "WECHATPAY_APP_OPEN";
 			public static String KEY_H5Open = "WECHATPAY_H5_OPEN";
-			public static String KEY_WechatPublic = "WECHAT_PUBLIC_ORG";
-			public static String KEY_ScanWeixin = "SCAN_WEIXIN_ORG";
+			public static String KEY_WechatPublic = "WECHAT_PUBLIC";
+			public static String KEY_ScanWeixin = "SCAN_WEIXIN";
 
 			@ApiModel(description = "微信小程序支付（收银宝）")
 			@Getter
@@ -225,8 +225,8 @@ public class CollectApplyReq implements YunstBaseReq {
 		@ApiModel
 		public static class Alipay {
 
-			public static String KEY_ScanAlipay = "SCAN_ALIPAY_ORG";
-			public static String KEY_AlipayService = "ALIPAY_SERVICE_ORG";
+			public static String KEY_ScanAlipay = "SCAN_ALIPAY";
+			public static String KEY_AlipayService = "ALIPAY_SERVICE";
 			public static String KEY_AppOpen = "ALIPAY_APP_OPEN";
 
 			@ApiModel(description = "支付宝扫码支付(正扫)")
@@ -279,7 +279,7 @@ public class CollectApplyReq implements YunstBaseReq {
 		@ApiModel
 		public static class CodePay {
 
-			public static String KEY_CodePayVsp = "CODEPAY_VSP_ORG";
+			public static String KEY_CodePayVsp = "CODEPAY_VSP";
 
 			@ApiModel(description = "收银宝刷卡支付（被扫）")
 			@Getter

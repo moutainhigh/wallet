@@ -2,7 +2,11 @@
 ```
 测试环境
 jenkins job: platform-rfwallet-super-server-test
-```  
+```
+## 1.1.0_b29_2020010916_Beta
+### [变动说明]
+- 回滚单商户模式
+  
 ## 1.1.0_b28_2020010910_Beta
 ### [变动说明]
 - 修正实名同步问题 fixbug21261
