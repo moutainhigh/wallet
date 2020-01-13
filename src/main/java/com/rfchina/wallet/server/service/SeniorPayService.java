@@ -31,6 +31,7 @@ import com.rfchina.wallet.domain.model.WalletRefund;
 import com.rfchina.wallet.domain.model.WalletRefundDetail;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.domain.model.WalletWithdraw;
+import com.rfchina.wallet.server.bank.yunst.response.SmsPayResp;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstQueryBalanceResult;
 import com.rfchina.wallet.server.mapper.ext.WalletClearingExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectExtDao;
@@ -152,7 +153,6 @@ public class SeniorPayService {
 
 	@Autowired
 	private SessionThreadLocal sessionThreadLocal;
-
 
 
 	/**
@@ -815,7 +815,12 @@ public class SeniorPayService {
 
 		EBankHandler handler = handlerHelper.selectByTunnelType(order.getTunnelType());
 		if (handler instanceof YunstBizHandler) {
-			((YunstBizHandler) handler).smsConfirm(order, tradeNo, verifyCode, ip);
+			SmsPayResp resp = ((YunstBizHandler) handler)
+				.smsConfirm(order, tradeNo, verifyCode, ip);
+			if ("fail".equalsIgnoreCase(resp.getPayStatus())) {
+				throw new WalletResponseException(
+					EnumWalletResponseCode.WALLET_SMS_ERROR.getValue(), resp.getPayFailMessage());
+			}
 		}
 	}
 
