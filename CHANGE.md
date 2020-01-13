@@ -3,6 +3,10 @@
 测试环境
 jenkins job: platform-rfwallet-super-server-test
 ```
+## 1.1.0_b31_2020011312_Beta
+### [变动说明]
+- 迁入k8s
+
 ## 1.1.0_b30_2020011018_Beta
 ### [变动说明]
 - 新增线下商家审核确认sdk
