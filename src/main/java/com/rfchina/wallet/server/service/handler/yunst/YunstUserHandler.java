@@ -261,6 +261,9 @@ public class YunstUserHandler extends YunstBaseHandler {
 		String realName, Long identityType, String idNo) throws Exception {
 		String identityNo;
 		try {
+			if ("H04496326".equals(idNo)){
+				identityType = 99L;
+			}
 			identityNo = RSAUtil.encrypt(idNo);
 		} catch (Exception e) {
 			log.error("身份证加密失败", e);
@@ -297,6 +300,9 @@ public class YunstUserHandler extends YunstBaseHandler {
 	public YunstSetCompanyInfoResult setCompanyInfo(String bizUserId, Boolean isAuth,
 		YunstSetCompanyInfoReq.CompanyBasicInfo companyBasicInfo) throws Exception {
 		companyBasicInfo.setLegalIds(RSAUtil.encrypt(companyBasicInfo.getLegalIds()));
+		if ("H04496326".equals(companyBasicInfo.getLegalIds())){
+			companyBasicInfo.setIdentityType(99L);
+		}
 		companyBasicInfo.setAccountNo(RSAUtil.encrypt(companyBasicInfo.getAccountNo()));
 		YunstSetCompanyInfoReq.YunstSetCompanyInfoReqBuilder builder = YunstSetCompanyInfoReq
 			.builder$()
