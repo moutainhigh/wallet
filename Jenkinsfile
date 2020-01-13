@@ -11,7 +11,7 @@ def memory_max = "1536Mi"
 def docker_file = "Dockerfile"
 def jar_path = "build/libs"
 def jar_name = "rfwallet_server-1.0.0-SNAPSHOT.jar"
-def app_path = "/data/service/rfwallet_server"
+def app_path = "/data/services/rfwallet_super_server"
 
 podTemplate(label: label) {
   node(label){
