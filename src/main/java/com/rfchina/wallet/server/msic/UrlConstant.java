@@ -250,6 +250,10 @@ public class UrlConstant {
 	 */
 	public static final String WALLET_SENIOR_COMPANY_INFO= VERSION + "/m/senior/wallet/company_info";
 	/**
+	 * 高级钱包线下确认更新企业信息
+	 */
+	public static final String WALLET_SENIOR_UPDATE_COMPANY_INFO_OFFLINE= VERSION + "/m/senior/wallet/update_company_info_offline";
+	/**
 	 * 高级钱包余额明细
 	 */
 	public static final String WALLET_SENIOR_ORDER_DETAIL= VERSION + "/m/senior/wallet/order_detail";

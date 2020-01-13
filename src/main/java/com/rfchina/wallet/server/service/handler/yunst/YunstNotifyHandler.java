@@ -13,7 +13,6 @@ import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyRefType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyType;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.model.ChannelNotify;
-import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.domain.model.WalletVerifyHis;
 import com.rfchina.wallet.server.bank.yunst.response.YunstNotify;
@@ -22,6 +21,7 @@ import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletVerifyHisExtDao;
 import com.rfchina.wallet.server.model.ext.SLWalletMqMessage;
 import com.rfchina.wallet.server.msic.EnumWallet.YunstCompanyInfoAuditStatus;
+import com.rfchina.wallet.server.service.SeniorWalletService;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +41,8 @@ public class YunstNotifyHandler {
 	private WalletCardExtDao walletCardDao;
 	@Autowired
 	private YunstBizHandler yunstBizHandler;
+	@Autowired
+	private SeniorWalletService seniorWalletService;
 
 	@Autowired
 	private WalletDao walletDao;
@@ -65,9 +67,6 @@ public class YunstNotifyHandler {
 		walletTunnel
 			.setCheckTime(DateUtil.parse(checkTime, DateUtil.STANDARD_DTAETIME_PATTERN));
 
-		WalletCard walletCard = walletCardDao
-			.selectNonVerifyPubAccountByWalletId(walletTunnel.getWalletId());
-
 		boolean isPass = false;
 
 		if (result == YunstCompanyInfoAuditStatus.SUCCESS.getValue().longValue()) {
@@ -91,10 +90,10 @@ public class YunstNotifyHandler {
 						.verifyTime(walletTunnel.getCheckTime())
 						.createTime(walletTunnel.getCheckTime()).build());
 			}
-			walletCard.setVerifyTime(DateUtil.parse(checkTime, DateUtil.STANDARD_DTAETIME_PATTERN));
 			Optional.ofNullable(walletTunnel)
 				.ifPresent(c -> walletDao.addProgress(c.getWalletId(),
 					WalletProgress.TUNNEL_VALIDATE.getValue()));
+			seniorWalletService.updateNonVerifyPublicAccountToWalletCard(walletTunnel.getWalletId(),walletTunnel.getCheckTime());
 		} else if (result == YunstCompanyInfoAuditStatus.FAIL.getValue().longValue()) {
 			walletTunnel
 				.setStatus(EnumDef.WalletTunnelAuditStatus.AUDIT_FAIL.getValue().byteValue());
@@ -106,10 +105,6 @@ public class YunstNotifyHandler {
 			log.error("处理企业信息审核结果通知-更新审核状态状态失败:bizUserId:{}", bizUserId);
 		}
 
-		effectRows = walletCardDao.updateByPrimaryKeySelective(walletCard);
-		if (effectRows != 1) {
-			log.error("处理企业信息审核结果通知-更新银行卡信息失败:bizUserId:{}", bizUserId);
-		}
 		return SLWalletMqMessage.builder().walletId(walletTunnel.getWalletId())
 			.isPass(isPass).checkTime(checkTime).failReason(failReason).build();
 	}

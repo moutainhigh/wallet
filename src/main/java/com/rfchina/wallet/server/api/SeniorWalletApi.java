@@ -119,7 +119,7 @@ public interface SeniorWalletApi {
 	 * @param walletId 必填, 钱包id
 	 */
 	YunstMemberInfoResult.CompanyInfoResult seniorWalletGetCompanyInfo(String accessToken,
-		Long walletId, Boolean isManualRefresh, String newPublicAccountNo);
+		Long walletId);
 
 	/**
 	 * 高级钱包获取个人用户信息
@@ -141,4 +141,13 @@ public interface SeniorWalletApi {
 	 * 高级钱包-用户绑定钱包身份
 	 */
 	void personIdBind(String accessToken, Long walletId, Long userId);
+
+	/**
+	 * 高级钱包商家资料线下二次审批确认同步
+	 *
+	 * @param walletId 必填, 钱包id
+	 * @param companyBasicInfo 必填, 企业基本信息
+	 */
+	YunstMemberInfoResult.CompanyInfoResult seniorWalletCompanyAuditOffline(String accessToken,
+		Long walletId, YunstSetCompanyInfoReq.CompanyBasicInfo companyBasicInfo);
 }

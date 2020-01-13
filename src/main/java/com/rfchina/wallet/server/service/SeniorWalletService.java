@@ -335,7 +335,6 @@ public class SeniorWalletService {
 			.selectByTunnelTypeAndWalletId(channelType.byteValue(), walletId);
 		walletChannel.setStatus(
 			EnumDef.WalletTunnelAuditStatus.WAITING_AUDIT.getValue().byteValue());
-		String cardNo = companyBasicInfo.getAccountNo();
 		CardInfo cardInfo = CardInfo.builder()
 			.cardNo(companyBasicInfo.getAccountNo())
 			.parentBankName(companyBasicInfo.getParentBankName())
@@ -363,7 +362,8 @@ public class SeniorWalletService {
 						walletChannel.setFailReason(null);
 						walletChannel.setCheckTime(curDate);
 
-						this.synchronizeCompanyTunnelInfo(walletId, walletChannel, cardInfo);
+						this.synchronizeCompanyTunnelInfo(walletId, walletChannel);
+						this.synchronizePublicAccountToWalletCard(walletId, cardInfo, curDate);
 					} else if (YunstCompanyInfoAuditStatus.FAIL.getValue() == result.longValue()) {
 						walletChannel.setStatus(
 							EnumDef.WalletTunnelAuditStatus.AUDIT_FAIL.getValue()
@@ -375,8 +375,7 @@ public class SeniorWalletService {
 					walletChannel.setStatus(
 						EnumDef.WalletTunnelAuditStatus.WAITING_AUDIT.getValue()
 							.byteValue());
-
-					this.synchronizeCompanyTunnelInfo(walletId, walletChannel, cardInfo);
+					this.synchronizePublicAccountToWalletCard(walletId, cardInfo, null);
 				}
 				walletChannel.setRemark(remark);
 				walletChannel.setFailReason(null);
@@ -463,8 +462,7 @@ public class SeniorWalletService {
 	/**
 	 * 高级钱包企业会员信息
 	 */
-	public CompanyInfoResult seniorWalletGetCompanyInfo(Long walletId, Boolean isManualRefresh,
-		String mchPublicAccountNo)
+	public CompanyInfoResult seniorWalletGetCompanyInfo(Long walletId)
 		throws Exception {
 		WalletTunnel walletTunnel = walletTunnelDao
 			.selectByTunnelTypeAndWalletId(TunnelType.YUNST.getValue(), walletId);
@@ -475,17 +473,58 @@ public class SeniorWalletService {
 			.longValue()
 			&& WalletTunnelAuditStatus.WAITING_AUDIT.getValue().byteValue() == walletTunnel
 			.getStatus()) {
-			this.synchronizeCompanyTunnelInfo(walletId, walletTunnel, null);
-		}
-		if (isManualRefresh.booleanValue()) {
-			CardInfo cardInfo = CardInfo.builder().cardNo(mchPublicAccountNo)
-				.parentBankName(memberInfo.getParentBankName())
-				.bankName(memberInfo.getBankName()).build();
+			if (YunstCompanyInfoAuditStatus.SUCCESS.getValue().longValue() == memberInfo
+				.getStatus()) {
+				walletTunnel.setStatus(
+					EnumDef.WalletTunnelAuditStatus.AUDIT_SUCCESS.getValue()
+						.byteValue());
+				walletTunnel.setFailReason(null);
+				walletTunnel.setSecurityTel(memberInfo.getPhone());
+				this.synchronizeCompanyTunnelInfo(walletId, walletTunnel);
+				this.updateNonVerifyPublicAccountToWalletCard(walletId,
+					walletTunnel.getCheckTime());
+			} else if (YunstCompanyInfoAuditStatus.FAIL.getValue().longValue() == memberInfo
+				.getStatus()) {
+				walletTunnel.setStatus(
+					EnumDef.WalletTunnelAuditStatus.AUDIT_FAIL.getValue()
+						.byteValue());
+				walletTunnel.setFailReason(memberInfo.getFailReason());
+				walletTunnel.setRemark(memberInfo.getRemark());
+			}
 			walletTunnel.setCheckTime(
 				DateUtil.parse(memberInfo.getCheckTime(), DateUtil.STANDARD_DTAETIME_PATTERN));
-			walletTunnel.setSecurityTel(memberInfo.getPhone());
 			walletTunnelDao.updateByPrimaryKey(walletTunnel);
-			this.synchronizeCompanyTunnelInfo(walletId, walletTunnel, cardInfo);
+		}
+		return memberInfo;
+	}
+
+
+	public CompanyInfoResult seniorWalletCompanyAuditOffline(Long walletId,
+		YunstSetCompanyInfoReq.CompanyBasicInfo companyBasicInfo)
+		throws Exception {
+		WalletTunnel walletTunnel = walletTunnelDao
+			.selectByTunnelTypeAndWalletId(TunnelType.YUNST.getValue(), walletId);
+		Objects.requireNonNull(walletTunnel);
+		CompanyInfoResult memberInfo = (CompanyInfoResult) yunstUserHandler
+			.getMemberInfo(walletTunnel.getBizUserId());
+		CardInfo cardInfo = CardInfo.builder()
+			.cardNo(companyBasicInfo.getAccountNo())
+			.parentBankName(companyBasicInfo.getParentBankName())
+			.bankName(companyBasicInfo.getBankName())
+			.build();
+		if (YunstCompanyInfoAuditStatus.SUCCESS.getValue().longValue() == memberInfo.getStatus()
+			&&
+			EnumDef.WalletTunnelAuditStatus.AUDIT_SUCCESS.getValue().byteValue() == walletTunnel
+				.getStatus() &&
+			walletTunnel.getCheckTime().compareTo(walletTunnel.getCheckTime()) == -1) {
+			walletTunnel.setFailReason(null);
+			walletTunnel.setSecurityTel(memberInfo.getPhone());
+			walletTunnel.setCheckTime(
+				DateUtil.parse(memberInfo.getCheckTime(), DateUtil.STANDARD_DTAETIME_PATTERN));
+			walletTunnelDao.updateByPrimaryKey(walletTunnel);
+			this.synchronizeCompanyTunnelInfo(walletId, walletTunnel);
+			this.synchronizePublicAccountToWalletCard(walletId, cardInfo,
+				walletTunnel.getCheckTime());
 		}
 		return memberInfo;
 	}
@@ -558,9 +597,7 @@ public class SeniorWalletService {
 	}
 
 
-	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-	private void synchronizeCompanyTunnelInfo(Long walletId, WalletTunnel walletTunnel,
-		CardInfo cardInfo) {
+	private void synchronizeCompanyTunnelInfo(Long walletId, WalletTunnel walletTunnel) {
 		if (EnumDef.WalletTunnelAuditStatus.AUDIT_SUCCESS.getValue()
 			.byteValue() == walletTunnel.getStatus()) {
 			WalletVerifyHis walletVerifyHis = walletVerifyHisExtDao
@@ -580,7 +617,10 @@ public class SeniorWalletService {
 						.createTime(walletTunnel.getCheckTime()).build());
 			}
 		}
+	}
 
+	public void synchronizePublicAccountToWalletCard(Long walletId, CardInfo cardInfo,
+		Date verifyTime) {
 		List<WalletCard> walletCards = walletCardDao
 			.selectPubAccountByWalletId(walletId);
 		if (walletCards != null && !walletCards.isEmpty()) {
@@ -598,12 +638,21 @@ public class SeniorWalletService {
 				.depositBank(cardInfo.getBankName())
 				.bankAccount(cardInfo.getCardNo())
 				.verifyChannel(VerifyChannel.YUNST.getValue())
-				.verifyTime(walletTunnel.getCheckTime())
+				.verifyTime(verifyTime)
 				.isPublic(EnumPublicAccount.YES.getValue().byteValue())
 				.isDef(EnumDefBankCard.YES.getValue().byteValue())
 				.status(EnumWalletCardStatus.BIND.getValue().byteValue())
 				.build());
+	}
 
+	public void updateNonVerifyPublicAccountToWalletCard(Long walletId, Date verifyTime) {
+		WalletCard walletCard = walletCardDao.selectNonVerifyPubAccountByWalletId(walletId);
+		Objects.requireNonNull(walletCard);
+		walletCard.setVerifyTime(verifyTime);
+		int effectRows = walletCardDao.updateByPrimaryKeySelective(walletCard);
+		if (effectRows != 1) {
+			log.error("更新对公账号信息审核时间失败");
+		}
 	}
 
 
