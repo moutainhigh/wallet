@@ -95,7 +95,7 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 			walletTunnel = seniorWalletService
 				.createTunnel(channelType, walletId, source);
 		} catch (Exception e) {
-			log.error("用户创建高级钱包失败，walletId:{}", walletId);
+			log.error("用户创建高级钱包失败，walletId" + walletId, e);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
 				"用户创建高级钱包失败");
 		}
@@ -205,9 +205,9 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 						WalletProgress.TUNNEL_BIND_MOBILE.getValue());
 				}
 				// 用户实名
-				seniorWalletService.personAudit(userId,walletTunnel,realName,idNo);
+				seniorWalletService.personAudit(userId, walletTunnel, realName, idNo);
 				// 更新钱包
-				seniorWalletService.updatePersionAuditInfo(walletTunnel,realName,idNo,mobile);
+				seniorWalletService.updatePersionAuditInfo(walletTunnel, realName, idNo, mobile);
 			}
 
 			return seniorWalletService.signMemberProtocol(walletId, jumpUrl);
@@ -229,10 +229,10 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 		@ParamValid(nullable = false) Long userId) {
 
 		WalletPerson walletPerson = walletPersonDao.selectByWalletId(walletId);
-		if(walletPerson == null || walletPerson.getIdNo() == null){
+		if (walletPerson == null || walletPerson.getIdNo() == null) {
 			throw new WalletResponseException(EnumWalletResponseCode.WALLET_NOT_AUTH);
 		}
-		seniorWalletService.syncRealInfo(userId,walletPerson.getName(),walletPerson.getIdNo());
+		seniorWalletService.syncRealInfo(userId, walletPerson.getName(), walletPerson.getIdNo());
 	}
 
 
@@ -267,7 +267,8 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public YunstMemberInfoResult.CompanyInfoResult seniorWalletCompanyAuditOffline(String accessToken, Long walletId,
+	public YunstMemberInfoResult.CompanyInfoResult seniorWalletCompanyAuditOffline(
+		String accessToken, Long walletId,
 		CompanyBasicInfo companyBasicInfo) {
 		try {
 			return seniorWalletService
@@ -383,7 +384,8 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@SignVerify
 	@Override
 	public Pagination<WalletOrder> queryWalletOrderDetail(String accessToken, Long walletId,
-		Date fromTime, Date endTime, Byte tradeType, Byte status, int limit, int offset, Boolean stat) {
+		Date fromTime, Date endTime, Byte tradeType, Byte status, int limit, int offset,
+		Boolean stat) {
 		List<WalletOrder> walletOrderList = walletOrderExtDao
 			.selectByCondition(walletId, fromTime, endTime, tradeType, status, null, null, limit,
 				offset);

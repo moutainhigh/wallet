@@ -96,6 +96,8 @@ public class YunstTpl {
 				.methodName(reqPkg.getMethod())
 				.traceId(MDC.get("traceId"))
 				.invokeStatus(status.getValue())
+				.isAuth(
+					Optional.ofNullable(Byte.valueOf((String) reqPkg.get("isAuth"))).orElse(null))
 				.req(JsonUtil.toJSON(reqPkg))
 				.resp(respBody)
 				.build();
