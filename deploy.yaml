@@ -16,10 +16,13 @@ spec:
       containers:
         - name: %{service_name}
           image: %{docker_hub}/platform/%{service_name}:%{build_tag}
-#          imagePullPolicy: Always
+          imagePullPolicy: Always
           envFrom:
             - configMapRef:
                 name: java-opts
+          env:
+            - name: TZ
+              value: Asia/Shanghai
           ports:
             - containerPort: 8080
           livenessProbe:

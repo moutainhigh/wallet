@@ -68,7 +68,7 @@ public class CollectApplyReq implements YunstBaseReq {
 	private String backUrl;
 
 	@ApiModelProperty(value = "订单过期时间")
-	private String ordErexpireDatetime;
+	private String orderExpireDatetime;
 
 	@ApiModelProperty(required = true, value = "支付方式")
 	private Map<String, Object> payMethod;

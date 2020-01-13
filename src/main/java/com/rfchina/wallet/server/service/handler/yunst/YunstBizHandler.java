@@ -350,7 +350,7 @@ public class YunstBizHandler extends EBankHandler {
 			.validateType(collect.getValidateType().longValue())
 			.frontUrl(null)
 			.backUrl(configService.getYunstRecallPrefix() + UrlConstant.YUNST_ORDER_RECALL)
-			.ordErexpireDatetime(expireTime)
+			.orderExpireDatetime(expireTime)
 			.payMethod(getMethodMap(methods, false))
 			.tradeCode(TRADE_CODESTRING_COLLECT)
 			.industryCode(order.getIndustryCode())
