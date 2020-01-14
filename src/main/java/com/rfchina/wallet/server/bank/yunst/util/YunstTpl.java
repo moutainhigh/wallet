@@ -88,6 +88,7 @@ public class YunstTpl {
 	private void log2db(YunRequest reqPkg, String respBody, YunstBaseResp resp,
 		GatewayInvokeStatus status) {
 		try {
+			Boolean isAuth = reqPkg.get("isAuth") != null ? (Boolean) reqPkg.get("isAuth") : null;
 			GatewayLog gatewayLog = GatewayLog.builder()
 				.tunnelType(TunnelType.YUNST.getValue())
 				.bizUserId((String) Optional.ofNullable(reqPkg.get("bizUserId")).orElse(null))
@@ -96,8 +97,7 @@ public class YunstTpl {
 				.methodName(reqPkg.getMethod())
 				.traceId(MDC.get("traceId"))
 				.invokeStatus(status.getValue())
-				.isAuth(
-					Optional.ofNullable(Byte.valueOf((String) reqPkg.get("isAuth"))).orElse(null))
+				.isAuth(isAuth != null ? Integer.valueOf(isAuth ? 1 : 0).byteValue() : null)
 				.req(JsonUtil.toJSON(reqPkg))
 				.resp(respBody)
 				.build();
