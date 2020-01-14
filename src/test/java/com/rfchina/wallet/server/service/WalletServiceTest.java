@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 import com.alibaba.fastjson.JSON;
 import com.rfchina.wallet.server.SpringBaseTest;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
-import com.rfchina.wallet.server.msic.EnumWallet.WalletStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;

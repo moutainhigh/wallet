@@ -109,8 +109,6 @@ public class SeniorWalletService {
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 	public WalletTunnel createTunnel(Integer channelType, Long walletId, Byte source)
 		throws Exception {
-		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
-		Objects.requireNonNull(wallet);
 		WalletTunnel walletChannel = walletTunnelDao
 			.selectByTunnelTypeAndWalletId(channelType.byteValue(), walletId);
 		if (walletChannel != null) {
@@ -162,6 +160,7 @@ public class SeniorWalletService {
 		}
 
 		if (source != WalletSource.USER.getValue().byteValue()) {
+			Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 			wallet.setLevel(EnumDef.EnumWalletLevel.SENIOR.getValue());
 			walletDao.updateByPrimaryKeySelective(wallet);
 		}

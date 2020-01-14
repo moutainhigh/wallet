@@ -19,6 +19,7 @@ import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletAuditType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletCardStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletLevel;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletSource;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
@@ -62,6 +63,8 @@ import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 @Slf4j
@@ -283,7 +286,8 @@ public class WalletService {
 	/**
 	 * 开通未审核的钱包
 	 */
-	public Wallet createWallet(Byte type, String title, Byte source) {
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+	public Wallet createWallet(Byte type, String title, Byte source) throws Exception {
 
 		Wallet wallet = Wallet.builder()
 			.type(type)
@@ -299,6 +303,12 @@ public class WalletService {
 			.level(EnumDef.EnumWalletLevel.JUNIOR.getValue())
 			.build();
 		walletDao.insertSelective(wallet);
+
+		if (type == WalletType.COMPANY.getValue().byteValue() && source == WalletSource.FHT_CORP
+			.getValue().byteValue()) {
+			seniorWalletService
+				.createTunnel(TunnelType.YUNST.getValue().intValue(), wallet.getId(), source);
+		}
 
 		return wallet;
 	}
