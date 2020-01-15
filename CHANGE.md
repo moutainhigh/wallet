@@ -3,6 +3,10 @@
 测试环境
 jenkins job: platform-rfwallet-super-server-test
 ```
+## 1.1.0_b32_2020011414_Beta
+### [变动说明]
+- 创建企业钱包默认高级钱包sdk
+
 ## 1.1.0_b31_2020011312_Beta
 ### [变动说明]
 - 迁入k8s

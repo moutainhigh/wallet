@@ -76,7 +76,7 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 		try {
 			walletChannel = seniorWalletService.getWalletTunnelInfo(channelType, walletId);
 		} catch (Exception e) {
-			log.error("查询高级钱包渠道信息失败, walletId: {}", walletId);
+			log.error("查询高级钱包渠道信息失败, walletId:"+walletId,e);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
 				"查询高级钱包渠道信息失败");
 		}
@@ -90,6 +90,8 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	public WalletTunnel seniorWalletCreateTunnel(String accessToken,
 		@ParamValid(nullable = false) Byte source,
 		Integer channelType, Long walletId) {
+		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
+		Objects.requireNonNull(wallet);
 		WalletTunnel walletTunnel = null;
 		try {
 			walletTunnel = seniorWalletService
@@ -110,10 +112,12 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	public WalletTunnel seniorWalletSmsCodeVerification(String accessToken, Byte source,
 		Integer channelType,
 		Long walletId, String mobile, Integer smsCodeType) {
+		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
+		Objects.requireNonNull(wallet);
 		WalletTunnel walletChannel = walletChannelDao
 			.selectByTunnelTypeAndWalletId(channelType.byteValue(), walletId);
 		if (walletChannel == null) {
-			log.error("发送云商通账户绑定手机验证码失败,未创建高级钱包用户, 查无此钱包, walletId: {}", walletId);
+			log.error("发送云商通账户绑定手机验证码失败,未创建高级钱包用户, 查无此钱包, walletId:", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
 				"发送云商通账户绑定手机验证码失败,未创建高级钱包用户, 查无此钱包");
 		}

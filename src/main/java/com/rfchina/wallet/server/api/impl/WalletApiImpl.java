@@ -7,6 +7,8 @@ import com.rfchina.platform.common.annotation.EnumParamValid;
 import com.rfchina.platform.common.annotation.Log;
 import com.rfchina.platform.common.annotation.ParamValid;
 import com.rfchina.platform.common.annotation.SignVerify;
+import com.rfchina.platform.common.exception.RfchinaResponseException;
+import com.rfchina.platform.common.misc.ResponseCode;
 import com.rfchina.platform.common.misc.ResponseValue;
 import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.platform.common.utils.BeanUtil;
@@ -117,7 +119,13 @@ public class WalletApiImpl implements WalletApi {
 		@ParamValid(nullable = false) Byte type,
 		@ParamValid(nullable = false) String title,
 		@ParamValid(nullable = false) Byte source) {
-		return walletService.createWallet(type, title, source);
+		try {
+			return walletService.createWallet(type, title, source);
+		} catch (Exception e) {
+			log.error("创建钱包失败",e);
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+				"创建钱包失败");
+		}
 	}
 
 	@Log
