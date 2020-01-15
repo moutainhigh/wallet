@@ -12,7 +12,7 @@
   <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
     <!-- 日志文件 -->
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <fileNamePattern>logs/wallet_server.%d{yyyy-MM-dd}.log</fileNamePattern>
+      <fileNamePattern>logs/wallet_server.%d{yyyy-MM-dd}.log.${HOSTNAME}</fileNamePattern>
       <maxHistory>60</maxHistory>
     </rollingPolicy>
 
