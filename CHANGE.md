@@ -3,7 +3,7 @@
 测试环境
 jenkins job: platform-rfwallet-super-server-test
 ```
-## 1.1.0_b33_2020011612_Beta
+## 1.1.0_b33_2020011616_Beta
 ### [变动说明]
 - 修复审核失败没保存错误信息bug
 
