@@ -100,7 +100,7 @@ public class YunstNotifyHandler {
 			walletTunnel.setFailReason(failReason);
 		}
 
-		int effectRows = walletTunnelExtDao.updateByPrimaryKeySelective(walletTunnel);
+		int effectRows = walletTunnelExtDao.updateByPrimaryKey(walletTunnel);
 		if (effectRows != 1) {
 			log.error("处理企业信息审核结果通知-更新审核状态状态失败:bizUserId:{}", bizUserId);
 		}
