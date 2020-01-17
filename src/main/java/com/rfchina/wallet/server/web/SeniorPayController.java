@@ -129,12 +129,13 @@ public class SeniorPayController {
 		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
 		@ApiParam(value = "业务方单号", required = true) @RequestParam(value = "biz_no") String bizNo,
 		@ApiParam(value = "代收单号", required = true) @RequestParam("collect_order_no") String collectOrderNo,
-		@ApiParam(value = "退款清单，参考List<RefundInfo>结构体", required = true) @RequestParam("refund_list") String refundList
+		@ApiParam(value = "退款清单，参考List<RefundInfo>结构体", required = true) @RequestParam("refund_list") String refundList,
+		@ApiParam(value = "备注") @RequestParam(value = "note", required = false) String note
 	) {
 		List<RefundInfo> rList = JsonUtil.toArray(refundList, RefundInfo.class, DEF_REQ_OBJ_MAP);
 		RateSetting rateSetting = RateSettingUtil.clone(bizNo, settingTemplate);
 		WalletOrder refund = seniorPayApi
-			.refund(accessToken, bizNo, collectOrderNo, rList, rateSetting);
+			.refund(accessToken, bizNo, collectOrderNo, rList, note, rateSetting);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, refund);
 	}
 
