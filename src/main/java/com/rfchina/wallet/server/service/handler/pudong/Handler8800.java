@@ -326,6 +326,7 @@ public class Handler8800 extends EBankHandler {
 								if (TransStatus8804.FINISH.getValue()
 									.equals(transStatus.getValue())) {
 									walletOrder.setTunnelSuccTime(bizTime);
+									walletOrder.setUserErrMsg(null);
 								}
 							}
 							walletOrderDao.updateByPrimaryKey(walletOrder);
