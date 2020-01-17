@@ -374,10 +374,10 @@ public class SeniorWalletService {
 					walletChannel.setStatus(
 						EnumDef.WalletTunnelAuditStatus.WAITING_AUDIT.getValue()
 							.byteValue());
+					walletChannel.setFailReason(null);
 					this.synchronizePublicAccountToWalletCard(walletId, cardInfo, null);
 				}
 				walletChannel.setRemark(remark);
-				walletChannel.setFailReason(null);
 				walletTunnelDao.updateByPrimaryKeySelective(walletChannel);
 
 			} catch (CommonGatewayException cge) {

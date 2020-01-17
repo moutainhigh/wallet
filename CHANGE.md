@@ -3,6 +3,10 @@
 测试环境
 jenkins job: platform-rfwallet-super-server-test
 ```
+## 1.1.0_b33_2020011616_Beta
+### [变动说明]
+- 修复审核失败没保存错误信息bug
+
 ## 1.1.0_b32_2020011414_Beta
 ### [变动说明]
 - 创建企业钱包默认高级钱包sdk
