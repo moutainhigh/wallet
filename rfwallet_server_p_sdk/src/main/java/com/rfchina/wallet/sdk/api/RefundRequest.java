@@ -25,6 +25,9 @@ public class RefundRequest extends  AbstractApiRequest {
   @ApiModelProperty("退款清单，参考List<RefundInfo>结构体")
   private String refundList ;
 
+  @ApiModelProperty("备注")
+  private String note ;
+
 
   @Override
   public String getApiUrl() {
@@ -50,6 +53,9 @@ public class RefundRequest extends  AbstractApiRequest {
       }
       if(refundList != null){
         parameters.put("refund_list", refundList.toString());
+      }
+      if(note != null){
+        parameters.put("note", note.toString());
       }
     return parameters;
   }

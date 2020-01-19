@@ -363,6 +363,7 @@
 |biz_no|是|业务方单号|
 |collect_order_no|是|代收单号|
 |refund_list|是|退款清单，参考List&lt;RefundInfo&gt;结构体|
+|note|否|备注|
 
 返回数据
 ```
