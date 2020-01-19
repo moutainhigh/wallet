@@ -13,7 +13,6 @@ import com.rfchina.wallet.domain.misc.EnumDef.DirtyType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumDefBankCard;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumIdType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumPublicAccount;
-import com.rfchina.wallet.domain.misc.EnumDef.EnumUserRealType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumVerifyCodeType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletAuditType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletCardStatus;
@@ -294,7 +293,7 @@ public class SeniorWalletService {
 				.idNo(idNo)
 				.name(name)
 				.tel(mobile)
-				.realLevel(EnumUserRealType.ID_CARD.getValue().byteValue())
+				.realLevel(EnumDef.EnumUserRealLevel.ID_CARD.getValue().byteValue())
 				.lastUpdTime(curDate)
 				.createTime(curDate)
 				.build();
@@ -304,7 +303,7 @@ public class SeniorWalletService {
 			walletPerson.setIdNo(idNo);
 			walletPerson.setName(name);
 			walletPerson.setTel(mobile);
-			walletPerson.setRealLevel(EnumDef.EnumUserRealType.ID_CARD.getValue().byteValue());
+			walletPerson.setRealLevel(EnumDef.EnumUserRealLevel.ID_CARD.getValue().byteValue());
 			walletPerson.setLastUpdTime(curDate);
 			walletPersonDao.updateByPrimaryKeySelective(walletPerson);
 		}

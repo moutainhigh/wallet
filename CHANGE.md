@@ -3,6 +3,10 @@
 测试环境
 jenkins job: platform-rfwallet-super-server-test
 ```
+## 1.1.0_b35_2020011910_Beta
+### [变动说明]
+- 修复实名验证枚举bug
+
 ## 1.1.0_b34_2020011711_Beta
 ### [变动说明]
 - 退款增加note
