@@ -207,6 +207,7 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 		@ParamValid(nullable = false) String bizNo,
 		@ParamValid(nullable = false) String collectOrderNo,
 		@ParamValid(nullable = false) List<RefundInfo> refundList,
+		@ParamValid(nullable = true) String note,
 		RateSetting rateSetting) {
 		// 判断退款申请不重复
 		Set<String> walletIdSet = refundList.stream()
@@ -219,7 +220,7 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 		// 检查代收单
 		WalletOrder collectOrder = verifyService
 			.checkOrder(collectOrderNo, OrderStatus.SUCC.getValue());
-		return seniorPayService.refund(collectOrder, bizNo, refundList);
+		return seniorPayService.refund(collectOrder, bizNo, refundList,note);
 	}
 
 	@Log

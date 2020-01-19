@@ -494,7 +494,8 @@ public class SeniorPayService {
 	/**
 	 * 退款
 	 */
-	public WalletOrder refund(WalletOrder collectOrder, String bizNo, List<RefundInfo> refundList) {
+	public WalletOrder refund(WalletOrder collectOrder, String bizNo, List<RefundInfo> refundList,
+		String note) {
 
 		// 不能超过可退金额
 		Long histValue = getCollectSpand(collectOrder);
@@ -565,6 +566,7 @@ public class SeniorPayService {
 				.tunnelType(TunnelType.YUNST.getValue())
 				.tunnelFee(0 - tunnelFee.longValue())
 				.sourceAppId(sessionThreadLocal.getApp().getId())
+				.note(note)
 				.createTime(new Date())
 				.build();
 			walletOrderDao.insertSelective(refundOrder);

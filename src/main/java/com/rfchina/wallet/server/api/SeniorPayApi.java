@@ -28,7 +28,7 @@ public interface SeniorPayApi {
 		String note, RateSetting rateSetting);
 
 	WalletOrder refund(String accessToken, String bizNo, String collectOrderNo,
-		List<RefundInfo> rList, RateSetting rateSetting);
+		List<RefundInfo> rList, String note, RateSetting rateSetting);
 
 	WalletCollectResp deduction(String accessToken, DeductionReq req, RateSetting rateSetting);
 
