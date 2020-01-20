@@ -31,3 +31,5 @@ data/logs
 /out
 /build
 build
+
+Dockerfile.o
