@@ -9,7 +9,9 @@ import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EmailUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderStatus;
+import com.rfchina.wallet.domain.misc.EnumDef.OrderType;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.BalanceJob;
 import com.rfchina.wallet.domain.model.BalanceJobCriteria;
@@ -360,6 +362,7 @@ public class SeniorBalanceService {
 		// 加载钱包数据
 		WalletOrderCriteria OrderExample = new WalletOrderCriteria();
 		OrderExample.createCriteria()
+			.andTypeNotEqualTo(OrderType.FINANCE.getValue())
 			.andStatusEqualTo(OrderStatus.SUCC.getValue())
 			.andEndTimeBetween(beginDate, endDate);
 		OrderExample.setOrderByClause("id asc");
