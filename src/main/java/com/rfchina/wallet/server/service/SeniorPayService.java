@@ -270,6 +270,7 @@ public class SeniorPayService {
 				.status(OrderStatus.WAITTING.getValue())
 				.tunnelType(TunnelType.YUNST.getValue())
 				.note("钱包提现")
+				.expireTime(getDefExpireTime(null))
 				.sourceAppId(sessionThreadLocal.getApp().getId())
 				.industryCode(INDUSTRY_CODE)
 				.industryName(INDUSTRY_NAME)
@@ -641,6 +642,7 @@ public class SeniorPayService {
 				.industryCode(req.getIndustryCode())
 				.industryName(req.getIndustryName())
 				.note(req.getNote())
+				.expireTime(getDefExpireTime(null))
 				.sourceAppId(sessionThreadLocal.getApp().getId())
 				.createTime(new Date())
 				.build();

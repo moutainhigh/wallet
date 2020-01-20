@@ -485,7 +485,7 @@ public class YunstBizHandler extends EBankHandler {
 	}
 
 	/**
-	 * 退款
+	 * 协议消费
 	 */
 	public WalletCollectResp consume(WalletOrder order, WalletConsume consume, WalletTunnel payer,
 		WalletTunnel payee, List<WalletCollectMethod> methods) {
