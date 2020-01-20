@@ -3,6 +3,10 @@
 测试环境
 jenkins job: platform-rfwallet-super-server-test
 ```
+## 1.1.0_b36_2020012010_Beta
+### [变动说明]
+- 提现、消费增加超时
+
 ## 1.1.0_b35_2020011910_Beta
 ### [变动说明]
 - 修复实名验证枚举bug
