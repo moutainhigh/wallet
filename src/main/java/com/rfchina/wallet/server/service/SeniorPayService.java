@@ -840,20 +840,19 @@ public class SeniorPayService {
 	}
 
 	@PostMq(routingKey = MqConstant.ORDER_STATUS_CHANGE)
-	public WalletOrder updateOrderStatusWithMq(String orderNo) {
+	public WalletOrder updateOrderStatusWithMq(String orderNo,boolean incQuery) {
+		return updateOrderStatus(orderNo,incQuery);
+	}
+
+
+	public WalletOrder updateOrderStatus(String orderNo,boolean incQuery) {
 		WalletOrder order = verifyService.checkOrder(orderNo, OrderStatus.WAITTING.getValue());
-		return updateOrderStatus(order);
-	}
-
-	@PostMq(routingKey = MqConstant.ORDER_STATUS_CHANGE)
-	public WalletOrder updateOrderStatusWithMq(WalletOrder order) {
-		return updateOrderStatus(order);
-	}
-
-	public WalletOrder updateOrderStatus(WalletOrder order) {
 		EBankHandler handler = handlerHelper.selectByTunnelType(order.getTunnelType());
 		try {
 			lock.acquireLock(LockConstant.LOCK_PAY_ORDER + order.getOrderNo(), 5, 0, 1000);
+			if(incQuery) {
+				order.setCurrTryTimes(order.getCurrTryTimes() + 1);
+			}
 			List<Triple<WalletOrder, WalletFinance, GatewayTrans>> triples = handler
 				.updateOrderStatus(Arrays.asList(order));
 

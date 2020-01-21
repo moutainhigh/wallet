@@ -220,7 +220,7 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 		// 检查代收单
 		WalletOrder collectOrder = verifyService
 			.checkOrder(collectOrderNo, OrderStatus.SUCC.getValue());
-		return seniorPayService.refund(collectOrder, bizNo, refundList,note);
+		return seniorPayService.refund(collectOrder, bizNo, refundList, note);
 	}
 
 	@Log
@@ -304,8 +304,11 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 	}
 
 	private UnifiedConfirmVo getUnifiedConfirmVo(String ticket) {
-		return (UnifiedConfirmVo) redisTemplate.opsForValue()
+		UnifiedConfirmVo result = (UnifiedConfirmVo) redisTemplate.opsForValue()
 			.get(PRE_RECHARGE + ticket);
+		return Optional.ofNullable(result)
+			.orElseThrow(() -> new WalletResponseException(
+				EnumWalletResponseCode.WALLET_TICKET_ERROR));
 	}
 
 	private String saveConfirmVo(UnifiedConfirmVo confirmVo) {

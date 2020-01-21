@@ -114,7 +114,7 @@ public class CollectReq {
 		@AllArgsConstructor
 		public static class Balance {
 
-			@ApiModelProperty(required = true, name = "wallet_id", value = "钱包用户登陆态ID")
+			@ApiModelProperty(required = true, name = "payer_wallet_id", value = "钱包用户登陆态ID")
 			private Long payerWalletId;
 
 			@ApiModelProperty(value = "渠道出资额(单位分)")

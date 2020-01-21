@@ -323,9 +323,8 @@ public class ScheduleService {
 				.selectByExampleWithRowbounds(example, new RowBounds(0, batchSize));
 			for (WalletOrder walletOrder : walletOrders) {
 				try {
-					walletOrder.setCurrTryTimes(walletOrder.getCurrTryTimes() + 1);
 					log.info("开始更新高级订单 [{}]", walletOrder.getOrderNo());
-					seniorPayService.updateOrderStatusWithMq(walletOrder);
+					seniorPayService.updateOrderStatusWithMq(walletOrder.getOrderNo(),true);
 				} catch (Exception e) {
 					log.error("定时更新支付状态, 异常！", e);
 				}

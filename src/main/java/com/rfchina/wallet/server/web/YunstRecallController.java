@@ -59,7 +59,7 @@ public class YunstRecallController {
 			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		});
 
-		seniorPayService.updateOrderStatusWithMq(rpsResp.getReturnValue().getBizOrderNo());
+		seniorPayService.updateOrderStatusWithMq(rpsResp.getReturnValue().getBizOrderNo(), false);
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS.getValue(),
 			"Receive Yunst order recall");
