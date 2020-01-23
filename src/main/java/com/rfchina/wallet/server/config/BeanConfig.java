@@ -74,4 +74,11 @@ public class BeanConfig {
 		return Executors.newFixedThreadPool(2,
 			new BasicThreadFactory.Builder().namingPattern("CacheExec_%d").build());
 	}
+
+	@Bean
+	@Qualifier(value = "walletApiExecutor")
+	public ExecutorService walletApiExecutor() {
+		return Executors.newFixedThreadPool(4,
+				new BasicThreadFactory.Builder().namingPattern("WalletApiExec").build());
+	}
 }

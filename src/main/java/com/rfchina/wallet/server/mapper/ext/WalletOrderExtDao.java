@@ -150,5 +150,22 @@ public interface WalletOrderExtDao extends WalletOrderMapper {
 		@Param("tradeType") Byte tradeType, @Param("status") Byte status,
 		@Param("orderNo") String orderNo, @Param("bizNo") String bizNo);
 
+	/**
+	 * 更新尝试次数
+	 */
+	@Update({"update rf_wallet_order"
+		, "set status = 4"
+		, "where id = #{applyId} and status = 3"
+	})
+	int setApplyStatusFail(@Param("applyId") Long applyId);
+
+	@Select({
+		"select * from rf_wallet_order",
+		"where batch_no = #{batchNo} and biz_no = #{bizNo}"
+	})
+	@ResultMap("com.rfchina.wallet.domain.mapper.WalletOrderMapper.BaseResultMap")
+	WalletOrder selectByBatchNoAndBizNo(@Param("batchNo") String batchNo,
+		@Param("bizNo") String bizNo);
+
 
 }

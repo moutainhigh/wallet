@@ -18,11 +18,13 @@ import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletAuditType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletCardStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletLevel;
+import com.rfchina.wallet.domain.misc.EnumDef.OrderStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletSource;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
+import com.rfchina.wallet.domain.model.ApplyStatusChange;
 import com.rfchina.wallet.domain.model.BankCode;
 import com.rfchina.wallet.domain.model.BankCodeCriteria;
 import com.rfchina.wallet.domain.model.GatewayTrans;
@@ -41,6 +43,7 @@ import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
 import com.rfchina.wallet.domain.model.ext.WalletCardExt;
 import com.rfchina.wallet.server.bank.pudong.domain.predicate.ExactErrPredicate;
+import com.rfchina.wallet.server.mapper.ext.ApplyStatusChangeExtDao;
 import com.rfchina.wallet.server.mapper.ext.GatewayTransExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCompanyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
@@ -102,9 +105,6 @@ public class WalletService {
 	private ConfigService configService;
 
 	@Autowired
-	private ExactErrPredicate exactErrPredicate;
-
-	@Autowired
 	private GatewayTransService gatewayTransService;
 
 	@Autowired
@@ -118,6 +118,10 @@ public class WalletService {
 
 	@Autowired
 	private GatewayTransExtDao gatewayTransDao;
+
+	@Autowired
+	private ApplyStatusChangeExtDao applyStatusChangeExtDao;
+
 
 	/**
 	 * 查询出佣结果
@@ -505,6 +509,29 @@ public class WalletService {
 		}
 
 		walletDao.updateActiveStatus(walletId, status, auditType);
+	}
+
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+	public void setWalletApplyStatus(Long applyId, String userId, String user, String comment) {
+		if (0 >= walletOrderDao.setApplyStatusFail(applyId)) {
+			throw new WalletResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE, "更新申请单状态失败");
+		}
+
+		ApplyStatusChange change = ApplyStatusChange.builder()
+				.applyId(applyId)
+				.auditStatus(OrderStatus.FAIL.getValue().toString())
+				.auditStatusDesc(OrderStatus.FAIL.getValueName())
+				.auditUserId(userId)
+				.auditUser(user)
+				.auditComment(comment)
+				.auditTime(new Date())
+				.createTime(new Date())
+				.oldVal(OrderStatus.SUCC.getValue().toString())
+				.newVal(OrderStatus.FAIL.getValue().toString())
+				.build();
+		if(0 >= applyStatusChangeExtDao.insertSelective(change)){
+			throw new WalletResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE, "插入更新记录失败");
+		}
 	}
 
 }

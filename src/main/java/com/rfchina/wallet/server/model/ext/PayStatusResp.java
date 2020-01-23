@@ -34,9 +34,6 @@ public class PayStatusResp {
 	@ApiModelProperty(name="payee_bank_info", value = "收款银行信息")
 	private BankCode payeeBankInfo;
 
-	@ApiModelProperty(name="payee_bank_info", value = "电子凭证号")
-	private String elecChequeNo;
-
 	@ApiModelProperty(name="note", value = "附言(不超过100)")
 	private String note;
 
@@ -75,4 +72,7 @@ public class PayStatusResp {
 
 	@ApiModelProperty(value = "钱包ID")
 	private Long walletId;
+
+	@ApiModelProperty(name="elec_cheque_no", value = "电子凭证号")
+	private String elecChequeNo;
 }

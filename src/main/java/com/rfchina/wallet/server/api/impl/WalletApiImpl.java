@@ -1,5 +1,6 @@
 package com.rfchina.wallet.server.api.impl;
 
+import com.rfchina.biztools.lock.SimpleExclusiveLock;
 import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.passport.token.EnumTokenType;
 import com.rfchina.passport.token.TokenVerify;
@@ -19,9 +20,11 @@ import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletUserDao;
 import com.rfchina.wallet.domain.misc.EnumDef;
+import com.rfchina.wallet.domain.misc.EnumDef.OrderStatus;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
+import com.rfchina.wallet.domain.model.ApplyStatusChange;
 import com.rfchina.wallet.domain.model.BankCode;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletCard;
@@ -32,16 +35,20 @@ import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
 import com.rfchina.wallet.domain.model.ext.WalletCardExt;
 import com.rfchina.wallet.server.api.WalletApi;
+import com.rfchina.wallet.server.mapper.ext.ApplyStatusChangeExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.WalletCardVo;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.JuniorPayService;
+import com.rfchina.wallet.server.service.MqService;
 import com.rfchina.wallet.server.service.UserService;
 import com.rfchina.wallet.server.service.WalletService;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +63,9 @@ public class WalletApiImpl implements WalletApi {
 
 	@Autowired
 	private JuniorPayService juniorPayService;
+
+	@Autowired
+	private SimpleExclusiveLock lock;
 
 	@Autowired
 	private WalletUserDao walletUserDao;
@@ -73,6 +83,18 @@ public class WalletApiImpl implements WalletApi {
 	private WalletCardDao walletCardDao;
 
 
+	@Autowired
+	private ApplyStatusChangeExtDao applyStatusChangeExtDao;
+
+	@Autowired
+	private MqService mqService;
+
+	@Autowired
+	private ExecutorService walletApiExecutor;
+
+	@Autowired
+	private WalletOrderExtDao walletOrderDao;
+
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
@@ -84,7 +106,7 @@ public class WalletApiImpl implements WalletApi {
 	}
 
 	@Log
-	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER, EnumTokenType.APP})
 	@SignVerify
 	@Override
 	public WalletInfoResp queryWalletInfo(String accessToken,
@@ -93,7 +115,7 @@ public class WalletApiImpl implements WalletApi {
 	}
 
 	@Log
-	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER, EnumTokenType.APP})
 	@SignVerify
 	@Override
 	public WalletInfoResp queryWalletInfoByUserId(String accessToken, Long userId) {
@@ -122,7 +144,7 @@ public class WalletApiImpl implements WalletApi {
 		try {
 			return walletService.createWallet(type, title, source);
 		} catch (Exception e) {
-			log.error("创建钱包失败",e);
+			log.error("创建钱包失败", e);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
 				"创建钱包失败");
 		}
@@ -140,7 +162,7 @@ public class WalletApiImpl implements WalletApi {
 	}
 
 	@Log
-	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER, EnumTokenType.APP})
 	@SignVerify
 	@Override
 	public List<WalletCard> bankCardList(String accessToken, Long walletId) {
@@ -153,10 +175,10 @@ public class WalletApiImpl implements WalletApi {
 	@Override
 	@PostMq(routingKey = MqConstant.WALLET_BANKCARD_BIND)
 	public WalletCardExt bindBankCard(String accessToken, Long walletId, String bankCode,
-		String bankAccount, String depositName, Integer isDef,
-		String telephone) {
-		return walletService.bindBankCard(walletId, bankCode, bankAccount, depositName,
-			isDef, telephone);
+		String bankAccount,
+		String depositName, Integer isDef, String telephone) {
+		return walletService
+			.bindBankCard(walletId, bankCode, bankAccount, depositName, isDef, telephone);
 	}
 
 	@Override
@@ -202,13 +224,14 @@ public class WalletApiImpl implements WalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public ResponseValue sendVerifyCode(String accessToken,
-		Long userId, @ParamValid(pattern = RegexUtil.REGEX_MOBILE) String mobile,
-		@EnumParamValid(valuableEnumClass = com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType.class) Integer type,
-		@ParamValid(nullable = false) String verifyToken, String redirectUrl, String ip) {
+	public ResponseValue sendVerifyCode(String accessToken, Long userId,
+		@ParamValid(pattern = RegexUtil.REGEX_MOBILE) String mobile,
+		@EnumParamValid(valuableEnumClass = com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType.class)
+			Integer type, @ParamValid(nullable = false) String verifyToken, String redirectUrl,
+		String ip) {
 
-		com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType enumSendSmsType = EnumUtil
-			.parse(com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType.class, type);
+		com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType enumSendSmsType = EnumUtil.parse(
+			com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType.class, type);
 
 		if (enumSendSmsType
 			== com.rfchina.wallet.domain.misc.EnumDef.EnumSendSmsType.VERIFY_BINDING_ACCOUNT) {
@@ -227,7 +250,8 @@ public class WalletApiImpl implements WalletApi {
 		//直接发送短信
 		return userService
 			.sendSmsVerifyCode(com.rfchina.wallet.domain.misc.EnumDef.EnumVerifyCodeType.LOGIN,
-				mobile, verifyToken, redirectUrl, enumSendSmsType.msg(), ip);
+				mobile,
+				verifyToken, redirectUrl, enumSendSmsType.msg(), ip);
 	}
 
 	@Log
@@ -248,6 +272,53 @@ public class WalletApiImpl implements WalletApi {
 		}
 
 		return walletUser;
+	}
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
+	@Override
+	public void setStatusFailWithApplyBill(String accessToken, String batchNo, String bizNo,
+		String auditUserId, String auditUser, String auditComment) {
+
+		WalletOrder order = walletOrderDao.selectByBatchNoAndBizNo(batchNo, bizNo);
+		if (null == order) {
+			throw new WalletResponseException(
+				ResponseCode.EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST,
+				"batch_no: " + batchNo + ", biz_no: " + bizNo);
+		}
+
+		Date[] changeTime = {new Date()};
+		ApplyStatusChange statusChange;
+		if (order.getStatus().intValue() != OrderStatus.FAIL.getValue().intValue()) {
+
+			if (order.getStatus().intValue() != OrderStatus.SUCC.getValue().intValue()) {
+				throw new WalletResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+					"申请单状态为成功时才能进行重置为失败操作");
+			}
+
+			statusChange = applyStatusChangeExtDao.selectByApplyId(order.getId());
+			if (null != statusChange) {
+				throw new WalletResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+					"该申请单已进行过状态调整");
+			}
+
+			walletService.setWalletApplyStatus(order.getId(), auditUserId, auditUser, auditComment);
+		} else {
+			statusChange = applyStatusChangeExtDao.selectByApplyId(order.getId());
+			changeTime[0] = statusChange.getCreateTime();
+		}
+
+		walletApiExecutor.execute(() -> mqService.publish(MqService.MqApplyStatusChange.builder()
+			.applyId(order.getId())
+			.tradeNo(order.getBatchNo())
+			.orderNo(order.getBizNo())
+			.newStatus(OrderStatus.FAIL.getValue().intValue())
+			.oldStatus(OrderStatus.SUCC.getValue().intValue())
+			.changeTime(changeTime[0])
+			.msg(auditComment)
+			.build(), MqConstant.WALLET_APPLY_BILL_STATUS_CHANGE));
+
 	}
 
 	@Log

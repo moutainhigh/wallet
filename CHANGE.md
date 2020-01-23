@@ -3,6 +3,34 @@
 测试环境
 jenkins job: platform-rfwallet-super-server-test
 ```
+
+
+## 1.2.0.2019102310_Release
+
+### [变动说明]
+
+1. v1/m/wallet/bank_card/list, v1/m/wallet/query_wallet_info和v1/m/wallet/query_wallet_info_by_uid增加应用令牌的访问权限
+2. 增加重置申请单出款状态为失败接口
+
+## 1.2.0.b3.2019102209_Beta
+
+### [变动说明]
+
+1. v1/m/wallet/bank_card/list, v1/m/wallet/query_wallet_info和v1/m/wallet/query_wallet_info_by_uid增加应用令牌的访问权限
+
+## 1.2.0.b2.2019101711_Beta
+
+### [变动说明]
+
+1. 优化重置代码
+
+
+## 1.2.0.b1.2019100916_Beta
+
+### [变动说明]
+
+1. 增加重置申请单出款状态为失败接口
+
 ## 1.1.0_b36_2020012010_Beta
 ### [变动说明]
 - 提现、消费增加超时

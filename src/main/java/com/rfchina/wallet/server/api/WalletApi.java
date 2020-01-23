@@ -53,9 +53,9 @@ public interface WalletApi {
 	/**
 	 * 查詢钱包流水
 	 *
-	 * @param walletId 钱包ID
+	 * @param walletId  钱包ID
 	 * @param startTime 开始时间
-	 * @param endTime 结束时间
+	 * @param endTime   结束时间
 	 */
 	Pagination<WalletOrder> walletApplyList(String accessToekn, Long walletId, Date startTime,
 		Date endTime, int limit, int offset, Boolean stat);
@@ -96,6 +96,9 @@ public interface WalletApi {
 
 	/**
 	 * 银行支行信息
+	 *
+	 * @param bankCode
+	 * @return
 	 */
 	BankCode bank(String bankCode);
 
@@ -137,4 +140,17 @@ public interface WalletApi {
 	 * 业务查询银行卡信息
 	 */
 	List<WalletCardVo> queryWalletCard(String accessToken, Long walletId);
+
+	/**
+	 * 设置出款申请单状态为失败
+	 *
+	 * @param batchNo      必填, 批次号
+	 * @param bizNo        必填, 业务单号
+	 * @param auditUserId  必填, 设置人ID
+	 * @param auditUser    必填, 设置人
+	 * @param auditComment 必填, 备注
+	 * @return
+	 */
+	void setStatusFailWithApplyBill(String accessToken, String batchNo, String bizNo, String auditUserId,
+			String auditUser, String auditComment);
 }

@@ -33,7 +33,7 @@ public class WalletController {
 	private WalletApi walletApi;
 
 	@ApiOperation("查询支付状态")
-	@PostMapping(UrlConstant.WALLET_APPLY_QUERY)
+	@PostMapping(UrlConstant.M_WALLET_APPLY_QUERY)
 	public ResponseValue<List<PayStatusResp>> queryWalletApply(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "业务凭证号(业务方定义唯一)", required = false, example = "123")
@@ -54,7 +54,7 @@ public class WalletController {
 //	}
 
 	@ApiOperation("查询钱包信息（企业or个人）")
-	@PostMapping(UrlConstant.WALLET_QUERY_INFO)
+	@PostMapping(UrlConstant.M_WALLET_QUERY_INFO)
 	public ResponseValue<WalletInfoResp> queryWalletInfo(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包ID", required = true, example = "2") @RequestParam("wallet_id") Long walletId) {
@@ -65,7 +65,7 @@ public class WalletController {
 	}
 
 	@ApiOperation("通过UID查询钱包信息（企业or个人）")
-	@PostMapping(UrlConstant.WALLET_QUERY_INFO_BY_UID)
+	@PostMapping(UrlConstant.M_WALLET_QUERY_INFO_BY_UID)
 	public ResponseValue<WalletInfoResp> queryWalletInfoByUid(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "用户ID", required = true, example = "2") @RequestParam("user_id") Long userId) {
@@ -94,7 +94,7 @@ public class WalletController {
 	}
 
 	@ApiOperation("开通未审核的钱包")
-	@PostMapping(UrlConstant.CREATE_WALLET)
+	@PostMapping(UrlConstant.M_CREATE_WALLET)
 	public ResponseValue<Wallet> createWallet(@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包类型， 1：企业钱包，2：个人钱包", required = true, example = "2") @RequestParam("type") Byte type,
 		@ApiParam(value = "钱包标题，通常是姓名或公司名", required = true, example = "测试个人钱包") @RequestParam("title")
@@ -106,8 +106,25 @@ public class WalletController {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, wallet);
 	}
 
+	@ApiOperation("设置出款申请单状态为失败")
+	@PostMapping(UrlConstant.M_APPLY_BILL_SET_STATUS_FAIL)
+	public ResponseValue<Wallet> setStatusFailWithApplyBill(
+		@RequestParam("access_token") String accessToken,
+		@ApiParam(value = "批次号", required = true, example = "2") @RequestParam("batch_no") String batchNo,
+		@ApiParam(value = "业务单号", required = true, example = "2") @RequestParam("biz_no") String bizNo,
+		@ApiParam(value = "设置人ID", required = true, example = "1") @RequestParam("audit_user_id")
+			String auditUserId,
+		@ApiParam(value = "设置人", required = true, example = "rfchina") @RequestParam("audit_user") String auditUser,
+		@ApiParam(value = "备注", required = true, example = "出款失败") @RequestParam("audit_comment")
+			String auditComment) {
+		walletApi.setStatusFailWithApplyBill(accessToken, batchNo, bizNo, auditUserId, auditUser,
+			auditComment);
+
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
+	}
+
 	@ApiOperation("富慧通审核企业商家钱包")
-	@PostMapping(UrlConstant.ACTIVE_WALLET_COMPANY)
+	@PostMapping(UrlConstant.M_ACTIVE_WALLET_COMPANY)
 	public ResponseValue activeWalletCompany(@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包ID", required = true, example = "2") @RequestParam("wallet_id") Long walletId,
 		@ApiParam(value = "公司名称", required = true) @RequestParam("company_name") String companyName,
@@ -121,7 +138,7 @@ public class WalletController {
 	}
 
 	@ApiOperation("富慧通审核个人商家钱包")
-	@PostMapping(UrlConstant.ACTIVE_WALLET_PERSON)
+	@PostMapping(UrlConstant.M_ACTIVE_WALLET_PERSON)
 	public ResponseValue activeWalletPerson(@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包ID", required = true, example = "2") @RequestParam("wallet_id") Long walletId,
 		@ApiParam(value = "姓名", required = true) @RequestParam("name") String name,
@@ -135,7 +152,7 @@ public class WalletController {
 	}
 
 	@ApiOperation("钱包绑定的银行卡列表")
-	@PostMapping(UrlConstant.WALLET_BANK_CARD_LIST)
+	@PostMapping(UrlConstant.M_WALLET_BANK_CARD_LIST)
 	public ResponseValue<List<WalletCard>> bindingBankCardList(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId) {
@@ -144,7 +161,7 @@ public class WalletController {
 	}
 
 	@ApiOperation("绑定银行卡(对公)")
-	@PostMapping(UrlConstant.WALLET_BANK_CARD_BIND)
+	@PostMapping(UrlConstant.M_WALLET_BANK_CARD_BIND)
 	public ResponseValue<WalletCard> bindBankCard(@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
 		@ApiParam(value = "银行帐号", required = true) @RequestParam("bank_account") String bankAccount,
@@ -189,7 +206,7 @@ public class WalletController {
 	}
 
 	@ApiOperation("发送短信验证码")
-	@PostMapping(UrlConstant.WALLET_SEND_VERIFY_CODE)
+	@PostMapping(UrlConstant.M_WALLET_SEND_VERIFY_CODE)
 	public ResponseValue<Map<String, Object>> sendVerifyCode(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "手机号码", required = true) @RequestParam(value = "mobile") String mobile,
@@ -209,7 +226,7 @@ public class WalletController {
 	}
 
 	@ApiOperation("通过短信验证码登录")
-	@PostMapping(UrlConstant.WALLET_LOGIN_WITH_VERIFY_CODE)
+	@PostMapping(UrlConstant.M_WALLET_LOGIN_WITH_VERIFY_CODE)
 	public ResponseValue<WalletUser> loginWithVerifyCode(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "手机号码", required = true) @RequestParam("mobile") String mobile,
