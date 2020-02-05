@@ -8,6 +8,7 @@ import com.rfchina.platform.common.misc.Triple;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
+import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.BizValidateType;
 import com.rfchina.wallet.domain.misc.EnumDef.DirtyType;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderStatus;
@@ -299,7 +300,8 @@ public class SeniorPayService {
 
 			String signedParams = ((YunstBizHandler) handler)
 				.pwdGwConfirm(withdrawOrder, payer, jumpUrl, customerIp);
-			signedParams = configService.getYunstPwdConfirmUrl() + "?" + signedParams;
+			String confirmUrl = validateType == EnumDef.WithdrawValidateType.SMS.getValue().intValue()?configService.getYunstSmsConfirmUrl():configService.getYunstPwdConfirmUrl();
+			signedParams = confirmUrl + "?" + signedParams;
 			result.setSignedParams(signedParams);
 			return result;
 		} finally {
