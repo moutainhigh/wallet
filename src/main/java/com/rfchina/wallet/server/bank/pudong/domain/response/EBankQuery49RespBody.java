@@ -7,8 +7,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import lombok.Data;
 
-@XmlRootElement(name = "body")
-@XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement(name = "body") @XmlAccessorType(XmlAccessType.FIELD)
 @Data
 public class EBankQuery49RespBody {
 
