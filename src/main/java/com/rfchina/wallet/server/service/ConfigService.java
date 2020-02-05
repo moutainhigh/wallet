@@ -155,6 +155,9 @@ public class ConfigService {
 	@Value("${yunst.pwdConfirm.url}")
 	private String yunstPwdConfirmUrl;
 
+	@Value("${yunst.smsConfirm.url}")
+	private String yunstSmsConfirmUrl;
+
 	@Value("${yunst.anony.walletId}")
 	private Long anonyPayerWalletId;
 
