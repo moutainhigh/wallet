@@ -235,7 +235,7 @@ public class SeniorPayService {
 	/**
 	 * 提现
 	 */
-	public WithdrawResp withdraw(Long walletId, WalletCard walletCard, Long amount, String jumpUrl,
+	public WithdrawResp withdraw(Long walletId, WalletCard walletCard, Long amount, Byte validateType, String jumpUrl,
 		String customerIp) {
 
 		// 检查钱包
@@ -285,7 +285,7 @@ public class SeniorPayService {
 				.cardPro(walletCard.getIsPublic().intValue() == 1 ? CardPro.COMPANY.getValue()
 					: CardPro.PERSON.getValue())
 				.bankAccount(walletCard.getBankAccount())
-				.validateType(BizValidateType.PASSWORD.getValue())
+				.validateType(validateType)
 				.createTime(new Date())
 				.build();
 			walletWithdrawDao.insertSelective(withdraw);

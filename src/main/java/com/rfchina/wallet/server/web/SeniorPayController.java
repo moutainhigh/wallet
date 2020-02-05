@@ -25,6 +25,7 @@ import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.model.ext.WithdrawResp;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import java.text.SimpleDateFormat;
@@ -82,12 +83,13 @@ public class SeniorPayController {
 		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
 		@ApiParam(value = "银行卡id", required = true) @RequestParam("card_id") Long cardId,
 		@ApiParam(value = "金额", required = true) @RequestParam("amount") Long amount,
+		@ApiParam(value = "交易验证方式 0：无验证 1：短信 2：密码") @RequestParam("validate_type") Byte validateType,
 		@ApiParam(value = "跳转地址", required = true) @RequestParam(value = "jump_url") String jumpUrl,
 		@ApiParam(value = "客户Ip", required = true) @RequestParam(value = "customer_ip") String customerIp
 	) {
 
 		WithdrawResp result = seniorPayApi
-			.withdraw(accessToken, walletId, cardId, amount, jumpUrl, customerIp);
+			.withdraw(accessToken, walletId, cardId, amount, validateType, jumpUrl, customerIp);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result);
 	}
 
