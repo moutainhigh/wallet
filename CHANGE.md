@@ -22,6 +22,10 @@ jenkins job: platform-rfwallet-super-server-test
 ### [变动说明]
 1. 增加重置申请单出款状态为失败接口
 
+## 1.1.0_b38_2020020516_Beta
+### [变动说明]
+- 提现sdk新增验证类型传参数
+
 ## 1.1.0_b37_2020012315_Beta
 ### [变动说明]
 - 合并master分支

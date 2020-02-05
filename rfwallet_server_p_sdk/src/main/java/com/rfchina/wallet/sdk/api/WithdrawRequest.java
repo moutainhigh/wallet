@@ -31,6 +31,9 @@ public class WithdrawRequest extends  AbstractApiRequest {
   @ApiModelProperty("钱包id")
   private Long walletId ;
 
+  @ApiModelProperty("交易验证方式 0：无验证 1：短信 2：密码")
+  private Integer validateType ;
+
 
   @Override
   public String getApiUrl() {
@@ -62,6 +65,9 @@ public class WithdrawRequest extends  AbstractApiRequest {
       }
       if(walletId != null){
         parameters.put("wallet_id", walletId.toString());
+      }
+      if(validateType != null){
+        parameters.put("validate_type", validateType.toString());
       }
     return parameters;
   }

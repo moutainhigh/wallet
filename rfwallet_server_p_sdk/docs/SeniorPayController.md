@@ -473,6 +473,7 @@
 |customer_ip|是|客户Ip|
 |jump_url|是|跳转地址|
 |wallet_id|是|钱包id|
+|validate_type|否|交易验证方式 0：无验证 1：短信 2：密码|
 
 返回数据
 ```
