@@ -49,7 +49,7 @@ spec:
               mountPath: %{app_path}/logs
               subPath: %{service_name}/logs
             - name: %{service_name}
-              mountPath: %{app_path}/files
+              mountPath: %{app_path}/balance_file
               subPath: %{service_name}/files
             - name: %{service_name}
               mountPath: %{app_path}/temp
