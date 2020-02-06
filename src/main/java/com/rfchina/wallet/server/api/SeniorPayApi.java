@@ -18,7 +18,7 @@ public interface SeniorPayApi {
 
 	RechargeResp recharge(String accessToken, Long walletId, Long cardId, Long amount);
 
-	WithdrawResp withdraw(String accessToken, Long walletId, Long cardId, Long amount, Byte validateType,
+	WithdrawResp withdraw(String accessToken, Long walletId, Long cardId, Long amount, Integer validateType,
 		String jumpUrl, String customerIp);
 
 	WalletCollectResp collect(String accessToken, CollectReq req, String jumpUrl,
