@@ -298,11 +298,19 @@ public class SeniorPayService {
 			EBankHandler handler = handlerHelper.selectByTunnelType(withdrawOrder.getTunnelType());
 			WithdrawResp result = handler.withdraw(withdrawOrder, withdraw, payer);
 
-			String signedParams = ((YunstBizHandler) handler)
-				.pwdGwConfirm(withdrawOrder, payer, jumpUrl, customerIp);
-			String confirmUrl = validateType == EnumDef.WithdrawValidateType.SMS.getValue().intValue()?configService.getYunstSmsConfirmUrl():configService.getYunstPwdConfirmUrl();
-			signedParams = confirmUrl + "?" + signedParams;
-			result.setSignedParams(signedParams);
+			// 签名密码验证参数
+			if (validateType  == BizValidateType.PASSWORD.getValue().byteValue()) {
+				String signedParams = ((YunstBizHandler) handler)
+						.pwdGwConfirm(withdrawOrder, payer, jumpUrl, customerIp);
+				signedParams = configService.getYunstPwdConfirmUrl() + "?" + signedParams;
+				result.setSignedParams(signedParams);
+			} else if (validateType == BizValidateType.SMS.getValue().byteValue()) {
+				String signedParams = ((YunstBizHandler) handler)
+						.smsGwConfirm(withdrawOrder, payer, customerIp);
+				signedParams = configService.getYunstSmsConfirmUrl() + "?" + signedParams;
+				result.setSignedParams(signedParams);
+			}
+
 			return result;
 		} finally {
 			lock.unLock(LockConstant.LOCK_PAY_ORDER + orderNo);
@@ -405,7 +413,7 @@ public class SeniorPayService {
 			} else if (collect.getValidateType().byteValue() == BizValidateType.SMS.getValue()) {
 				String signedParams = ((YunstBizHandler) handler)
 					.smsGwConfirm(collectOrder, payer, customerIp);
-				signedParams = configService.getYunstPwdConfirmUrl() + "?" + signedParams;
+				signedParams = configService.getYunstSmsConfirmUrl() + "?" + signedParams;
 				result.setSignedParams(signedParams);
 			}
 
