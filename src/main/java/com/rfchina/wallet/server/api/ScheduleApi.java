@@ -27,6 +27,6 @@ public interface ScheduleApi {
 	/**
 	 * 定时计费
 	 */
-	void quartzCharging();
+	void quartzCharging(String balanceDate);
 
 }
