@@ -654,14 +654,28 @@ public class YunstBizHandler extends EBankHandler {
 							walletCollectInfoDao
 								.accuRefundAmount(detail.getCollectInfoId(), detail.getAmount());
 						});
-
+						walletCollectDao.reduceRefundLimit(refund.getCollectOrderId(),order.getAmount());
 					}
 					moneyLogDao.insertSelective(builder.build());
 				}
 
 
 			}
+			// 处理失败的退款
+			else if((OrderStatus.FAIL.getValue().byteValue() == order.getStatus()
+					|| OrderStatus.CLOSED.getValue().byteValue() == order.getStatus())
+					&& OrderType.REFUND.getValue().byteValue() == order.getType().byteValue()
+				&& (order.getBizTag() == null || !EnumBizTag.RECORD.contains(order.getBizTag()))){
+				order.setBizTag(
+						EnumBizTag.RECORD.and(Optional.ofNullable(order.getBizTag()).orElse((byte) 0)));
+				walletOrderDao.updateByPrimaryKeySelective(order);
 
+				WalletRefund walletRefund = walletRefundDao.selectByOrderId(order.getId());
+				WalletCollect walletCollect = walletCollectDao.selectByOrderId(walletRefund.getCollectOrderId());
+				walletCollect.setRefundLimit(walletCollect.getRefundLimit() + order.getAmount());
+				walletCollect.setRemainTunnelFee(walletCollect.getRemainTunnelFee() - order.getTunnelFee());
+				walletCollectDao.updateByPrimaryKeySelective(walletCollect);
+			}
 			return order;
 		} catch (Exception e) {
 			dealUndefinedError(order, e);

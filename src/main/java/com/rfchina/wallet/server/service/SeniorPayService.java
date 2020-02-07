@@ -8,58 +8,19 @@ import com.rfchina.platform.common.misc.Triple;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
-import com.rfchina.wallet.domain.misc.EnumDef;
-import com.rfchina.wallet.domain.misc.EnumDef.BizValidateType;
-import com.rfchina.wallet.domain.misc.EnumDef.DirtyType;
-import com.rfchina.wallet.domain.misc.EnumDef.OrderStatus;
-import com.rfchina.wallet.domain.misc.EnumDef.OrderType;
-import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
+import com.rfchina.wallet.domain.misc.EnumDef.*;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
-import com.rfchina.wallet.domain.model.GatewayTrans;
-import com.rfchina.wallet.domain.model.Wallet;
-import com.rfchina.wallet.domain.model.WalletCard;
-import com.rfchina.wallet.domain.model.WalletClearing;
-import com.rfchina.wallet.domain.model.WalletCollect;
-import com.rfchina.wallet.domain.model.WalletCollectInfo;
-import com.rfchina.wallet.domain.model.WalletCollectMethod;
+import com.rfchina.wallet.domain.model.*;
 import com.rfchina.wallet.domain.model.WalletCollectMethod.WalletCollectMethodBuilder;
-import com.rfchina.wallet.domain.model.WalletConsume;
-import com.rfchina.wallet.domain.model.WalletFinance;
-import com.rfchina.wallet.domain.model.WalletOrder;
-import com.rfchina.wallet.domain.model.WalletRecharge;
-import com.rfchina.wallet.domain.model.WalletRefund;
-import com.rfchina.wallet.domain.model.WalletRefundDetail;
-import com.rfchina.wallet.domain.model.WalletTunnel;
-import com.rfchina.wallet.domain.model.WalletWithdraw;
 import com.rfchina.wallet.server.bank.yunst.response.SmsPayResp;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstQueryBalanceResult;
-import com.rfchina.wallet.server.mapper.ext.WalletClearingExtDao;
-import com.rfchina.wallet.server.mapper.ext.WalletCollectExtDao;
-import com.rfchina.wallet.server.mapper.ext.WalletCollectInfoExtDao;
-import com.rfchina.wallet.server.mapper.ext.WalletCollectMethodExtDao;
-import com.rfchina.wallet.server.mapper.ext.WalletConsumeExtDao;
-import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
-import com.rfchina.wallet.server.mapper.ext.WalletRechargeExtDao;
-import com.rfchina.wallet.server.mapper.ext.WalletRefundDetailExtDao;
-import com.rfchina.wallet.server.mapper.ext.WalletRefundExtDao;
-import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
-import com.rfchina.wallet.server.mapper.ext.WalletWithdrawExtDao;
+import com.rfchina.wallet.server.mapper.ext.*;
 import com.rfchina.wallet.server.model.ext.AgentPayReq.Reciever;
-import com.rfchina.wallet.server.model.ext.CollectReq;
+import com.rfchina.wallet.server.model.ext.*;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod;
-import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Alipay;
-import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Balance;
-import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.BankCard;
-import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.CodePay;
-import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.WalletPayMethodBuilder;
-import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Wechat;
-import com.rfchina.wallet.server.model.ext.DeductionReq;
-import com.rfchina.wallet.server.model.ext.RechargeResp;
+import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.*;
 import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
-import com.rfchina.wallet.server.model.ext.SettleResp;
-import com.rfchina.wallet.server.model.ext.WalletCollectResp;
-import com.rfchina.wallet.server.model.ext.WithdrawResp;
 import com.rfchina.wallet.server.msic.EnumWallet.CardPro;
 import com.rfchina.wallet.server.msic.EnumWallet.ChannelType;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
@@ -69,17 +30,13 @@ import com.rfchina.wallet.server.service.handler.common.EBankHandler;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBizHandler;
 import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
-import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -378,6 +335,7 @@ public class SeniorPayService {
 				.orderId(collectOrder.getId())
 				.agentWalletId(configService.getAgentEntWalletId())
 				.refundLimit(req.getAmount())
+				.remainTunnelFee(tunnelFee.longValue())
 				.validateType(validateType)
 				.createTime(new Date())
 				.build();
@@ -529,6 +487,7 @@ public class SeniorPayService {
 						EnumWalletResponseCode.REFUND_RECEIVER_NOT_EXISTS,
 						r.getWalletId().toString())
 					);
+
 				// 分帐金额不能小于退款金额+已退金额+已清金额
 				if (collectInfo.getBudgetAmount() < collectInfo.getRefundAmount()
 					+ collectInfo.getClearAmount() + r.getAmount()) {
@@ -545,9 +504,10 @@ public class SeniorPayService {
 			List<WalletCollectMethod> methods = walletCollectMethodDao
 				.selectByCollectId(walletCollect.getId(), OrderType.COLLECT.getValue());
 			WalletPayMethod payMethod = getPayMethod(methods.get(0));
-			tunnelFee = new BigDecimal(refundAmount)
+			tunnelFee = new BigDecimal(walletCollect.getRefundLimit()-refundAmount)
 				.multiply(payMethod.getRate(configService))
 				.setScale(0, EBankHandler.getRoundingMode());
+
 		} catch (Exception e) {
 			log.error("手续费错误", e);
 		}
@@ -575,16 +535,21 @@ public class SeniorPayService {
 				.progress(GwProgress.WAIT_SEND.getValue())
 				.status(OrderStatus.WAITTING.getValue())
 				.tunnelType(TunnelType.YUNST.getValue())
-				.tunnelFee(0 - tunnelFee.longValue())
+				.tunnelFee(tunnelFee.longValue() - walletCollect.getRemainTunnelFee())
 				.sourceAppId(sessionThreadLocal.getApp().getId())
 				.note(note)
 				.createTime(new Date())
 				.build();
 			walletOrderDao.insertSelective(refundOrder);
 
+			walletCollect.setRefundLimit(walletCollect.getRefundLimit() - refundAmount);
+			walletCollect.setRemainTunnelFee(tunnelFee.longValue());
+			walletCollectDao.updateByPrimaryKey(walletCollect);
+
 			// 记录退款单
 			WalletRefund refund = WalletRefund.builder()
 				.orderId(refundOrder.getId())
+				.collectOrderId(collectOrder.getId())
 				.collectOrderNo(collectOrder.getOrderNo())
 				.agentWalletId(configService.getAgentEntWalletId())
 				.collectAmount(collectOrder.getAmount())
