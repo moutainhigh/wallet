@@ -18,6 +18,8 @@ import com.rfchina.wallet.server.bank.yunst.response.YunstBaseResp;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayInvokeStatus;
 import com.rfchina.wallet.server.msic.EnumYunst.YunstMethodName;
 import com.rfchina.wallet.server.service.CacheService;
+
+import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TimeZone;
@@ -97,6 +99,7 @@ public class YunstTpl {
 				.methodName(reqPkg.getMethod())
 				.traceId(MDC.get("traceId"))
 				.invokeStatus(status.getValue())
+				.invokeTime(new Date())
 				.isAuth(isAuth != null ? Integer.valueOf(isAuth ? 1 : 0).byteValue() : null)
 				.req(JsonUtil.toJSON(reqPkg))
 				.resp(respBody)
