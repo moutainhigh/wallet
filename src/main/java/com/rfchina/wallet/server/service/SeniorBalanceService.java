@@ -375,8 +375,9 @@ public class SeniorBalanceService {
 					.map(order -> {
 						return OrderType.WITHDRAWAL.getValue().byteValue() == order.getType().byteValue() ?
 							order.getOrderNo() + SPLIT_TAG + order.getAmount().longValue()
-							:order.getOrderNo() + SPLIT_TAG + order.getAmount().longValue()
-								+ SPLIT_TAG + (0 - order.getTunnelFee().longValue()) ;
+							:order.getOrderNo() + SPLIT_TAG + order.getAmount().longValue() + SPLIT_TAG
+								+ (OrderType.REFUND.getValue().byteValue() == order.getType() ?
+									0 - order.getTunnelFee().longValue() : order.getTunnelFee().longValue()) ;
 					}).collect(Collectors.toList());
 			});
 
