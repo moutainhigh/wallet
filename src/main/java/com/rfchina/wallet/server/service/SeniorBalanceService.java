@@ -353,8 +353,9 @@ public class SeniorBalanceService {
 					.selectByExampleWithRowbounds(tunnelExample, new RowBounds(offset, limit));
 				return list.stream()
 					.map(v -> {
-						return
-							v.getOrderNo() + SPLIT_TAG + v.getTotalAmount().longValue() + SPLIT_TAG
+						return "提现".equals(v.getTunnelOrderType()) ?
+							v.getOrderNo() + SPLIT_TAG + v.getTotalAmount().longValue()
+							:v.getOrderNo() + SPLIT_TAG + v.getTotalAmount().longValue() + SPLIT_TAG
 								+ v.getChannelFeeAmount().longValue();
 					}).collect(Collectors.toList());
 			});
@@ -372,7 +373,9 @@ public class SeniorBalanceService {
 					.selectByExampleWithRowbounds(OrderExample, new RowBounds(offset, limit));
 				return orders.stream()
 					.map(order -> {
-							return order.getOrderNo() + SPLIT_TAG + order.getAmount().longValue()
+						return OrderType.WITHDRAWAL.getValue().byteValue() == order.getType().byteValue() ?
+							order.getOrderNo() + SPLIT_TAG + order.getAmount().longValue()
+							:order.getOrderNo() + SPLIT_TAG + order.getAmount().longValue()
 								+ SPLIT_TAG + (0 - order.getTunnelFee().longValue()) ;
 					}).collect(Collectors.toList());
 			});

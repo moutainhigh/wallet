@@ -614,6 +614,7 @@ public class SeniorPayService {
 				.progress(GwProgress.WAIT_SEND.getValue())
 				.status(OrderStatus.WAITTING.getValue())
 				.tunnelType(TunnelType.YUNST.getValue())
+				.tunnelFee(0L)
 				.industryCode(req.getIndustryCode())
 				.industryName(req.getIndustryName())
 				.note(req.getNote())
