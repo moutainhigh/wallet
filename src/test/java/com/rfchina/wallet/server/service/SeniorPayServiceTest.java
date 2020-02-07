@@ -7,162 +7,158 @@ import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.server.SpringBaseTest;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
-import com.rfchina.wallet.server.model.ext.AgentPayReq;
-import com.rfchina.wallet.server.model.ext.CollectReq;
+import com.rfchina.wallet.server.model.ext.*;
 import com.rfchina.wallet.server.model.ext.CollectReq.Reciever;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Balance;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.CodePay;
-import com.rfchina.wallet.server.model.ext.DeductionReq;
-import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
-import com.rfchina.wallet.server.model.ext.SettleResp;
-import com.rfchina.wallet.server.model.ext.WalletCollectResp;
-import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Arrays;
+
 @Slf4j
 public class SeniorPayServiceTest extends SpringBaseTest {
 
-	@Autowired
-	private SeniorPayService seniorPayService;
+    @Autowired
+    private SeniorPayService seniorPayService;
 
-	@Autowired
-	private WalletCollectExtDao walletCollectDao;
+    @Autowired
+    private WalletCollectExtDao walletCollectDao;
 
-	@Autowired
-	private WalletOrderExtDao walletOrderDao;
+    @Autowired
+    private WalletOrderExtDao walletOrderDao;
 
-	@Autowired
-	private WalletCardDao walletCardDao;
+    @Autowired
+    private WalletCardDao walletCardDao;
 
-	private Long payerWalletId = 10035L;
-	private Long payeeWalletId = 10074L;
-	private Long platWalletId = 10000L;
-	private Long cardId = 17L;
+    private Long payerWalletId = 10035L;
+    private Long payeeWalletId = 10074L;
+    private Long platWalletId = 10000L;
+    private Long cardId = 17L;
 
 
-	/**
-	 * 更新订单状态
-	 */
-	@Test
-	public void updateOrderStatus() {
-		String orderNo = "DWR2020010204994699";
-		seniorPayService.updateOrderStatusWithMq(orderNo);
-	}
+    /**
+     * 更新订单状态
+     */
+    @Test
+    public void updateOrderStatus() {
+        String orderNo = "DWR2020010204994699";
+        seniorPayService.updateOrderStatusWithMq(orderNo,false);
+    }
 
-	/**
-	 * 充值
-	 */
-	@Test
-	public void recharge() {
-		WalletCard walletCard = walletCardDao.selectByPrimaryKey(cardId);
-		RechargeResp resp = seniorPayService.recharge(payerWalletId, walletCard, 1L);
-		log.info("recharge.resp = {}", JsonUtil.toJSON(resp));
-	}
+    /**
+     * 充值
+     */
+    @Test
+    public void recharge() {
+        WalletCard walletCard = walletCardDao.selectByPrimaryKey(cardId);
+        RechargeResp resp = seniorPayService.recharge(payerWalletId, walletCard, 1L);
+        log.info("recharge.resp = {}", JsonUtil.toJSON(resp));
+    }
 
-	@Test
-	public void rechargeConfirm() {
-		WalletOrder order = walletOrderDao.selectByPrimaryKey(14L);
-		seniorPayService.smsConfirm(order,
-			"{\"sign\":\"\",\"tphtrxcrtime\":\"\",\"tphtrxid\":0,\"trxflag\":\"trx\",\"trxsn\":\"\"}",
-			"575636", "113.194.30.199");
-	}
+    @Test
+    public void rechargeConfirm() {
+        WalletOrder order = walletOrderDao.selectByPrimaryKey(14L);
+        seniorPayService.smsConfirm(order,
+                "{\"sign\":\"\",\"tphtrxcrtime\":\"\",\"tphtrxid\":0,\"trxflag\":\"trx\",\"trxsn\":\"\"}",
+                "575636", "113.194.30.199");
+    }
 
-	@Test
-	public void withdraw() {
-		WalletCard walletCard = walletCardDao.selectByPrimaryKey(cardId);
-		WalletOrder withdraw = seniorPayService
-			.withdraw(payerWalletId, walletCard, 1L, "http://192.168.197.75:7777/#/withdrawSuccess",
-				"8.8.8.8");
-		log.info("withdraw.resp = {}", JsonUtil.toJSON(withdraw));
-	}
+    @Test
+    public void withdraw() {
+        WalletCard walletCard = walletCardDao.selectByPrimaryKey(cardId);
+        WalletOrder withdraw = seniorPayService
+                .withdraw(payerWalletId, walletCard, 1L, (byte)2, "http://192.168.197.75:7777/#/withdrawSuccess",
+                        "8.8.8.8");
+        log.info("withdraw.resp = {}", JsonUtil.toJSON(withdraw));
+    }
 
-	/**
-	 * 代收
-	 */
-	@Test
-	public void collect() {
+    /**
+     * 代收
+     */
+    @Test
+    public void collect() {
 //		Balance balance = Balance.builder()
 //			.payerWalletId(platWalletId)
 //			.amount(1L)
 //			.build();
-		CodePay codePay = CodePay.builder()
-			.payType((byte) 41)
-			.authcode("134686334254524314")
-			.amount(1L)
-			.build();
+        CodePay codePay = CodePay.builder()
+                .payType((byte) 41)
+                .authcode("134686334254524314")
+                .amount(1L)
+                .build();
 //		BankCard bankCard = BankCard.builder()
 //			.payType(CollectPayType.BANKCARD.getValue())
 //			.bankCardNo("6214850201481956")
 //			.amount(1L)
 //			.build();
 
-		Reciever reciever = Reciever.builder()
-			.walletId(payeeWalletId)
-			.amount(1L)
-			.build();
-		CollectReq req = CollectReq.builder()
-			.bizNo(String.valueOf(System.currentTimeMillis()))
-			.amount(1L)
-			.note("")
-			.fee(0L)
-			.validateType((byte) 0)
-			.expireTime(null)
-			.industryCode("1010")
-			.industryName("保险代理")
-			.recievers(Arrays.asList(reciever))
-			.walletPayMethod(WalletPayMethod.builder().codePay(codePay).build())
-			.build();
-		WalletCollectResp collect = seniorPayService.collect(req, "", "");
-		log.info("预代收 {}", JsonUtil.toJSON(collect));
-	}
+        Reciever reciever = Reciever.builder()
+                .walletId(payeeWalletId)
+                .amount(1L)
+                .build();
+        CollectReq req = CollectReq.builder()
+                .bizNo(String.valueOf(System.currentTimeMillis()))
+                .amount(1L)
+                .note("")
+                .fee(0L)
+                .validateType((byte) 0)
+                .expireTime(null)
+                .industryCode("1010")
+                .industryName("保险代理")
+                .recievers(Arrays.asList(reciever))
+                .walletPayMethod(WalletPayMethod.builder().codePay(codePay).build())
+                .build();
+        WalletCollectResp collect = seniorPayService.collect(req, "", "");
+        log.info("预代收 {}", JsonUtil.toJSON(collect));
+    }
 
 
-	@Test
-	public void agentPay() {
-		AgentPayReq.Reciever reciever = new AgentPayReq.Reciever();
-		reciever.setWalletId(payeeWalletId);
-		reciever.setAmount(1L);
-		reciever.setFeeAmount(0L);
-		WalletOrder order = walletOrderDao.selectByOrderNo("WC20191204761161144");
-		SettleResp resp = seniorPayService
-			.agentPay(order, String.valueOf(System.currentTimeMillis())
-				, reciever, "note");
-		log.info("agent pay {}", resp);
-	}
+    @Test
+    public void agentPay() {
+        AgentPayReq.Reciever reciever = new AgentPayReq.Reciever();
+        reciever.setWalletId(payeeWalletId);
+        reciever.setAmount(1L);
+        reciever.setFeeAmount(0L);
+        WalletOrder order = walletOrderDao.selectByOrderNo("WC20191204761161144");
+        SettleResp resp = seniorPayService
+                .agentPay(order, String.valueOf(System.currentTimeMillis())
+                        , reciever, "note");
+        log.info("agent pay {}", resp);
+    }
 
-	@Test
-	public void refund() {
-		RefundInfo refundInfo = new RefundInfo();
-		refundInfo.setWalletId(platWalletId);
-		refundInfo.setAmount(1L);
-		WalletOrder collectOrder = walletOrderDao.selectByOrderNo("WC20191101684530808");
-		WalletOrder refund = seniorPayService
-			.refund(collectOrder, String.valueOf(System.currentTimeMillis()),
-				Arrays.asList(refundInfo));
-		log.info("refund {}", refund);
-	}
+    @Test
+    public void refund() {
+        RefundInfo refundInfo = new RefundInfo();
+        refundInfo.setWalletId(platWalletId);
+        refundInfo.setAmount(1L);
+        WalletOrder collectOrder = walletOrderDao.selectByOrderNo("WC20191101684530808");
+        WalletOrder refund = seniorPayService
+                .refund(collectOrder, String.valueOf(System.currentTimeMillis()),
+                        Arrays.asList(refundInfo),"");
+        log.info("refund {}", refund);
+    }
 
-	@Test
-	public void deduction() {
-		Balance balance = Balance.builder()
-			.payerWalletId(payeeWalletId)
-			.amount(1L)
-			.build();
-		DeductionReq req = DeductionReq.builder()
-			.bizNo(String.valueOf(System.currentTimeMillis()))
-			.amount(1L)
-			.fee(0L)
-			.walletPayMethod(WalletPayMethod.builder().balance(balance).build())
-			.industryCode("1010")
-			.industryName("保险代理")
-			.build();
-		WalletCollectResp resp = seniorPayService.deduction(req);
-		log.info("deduction {}", resp);
-	}
+    @Test
+    public void deduction() {
+        Balance balance = Balance.builder()
+                .payerWalletId(payeeWalletId)
+                .amount(1L)
+                .build();
+        DeductionReq req = DeductionReq.builder()
+                .bizNo(String.valueOf(System.currentTimeMillis()))
+                .amount(1L)
+                .fee(0L)
+                .walletPayMethod(WalletPayMethod.builder().balance(balance).build())
+                .industryCode("1010")
+                .industryName("保险代理")
+                .build();
+        WalletCollectResp resp = seniorPayService.deduction(req);
+        log.info("deduction {}", resp);
+    }
 
 
 }

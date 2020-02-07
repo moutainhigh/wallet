@@ -45,7 +45,7 @@ public abstract class YunstBaseTest extends BaseTest {
         String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
         params.put("sign", sign);
 
-        return postAndValidateSuccessCode(BASE_URL, UrlConstant.CREATE_WALLET, params);
+        return postAndValidateSuccessCode(BASE_URL, UrlConstant.M_CREATE_WALLET, params);
     }
 
     protected Map<String, Object> walletLogList(Long walletId, String startTime, String endTime, int limit, long offset, Boolean stat){
@@ -63,7 +63,7 @@ public abstract class YunstBaseTest extends BaseTest {
 
         Optional.ofNullable(startTime).ifPresent( o -> params.put("start_time", startTime) );
         Optional.ofNullable(endTime).ifPresent( o -> params.put("end_time", endTime) );
-        return postAndValidateSuccessCode(BASE_URL, UrlConstant.WALLET_LOG_LIST, params);
+        return postAndValidateSuccessCode(BASE_URL, UrlConstant.M_WALLET_LOG_LIST, params);
     }
 
     protected Map<String, Object> bindingBankCardList(Long walletId){
@@ -75,7 +75,7 @@ public abstract class YunstBaseTest extends BaseTest {
         String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
         params.put("sign", sign);
 
-        return postAndValidateSuccessCode(BASE_URL, UrlConstant.WALLET_BANK_CARD_LIST, params);
+        return postAndValidateSuccessCode(BASE_URL, UrlConstant.M_WALLET_BANK_CARD_LIST, params);
     }
 
     protected Map<String, Object> bindBankCard(Long walletId, String bankCode, String bankAccount, String depositName, Integer isDef,
@@ -93,7 +93,7 @@ public abstract class YunstBaseTest extends BaseTest {
         String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
         params.put("sign", sign);
 
-        return postAndValidateSuccessCode(BASE_URL, UrlConstant.WALLET_BANK_CARD_BIND, params);
+        return postAndValidateSuccessCode(BASE_URL, UrlConstant.M_WALLET_BANK_CARD_BIND, params);
     }
 
     protected Map<String, Object> bankClassList(){
@@ -130,7 +130,7 @@ public abstract class YunstBaseTest extends BaseTest {
         params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
         String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
         params.put("sign", sign);
-        return postAndValidateSuccessCode(BASE_URL, UrlConstant.WALLET_QUERY_INFO_BY_UID, params);
+        return postAndValidateSuccessCode(BASE_URL, UrlConstant.M_WALLET_QUERY_INFO_BY_UID, params);
     }
 
     protected Map<String, Object> sendVerifyCode(String mobile, Integer type, String ip){
@@ -143,7 +143,7 @@ public abstract class YunstBaseTest extends BaseTest {
         params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
         String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
         params.put("sign", sign);
-        return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_SEND_VERIFY_CODE, params, 2033);
+        return postAndValidateSpecCode(BASE_URL, UrlConstant.M_WALLET_SEND_VERIFY_CODE, params, 2033);
     }
 
     protected Map<String, Object> loginWithVerify(String mobile, String verifyCode, Integer type, String ip){
@@ -157,6 +157,6 @@ public abstract class YunstBaseTest extends BaseTest {
         params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
         String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
         params.put("sign", sign);
-        return postAndValidateSpecCode(BASE_URL, UrlConstant.WALLET_LOGIN_WITH_VERIFY_CODE, params, 2033);
+        return postAndValidateSpecCode(BASE_URL, UrlConstant.M_WALLET_LOGIN_WITH_VERIFY_CODE, params, 2033);
     }
 }

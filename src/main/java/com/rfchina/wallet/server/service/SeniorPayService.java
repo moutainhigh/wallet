@@ -544,7 +544,7 @@ public class SeniorPayService {
 
 			walletCollect.setRefundLimit(walletCollect.getRefundLimit() - refundAmount);
 			walletCollect.setRemainTunnelFee(tunnelFee.longValue());
-			walletCollectDao.updateByPrimaryKey(walletCollect);
+			walletCollectDao.updateByPrimaryKeySelective(walletCollect);
 
 			// 记录退款单
 			WalletRefund refund = WalletRefund.builder()
