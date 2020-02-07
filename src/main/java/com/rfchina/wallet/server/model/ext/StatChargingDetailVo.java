@@ -11,7 +11,8 @@ public class StatChargingDetailVo extends StatChargingDetail {
 	public String getEvent() {
 		EnumYunst.YunstMethodName name = EnumUtil
 			.parse(EnumYunst.YunstMethodName.class, super.getMethodName());
-		return name != null ? name.getValueName() : null;
+		return name != null ? name.getValueName().replace("代收","支付")
+				.replace("代付","收入"): null;
 	}
 
 }
