@@ -45,7 +45,7 @@ public class SeniorPayServiceTest extends SpringBaseTest {
      */
     @Test
     public void updateOrderStatus() {
-        String orderNo = "DWR2020010204994699";
+        String orderNo = "TWB2020020944946343";
         seniorPayService.updateOrderStatusWithMq(orderNo,false);
     }
 
@@ -133,9 +133,9 @@ public class SeniorPayServiceTest extends SpringBaseTest {
     @Test
     public void refund() {
         RefundInfo refundInfo = new RefundInfo();
-        refundInfo.setWalletId(platWalletId);
+        refundInfo.setWalletId(305L);
         refundInfo.setAmount(1L);
-        WalletOrder collectOrder = walletOrderDao.selectByOrderNo("WC20191101684530808");
+        WalletOrder collectOrder = walletOrderDao.selectByOrderNo("TWC2020020937514490");
         WalletOrder refund = seniorPayService
                 .refund(collectOrder, String.valueOf(System.currentTimeMillis()),
                         Arrays.asList(refundInfo),"");

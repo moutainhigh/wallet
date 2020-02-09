@@ -22,6 +22,9 @@ jenkins job: platform-rfwallet-super-server-test
 ### [变动说明]
 1. 增加重置申请单出款状态为失败接口
 
+## 1.1.0_b40_2020020914_Beta
+### [变动说明]
+- 修复手续费SQL异常
 
 ## 1.1.0_b40_2020020713_Beta
 ### [变动说明]

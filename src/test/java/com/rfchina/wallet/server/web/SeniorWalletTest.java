@@ -192,11 +192,11 @@ public class SeniorWalletTest extends WalletBaseTest {
 
 	@Test
 	public void testRefund() {
-		String refundList = "[{\"wallet_id\":305,\"amount\":350}]";
+		String refundList = "[{\"wallet_id\":305,\"amount\":1}]";
 		Map<String, String> params = new HashMap<>();
 		params.put("access_token", getAccessToken(appId, appSecret));
 		params.put("biz_no", "jUnitTest");
-		params.put("collect_order_no", "TWC2020020674339259");
+		params.put("collect_order_no", "TWC2020020937514490");
 		params.put("refund_list", refundList);
 		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
 		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
