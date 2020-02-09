@@ -22,7 +22,7 @@ public interface WalletCollectExtDao extends WalletCollectMapper {
     @Update({
             "update rf_wallet_collect  ",
             "set refund_limit = refund_limit - #{amount}",
-            "where collect_order_id = #{collectOrderId}"
+            "where order_id = #{collectOrderId}"
     })
     int reduceRefundLimit(@Param("collectOrderId") Long collectOrderId, @Param("amount") Long amount);
 }

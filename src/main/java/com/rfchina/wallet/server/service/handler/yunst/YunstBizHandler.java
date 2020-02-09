@@ -654,7 +654,6 @@ public class YunstBizHandler extends EBankHandler {
 							walletCollectInfoDao
 								.accuRefundAmount(detail.getCollectInfoId(), detail.getAmount());
 						});
-						walletCollectDao.reduceRefundLimit(refund.getCollectOrderId(),order.getAmount());
 					}
 					moneyLogDao.insertSelective(builder.build());
 				}
