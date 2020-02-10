@@ -58,7 +58,7 @@ public class ReportController {
 	@ApiOperation("手续费重做")
 	@PostMapping(UrlConstant.REPORT_CHARGING_REDO)
 	public ResponseValue chargingRedo(
-		@ApiParam(name = "access_token", value = "访问令牌", required = true) @RequestParam("access_token") String accessToken,
+		@ApiParam(name = "access_token", value = "访问令牌", required = true) @RequestParam(value = "access_token",required = false) String accessToken,
 		@ApiParam(name = "start_time", value = "开始时间", required = true) @RequestParam("start_time") Date startTime,
 		@ApiParam(name = "end_time", value = "结束时间", required = true) @RequestParam("end_time") Date endTime) {
 
