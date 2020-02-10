@@ -12,7 +12,6 @@ import com.rfchina.wallet.server.msic.UrlConstant;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -59,10 +58,10 @@ public class ReportController {
 	@PostMapping(UrlConstant.REPORT_CHARGING_REDO)
 	public ResponseValue chargingRedo(
 		@ApiParam(name = "access_token", value = "访问令牌", required = true) @RequestParam(value = "access_token",required = false) String accessToken,
-		@ApiParam(name = "start_time", value = "开始时间", required = true) @RequestParam("start_time") Date startTime,
-		@ApiParam(name = "end_time", value = "结束时间", required = true) @RequestParam("end_time") Date endTime) {
+		@ApiParam(name = "start_time", value = "开始时间", required = true) @RequestParam("start_time") String startTime,
+		@ApiParam(name = "end_time", value = "结束时间", required = true) @RequestParam("end_time") String endTime) {
 
-		seniorChargingApi.chargingRedo(accessToken, startTime, endTime);
+		seniorChargingApi.chargingRedo(accessToken, DateUtil.parse(startTime,DateUtil.STANDARD_DTAE_PATTERN), DateUtil.parse(endTime,DateUtil.STANDARD_DTAE_PATTERN));
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
 
