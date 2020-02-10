@@ -48,8 +48,8 @@ public class SeniorChargingApiImpl implements SeniorChargingApi {
 	}
 
 	@Log
-	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
-	@SignVerify
+//	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+//	@SignVerify
 	@Override
 	public void chargingRedo(String accessToken, Date startTime, Date endTime) {
 		String key = String.format("%s_%s",
