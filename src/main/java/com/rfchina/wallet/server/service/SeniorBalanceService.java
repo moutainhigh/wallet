@@ -180,8 +180,8 @@ public class SeniorBalanceService {
 		// 发送通知邮件
 		try {
 			EmailUtil.EmailBody emailBody = new EmailUtil.EmailBody(
-				"**********[钱包服务]对账异常通知 " + statDate, errMsg, configService.getEmailSender(),
-				configService.getEmailSender());
+				"**********[钱包服务]["+configService.getEnv()+"]对账异常通知 " + statDate, errMsg,
+					configService.getEmailSender(),configService.getEmailSender());
 			String errorContract = configService.getNotifyContract();
 			if (StringUtils.isNotBlank(errorContract)) {
 				for (String email : errorContract.split(",")) {

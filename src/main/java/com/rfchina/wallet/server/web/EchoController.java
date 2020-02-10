@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 public class EchoController {
 
-	@Value(value = "${srv.base.home}")
+	@Value(value = "${srv.base.home:.}")
 	private String srvBaseHome;
 
 	@RequestMapping(value = "index", method = RequestMethod.GET)

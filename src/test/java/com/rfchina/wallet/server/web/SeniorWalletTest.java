@@ -203,4 +203,19 @@ public class SeniorWalletTest extends WalletBaseTest {
 		params.put("sign", sign);
 		postAndValidateSpecCode(BASE_URL, UrlConstant.SENIOR_WALLET_REFUND, params, 1001);
 	}
+
+	@Test
+	public void testAgentPay() {
+		String receiveList = "{\"wallet_id\":299,\"amount\":2}";
+		Map<String, String> params = new HashMap<>();
+		params.put("access_token", getAccessToken(appId, appSecret));
+		params.put("biz_no", "jUnitTest");
+		params.put("collect_order_no", "TWC2020021013344408");
+		params.put("agent_pay_req", receiveList);
+		params.put("note", "手动代付");
+		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+		params.put("sign", sign);
+		postAndValidateSpecCode(BASE_URL, UrlConstant.SENIOR_WALLET_AGENT_PAY, params, 1001);
+	}
 }

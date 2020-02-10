@@ -111,7 +111,7 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 		@ParamValid(nullable = false) Long cardId,
 		@ParamValid(nullable = false) Long amount,
 		@ParamValid(nullable = false) Integer validateType,
-		@ParamValid(nullable = false) String jumpUrl,
+		@ParamValid(nullable = true) String jumpUrl,
 		@ParamValid(nullable = false) String customerIp) {
 
 		WalletCard walletCard = walletCardDao.selectByPrimaryKey(cardId);

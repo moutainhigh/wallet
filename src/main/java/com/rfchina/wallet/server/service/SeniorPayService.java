@@ -832,23 +832,25 @@ public class SeniorPayService {
 			List<Triple<WalletOrder, WalletFinance, GatewayTrans>> triples = handler
 				.updateOrderStatus(Arrays.asList(order));
 
-			WalletTunnel walletTunnel = walletTunnelDao
-				.selectByWalletId(order.getWalletId(), order.getTunnelType());
-			// 通联查余额
-			YunstQueryBalanceResult result = yunstUserHandler
-				.queryBalance(walletTunnel.getBizUserId());
-			// 更新通道余额
-			walletTunnel.setBalance(result.getAllAmount());
-			walletTunnel.setFreezenAmount(result.getFreezenAmount());
-			walletTunnel.setIsDirty(DirtyType.NORMAL.getValue());
-			walletTunnelDao.updateByPrimaryKeySelective(walletTunnel);
-			// 更新钱包余额
-			Wallet wallet = walletDao.selectByPrimaryKey(walletTunnel.getWalletId());
-			wallet.setWalletBalance(walletTunnel.getBalance());
-			wallet.setFreezeAmount(walletTunnel.getFreezenAmount());
-			walletDao.updateByPrimaryKeySelective(wallet);
-
-			return triples.get(0).x;
+			WalletOrder rs = triples.get(0).x;
+			if(OrderStatus.SUCC.getValue().byteValue() == rs.getStatus().byteValue()) {
+				WalletTunnel walletTunnel = walletTunnelDao
+						.selectByWalletId(order.getWalletId(), order.getTunnelType());
+				// 通联查余额
+				YunstQueryBalanceResult result = yunstUserHandler
+						.queryBalance(walletTunnel.getBizUserId());
+				// 更新通道余额
+				walletTunnel.setBalance(result.getAllAmount());
+				walletTunnel.setFreezenAmount(result.getFreezenAmount());
+				walletTunnel.setIsDirty(DirtyType.NORMAL.getValue());
+				walletTunnelDao.updateByPrimaryKeySelective(walletTunnel);
+				// 更新钱包余额
+				Wallet wallet = walletDao.selectByPrimaryKey(walletTunnel.getWalletId());
+				wallet.setWalletBalance(walletTunnel.getBalance());
+				wallet.setFreezeAmount(walletTunnel.getFreezenAmount());
+				walletDao.updateByPrimaryKeySelective(wallet);
+			}
+			return rs;
 		} finally {
 			lock.unLock(LockConstant.LOCK_PAY_ORDER + order.getOrderNo());
 		}
