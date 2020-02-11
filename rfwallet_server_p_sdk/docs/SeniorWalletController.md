@@ -43,7 +43,6 @@
     order_no:""  , //订单号
     pay_method:""  , //支付方式 1：余额 2：微信 4：支付宝 8:刷卡支付 16：银行卡
     progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
-    remain_amount:""  , //交易余额
     remark:""  , //备注
     source_app_id:""  , //来源APPID
     start_time:""  , //开始时间

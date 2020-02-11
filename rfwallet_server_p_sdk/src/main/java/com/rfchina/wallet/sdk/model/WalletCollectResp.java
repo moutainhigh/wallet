@@ -67,9 +67,6 @@ public class WalletCollectResp  {
     @ApiModelProperty("进度。1：待发送 2：已发送 3：已接收结果")
     private Integer progress ;
 
-    @ApiModelProperty("交易余额")
-    private Long remainAmount ;
-
     @ApiModelProperty("备注")
     private String remark ;
 

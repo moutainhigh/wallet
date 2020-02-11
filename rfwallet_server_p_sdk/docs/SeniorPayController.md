@@ -48,7 +48,6 @@
     order_no:""  , //订单号
     pay_method:""  , //支付方式 1：余额 2：微信 4：支付宝 8:刷卡支付 16：银行卡
     progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
-    remain_amount:""  , //交易余额
     remark:""  , //备注
     source_app_id:""  , //来源APPID
     start_time:""  , //开始时间
@@ -139,7 +138,6 @@
     pay_info:""  , //扫码支付信息/ JS 支付串信息/微信原生 H5 支付串信息
     pay_method:""  , //支付方式 1：余额 2：微信 4：支付宝 8:刷卡支付 16：银行卡
     progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
-    remain_amount:""  , //交易余额
     remark:""  , //备注
     signed_params:""  , //密码确认时输入参数
     source_app_id:""  , //来源APPID
@@ -201,7 +199,6 @@
     pay_info:""  , //扫码支付信息/ JS 支付串信息/微信原生 H5 支付串信息
     pay_method:""  , //支付方式 1：余额 2：微信 4：支付宝 8:刷卡支付 16：银行卡
     progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
-    remain_amount:""  , //交易余额
     remark:""  , //备注
     signed_params:""  , //密码确认时输入参数
     source_app_id:""  , //来源APPID
@@ -262,7 +259,6 @@
     order_no:""  , //订单号
     pay_method:""  , //支付方式 1：余额 2：微信 4：支付宝 8:刷卡支付 16：银行卡
     progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
-    remain_amount:""  , //交易余额
     remark:""  , //备注
     source_app_id:""  , //来源APPID
     start_time:""  , //开始时间
@@ -324,7 +320,6 @@
     pay_info:""  , //扫码支付信息/ JS支付串信息/ 微信原生H5支付串信息
     pay_method:""  , //支付方式 1：余额 2：微信 4：支付宝 8:刷卡支付 16：银行卡
     progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
-    remain_amount:""  , //交易余额
     remark:""  , //备注
     sms_confirm:""  , //短信验证
     source_app_id:""  , //来源APPID
@@ -388,7 +383,6 @@
     order_no:""  , //订单号
     pay_method:""  , //支付方式 1：余额 2：微信 4：支付宝 8:刷卡支付 16：银行卡
     progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
-    remain_amount:""  , //交易余额
     remark:""  , //备注
     source_app_id:""  , //来源APPID
     start_time:""  , //开始时间
@@ -471,8 +465,8 @@
 |amount|是|金额|
 |card_id|是|银行卡id|
 |customer_ip|是|客户Ip|
-|jump_url|是|跳转地址|
 |wallet_id|是|钱包id|
+|jump_url|否|跳转地址|
 |validate_type|否|交易验证方式 0：无验证 1：短信 2：密码|
 
 返回数据
@@ -499,7 +493,6 @@
     order_no:""  , //订单号
     pay_method:""  , //支付方式 1：余额 2：微信 4：支付宝 8:刷卡支付 16：银行卡
     progress:""  , //进度。1：待发送 2：已发送 3：已接收结果
-    remain_amount:""  , //交易余额
     remark:""  , //备注
     signed_params:""  , //密码确认时输入参数
     source_app_id:""  , //来源APPID

@@ -25,11 +25,11 @@ public class WithdrawRequest extends  AbstractApiRequest {
   @ApiModelProperty("客户Ip")
   private String customerIp ;
 
-  @ApiModelProperty("跳转地址")
-  private String jumpUrl ;
-
   @ApiModelProperty("钱包id")
   private Long walletId ;
+
+  @ApiModelProperty("跳转地址")
+  private String jumpUrl ;
 
   @ApiModelProperty("交易验证方式 0：无验证 1：短信 2：密码")
   private Integer validateType ;
@@ -60,11 +60,11 @@ public class WithdrawRequest extends  AbstractApiRequest {
       if(customerIp != null){
         parameters.put("customer_ip", customerIp.toString());
       }
-      if(jumpUrl != null){
-        parameters.put("jump_url", jumpUrl.toString());
-      }
       if(walletId != null){
         parameters.put("wallet_id", walletId.toString());
+      }
+      if(jumpUrl != null){
+        parameters.put("jump_url", jumpUrl.toString());
       }
       if(validateType != null){
         parameters.put("validate_type", validateType.toString());
