@@ -22,6 +22,9 @@ jenkins job: platform-rfwallet-super-server-test
 ### [变动说明]
 1. 增加重置申请单出款状态为失败接口
 
+## 1.1.0_2020021115_Release
+### [变动说明]
+- 通联钱包发布
 
 ## 1.1.0_b41_2020021109_Beta
 ### [变动说明]
