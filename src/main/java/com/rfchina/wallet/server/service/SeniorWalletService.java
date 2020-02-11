@@ -514,7 +514,7 @@ public class SeniorWalletService {
 			&&
 			EnumDef.WalletTunnelAuditStatus.AUDIT_SUCCESS.getValue().byteValue() == walletTunnel
 				.getStatus() &&
-			walletTunnel.getCheckTime().compareTo(walletTunnel.getCheckTime()) == -1) {
+			walletTunnel.getCheckTime().compareTo(DateUtil.parse(memberInfo.getCheckTime(), DateUtil.STANDARD_DTAETIME_PATTERN)) == -1) {
 			walletTunnel.setFailReason(null);
 			walletTunnel.setSecurityTel(memberInfo.getPhone());
 			walletTunnel.setCheckTime(
