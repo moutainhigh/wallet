@@ -109,7 +109,7 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 		@ParamValid(nullable = false) String accessToken,
 		@ParamValid(nullable = false) Long walletId,
 		@ParamValid(nullable = false) Long cardId,
-		@ParamValid(nullable = false) Long amount,
+		@ParamValid(nullable = false,min = 1) Long amount,
 		@ParamValid(nullable = false) Integer validateType,
 		@ParamValid(nullable = true) String jumpUrl,
 		@ParamValid(nullable = false) String customerIp) {
