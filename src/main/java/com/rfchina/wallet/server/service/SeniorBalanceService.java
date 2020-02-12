@@ -39,10 +39,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
@@ -354,8 +351,8 @@ public class SeniorBalanceService {
 				return list.stream()
 					.map(v -> {
 						return "提现".equals(v.getTunnelOrderType()) ?
-							v.getOrderNo() + SPLIT_TAG + v.getTotalAmount().longValue()
-							:v.getOrderNo() + SPLIT_TAG + v.getTotalAmount().longValue() + SPLIT_TAG
+								v.getOrderNo() + SPLIT_TAG + v.getTotalAmount().longValue()+ SPLIT_TAG + 0
+								:v.getOrderNo() + SPLIT_TAG + v.getTotalAmount().longValue() + SPLIT_TAG
 								+ v.getChannelFeeAmount().longValue();
 					}).collect(Collectors.toList());
 			});
@@ -373,11 +370,8 @@ public class SeniorBalanceService {
 					.selectByExampleWithRowbounds(OrderExample, new RowBounds(offset, limit));
 				return orders.stream()
 					.map(order -> {
-						return OrderType.WITHDRAWAL.getValue().byteValue() == order.getType().byteValue() ?
-							order.getOrderNo() + SPLIT_TAG + order.getAmount().longValue()
-							:order.getOrderNo() + SPLIT_TAG + order.getAmount().longValue() + SPLIT_TAG
-								+ (OrderType.REFUND.getValue().byteValue() == order.getType() ?
-									0 - order.getTunnelFee().longValue() : order.getTunnelFee().longValue()) ;
+						return order.getOrderNo() + SPLIT_TAG + order.getAmount().longValue() + SPLIT_TAG
+								+  Optional.ofNullable(order.getTunnelFee()).orElse(0L);
 					}).collect(Collectors.toList());
 			});
 
