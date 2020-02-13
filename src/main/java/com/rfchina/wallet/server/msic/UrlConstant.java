@@ -118,9 +118,9 @@ public class UrlConstant {
 	public static final String WALLET_LIST = VERSION + "/m/wallet/wallet_list";
 
 	/**
-	 * 开通未审核的钱包
+	 * 开通未审核的商家钱包
 	 */
-	public static final String M_CREATE_WALLET = VERSION + "/m/wallet/create_wallet";
+	public static final String M_CREATE_MCH_WALLET = VERSION + "/m/wallet/create_mch_wallet";
 
 	/**
 	 * 设置出款申请单状态为失败
@@ -130,7 +130,7 @@ public class UrlConstant {
 	/**
 	 * 富慧通审核企业商家钱包
 	 */
-	public static final String M_ACTIVE_WALLET_COMPANY = VERSION + "/m/wallet/active_wallet_company";
+	public static final String M_AUDIT_WALLET_COMPANY = VERSION + "/m/wallet/audit_wallet_company";
 
 	/**
 	 * 富慧通审核个人商家钱包

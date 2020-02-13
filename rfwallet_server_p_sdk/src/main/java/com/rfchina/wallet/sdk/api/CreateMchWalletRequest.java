@@ -11,10 +11,16 @@ import java.util.List;
 
 /** 开通未审核的钱包 */
 @Builder
-public class CreateWalletRequest extends  AbstractApiRequest {
+public class CreateMchWalletRequest extends  AbstractApiRequest {
 
   @ApiModelProperty("access_token")
   private String accessToken ;
+
+  @ApiModelProperty("公司名称")
+  private String companyName ;
+
+  @ApiModelProperty("商家ID")
+  private String mchId ;
 
   @ApiModelProperty("钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户")
   private Integer source ;
@@ -25,10 +31,16 @@ public class CreateWalletRequest extends  AbstractApiRequest {
   @ApiModelProperty("钱包类型， 1：企业钱包，2：个人钱包")
   private Integer type ;
 
+  @ApiModelProperty("公司邮箱")
+  private String email ;
+
+  @ApiModelProperty("公司电话")
+  private String tel ;
+
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/wallet/create_wallet";
+    return "/wallet_server/v1/m/wallet/create_mch_wallet";
   }
 
   @Override
@@ -42,6 +54,12 @@ public class CreateWalletRequest extends  AbstractApiRequest {
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
       }
+      if(companyName != null){
+        parameters.put("company_name", companyName.toString());
+      }
+      if(mchId != null){
+        parameters.put("mch_id", mchId.toString());
+      }
       if(source != null){
         parameters.put("source", source.toString());
       }
@@ -50,6 +68,12 @@ public class CreateWalletRequest extends  AbstractApiRequest {
       }
       if(type != null){
         parameters.put("type", type.toString());
+      }
+      if(email != null){
+        parameters.put("email", email.toString());
+      }
+      if(tel != null){
+        parameters.put("tel", tel.toString());
       }
     return parameters;
   }

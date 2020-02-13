@@ -1,5 +1,6 @@
 package com.rfchina.wallet.server.api;
 
+import com.rfchina.platform.common.annotation.ParamValid;
 import com.rfchina.platform.common.misc.ResponseValue;
 import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.wallet.domain.model.BankCode;
@@ -24,11 +25,6 @@ public interface WalletApi {
 	 */
 	List<PayStatusResp> queryWalletApply(String accessToken, String bizNo, String batchNo);
 
-//	/**
-//	 * 重做订单
-//	 */
-//	void redoWalletApply(String accessToken, Long walletLogId);
-
 	/**
 	 * 查询钱包明细
 	 */
@@ -48,7 +44,8 @@ public interface WalletApi {
 	/**
 	 * 开通未审核的钱包
 	 */
-	Wallet createWallet(String accessToken, Byte type, String title, Byte source);
+	Wallet createMchWallet(String accessToken, Byte type, String title, Byte source,
+		 String mchId, String companyName, String tel, String email);
 
 	/**
 	 * 查詢钱包流水
@@ -103,15 +100,9 @@ public interface WalletApi {
 	BankCode bank(String bankCode);
 
 	/**
-	 * 富慧通审核个人商家钱包
-	 */
-	void activeWalletPerson(Long walletId, String name, Byte idType, String idNo, Byte status,
-		Long auditType);
-
-	/**
 	 * 富慧通审核企业商家钱包
 	 */
-	void activeWalletCompany(Long walletId, String companyName, Byte status, Long auditType,
+	void auditWalletCompany(Long walletId, String companyName, Byte status, Long auditType,
 		String phone, String email);
 
 	/**

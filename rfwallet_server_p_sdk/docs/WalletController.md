@@ -1,6 +1,6 @@
 ###  富慧通审核企业商家钱包
 
-请求地址: /wallet_server/v1/m/wallet/active_wallet_company
+请求地址: /wallet_server/v1/m/wallet/audit_wallet_company
 
 请求类型: POST
 
@@ -16,34 +16,6 @@
 |wallet_id|是|钱包ID|
 |email|否|公司邮箱|
 |phone|否|公司电话|
-
-返回数据
-```
-{
-  "code": 1001,//状态码
-  "msg": ""//消息
-  
-}
-```
-
-###  富慧通审核个人商家钱包
-
-请求地址: /wallet_server/v1/m/wallet/active_wallet_person
-
-请求类型: POST
-
-请求参数:
-
-
-| 参数名 | 是否必须 | 描述 |
-|:-- |:-- |:--   |
-|access_token|是|access_token|
-|audit_type|是|审核方式，1：运营，2：银企直连，4：通联|
-|id_no|是|证件号|
-|id_type|是|证件类型，1:身份证|
-|name|是|姓名|
-|status|是|钱包状态: 1:待审核，2：激活,3：禁用|
-|wallet_id|是|钱包ID|
 
 返回数据
 ```
@@ -126,7 +98,7 @@
 
 ###  开通未审核的钱包
 
-请求地址: /wallet_server/v1/m/wallet/create_wallet
+请求地址: /wallet_server/v1/m/wallet/create_mch_wallet
 
 请求类型: POST
 
@@ -136,9 +108,13 @@
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
 |access_token|是|access_token|
+|company_name|是|公司名称|
+|mch_id|是|商家ID|
 |source|是|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
 |title|是|钱包标题，通常是姓名或公司名|
 |type|是|钱包类型， 1：企业钱包，2：个人钱包|
+|email|否|公司邮箱|
+|tel|否|公司电话|
 
 返回数据
 ```

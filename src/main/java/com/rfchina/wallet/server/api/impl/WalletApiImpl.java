@@ -137,12 +137,17 @@ public class WalletApiImpl implements WalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public Wallet createWallet(String accessToken,
+	public Wallet createMchWallet(String accessToken,
 		@ParamValid(nullable = false) Byte type,
 		@ParamValid(nullable = false) String title,
-		@ParamValid(nullable = false) Byte source) {
+		@ParamValid(nullable = false) Byte source,
+		@ParamValid(nullable = false) String mchId,
+		@ParamValid(nullable = false) String companyName,
+		@ParamValid(nullable = true) String tel,
+		@ParamValid(nullable = true) String email
+	) {
 		try {
-			return walletService.createWallet(type, title, source);
+			return walletService.createMchWallet(type, title, source, mchId,companyName,tel,email);
 		} catch (Exception e) {
 			log.error("创建钱包失败", e);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
@@ -206,18 +211,9 @@ public class WalletApiImpl implements WalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public void activeWalletPerson(Long walletId, String name, Byte idType, String idNo,
-		Byte status, Long auditType) {
-		walletService.activeWalletPerson(walletId, name, idType, idNo, status, auditType);
-	}
-
-	@Log
-	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
-	@SignVerify
-	@Override
-	public void activeWalletCompany(Long walletId, String companyName, Byte status,
+	public void auditWalletCompany(Long walletId, String companyName, Byte status,
 		Long auditType, String phone, String email) {
-		walletService.activeWalletCompany(walletId, companyName, status, auditType, phone, email);
+		walletService.auditWalletCompany(walletId, companyName, status, auditType, phone, email);
 	}
 
 	@Log

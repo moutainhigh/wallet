@@ -210,7 +210,7 @@ public class SeniorWalletTest extends WalletBaseTest {
 		Map<String, String> params = new HashMap<>();
 		params.put("access_token", getAccessToken(appId, appSecret));
 		params.put("biz_no", "jUnitTest");
-		params.put("collect_order_no", "TWC2020021013344408");
+		params.put("collect_order_no", "TWC2020021321088436");
 		params.put("agent_pay_req", receiveList);
 		params.put("note", "手动代付");
 		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
