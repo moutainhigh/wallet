@@ -817,7 +817,10 @@ public class SeniorPayService {
 
 	@PostMq(routingKey = MqConstant.ORDER_STATUS_CHANGE)
 	public WalletOrder updateOrderStatusWithMq(String orderNo,boolean incQuery) {
-		return updateOrderStatus(orderNo,incQuery);
+		WalletOrder walletOrder = updateOrderStatus(orderNo, incQuery);
+		return Optional.ofNullable(walletOrder)
+				.filter(order -> OrderStatus.WAITTING.getValue().byteValue() != order.getStatus().byteValue())
+				.orElse(null);
 	}
 
 
