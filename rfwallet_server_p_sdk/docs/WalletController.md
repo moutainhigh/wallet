@@ -26,6 +26,105 @@
 }
 ```
 
+###  银行地区列表
+
+请求地址: /wallet_server/v1/wallet/bank/area_list
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|class_code|是|银行类型编码|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+   , "data": [ {
+} ] 
+}
+```
+
+###  银行类别列表
+
+请求地址: /wallet_server/v1/wallet/bank/class_list
+
+请求类型: POST
+
+请求参数:
+
+
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+   , "data": [ {
+} ] 
+}
+```
+
+###  银行支行列表
+
+请求地址: /wallet_server/v1/wallet/bank/bank_list
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|area_code|是|地区编码|
+|class_code|是|银行类型编码|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+   , "data": [ {
+} ] 
+}
+```
+
+###  银行支行信息
+
+请求地址: /wallet_server/v1/wallet/bank/bank
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|bank_code|是|银行编码|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+   , "data":  {
+    area_code:""  , //所属地区
+    bank_code:""  , //银行行号
+    bank_name:""  , //银行名称
+    city_name:""  , //所属省市
+    class_code:""  , //所属分类代码
+    class_name:""  , //所属分类行名
+    id:""  , //ID
+    province_name:""  , //所属地区
+    weight:""   //
+}  
+}
+```
+
 ###  绑定银行卡(对公)
 
 请求地址: /wallet_server/v1/m/wallet/bank_card/bind
@@ -69,6 +168,31 @@
     verify_time:""  , //验证时间
     wallet_id:""   //钱包ID
 }  
+}
+```
+
+###  绑定商家钱包
+
+请求地址: /wallet_server/v1/m/wallet/bind_mch_wallet
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|mch_id|是|商家ID|
+|wallet_id|是|钱包id|
+|source|否|钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+  
 }
 ```
 

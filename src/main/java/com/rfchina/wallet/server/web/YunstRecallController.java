@@ -41,7 +41,7 @@ public class YunstRecallController {
 
 
 	/**
-	 * 云商通充值回调
+	 * 云商通支付回调
 	 */
 	@RequestMapping(value = UrlConstant.YUNST_ORDER_RECALL)
 	public ResponseValue<String> orderRecall(HttpServletRequest request) {

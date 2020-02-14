@@ -109,6 +109,12 @@ public class WalletService {
 	@Autowired
 	private ApplyStatusChangeExtDao applyStatusChangeExtDao;
 
+	@Autowired
+	private WalletEventService walletEventService;
+
+	@Autowired
+	private WalletOwnerDao walletOwnerDao;
+
 
 	/**
 	 * 查询出佣结果
@@ -172,27 +178,6 @@ public class WalletService {
 		}).collect(Collectors.toList());
 
 	}
-
-//	/**
-//	 * 重做问题单
-//	 */
-//	public void redo(Long walletApplyId) {
-//		log.info("重做问题单 [{}]", walletApplyId);
-//		WalletApply walletApply = walletApplyExtDao.selectByPrimaryKey(walletApplyId);
-//		if (walletApply == null) {
-//			throw new RfchinaResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST,
-//				walletApplyId.toString());
-//		}
-//
-//		if (walletApply.getStatus().byteValue() != WalletApplyStatus.REDO.getValue()) {
-//			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_APPLY_STATUS_ERROR);
-//		}
-//
-//		GatewayTrans trans = gatewayTransService.createTrans(walletApply);
-//		walletApply.setCurrTransId(trans.getId());
-//		walletApply.setStatus(WalletApplyStatus.WAIT_SEND.getValue());
-//		walletApplyExtDao.updateByPrimaryKey(walletApply);
-//	}
 
 
 	/**
@@ -277,9 +262,8 @@ public class WalletService {
 	/**
 	 * 开通未审核的钱包
 	 */
-	@PostMq(routingKey = MqConstant.WALLET_CREATE)
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-	public WalletInfoVO createMchWallet(Byte type, String title, Byte source, String mchId,
+	public Wallet createMchWallet(Byte type, String title, Byte source, String mchId,
 		String companyName, String tel, String email) throws Exception{
 
 		Wallet wallet = Wallet.builder()
@@ -317,14 +301,12 @@ public class WalletService {
 				.build();
 		walletOwnerDao.insertSelective(walletOwner);
 
-		WalletInfoVO walletInfoVO = BeanUtil.newInstance(wallet, WalletInfoVO.class);
-		walletInfoVO.setWalletCompany(walletCompany);
-		walletInfoVO.setWalletOwnerList(Arrays.asList(walletOwner));
-		return walletInfoVO;
+		// 发送钱包事件
+		walletEventService.sendEventMq(EnumDef.WalletEventType.CREATE,wallet.getId()
+				,wallet.getStatus(),Arrays.asList(walletOwner));
+		return wallet;
 	}
 
-	@Autowired
-	private WalletOwnerDao walletOwnerDao;
 
 
 	/**
@@ -475,12 +457,12 @@ public class WalletService {
 	/**
 	 * 富慧通审核通过企业商家钱包
 	 */
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 	public void auditWalletCompany(Long walletId, String companyName, Byte status,
 		Long auditType, String tel, String email) {
 
+		WalletCompany walletCompany = walletCompanyDao.selectByWalletId(walletId);
 		if(status.byteValue() == WalletStatus.ACTIVE.getValue().byteValue()) {
-			WalletCompany walletCompany = walletCompanyDao.selectByWalletId(walletId);
-
 			boolean isUpdate = walletCompany != null;
 			walletCompany = isUpdate ? walletCompany : new WalletCompany();
 			walletCompany.setWalletId(walletId);
@@ -494,7 +476,13 @@ public class WalletService {
 				walletCompanyDao.insertSelective(walletCompany);
 			}
 		}
-		walletDao.updateActiveStatus(walletId, status, auditType);
+		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
+		wallet.setStatus(status);
+		wallet.setAuditType(auditType.byteValue());
+		walletDao.updateByPrimaryKeySelective(wallet);
+
+		// 发送钱包事件
+		walletEventService.sendEventMq(EnumDef.WalletEventType.CHANGE,wallet.getId(),wallet.getStatus());
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
@@ -520,4 +508,19 @@ public class WalletService {
 		}
 	}
 
+	public void bindMchWallet(Long walletId,WalletSource source, String mchId) {
+		WalletOwner walletOwner = walletOwnerDao.selectByWalletOwnerId(walletId, source.getValue(), mchId);
+		if(Optional.ofNullable(walletOwner).isPresent()){
+			return;
+		}
+		walletOwner = WalletOwner.builder()
+				.walletId(walletId)
+				.ownerType(source.getValue())
+				.ownerId(mchId)
+				.deleted(EnumDef.Deleted.NO.getValue())
+				.build();
+		walletOwnerDao.insertSelective(walletOwner);
+		// 发送钱包事件
+		walletEventService.sendEventMq(EnumDef.WalletEventType.BIND,walletId);
+	}
 }

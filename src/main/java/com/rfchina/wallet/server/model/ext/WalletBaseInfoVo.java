@@ -15,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @ApiModel(description="钱包信息，包含企业钱包和个人钱包两种")
-public class WalletBaseInfo {
+public class WalletBaseInfoVo {
 
 	@ApiModelProperty("钱包主要信息")
 	private Wallet wallet;

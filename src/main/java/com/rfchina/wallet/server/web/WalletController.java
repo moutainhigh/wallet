@@ -12,6 +12,7 @@ import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
 import com.rfchina.wallet.server.api.WalletApi;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
+import com.rfchina.wallet.server.model.ext.WalletBaseInfoVo;
 import com.rfchina.wallet.server.model.ext.WalletCardVo;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import com.rfchina.wallet.server.msic.UrlConstant;
@@ -20,6 +21,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import java.util.List;
 import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -75,6 +77,16 @@ public class WalletController {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, resp);
 	}
 
+	@ApiOperation("查询钱包信息（企业or个人）")
+	@PostMapping(UrlConstant.U_WALLET_QUERY_BASE_INFO)
+	public ResponseValue<WalletBaseInfoVo> queryWalletBaseInfo(
+		@RequestParam("access_token") String accessToken,
+		@ApiParam(value = "钱包ID", required = true, example = "2") @RequestParam("wallet_id") Long walletId
+	) {
+
+		WalletBaseInfoVo wallet = walletApi.queryWalletBaseInfo(accessToken,walletId);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,wallet);
+	}
 
 	@ApiOperation("钱包列表")
 	@PostMapping(UrlConstant.WALLET_LIST)
@@ -107,6 +119,17 @@ public class WalletController {
 		Wallet wallet = walletApi.createMchWallet(accessToken, type, title, source,
 				mchId, companyName, tel, email);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, wallet);
+	}
+
+	@ApiOperation("绑定商家钱包")
+	@PostMapping(UrlConstant.M_BIND_MCH_WALLET)
+	public ResponseValue bindMchWallet(@RequestParam("access_token") String accessToken,
+		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+		@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = false, example = "2") @RequestParam(value = "source", required = false) Byte source,
+		@ApiParam(value = "商家ID", required = true) @RequestParam("mch_id") String mchId
+	) {
+		walletApi.bindMchWallet(accessToken, walletId, source, mchId);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
 
 	@ApiOperation("设置出款申请单状态为失败")

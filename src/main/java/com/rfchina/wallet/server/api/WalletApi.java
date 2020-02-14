@@ -3,6 +3,7 @@ package com.rfchina.wallet.server.api;
 import com.rfchina.platform.common.annotation.ParamValid;
 import com.rfchina.platform.common.misc.ResponseValue;
 import com.rfchina.platform.common.page.Pagination;
+import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.model.BankCode;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletCard;
@@ -13,6 +14,7 @@ import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
 import com.rfchina.wallet.domain.model.ext.WalletCardExt;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
+import com.rfchina.wallet.server.model.ext.WalletBaseInfoVo;
 import com.rfchina.wallet.server.model.ext.WalletCardVo;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import java.util.Date;
@@ -144,4 +146,14 @@ public interface WalletApi {
 	 */
 	void setStatusFailWithApplyBill(String accessToken, String batchNo, String bizNo, String auditUserId,
 			String auditUser, String auditComment);
+
+	/**
+	 * 绑定商家钱包
+	 */
+    void bindMchWallet(String accessToken, Long walletId, Byte source, String mchId);
+
+	/**
+	 * 查询钱包基本信息
+	 */
+    WalletBaseInfoVo queryWalletBaseInfo(String accessToken, Long walletId);
 }

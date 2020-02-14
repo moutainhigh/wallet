@@ -18,18 +18,14 @@ import com.rfchina.platform.common.utils.RegexUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
+import com.rfchina.wallet.domain.mapper.ext.WalletOwnerDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletUserDao;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderStatus;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
-import com.rfchina.wallet.domain.model.ApplyStatusChange;
-import com.rfchina.wallet.domain.model.BankCode;
-import com.rfchina.wallet.domain.model.Wallet;
-import com.rfchina.wallet.domain.model.WalletCard;
-import com.rfchina.wallet.domain.model.WalletOrder;
-import com.rfchina.wallet.domain.model.WalletUser;
+import com.rfchina.wallet.domain.model.*;
 import com.rfchina.wallet.domain.model.ext.Bank;
 import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
@@ -38,6 +34,7 @@ import com.rfchina.wallet.server.api.WalletApi;
 import com.rfchina.wallet.server.mapper.ext.ApplyStatusChangeExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
+import com.rfchina.wallet.server.model.ext.WalletBaseInfoVo;
 import com.rfchina.wallet.server.model.ext.WalletCardVo;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import com.rfchina.wallet.server.service.ConfigService;
@@ -94,6 +91,9 @@ public class WalletApiImpl implements WalletApi {
 
 	@Autowired
 	private WalletOrderExtDao walletOrderDao;
+
+	@Autowired
+	private WalletOwnerDao walletOwnerDao;
 
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
@@ -318,6 +318,28 @@ public class WalletApiImpl implements WalletApi {
 	}
 
 	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER, EnumTokenType.APP})
+	@SignVerify
+	@Override
+	public void bindMchWallet(String accessToken, Long walletId, Byte source, String mchId) {
+		EnumDef.WalletSource walletSource = EnumUtil.parse(EnumDef.WalletSource.class, source);
+		walletService.bindMchWallet(walletId,walletSource,mchId);
+	}
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER, EnumTokenType.APP})
+	@SignVerify
+	@Override
+    public WalletBaseInfoVo queryWalletBaseInfo(String accessToken, Long walletId) {
+		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
+		List<WalletOwner> walletOwners = walletOwnerDao.selectByWalletId(walletId);
+		return WalletBaseInfoVo.builder()
+				.wallet(wallet)
+				.walletOwnerList(walletOwners)
+				.build();
+    }
+
+    @Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER, EnumTokenType.APP})
 	@SignVerify
 	@Override
