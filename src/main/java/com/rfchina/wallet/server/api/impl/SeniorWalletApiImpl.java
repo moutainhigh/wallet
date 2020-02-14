@@ -202,7 +202,7 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 			// 如果未审核通过
 			if (EnumDef.WalletTunnelAuditStatus.AUDIT_SUCCESS.getValue().byteValue()
 				!= walletTunnel.getStatus()) {
-				// 未绑手机
+				// 通道未绑手机
 				if (StringUtils.isEmpty(walletTunnel.getSecurityTel())) {
 					seniorWalletService.seniorWalletBindPhone(walletTunnel, mobile, verifyCode);
 					walletDao.addProgress(walletTunnel.getWalletId(),

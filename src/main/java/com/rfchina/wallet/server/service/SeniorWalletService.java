@@ -101,6 +101,9 @@ public class SeniorWalletService {
 	@Qualifier("apiTemplate")
 	private ApiClient apiTemplate;
 
+	@Autowired
+	private WalletEventService walletEventService;
+
 
 	/**
 	 * 升级高级钱包
@@ -320,6 +323,9 @@ public class SeniorWalletService {
 			| WalletProgress.TUNNEL_VALIDATE.getValue();
 		wallet.setProgress(progress);
 		walletDao.updateByPrimaryKeySelective(wallet);
+
+		// 发送钱包事件
+		walletEventService.sendEventMq(EnumDef.WalletEventType.CHANGE,wallet.getId());
 	}
 
 

@@ -303,7 +303,7 @@ public class WalletService {
 
 		// 发送钱包事件
 		walletEventService.sendEventMq(EnumDef.WalletEventType.CREATE,wallet.getId()
-				,wallet.getStatus(),Arrays.asList(walletOwner));
+				,wallet.getLevel(),wallet.getStatus(),Arrays.asList(walletOwner));
 		return wallet;
 	}
 
@@ -482,7 +482,8 @@ public class WalletService {
 		walletDao.updateByPrimaryKeySelective(wallet);
 
 		// 发送钱包事件
-		walletEventService.sendEventMq(EnumDef.WalletEventType.CHANGE,wallet.getId(),wallet.getStatus());
+		walletEventService.sendEventMq(EnumDef.WalletEventType.CHANGE,wallet.getId()
+				,wallet.getLevel(),wallet.getStatus());
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)

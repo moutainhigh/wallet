@@ -30,29 +30,33 @@ public class WalletEventService {
         return WalletEvent.builder()
                 .eventType(eventType.getValue())
                 .walletId(walletId)
+                .level(wallet.getLevel())
                 .status(wallet.getStatus())
                 .walletOwners(walletOwners)
                 .build();
     }
 
     @PostMq(routingKey = MqConstant.WALLET_EVENT)
-    public WalletEvent sendEventMq(EnumDef.WalletEventType eventType, Long walletId, Byte status) {
+    public WalletEvent sendEventMq(EnumDef.WalletEventType eventType, Long walletId,Byte level, Byte status) {
 
         List<WalletOwner> walletOwners = walletOwnerDao.selectByWalletId(walletId);
         return WalletEvent.builder()
                 .eventType(eventType.getValue())
                 .walletId(walletId)
+                .level(level)
                 .status(status)
                 .walletOwners(walletOwners)
                 .build();
     }
 
     @PostMq(routingKey = MqConstant.WALLET_EVENT)
-    public WalletEvent sendEventMq(EnumDef.WalletEventType eventType, Long walletId, Byte status, List<WalletOwner> walletOwners) {
+    public WalletEvent sendEventMq(EnumDef.WalletEventType eventType, Long walletId,Byte level
+            , Byte status, List<WalletOwner> walletOwners) {
 
         return WalletEvent.builder()
                 .eventType(eventType.getValue())
                 .walletId(walletId)
+                .level(level)
                 .status(status)
                 .walletOwners(walletOwners)
                 .build();
