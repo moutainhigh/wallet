@@ -16,6 +16,9 @@ public class WalletCard  {
     @ApiModelProperty("银行账号")
     private String bankAccount ;
 
+    @ApiModelProperty("银行分类代码")
+    private String bankClass ;
+
     @ApiModelProperty("银行代码")
     private String bankCode ;
 

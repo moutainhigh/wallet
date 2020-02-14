@@ -79,10 +79,13 @@ public class RechargeResp  {
     @ApiModelProperty("短信验证")
     private Boolean smsConfirm ;
 
+    @ApiModelProperty("来源APPID")
+    private Long sourceAppId ;
+
     @ApiModelProperty("开始时间")
     private String startTime ;
 
-    @ApiModelProperty("交易状态。 2：进行中，3：交易成功，4：交易失败")
+    @ApiModelProperty("交易状态。 2：进行中，3：交易成功，4：交易失败，5：交易关闭（超时或其他）")
     private Integer status ;
 
     @ApiModelProperty("0：默认 1:待人工处理 2:等待重新发起")
@@ -99,6 +102,9 @@ public class RechargeResp  {
 
     @ApiModelProperty("系统错误信息")
     private String tunnelErrMsg ;
+
+    @ApiModelProperty("通道手续费")
+    private Long tunnelFee ;
 
     @ApiModelProperty("渠道订单号")
     private String tunnelOrderNo ;
