@@ -1,6 +1,5 @@
 package com.rfchina.wallet.server.service;
 
-import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.platform.common.annotation.EnumParamValid;
 import com.rfchina.platform.common.annotation.ParamValid;
 import com.rfchina.platform.common.exception.RfchinaResponseException;
@@ -8,7 +7,6 @@ import com.rfchina.platform.common.misc.ResponseCode;
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.SymbolConstant;
 import com.rfchina.platform.common.page.Pagination;
-import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.platform.common.utils.RegexUtil;
@@ -26,12 +24,26 @@ import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletSource;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletType;
-import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
-import com.rfchina.wallet.domain.model.*;
+import com.rfchina.wallet.domain.model.ApplyStatusChange;
+import com.rfchina.wallet.domain.model.BankCode;
+import com.rfchina.wallet.domain.model.BankCodeCriteria;
+import com.rfchina.wallet.domain.model.GatewayTrans;
+import com.rfchina.wallet.domain.model.Wallet;
+import com.rfchina.wallet.domain.model.WalletCard;
+import com.rfchina.wallet.domain.model.WalletCompany;
+import com.rfchina.wallet.domain.model.WalletFinance;
+import com.rfchina.wallet.domain.model.WalletOrder;
+import com.rfchina.wallet.domain.model.WalletOrderCriteria;
 import com.rfchina.wallet.domain.model.WalletOrderCriteria.Criteria;
-import com.rfchina.wallet.domain.model.ext.*;
-import com.rfchina.wallet.server.bank.pudong.domain.predicate.ExactErrPredicate;
+import com.rfchina.wallet.domain.model.WalletOwner;
+import com.rfchina.wallet.domain.model.WalletPerson;
+import com.rfchina.wallet.domain.model.WalletTunnel;
+import com.rfchina.wallet.domain.model.WalletUser;
+import com.rfchina.wallet.domain.model.ext.Bank;
+import com.rfchina.wallet.domain.model.ext.BankArea;
+import com.rfchina.wallet.domain.model.ext.BankClass;
+import com.rfchina.wallet.domain.model.ext.WalletCardExt;
 import com.rfchina.wallet.server.mapper.ext.ApplyStatusChangeExtDao;
 import com.rfchina.wallet.server.mapper.ext.GatewayTransExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCompanyExtDao;
@@ -45,8 +57,11 @@ import com.rfchina.wallet.server.model.ext.WalletInfoResp.WalletInfoRespBuilder;
 import com.rfchina.wallet.server.msic.EnumWallet.CardPro;
 import com.rfchina.wallet.server.msic.EnumWallet.GwPayeeType;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
-
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.session.RowBounds;
@@ -193,7 +208,7 @@ public class WalletService {
 		}
 
 		if (wallet.getLevel() == EnumWalletLevel.SENIOR.getValue().byteValue()
-			&& wallet.getAuditType() == EnumWalletAuditType.ALLINPAY
+			&& Objects.nonNull(wallet.getAuditType()) && wallet.getAuditType() == EnumWalletAuditType.ALLINPAY
 			.getValue().byteValue()) {
 			try {
 				WalletTunnel walletTunnel = seniorWalletService
@@ -524,4 +539,5 @@ public class WalletService {
 		// 发送钱包事件
 		walletEventService.sendEventMq(EnumDef.WalletEventType.BIND,walletId);
 	}
+
 }
