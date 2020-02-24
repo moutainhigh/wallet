@@ -4,7 +4,7 @@
 jenkins job: platform-rfwallet-super-server-test
 ```
 
-## 1.1.1.2020022410_Beta
+## 1.3.0.b2.2020022410_Beta
 ### [变动说明]
 1. 修复钱包余额空指针问题
 
