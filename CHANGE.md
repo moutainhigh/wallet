@@ -4,8 +4,11 @@
 jenkins job: platform-rfwallet-super-server-test
 ```
 
+## 1.1.1.2020022410_Beta
+### [变动说明]
+1. 修复钱包余额空指针问题
 
-## 1.2.0.2019102310_Release
+## 1.1.0.2019102310_Release
 ### [变动说明]
 1. v1/m/wallet/bank_card/list, v1/m/wallet/query_wallet_info和v1/m/wallet/query_wallet_info_by_uid增加应用令牌的访问权限
 2. 增加重置申请单出款状态为失败接口
