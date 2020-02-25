@@ -3,6 +3,9 @@
 测试环境
 jenkins job: platform-rfwallet-super-server-test
 ```
+## 1.3.0.b3.2020022516_Beta
+### [变动说明]
+1. 优化余额明细时间查询
 
 ## 1.3.0.b2.2020022410_Beta
 ### [变动说明]
