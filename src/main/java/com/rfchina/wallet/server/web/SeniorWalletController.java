@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.ResponseValue;
 import com.rfchina.platform.common.page.Pagination;
+import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletOrder;
@@ -17,6 +18,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import java.util.Date;
+import java.util.Objects;
 import java.util.TimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -236,9 +238,15 @@ public class SeniorWalletController {
 		@ApiParam(value = "每页限制", required = false) @RequestParam(value = "limit") int limit,
 		@ApiParam(value = "起始页偏移量", required = false) @RequestParam(value = "offset") int offset,
 		@ApiParam(value = "是否统计", required = false) @RequestParam(value = "stat", required = false) Boolean stat) {
-
+		if (Objects.nonNull(fromTime)) {
+			toTime = Objects.isNull(toTime) ? new Date()
+				: fromTime.compareTo(toTime) == 0 ? DateUtil
+					.addSecs(DateUtil.addDate2(toTime, 1), -1) : toTime;
+		}
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
-			seniorWalletApi.queryWalletOrderDetail(accessToken, walletId,fromTime,toTime,tradeType,status, limit, offset, stat));
+			seniorWalletApi
+				.queryWalletOrderDetail(accessToken, walletId, fromTime, toTime, tradeType, status,
+					limit, offset, stat));
 	}
 
 
@@ -250,7 +258,7 @@ public class SeniorWalletController {
 		@ApiParam(value = "企业信息(json)", required = true) @RequestParam("company_basic_info") String companyBasicInfo) {
 
 		YunstMemberInfoResult.CompanyInfoResult result = seniorWalletApi
-			.seniorWalletCompanyAuditOffline(accessToken,  walletId,
+			.seniorWalletCompanyAuditOffline(accessToken, walletId,
 				JsonUtil.toObject(companyBasicInfo, YunstSetCompanyInfoReq.CompanyBasicInfo.class,
 					objectMapper -> {
 						objectMapper.setTimeZone(TimeZone.getDefault());
