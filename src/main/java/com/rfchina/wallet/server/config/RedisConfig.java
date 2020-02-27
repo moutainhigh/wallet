@@ -20,15 +20,21 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 public class RedisConfig extends CachingConfigurerSupport {
 
 	@Bean(value = "redisTemplate")
-	public RedisTemplate<Object, Object> jsonRedisTemplate(LettuceConnectionFactory lettuceConnectionFactory) {
+	public RedisTemplate<Object, Object> jsonRedisTemplate(
+		LettuceConnectionFactory lettuceConnectionFactory) {
 		RedisTemplate<Object, Object> redisTemplate = new RedisTemplate<>();
 		redisTemplate.setConnectionFactory(lettuceConnectionFactory);
+		defaultSetting(redisTemplate);
+		return redisTemplate;
+	}
+
+	private void defaultSetting(RedisTemplate redisTemplate) {
 		StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 		RedisSerializer valueSerializer = new GenericJackson2JsonRedisSerializer();
+		redisTemplate.setDefaultSerializer(valueSerializer);
 		redisTemplate.setKeySerializer(stringRedisSerializer);
 		redisTemplate.setValueSerializer(valueSerializer);
-		redisTemplate.setHashValueSerializer(valueSerializer);
 		redisTemplate.setHashKeySerializer(stringRedisSerializer);
-		return redisTemplate;
+		redisTemplate.setHashValueSerializer(valueSerializer);
 	}
 }
