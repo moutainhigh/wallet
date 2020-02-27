@@ -700,7 +700,7 @@ public class YunstBizHandler extends EBankHandler {
 				m.getPayType().byteValue()) {
 				MiniProgram miniProgram = MiniProgram.builder()
 					.limitPay(isRecharge ? "no_credit" : "")
-					.subAppId(m.getAppId())
+					.subAppid(m.getAppId())
 					.amount(m.getAmount())
 					.acct(m.getOpenId())
 					.vspCusid(m.getSellerId())
@@ -729,7 +729,7 @@ public class YunstBizHandler extends EBankHandler {
 				m.getPayType().byteValue()) {
 				WechatPublic wechatPublic = WechatPublic.builder()
 					.limitPay(isRecharge ? "no_credit" : "")
-					.subAppId(m.getAppId())
+					.subAppid(m.getAppId())
 					.amount(m.getAmount())
 					.acct(m.getOpenId())
 					.vspCusid(m.getSellerId())
