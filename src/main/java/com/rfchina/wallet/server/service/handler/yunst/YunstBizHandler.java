@@ -823,6 +823,8 @@ public class YunstBizHandler extends EBankHandler {
 			.build();
 		try {
 			return yunstTpl.execute(req, SmsPayResp.class);
+		}catch (CommonGatewayException e){
+			throw e;
 		} catch (Exception e) {
 			log.error("通联-接口异常", e);
 			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
@@ -840,6 +842,8 @@ public class YunstBizHandler extends EBankHandler {
 
 		try {
 			return yunstTpl.execute(req, SmsRetryResp.class);
+		}catch (CommonGatewayException e){
+			throw e;
 		} catch (Exception e) {
 			log.error("通联-接口异常", e);
 			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
