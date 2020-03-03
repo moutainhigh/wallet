@@ -9,7 +9,6 @@ import com.rfchina.platform.common.annotation.SignVerify;
 import com.rfchina.platform.common.exception.RfchinaResponseException;
 import com.rfchina.platform.common.misc.ResponseCode;
 import com.rfchina.platform.common.page.Pagination;
-import com.rfchina.platform.common.utils.RegexUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
 import com.rfchina.wallet.domain.misc.EnumDef;
@@ -191,7 +190,7 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 		@ParamValid(nullable = false) Long userId,
 		@ParamValid(nullable = false) String realName,
 		@ParamValid(nullable = false) String idNo,
-		@ParamValid(pattern = RegexUtil.REGEX_MOBILE, nullable = false) String mobile,
+		@ParamValid(nullable = false) String mobile,
 		@ParamValid(nullable = false) String verifyCode,
 		String jumpUrl) {
 		try {

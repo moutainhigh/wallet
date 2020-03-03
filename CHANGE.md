@@ -25,7 +25,7 @@ jenkins job: platform-rfwallet-super-server-test
 
 ## 1.1.1_2020030310_Release
 ### [变动说明]
-- 升级common util版本，兼容新版199号段手机验证
+- 去除通联个人验证手机正则验证验证
 
 ## 1.1.0_b42_2020021216_Beta 1.1.1_2020021310_Release
 ### [变动说明]
