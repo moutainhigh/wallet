@@ -348,8 +348,12 @@ public class Handler8800 extends EBankHandler {
 
 			return new ArrayList<>();
 		} catch (Exception e) {
-			dealUndefinedError(walletOrders, e);
-			return null;
+			log.error("未定义异常", e);
+			for (WalletOrder walletOrder : walletOrders) {
+				walletOrder.setUserErrMsg("更新状态异常");
+				walletOrderDao.updateByPrimaryKeySelective(walletOrder);
+			}
+			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
 		}
 	}
 
