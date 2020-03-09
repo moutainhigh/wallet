@@ -839,24 +839,34 @@ public class SeniorPayService {
 			if(OrderStatus.SUCC.getValue().byteValue() == rs.getStatus().byteValue()) {
 				WalletTunnel walletTunnel = walletTunnelDao
 						.selectByWalletId(order.getWalletId(), order.getTunnelType());
-				// 通联查余额
-				YunstQueryBalanceResult result = yunstUserHandler
-						.queryBalance(walletTunnel.getBizUserId());
-				// 更新通道余额
-				walletTunnel.setBalance(result.getAllAmount());
-				walletTunnel.setFreezenAmount(result.getFreezenAmount());
-				walletTunnel.setIsDirty(DirtyType.NORMAL.getValue());
-				walletTunnelDao.updateByPrimaryKeySelective(walletTunnel);
-				// 更新钱包余额
-				Wallet wallet = walletDao.selectByPrimaryKey(walletTunnel.getWalletId());
-				wallet.setWalletBalance(walletTunnel.getBalance());
-				wallet.setFreezeAmount(walletTunnel.getFreezenAmount());
-				walletDao.updateByPrimaryKeySelective(wallet);
+				syncTunnelAmount(walletTunnel);
+				if(OrderType.DEDUCTION.getValue().byteValue() == order.getType().byteValue()){
+					WalletConsume walletConsume = walletConsumeDao.selectByOrderId(order.getId());
+					WalletTunnel payeeTunnel = walletTunnelDao
+						.selectByWalletId(walletConsume.getPayeeWalletId(), order.getTunnelType());
+					syncTunnelAmount(payeeTunnel);
+				}
 			}
 			return rs;
 		} finally {
 			lock.unLock(LockConstant.LOCK_PAY_ORDER + order.getOrderNo());
 		}
+	}
+
+	private void syncTunnelAmount(WalletTunnel walletTunnel){
+		// 通联查余额
+		YunstQueryBalanceResult result = yunstUserHandler
+			.queryBalance(walletTunnel.getBizUserId());
+		// 更新通道余额
+		walletTunnel.setBalance(result.getAllAmount());
+		walletTunnel.setFreezenAmount(result.getFreezenAmount());
+		walletTunnel.setIsDirty(DirtyType.NORMAL.getValue());
+		walletTunnelDao.updateByPrimaryKeySelective(walletTunnel);
+		// 更新钱包余额
+		Wallet wallet = walletDao.selectByPrimaryKey(walletTunnel.getWalletId());
+		wallet.setWalletBalance(walletTunnel.getBalance());
+		wallet.setFreezeAmount(walletTunnel.getFreezenAmount());
+		walletDao.updateByPrimaryKeySelective(wallet);
 	}
 
 
