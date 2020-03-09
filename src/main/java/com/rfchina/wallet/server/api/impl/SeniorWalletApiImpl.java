@@ -10,7 +10,9 @@ import com.rfchina.platform.common.exception.RfchinaResponseException;
 import com.rfchina.platform.common.misc.ResponseCode;
 import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
+import com.rfchina.wallet.domain.mapper.ext.WalletConsumeDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
+import com.rfchina.wallet.domain.mapper.ext.WalletOrderDao;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletProgress;
@@ -26,11 +28,11 @@ import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq.Compa
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.CompanyInfoResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.PersonInfoResult;
-import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.service.SeniorWalletService;
 import com.rfchina.wallet.server.service.VerifyService;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -56,13 +58,16 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	private WalletPersonExtDao walletPersonDao;
 
 	@Autowired
-	private WalletOrderExtDao walletOrderExtDao;
+	private WalletOrderDao walletOrderDao;
 
 	@Autowired
 	private VerifyService verifyService;
 
 	@Autowired
 	private WalletTunnelExtDao walletTunnelDao;
+
+	@Autowired
+	private WalletConsumeDao walletConsumeDao;
 
 
 	@Log
@@ -75,7 +80,7 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 		try {
 			walletChannel = seniorWalletService.getWalletTunnelInfo(channelType, walletId);
 		} catch (Exception e) {
-			log.error("查询高级钱包渠道信息失败, walletId:"+walletId,e);
+			log.error("查询高级钱包渠道信息失败, walletId:" + walletId, e);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
 				"查询高级钱包渠道信息失败");
 		}
@@ -382,6 +387,7 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 
 	}
 
+
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
@@ -389,12 +395,17 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	public Pagination<WalletOrder> queryWalletOrderDetail(String accessToken, Long walletId,
 		Date fromTime, Date endTime, Byte tradeType, Byte status, int limit, int offset,
 		Boolean stat) {
-		List<WalletOrder> walletOrderList = walletOrderExtDao
-			.selectByCondition(walletId, fromTime, endTime, tradeType, status, null, null, limit,
-				offset);
-		long total = Objects.nonNull(stat) && stat ? walletOrderExtDao
-			.selectCountByCondition(walletId, fromTime, endTime, tradeType, status, null, null)
-			: 0;
+
+		List<Byte> types = tradeType != null ? Arrays.asList(tradeType) : null;
+		List<Byte> statusList = status != null ? Arrays.asList(status) : null;
+		List<WalletOrder> walletOrderList = walletOrderDao
+			.selectByWalletIdStatus(walletId, types, statusList, fromTime, endTime,
+				offset, limit);
+		long total = 0;
+		if (Objects.nonNull(stat) && stat) {
+			total = walletOrderDao
+				.countByWalletIdStatus(walletId, types, statusList, fromTime, endTime);
+		}
 		return new Pagination.PaginationBuilder<WalletOrder>().data(walletOrderList)
 			.total(total)
 			.offset(offset)
