@@ -910,6 +910,7 @@ public class SeniorPayService {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletTunnel.getWalletId());
 		wallet.setWalletBalance(walletTunnel.getBalance());
 		wallet.setFreezeAmount(walletTunnel.getFreezenAmount());
+		wallet.setBalanceUpdTime(new Date());
 		walletDao.updateByPrimaryKeySelective(wallet);
 	}
 
