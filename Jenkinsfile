@@ -23,7 +23,10 @@ podTemplate(label: label) {
 
      stage('Build') {
        container('gradle') {
-         sh 'gradle clean :bootJar'
+         sh """
+            rm -rf %gradle_repo/rfwallet-domain || echo 0
+            gradle clean :bootJar
+            """
        }
      }
 
