@@ -208,7 +208,8 @@ public class WalletService {
 		}
 
 		if (wallet.getLevel() == EnumWalletLevel.SENIOR.getValue().byteValue()
-			&& Objects.nonNull(wallet.getAuditType()) && wallet.getAuditType() == EnumWalletAuditType.ALLINPAY
+			&& Objects.nonNull(wallet.getAuditType())
+			&& wallet.getAuditType() == EnumWalletAuditType.ALLINPAY
 			.getValue().byteValue()) {
 			try {
 				WalletTunnel walletTunnel = seniorWalletService
@@ -279,7 +280,7 @@ public class WalletService {
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 	public Wallet createMchWallet(Byte type, String title, Byte source, String mchId,
-		String companyName, String tel, String email) throws Exception{
+		String companyName, String tel, String email) throws Exception {
 
 		Wallet wallet = Wallet.builder()
 			.type(type)
@@ -297,31 +298,32 @@ public class WalletService {
 		walletDao.insertSelective(wallet);
 
 		WalletCompany walletCompany = WalletCompany.builder()
-				.walletId(wallet.getId())
-				.companyName(companyName)
-				.email(email)
-				.tel(tel)
-				.createTime(new Date())
-				.build();
+			.walletId(wallet.getId())
+			.companyName(companyName)
+			.email(email)
+			.tel(tel)
+			.createTime(new Date())
+			.build();
 		walletCompanyDao.insertSelective(walletCompany);
 
 		// 创建通联会员
-		seniorWalletService.createTunnel(TunnelType.YUNST.getValue().intValue(), wallet.getId(), source);
+		seniorWalletService
+			.createTunnel(TunnelType.YUNST.getValue().intValue(), wallet.getId(), source);
 
 		// 关联商家和钱包
 		WalletOwner walletOwner = WalletOwner.builder()
-				.ownerType(EnumDef.WalletSource.USER.getValue())
-				.ownerId(mchId)
-				.deleted(EnumDef.Deleted.NO.getValue())
-				.build();
+			.walletId(wallet.getId())
+			.ownerType(WalletSource.FHT_CORP.getValue())
+			.ownerId(mchId)
+			.deleted(EnumDef.Deleted.NO.getValue())
+			.build();
 		walletOwnerDao.insertSelective(walletOwner);
 
 		// 发送钱包事件
-		walletEventService.sendEventMq(EnumDef.WalletEventType.CREATE,wallet.getId()
-				,wallet.getLevel(),wallet.getStatus(),Arrays.asList(walletOwner));
+		walletEventService.sendEventMq(EnumDef.WalletEventType.CREATE, wallet.getId()
+			, wallet.getLevel(), wallet.getStatus(), Arrays.asList(walletOwner));
 		return wallet;
 	}
-
 
 
 	/**
@@ -477,7 +479,7 @@ public class WalletService {
 		Long auditType, String tel, String email) {
 
 		WalletCompany walletCompany = walletCompanyDao.selectByWalletId(walletId);
-		if(status.byteValue() == WalletStatus.ACTIVE.getValue().byteValue()) {
+		if (status.byteValue() == WalletStatus.ACTIVE.getValue().byteValue()) {
 			boolean isUpdate = walletCompany != null;
 			walletCompany = isUpdate ? walletCompany : new WalletCompany();
 			walletCompany.setWalletId(walletId);
@@ -497,47 +499,50 @@ public class WalletService {
 		walletDao.updateByPrimaryKeySelective(wallet);
 
 		// 发送钱包事件
-		walletEventService.sendEventMq(EnumDef.WalletEventType.CHANGE,wallet.getId()
-				,wallet.getLevel(),wallet.getStatus());
+		walletEventService.sendEventMq(EnumDef.WalletEventType.CHANGE, wallet.getId()
+			, wallet.getLevel(), wallet.getStatus());
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 	public void setWalletApplyStatus(Long applyId, String userId, String user, String comment) {
 		if (0 >= walletOrderDao.setApplyStatusFail(applyId)) {
-			throw new WalletResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE, "更新申请单状态失败");
+			throw new WalletResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+				"更新申请单状态失败");
 		}
 
 		ApplyStatusChange change = ApplyStatusChange.builder()
-				.applyId(applyId)
-				.auditStatus(OrderStatus.FAIL.getValue().toString())
-				.auditStatusDesc(OrderStatus.FAIL.getValueName())
-				.auditUserId(userId)
-				.auditUser(user)
-				.auditComment(comment)
-				.auditTime(new Date())
-				.createTime(new Date())
-				.oldVal(OrderStatus.SUCC.getValue().toString())
-				.newVal(OrderStatus.FAIL.getValue().toString())
-				.build();
-		if(0 >= applyStatusChangeExtDao.insertSelective(change)){
-			throw new WalletResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE, "插入更新记录失败");
+			.applyId(applyId)
+			.auditStatus(OrderStatus.FAIL.getValue().toString())
+			.auditStatusDesc(OrderStatus.FAIL.getValueName())
+			.auditUserId(userId)
+			.auditUser(user)
+			.auditComment(comment)
+			.auditTime(new Date())
+			.createTime(new Date())
+			.oldVal(OrderStatus.SUCC.getValue().toString())
+			.newVal(OrderStatus.FAIL.getValue().toString())
+			.build();
+		if (0 >= applyStatusChangeExtDao.insertSelective(change)) {
+			throw new WalletResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+				"插入更新记录失败");
 		}
 	}
 
-	public void bindMchWallet(Long walletId,WalletSource source, String mchId) {
-		WalletOwner walletOwner = walletOwnerDao.selectByWalletOwnerId(walletId, source.getValue(), mchId);
-		if(Optional.ofNullable(walletOwner).isPresent()){
+	public void bindMchWallet(Long walletId, WalletSource source, String mchId) {
+		WalletOwner walletOwner = walletOwnerDao
+			.selectByWalletOwnerId(walletId, source.getValue(), mchId);
+		if (Optional.ofNullable(walletOwner).isPresent()) {
 			return;
 		}
 		walletOwner = WalletOwner.builder()
-				.walletId(walletId)
-				.ownerType(source.getValue())
-				.ownerId(mchId)
-				.deleted(EnumDef.Deleted.NO.getValue())
-				.build();
+			.walletId(walletId)
+			.ownerType(source.getValue())
+			.ownerId(mchId)
+			.deleted(EnumDef.Deleted.NO.getValue())
+			.build();
 		walletOwnerDao.insertSelective(walletOwner);
 		// 发送钱包事件
-		walletEventService.sendEventMq(EnumDef.WalletEventType.BIND,walletId);
+		walletEventService.sendEventMq(EnumDef.WalletEventType.BIND, walletId);
 	}
 
 }

@@ -7,20 +7,58 @@ import com.rfchina.passport.misc.SessionThreadLocal;
 import com.rfchina.platform.common.misc.Triple;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
+import com.rfchina.wallet.domain.mapper.ext.WalletConsumeDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
-import com.rfchina.wallet.domain.misc.EnumDef.*;
+import com.rfchina.wallet.domain.misc.EnumDef.BizValidateType;
+import com.rfchina.wallet.domain.misc.EnumDef.DirtyType;
+import com.rfchina.wallet.domain.misc.EnumDef.OrderStatus;
+import com.rfchina.wallet.domain.misc.EnumDef.OrderType;
+import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
-import com.rfchina.wallet.domain.model.*;
+import com.rfchina.wallet.domain.model.GatewayTrans;
+import com.rfchina.wallet.domain.model.Wallet;
+import com.rfchina.wallet.domain.model.WalletCard;
+import com.rfchina.wallet.domain.model.WalletClearing;
+import com.rfchina.wallet.domain.model.WalletCollect;
+import com.rfchina.wallet.domain.model.WalletCollectInfo;
+import com.rfchina.wallet.domain.model.WalletCollectMethod;
 import com.rfchina.wallet.domain.model.WalletCollectMethod.WalletCollectMethodBuilder;
+import com.rfchina.wallet.domain.model.WalletConsume;
+import com.rfchina.wallet.domain.model.WalletFinance;
+import com.rfchina.wallet.domain.model.WalletOrder;
+import com.rfchina.wallet.domain.model.WalletRecharge;
+import com.rfchina.wallet.domain.model.WalletRefund;
+import com.rfchina.wallet.domain.model.WalletRefundDetail;
+import com.rfchina.wallet.domain.model.WalletTunnel;
+import com.rfchina.wallet.domain.model.WalletWithdraw;
 import com.rfchina.wallet.server.bank.yunst.response.SmsPayResp;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstQueryBalanceResult;
-import com.rfchina.wallet.server.mapper.ext.*;
+import com.rfchina.wallet.server.mapper.ext.WalletClearingExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletCollectExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletCollectInfoExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletCollectMethodExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletRechargeExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletRefundDetailExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletRefundExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletWithdrawExtDao;
 import com.rfchina.wallet.server.model.ext.AgentPayReq.Reciever;
-import com.rfchina.wallet.server.model.ext.*;
+import com.rfchina.wallet.server.model.ext.CollectReq;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod;
-import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.*;
+import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Alipay;
+import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Balance;
+import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.BankCard;
+import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.CodePay;
+import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.WalletPayMethodBuilder;
+import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Wechat;
+import com.rfchina.wallet.server.model.ext.DeductionReq;
+import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
+import com.rfchina.wallet.server.model.ext.SettleResp;
+import com.rfchina.wallet.server.model.ext.WalletCollectResp;
+import com.rfchina.wallet.server.model.ext.WithdrawResp;
 import com.rfchina.wallet.server.msic.EnumWallet.CardPro;
 import com.rfchina.wallet.server.msic.EnumWallet.ChannelType;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
@@ -30,13 +68,17 @@ import com.rfchina.wallet.server.service.handler.common.EBankHandler;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBizHandler;
 import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
+import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -104,7 +146,7 @@ public class SeniorPayService {
 	private YunstUserHandler yunstUserHandler;
 
 	@Autowired
-	private WalletConsumeExtDao walletConsumeDao;
+	private WalletConsumeDao walletConsumeDao;
 
 	@Autowired
 	private SimpleExclusiveLock lock;
@@ -193,7 +235,8 @@ public class SeniorPayService {
 	/**
 	 * 提现
 	 */
-	public WithdrawResp withdraw(Long walletId, WalletCard walletCard, Long amount, Byte validateType, String jumpUrl,
+	public WithdrawResp withdraw(Long walletId, WalletCard walletCard, Long amount,
+		Byte validateType, String jumpUrl,
 		String customerIp) {
 
 		// 检查钱包
@@ -256,14 +299,14 @@ public class SeniorPayService {
 			WithdrawResp result = handler.withdraw(withdrawOrder, withdraw, payer);
 
 			// 签名密码验证参数
-			if (validateType  == BizValidateType.PASSWORD.getValue().byteValue()) {
+			if (validateType == BizValidateType.PASSWORD.getValue().byteValue()) {
 				String signedParams = ((YunstBizHandler) handler)
-						.pwdGwConfirm(withdrawOrder, payer, jumpUrl, customerIp);
+					.pwdGwConfirm(withdrawOrder, payer, jumpUrl, customerIp);
 				signedParams = configService.getYunstPwdConfirmUrl() + "?" + signedParams;
 				result.setSignedParams(signedParams);
 			} else if (validateType == BizValidateType.SMS.getValue().byteValue()) {
 				String signedParams = ((YunstBizHandler) handler)
-						.smsGwConfirm(withdrawOrder, payer, customerIp);
+					.smsGwConfirm(withdrawOrder, payer, customerIp);
 				signedParams = configService.getYunstSmsConfirmUrl() + "?" + signedParams;
 				result.setSignedParams(signedParams);
 			}
@@ -504,7 +547,7 @@ public class SeniorPayService {
 			List<WalletCollectMethod> methods = walletCollectMethodDao
 				.selectByCollectId(walletCollect.getId(), OrderType.COLLECT.getValue());
 			WalletPayMethod payMethod = getPayMethod(methods.get(0));
-			tunnelFee = new BigDecimal(walletCollect.getRefundLimit()-refundAmount)
+			tunnelFee = new BigDecimal(walletCollect.getRefundLimit() - refundAmount)
 				.multiply(payMethod.getRate(configService))
 				.setScale(0, EBankHandler.getRoundingMode());
 
@@ -816,47 +859,59 @@ public class SeniorPayService {
 	}
 
 	@PostMq(routingKey = MqConstant.ORDER_STATUS_CHANGE)
-	public WalletOrder updateOrderStatusWithMq(String orderNo,boolean incQuery) {
+	public WalletOrder updateOrderStatusWithMq(String orderNo, boolean incQuery) {
 		WalletOrder walletOrder = updateOrderStatus(orderNo, incQuery);
 		return Optional.ofNullable(walletOrder)
-				.filter(order -> OrderStatus.WAITTING.getValue().byteValue() != order.getStatus().byteValue())
-				.orElse(null);
+			.filter(order -> OrderStatus.WAITTING.getValue().byteValue() != order.getStatus()
+				.byteValue())
+			.orElse(null);
 	}
 
 
-	public WalletOrder updateOrderStatus(String orderNo,boolean incQuery) {
+	public WalletOrder updateOrderStatus(String orderNo, boolean incQuery) {
 		WalletOrder order = verifyService.checkOrder(orderNo, OrderStatus.WAITTING.getValue());
 		EBankHandler handler = handlerHelper.selectByTunnelType(order.getTunnelType());
 		try {
 			lock.acquireLock(LockConstant.LOCK_PAY_ORDER + order.getOrderNo(), 5, 0, 1000);
-			if(incQuery) {
+			if (incQuery) {
 				order.setCurrTryTimes(order.getCurrTryTimes() + 1);
 			}
 			List<Triple<WalletOrder, WalletFinance, GatewayTrans>> triples = handler
 				.updateOrderStatus(Arrays.asList(order));
 
 			WalletOrder rs = triples.get(0).x;
-			if(OrderStatus.SUCC.getValue().byteValue() == rs.getStatus().byteValue()) {
+			if (OrderStatus.SUCC.getValue().byteValue() == rs.getStatus().byteValue()) {
 				WalletTunnel walletTunnel = walletTunnelDao
-						.selectByWalletId(order.getWalletId(), order.getTunnelType());
-				// 通联查余额
-				YunstQueryBalanceResult result = yunstUserHandler
-						.queryBalance(walletTunnel.getBizUserId());
-				// 更新通道余额
-				walletTunnel.setBalance(result.getAllAmount());
-				walletTunnel.setFreezenAmount(result.getFreezenAmount());
-				walletTunnel.setIsDirty(DirtyType.NORMAL.getValue());
-				walletTunnelDao.updateByPrimaryKeySelective(walletTunnel);
-				// 更新钱包余额
-				Wallet wallet = walletDao.selectByPrimaryKey(walletTunnel.getWalletId());
-				wallet.setWalletBalance(walletTunnel.getBalance());
-				wallet.setFreezeAmount(walletTunnel.getFreezenAmount());
-				walletDao.updateByPrimaryKeySelective(wallet);
+					.selectByWalletId(order.getWalletId(), order.getTunnelType());
+				syncTunnelAmount(walletTunnel);
+				if (OrderType.DEDUCTION.getValue().byteValue() == order.getType().byteValue()) {
+					WalletConsume walletConsume = walletConsumeDao.selectByOrderId(order.getId());
+					WalletTunnel payeeTunnel = walletTunnelDao
+						.selectByWalletId(walletConsume.getPayeeWalletId(), order.getTunnelType());
+					syncTunnelAmount(payeeTunnel);
+				}
 			}
 			return rs;
 		} finally {
 			lock.unLock(LockConstant.LOCK_PAY_ORDER + order.getOrderNo());
 		}
+	}
+
+	private void syncTunnelAmount(WalletTunnel walletTunnel) {
+		// 通联查余额
+		YunstQueryBalanceResult result = yunstUserHandler
+			.queryBalance(walletTunnel.getBizUserId());
+		// 更新通道余额
+		walletTunnel.setBalance(result.getAllAmount());
+		walletTunnel.setFreezenAmount(result.getFreezenAmount());
+		walletTunnel.setIsDirty(DirtyType.NORMAL.getValue());
+		walletTunnelDao.updateByPrimaryKeySelective(walletTunnel);
+		// 更新钱包余额
+		Wallet wallet = walletDao.selectByPrimaryKey(walletTunnel.getWalletId());
+		wallet.setWalletBalance(walletTunnel.getBalance());
+		wallet.setFreezeAmount(walletTunnel.getFreezenAmount());
+		wallet.setBalanceUpdTime(new Date());
+		walletDao.updateByPrimaryKeySelective(wallet);
 	}
 
 
