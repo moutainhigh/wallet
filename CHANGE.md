@@ -3,6 +3,10 @@
 测试环境
 jenkins job: platform-rfwallet-super-server-test
 ```
+## 1.3.0_b6_20200311111_Beta
+### [变动说明]
+- 优化余额刷新机制
+
 ## 1.3.0_b5_2020022716_Beta
 ### [变动说明]
 - 修改显示扣费记录
