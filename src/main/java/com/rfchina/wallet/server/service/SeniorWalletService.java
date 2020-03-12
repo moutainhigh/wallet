@@ -101,6 +101,9 @@ public class SeniorWalletService {
 	@Qualifier("apiTemplate")
 	private ApiClient apiTemplate;
 
+	@Autowired
+	private WalletEventService walletEventService;
+
 
 	/**
 	 * 升级高级钱包
@@ -320,6 +323,9 @@ public class SeniorWalletService {
 			| WalletProgress.TUNNEL_VALIDATE.getValue();
 		wallet.setProgress(progress);
 		walletDao.updateByPrimaryKeySelective(wallet);
+
+		// 发送钱包事件
+		walletEventService.sendEventMq(EnumDef.WalletEventType.CHANGE,wallet.getId());
 	}
 
 
@@ -551,12 +557,16 @@ public class SeniorWalletService {
 			new WalletResponseException(EnumWalletResponseCode.TUNNEL_INFO_NOT_EXISTS,
 				tunnelType + " " + walletId));
 
-		boolean needUpdate = !Optional.ofNullable(walletTunnel.getIsDirty()).isPresent() || Optional
-			.ofNullable(walletTunnel.getIsDirty())
-			.filter(dirty -> dirty != DirtyType.NORMAL.getValue().byteValue()).isPresent();
+		boolean needUpdate = !Optional.ofNullable(walletTunnel.getIsDirty()).isPresent()
+			|| walletTunnel.getIsDirty() != DirtyType.NORMAL.getValue().byteValue();
+		Wallet wallet = walletDao.selectByPrimaryKey(walletTunnel.getWalletId());
+		if (!needUpdate){
+			needUpdate = !Optional.ofNullable(wallet.getBalanceUpdTime()).isPresent()
+				|| DateUtil.addSecs(wallet.getBalanceUpdTime(),1800).before(new Date());
+		}
 
 		if (needUpdate) {
-			updateBalance(walletTunnel);
+			updateBalance(walletTunnel, wallet);
 		}
 
 		//特殊处理思力账号
@@ -569,17 +579,12 @@ public class SeniorWalletService {
 		return walletTunnel;
 	}
 
-	public void updateBalance(WalletTunnel walletTunnel) {
+	public void updateBalance(WalletTunnel walletTunnel, Wallet wallet) {
 		// 目前只支持通联
 		if (walletTunnel.getTunnelType().byteValue() != TunnelType.YUNST.getValue().byteValue()) {
 			return;
 		}
-		// 判断签约
-		if (walletTunnel.getIsSignContact() == null
-			|| walletTunnel.getIsSignContact() == WalletTunnelSignContract.NONE.getValue()
-			.byteValue()) {
-			return;
-		}
+
 		// 通联查余额
 		YunstQueryBalanceResult result = yunstUserHandler.queryBalance(walletTunnel.getBizUserId());
 		// 更新通道余额
@@ -588,9 +593,9 @@ public class SeniorWalletService {
 		walletTunnel.setIsDirty(DirtyType.NORMAL.getValue());
 		walletTunnelDao.updateByPrimaryKeySelective(walletTunnel);
 		// 更新钱包余额
-		Wallet wallet = walletDao.selectByPrimaryKey(walletTunnel.getWalletId());
 		wallet.setWalletBalance(walletTunnel.getBalance());
 		wallet.setFreezeAmount(walletTunnel.getFreezenAmount());
+		wallet.setBalanceUpdTime(new Date());
 		walletDao.updateByPrimaryKeySelective(wallet);
 	}
 
@@ -665,4 +670,13 @@ public class SeniorWalletService {
 		private String bankName;
 	}
 
+
+	public static void main(String[] args) {
+		WalletTunnel walletTunnel = new WalletTunnel();
+		walletTunnel.setIsDirty((byte)1);
+		boolean needUpdate = !Optional.ofNullable(walletTunnel.getIsDirty()).isPresent() || Optional
+			.ofNullable(walletTunnel.getIsDirty())
+			.filter(dirty -> dirty != DirtyType.NORMAL.getValue().byteValue()).isPresent();
+		System.out.println(needUpdate);
+	}
 }

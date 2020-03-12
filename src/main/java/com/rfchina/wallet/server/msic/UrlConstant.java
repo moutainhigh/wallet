@@ -106,6 +106,10 @@ public class UrlConstant {
 	 * 查询钱包信息（企业or个人）
 	 */
 	public static final String M_WALLET_QUERY_INFO = VERSION + "/m/wallet/query_wallet_info";
+	/**
+	 * 查询钱包信息
+	 */
+	public static final String U_WALLET_QUERY_BASE_INFO = VERSION + "/u/wallet/query_wallet_base_info";
 
 	/**
 	 * 查询钱包信息（企业or个人）
@@ -118,9 +122,14 @@ public class UrlConstant {
 	public static final String WALLET_LIST = VERSION + "/m/wallet/wallet_list";
 
 	/**
-	 * 开通未审核的钱包
+	 * 开通未审核的商家钱包
 	 */
-	public static final String M_CREATE_WALLET = VERSION + "/m/wallet/create_wallet";
+	public static final String M_CREATE_MCH_WALLET = VERSION + "/m/wallet/create_mch_wallet";
+
+	/**
+	 * 绑定商家钱包
+	 */
+	public static final String M_BIND_MCH_WALLET = VERSION + "/m/wallet/bind_mch_wallet";
 
 	/**
 	 * 设置出款申请单状态为失败
@@ -130,7 +139,7 @@ public class UrlConstant {
 	/**
 	 * 富慧通审核企业商家钱包
 	 */
-	public static final String M_ACTIVE_WALLET_COMPANY = VERSION + "/m/wallet/active_wallet_company";
+	public static final String M_AUDIT_WALLET_COMPANY = VERSION + "/m/wallet/audit_wallet_company";
 
 	/**
 	 * 富慧通审核个人商家钱包
@@ -297,5 +306,4 @@ public class UrlConstant {
 	 * 当月手续费报表
 	 */
 	public static final String REPORT_CUR_CHARGING_QUERY = VERSION + "/m/report/cur_charging_query";
-
 }

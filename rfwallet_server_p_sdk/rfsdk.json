@@ -9,6 +9,6 @@
   "additionalProperties": {
     "apiVersion": "v1.0.0",
     "author": "nzm",
-    "pathsRequired": ["/m/","/p/","/account/"]
+    "pathsRequired": ["/m/","/p/","/account/","/wallet/bank"]
   }
 }

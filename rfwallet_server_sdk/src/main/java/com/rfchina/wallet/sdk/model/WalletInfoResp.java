@@ -28,6 +28,9 @@ public class WalletInfoResp  {
     @ApiModelProperty("钱包主要信息")
     private Wallet wallet ;
 
+    @ApiModelProperty("钱包通道信息")
+    private WalletTunnel walletTunnel ;
+
 
 }
 

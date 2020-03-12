@@ -33,3 +33,5 @@ data/logs
 build
 
 Dockerfile.o
+/gradle
+/gradlew*

@@ -45,7 +45,7 @@ public abstract class YunstBaseTest extends BaseTest {
         String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
         params.put("sign", sign);
 
-        return postAndValidateSuccessCode(BASE_URL, UrlConstant.M_CREATE_WALLET, params);
+        return postAndValidateSuccessCode(BASE_URL, UrlConstant.M_CREATE_MCH_WALLET, params);
     }
 
     protected Map<String, Object> walletLogList(Long walletId, String startTime, String endTime, int limit, long offset, Boolean stat){

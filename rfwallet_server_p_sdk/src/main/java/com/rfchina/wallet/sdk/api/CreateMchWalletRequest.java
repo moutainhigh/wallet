@@ -9,40 +9,43 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 
 
-/** 富慧通审核企业商家钱包 */
+/** 开通未审核的钱包 */
 @Builder
-public class ActiveWalletCompanyRequest extends  AbstractApiRequest {
+public class CreateMchWalletRequest extends  AbstractApiRequest {
 
   @ApiModelProperty("access_token")
   private String accessToken ;
 
-  @ApiModelProperty("审核方式，1：运营，2：银企直连，4：通联")
-  private Long auditType ;
-
   @ApiModelProperty("公司名称")
   private String companyName ;
 
-  @ApiModelProperty("钱包状态: 1:待审核，2：激活,3：禁用")
-  private Integer status ;
+  @ApiModelProperty("商家ID")
+  private String mchId ;
 
-  @ApiModelProperty("钱包ID")
-  private Long walletId ;
+  @ApiModelProperty("钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户")
+  private Integer source ;
+
+  @ApiModelProperty("钱包标题，通常是姓名或公司名")
+  private String title ;
+
+  @ApiModelProperty("钱包类型， 1：企业钱包，2：个人钱包")
+  private Integer type ;
 
   @ApiModelProperty("公司邮箱")
   private String email ;
 
   @ApiModelProperty("公司电话")
-  private String phone ;
+  private String tel ;
 
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/wallet/active_wallet_company";
+    return "/wallet_server/v1/m/wallet/create_mch_wallet";
   }
 
   @Override
   public Class<?> getResponseModelClass() {
-    return Map.class;
+    return Wallet.class;
   }
 
   @Override
@@ -51,23 +54,26 @@ public class ActiveWalletCompanyRequest extends  AbstractApiRequest {
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
       }
-      if(auditType != null){
-        parameters.put("audit_type", auditType.toString());
-      }
       if(companyName != null){
         parameters.put("company_name", companyName.toString());
       }
-      if(status != null){
-        parameters.put("status", status.toString());
+      if(mchId != null){
+        parameters.put("mch_id", mchId.toString());
       }
-      if(walletId != null){
-        parameters.put("wallet_id", walletId.toString());
+      if(source != null){
+        parameters.put("source", source.toString());
+      }
+      if(title != null){
+        parameters.put("title", title.toString());
+      }
+      if(type != null){
+        parameters.put("type", type.toString());
       }
       if(email != null){
         parameters.put("email", email.toString());
       }
-      if(phone != null){
-        parameters.put("phone", phone.toString());
+      if(tel != null){
+        parameters.put("tel", tel.toString());
       }
     return parameters;
   }

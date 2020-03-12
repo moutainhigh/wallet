@@ -9,25 +9,25 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 
 
-/** 高级钱包-定时代收 */
+/** 查询钱包信息（企业or个人） */
 @Builder
-public class CollectAsyncRequest extends  AbstractApiRequest {
+public class QueryWalletBaseInfoRequest extends  AbstractApiRequest {
 
-  @ApiModelProperty("应用令牌")
+  @ApiModelProperty("access_token")
   private String accessToken ;
 
-  @ApiModelProperty("代收内容，参考CollectReq结构体")
-  private String collectReq ;
+  @ApiModelProperty("钱包ID")
+  private Long walletId ;
 
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/senior/collect_async";
+    return "/wallet_server/v1/u/wallet/query_wallet_base_info";
   }
 
   @Override
   public Class<?> getResponseModelClass() {
-    return WalletCollect.class;
+    return WalletBaseInfoVo.class;
   }
 
   @Override
@@ -36,8 +36,8 @@ public class CollectAsyncRequest extends  AbstractApiRequest {
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
       }
-      if(collectReq != null){
-        parameters.put("collect_req", collectReq.toString());
+      if(walletId != null){
+        parameters.put("wallet_id", walletId.toString());
       }
     return parameters;
   }

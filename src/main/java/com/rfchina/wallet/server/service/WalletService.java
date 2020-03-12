@@ -14,6 +14,7 @@ import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.BankCodeDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletFinanceDao;
+import com.rfchina.wallet.domain.mapper.ext.WalletOwnerDao;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletAuditType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletCardStatus;
@@ -35,6 +36,7 @@ import com.rfchina.wallet.domain.model.WalletFinance;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletOrderCriteria;
 import com.rfchina.wallet.domain.model.WalletOrderCriteria.Criteria;
+import com.rfchina.wallet.domain.model.WalletOwner;
 import com.rfchina.wallet.domain.model.WalletPerson;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.domain.model.WalletUser;
@@ -42,7 +44,6 @@ import com.rfchina.wallet.domain.model.ext.Bank;
 import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
 import com.rfchina.wallet.domain.model.ext.WalletCardExt;
-import com.rfchina.wallet.server.bank.pudong.domain.predicate.ExactErrPredicate;
 import com.rfchina.wallet.server.mapper.ext.ApplyStatusChangeExtDao;
 import com.rfchina.wallet.server.mapper.ext.GatewayTransExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCompanyExtDao;
@@ -56,6 +57,7 @@ import com.rfchina.wallet.server.model.ext.WalletInfoResp.WalletInfoRespBuilder;
 import com.rfchina.wallet.server.msic.EnumWallet.CardPro;
 import com.rfchina.wallet.server.msic.EnumWallet.GwPayeeType;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -122,6 +124,12 @@ public class WalletService {
 	@Autowired
 	private ApplyStatusChangeExtDao applyStatusChangeExtDao;
 
+	@Autowired
+	private WalletEventService walletEventService;
+
+	@Autowired
+	private WalletOwnerDao walletOwnerDao;
+
 
 	/**
 	 * 查询出佣结果
@@ -186,27 +194,6 @@ public class WalletService {
 
 	}
 
-//	/**
-//	 * 重做问题单
-//	 */
-//	public void redo(Long walletApplyId) {
-//		log.info("重做问题单 [{}]", walletApplyId);
-//		WalletApply walletApply = walletApplyExtDao.selectByPrimaryKey(walletApplyId);
-//		if (walletApply == null) {
-//			throw new RfchinaResponseException(EnumResponseCode.COMMON_DATA_DOES_NOT_EXIST,
-//				walletApplyId.toString());
-//		}
-//
-//		if (walletApply.getStatus().byteValue() != WalletApplyStatus.REDO.getValue()) {
-//			throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_APPLY_STATUS_ERROR);
-//		}
-//
-//		GatewayTrans trans = gatewayTransService.createTrans(walletApply);
-//		walletApply.setCurrTransId(trans.getId());
-//		walletApply.setStatus(WalletApplyStatus.WAIT_SEND.getValue());
-//		walletApplyExtDao.updateByPrimaryKey(walletApply);
-//	}
-
 
 	/**
 	 * 查询钱包明细
@@ -221,6 +208,7 @@ public class WalletService {
 		}
 
 		if (wallet.getLevel() == EnumWalletLevel.SENIOR.getValue().byteValue()
+			&& Objects.nonNull(wallet.getAuditType())
 			&& wallet.getAuditType() == EnumWalletAuditType.ALLINPAY
 			.getValue().byteValue()) {
 			try {
@@ -291,7 +279,8 @@ public class WalletService {
 	 * 开通未审核的钱包
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-	public Wallet createWallet(Byte type, String title, Byte source) throws Exception {
+	public Wallet createMchWallet(Byte type, String title, Byte source, String mchId,
+		String companyName, String tel, String email) throws Exception {
 
 		Wallet wallet = Wallet.builder()
 			.type(type)
@@ -304,16 +293,35 @@ public class WalletService {
 			.source(source)
 			.status(WalletStatus.WAIT_AUDIT.getValue())
 			.createTime(new Date())
-			.level(EnumDef.EnumWalletLevel.JUNIOR.getValue())
+			.level(EnumWalletLevel.SENIOR.getValue())
 			.build();
 		walletDao.insertSelective(wallet);
 
-		if (type == WalletType.COMPANY.getValue().byteValue() && source == WalletSource.FHT_CORP
-			.getValue().byteValue()) {
-			seniorWalletService
-				.createTunnel(TunnelType.YUNST.getValue().intValue(), wallet.getId(), source);
-		}
+		WalletCompany walletCompany = WalletCompany.builder()
+			.walletId(wallet.getId())
+			.companyName(companyName)
+			.email(email)
+			.tel(tel)
+			.createTime(new Date())
+			.build();
+		walletCompanyDao.insertSelective(walletCompany);
 
+		// 创建通联会员
+		seniorWalletService
+			.createTunnel(TunnelType.YUNST.getValue().intValue(), wallet.getId(), source);
+
+		// 关联商家和钱包
+		WalletOwner walletOwner = WalletOwner.builder()
+			.walletId(wallet.getId())
+			.ownerType(WalletSource.FHT_CORP.getValue())
+			.ownerId(mchId)
+			.deleted(EnumDef.Deleted.NO.getValue())
+			.build();
+		walletOwnerDao.insertSelective(walletOwner);
+
+		// 发送钱包事件
+		walletEventService.sendEventMq(EnumDef.WalletEventType.CREATE, wallet.getId()
+			, wallet.getLevel(), wallet.getStatus(), Arrays.asList(walletOwner));
 		return wallet;
 	}
 
@@ -464,74 +472,77 @@ public class WalletService {
 	}
 
 	/**
-	 * 富慧通审核通过个人商家钱包
-	 */
-	public void activeWalletPerson(Long walletId, String name, Byte idType, String idNo,
-		Byte status, Long auditType) {
-
-		WalletPerson walletPerson = walletPersonDao.selectByWalletId(walletId);
-
-		boolean isUpdate = walletPerson != null;
-		walletPerson = isUpdate ? walletPerson : new WalletPerson();
-		walletPerson.setWalletId(walletId);
-		walletPerson.setName(name);
-		walletPerson.setIdType(idType);
-		walletPerson.setIdNo(idNo);
-
-		if (isUpdate) {
-			walletPersonDao.updateByPrimaryKeySelective(walletPerson);
-		} else {
-			walletPersonDao.insertSelective(walletPerson);
-		}
-
-		walletDao.updateActiveStatus(walletId, status, auditType);
-	}
-
-	/**
 	 * 富慧通审核通过企业商家钱包
 	 */
-	public void activeWalletCompany(Long walletId, String companyName, Byte status,
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+	public void auditWalletCompany(Long walletId, String companyName, Byte status,
 		Long auditType, String tel, String email) {
 
 		WalletCompany walletCompany = walletCompanyDao.selectByWalletId(walletId);
+		if (status.byteValue() == WalletStatus.ACTIVE.getValue().byteValue()) {
+			boolean isUpdate = walletCompany != null;
+			walletCompany = isUpdate ? walletCompany : new WalletCompany();
+			walletCompany.setWalletId(walletId);
+			walletCompany.setCompanyName(companyName);
+			walletCompany.setEmail(email);
+			walletCompany.setTel(tel);
 
-		boolean isUpdate = walletCompany != null;
-		walletCompany = isUpdate ? walletCompany : new WalletCompany();
-		walletCompany.setWalletId(walletId);
-		walletCompany.setCompanyName(companyName);
-		walletCompany.setEmail(email);
-		walletCompany.setTel(tel);
-
-		if (isUpdate) {
-			walletCompanyDao.updateByPrimaryKeySelective(walletCompany);
-		} else {
-			walletCompanyDao.insertSelective(walletCompany);
+			if (isUpdate) {
+				walletCompanyDao.updateByPrimaryKeySelective(walletCompany);
+			} else {
+				walletCompanyDao.insertSelective(walletCompany);
+			}
 		}
+		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
+		wallet.setStatus(status);
+		wallet.setAuditType(auditType.byteValue());
+		walletDao.updateByPrimaryKeySelective(wallet);
 
-		walletDao.updateActiveStatus(walletId, status, auditType);
+		// 发送钱包事件
+		walletEventService.sendEventMq(EnumDef.WalletEventType.CHANGE, wallet.getId()
+			, wallet.getLevel(), wallet.getStatus());
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 	public void setWalletApplyStatus(Long applyId, String userId, String user, String comment) {
 		if (0 >= walletOrderDao.setApplyStatusFail(applyId)) {
-			throw new WalletResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE, "更新申请单状态失败");
+			throw new WalletResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+				"更新申请单状态失败");
 		}
 
 		ApplyStatusChange change = ApplyStatusChange.builder()
-				.applyId(applyId)
-				.auditStatus(OrderStatus.FAIL.getValue().toString())
-				.auditStatusDesc(OrderStatus.FAIL.getValueName())
-				.auditUserId(userId)
-				.auditUser(user)
-				.auditComment(comment)
-				.auditTime(new Date())
-				.createTime(new Date())
-				.oldVal(OrderStatus.SUCC.getValue().toString())
-				.newVal(OrderStatus.FAIL.getValue().toString())
-				.build();
-		if(0 >= applyStatusChangeExtDao.insertSelective(change)){
-			throw new WalletResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE, "插入更新记录失败");
+			.applyId(applyId)
+			.auditStatus(OrderStatus.FAIL.getValue().toString())
+			.auditStatusDesc(OrderStatus.FAIL.getValueName())
+			.auditUserId(userId)
+			.auditUser(user)
+			.auditComment(comment)
+			.auditTime(new Date())
+			.createTime(new Date())
+			.oldVal(OrderStatus.SUCC.getValue().toString())
+			.newVal(OrderStatus.FAIL.getValue().toString())
+			.build();
+		if (0 >= applyStatusChangeExtDao.insertSelective(change)) {
+			throw new WalletResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+				"插入更新记录失败");
 		}
+	}
+
+	public void bindMchWallet(Long walletId, WalletSource source, String mchId) {
+		WalletOwner walletOwner = walletOwnerDao
+			.selectByWalletOwnerId(walletId, source.getValue(), mchId);
+		if (Optional.ofNullable(walletOwner).isPresent()) {
+			return;
+		}
+		walletOwner = WalletOwner.builder()
+			.walletId(walletId)
+			.ownerType(source.getValue())
+			.ownerId(mchId)
+			.deleted(EnumDef.Deleted.NO.getValue())
+			.build();
+		walletOwnerDao.insertSelective(walletOwner);
+		// 发送钱包事件
+		walletEventService.sendEventMq(EnumDef.WalletEventType.BIND, walletId);
 	}
 
 }

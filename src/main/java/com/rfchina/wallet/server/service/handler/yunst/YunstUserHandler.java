@@ -39,6 +39,7 @@ import com.rfchina.wallet.server.bank.yunst.util.YunstTpl;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.msic.EnumYunst.EnumYunstResponse;
 import com.rfchina.wallet.server.msic.EnumYunst.YunstIdType;
+import com.rfchina.wallet.server.util.IdNumValidUtil;
 import java.util.TimeZone;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
@@ -299,9 +300,12 @@ public class YunstUserHandler extends YunstBaseHandler {
 	 */
 	public YunstSetCompanyInfoResult setCompanyInfo(String bizUserId, Boolean isAuth,
 		YunstSetCompanyInfoReq.CompanyBasicInfo companyBasicInfo) throws Exception {
-		if ("H04496326".equals(companyBasicInfo.getLegalIds())){
+		if (!IdNumValidUtil.isIDNumber(companyBasicInfo.getLegalIds())){
 			companyBasicInfo.setIdentityType(99L);
 		}
+//		if ("H04496326".equals(companyBasicInfo.getLegalIds())){
+//			companyBasicInfo.setIdentityType(99L);
+//		}
 		companyBasicInfo.setLegalIds(RSAUtil.encrypt(companyBasicInfo.getLegalIds()));
 		companyBasicInfo.setAccountNo(RSAUtil.encrypt(companyBasicInfo.getAccountNo()));
 		YunstSetCompanyInfoReq.YunstSetCompanyInfoReqBuilder builder = YunstSetCompanyInfoReq

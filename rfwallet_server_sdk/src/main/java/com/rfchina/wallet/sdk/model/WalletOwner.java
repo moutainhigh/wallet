@@ -9,27 +9,24 @@ import java.util.ArrayList;
 
     
 /**
-* BalanceJob
+* WalletOwner
 */
 @Data
-public class BalanceJob  {
-    @ApiModelProperty("钱包对账日期")
-    private String balanceDate ;
-
-    @ApiModelProperty("创建日期")
-    private String createTime ;
-
+public class WalletOwner  {
     @ApiModelProperty("是否删除 0：正常 1：已删除")
     private Integer deleted ;
 
     @ApiModelProperty("id")
     private Long id ;
 
-    @ApiModelProperty("状态 1：进行中 2：对账完成 3:对账失败")
-    private Integer status ;
+    @ApiModelProperty("所有者id")
+    private String ownerId ;
 
-    @ApiModelProperty("对账文件")
-    private String walletFileUrl ;
+    @ApiModelProperty("所有者类型,1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户")
+    private Integer ownerType ;
+
+    @ApiModelProperty("钱包id")
+    private Long walletId ;
 
 
 }

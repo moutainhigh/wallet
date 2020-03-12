@@ -28,9 +28,13 @@ public class DefaultMqAdvice extends AbstractMqAdvice {
 			return;
 		}
 		log.info("发送MQ {}", JSON.toJSONString(msg));
-		amqpTemplate.convertAndSend(
-			StringUtils.isBlank(msg.getExchageName()) ? exchangeName : msg.getExchageName(),
-			msg.getRoutingKey(),
-			msg.getMessage(null));
+		try {
+			amqpTemplate.convertAndSend(
+					StringUtils.isBlank(msg.getExchageName()) ? exchangeName : msg.getExchageName(),
+					msg.getRoutingKey(),
+					msg.getMessage(null));
+		}catch (Exception e){
+			log.error("MQ发送失败",e);
+		}
 	}
 }

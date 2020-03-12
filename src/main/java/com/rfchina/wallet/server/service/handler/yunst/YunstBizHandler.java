@@ -76,7 +76,6 @@ import com.rfchina.wallet.server.mapper.ext.WalletClearingExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectInfoExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCollectMethodExtDao;
-import com.rfchina.wallet.server.mapper.ext.WalletConsumeExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRechargeExtDao;
@@ -143,9 +142,6 @@ public class YunstBizHandler extends EBankHandler {
 
 	@Autowired
 	private WalletCollectMethodExtDao walletCollectMethodDao;
-
-	@Autowired
-	private WalletConsumeExtDao walletConsumeDao;
 
 	@Autowired
 	private WalletTunnelExtDao walletTunnelExtDao;
@@ -661,18 +657,20 @@ public class YunstBizHandler extends EBankHandler {
 
 			}
 			// 处理失败的退款
-			else if((OrderStatus.FAIL.getValue().byteValue() == order.getStatus()
-					|| OrderStatus.CLOSED.getValue().byteValue() == order.getStatus())
-					&& OrderType.REFUND.getValue().byteValue() == order.getType().byteValue()
-				&& (order.getBizTag() == null || !EnumBizTag.RECORD.contains(order.getBizTag()))){
+			else if ((OrderStatus.FAIL.getValue().byteValue() == order.getStatus()
+				|| OrderStatus.CLOSED.getValue().byteValue() == order.getStatus())
+				&& OrderType.REFUND.getValue().byteValue() == order.getType().byteValue()
+				&& (order.getBizTag() == null || !EnumBizTag.RECORD.contains(order.getBizTag()))) {
 				order.setBizTag(
-						EnumBizTag.RECORD.and(Optional.ofNullable(order.getBizTag()).orElse((byte) 0)));
+					EnumBizTag.RECORD.and(Optional.ofNullable(order.getBizTag()).orElse((byte) 0)));
 				walletOrderDao.updateByPrimaryKeySelective(order);
 
 				WalletRefund walletRefund = walletRefundDao.selectByOrderId(order.getId());
-				WalletCollect walletCollect = walletCollectDao.selectByOrderId(walletRefund.getCollectOrderId());
+				WalletCollect walletCollect = walletCollectDao
+					.selectByOrderId(walletRefund.getCollectOrderId());
 				walletCollect.setRefundLimit(walletCollect.getRefundLimit() + order.getAmount());
-				walletCollect.setRemainTunnelFee(walletCollect.getRemainTunnelFee() - order.getTunnelFee());
+				walletCollect
+					.setRemainTunnelFee(walletCollect.getRemainTunnelFee() - order.getTunnelFee());
 				walletCollectDao.updateByPrimaryKeySelective(walletCollect);
 			}
 			return order;
@@ -823,6 +821,8 @@ public class YunstBizHandler extends EBankHandler {
 			.build();
 		try {
 			return yunstTpl.execute(req, SmsPayResp.class);
+		} catch (CommonGatewayException e) {
+			throw e;
 		} catch (Exception e) {
 			log.error("通联-接口异常", e);
 			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
@@ -840,6 +840,8 @@ public class YunstBizHandler extends EBankHandler {
 
 		try {
 			return yunstTpl.execute(req, SmsRetryResp.class);
+		} catch (CommonGatewayException e) {
+			throw e;
 		} catch (Exception e) {
 			log.error("通联-接口异常", e);
 			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
