@@ -3,6 +3,10 @@
 测试环境
 jenkins job: platform-rfwallet-super-server-test
 ```
+## 1.3.0_2020031215_Release
+### [变动说明]
+- 3.1需求发版
+
 ## 1.3.0_b6_20200311111_Beta
 ### [变动说明]
 - 优化余额刷新机制
