@@ -3,6 +3,10 @@
 测试环境
 jenkins job: platform-rfwallet-super-server-test
 ```
+## 1.3.1_2020031615_Release
+### [变动说明]
+- 通道配置增加非空判断
+
 ## 1.3.0_2020031215_Release
 ### [变动说明]
 - 3.1需求发版

@@ -888,7 +888,7 @@ public class SeniorPayService {
 					WalletConsume walletConsume = walletConsumeDao.selectByOrderId(order.getId());
 					WalletTunnel payeeTunnel = walletTunnelDao
 						.selectByWalletId(walletConsume.getPayeeWalletId(), order.getTunnelType());
-					syncTunnelAmount(payeeTunnel);
+					Optional.ofNullable(payeeTunnel).ifPresent(t -> syncTunnelAmount(t));
 				}
 			}
 			return rs;
