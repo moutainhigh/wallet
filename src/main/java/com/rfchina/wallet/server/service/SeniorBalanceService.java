@@ -146,19 +146,15 @@ public class SeniorBalanceService {
 				sendFailMail(statDate, tunnelMoreSet, walletMoreSet, diffSet);
 			} else {
 				// 生成对账文件
-				try {
-					Path path = write2File(date, succSet);
-					byte[] bytes = Files.readAllBytes(path);
-					String fileKey = path.getFileName().toString();
-					fileServer.upload(fileKey, bytes, "text/plain", EnumFileAcl.PUBLIC_READ, null);
-					Files.delete(path);
-					job.setStatus(BalanceJobStatus.SUCC.getValue());
-					job.setWalletFileUrl(fileServer.getSvrEndpoint() + "/_f/" +
-						fileServer.getSrvBucket() + "/" + fileKey);
-					balanceJobDao.updateByPrimaryKeySelective(job);
-				} catch (Exception e) {
-					log.error("上传对账文件异常", e);
-				}
+				Path path = write2File(date, succSet);
+				byte[] bytes = Files.readAllBytes(path);
+				String fileKey = path.getFileName().toString();
+				fileServer.upload(fileKey, bytes, "text/plain", EnumFileAcl.PUBLIC_READ, null);
+				Files.delete(path);
+				job.setStatus(BalanceJobStatus.SUCC.getValue());
+				job.setWalletFileUrl(fileServer.getSvrEndpoint() + "/_f/" +
+					fileServer.getSrvBucket() + "/" + fileKey);
+				balanceJobDao.updateByPrimaryKeySelective(job);
 			}
 		} catch (Exception e) {
 			log.error("对账失败 " + statDate, e);
