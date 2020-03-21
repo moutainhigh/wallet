@@ -30,6 +30,7 @@ import com.rfchina.wallet.domain.model.WalletRefund;
 import com.rfchina.wallet.domain.model.WalletRefundDetail;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.domain.model.WalletWithdraw;
+import com.rfchina.wallet.domain.model.WalletWithdrawDetail;
 import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
 import com.rfchina.wallet.server.bank.yunst.exception.UnknownException;
 import com.rfchina.wallet.server.bank.yunst.request.AgentPayReq;
@@ -82,6 +83,7 @@ import com.rfchina.wallet.server.mapper.ext.WalletRechargeExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRefundDetailExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRefundExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletWithdrawDetailExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletWithdrawExtDao;
 import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
@@ -172,6 +174,9 @@ public class YunstBizHandler extends EBankHandler {
 
 	@Autowired
 	private WalletExtDao walletDao;
+
+	@Autowired
+	private WalletWithdrawDetailExtDao walletWithdrawDetailDao;
 
 
 	public boolean isSupportTunnelType(Byte tunnelType) {
@@ -642,6 +647,8 @@ public class YunstBizHandler extends EBankHandler {
 						builder.debitAmount(0L);
 						builder.creditAmount(order.getAmount());
 					}
+					moneyLogDao.insertSelective(builder.build());
+
 					if (order.getType().byteValue() == OrderType.REFUND.getValue()) {
 						WalletRefund refund = walletRefundDao.selectByOrderId(order.getId());
 						List<WalletRefundDetail> details = walletRefundDetailDao
@@ -650,8 +657,16 @@ public class YunstBizHandler extends EBankHandler {
 							walletCollectInfoDao
 								.accuRefundAmount(detail.getCollectInfoId(), detail.getAmount());
 						});
+					} else if (order.getType().byteValue() == OrderType.WITHDRAWAL.getValue()) {
+						WalletWithdraw withdraw = walletWithdrawDao.selectByOrderId(order.getId());
+						List<WalletWithdrawDetail> details = walletWithdrawDetailDao
+							.selectByWithdrawId(withdraw.getId());
+						details.forEach(detail -> {
+							walletClearingDao.accWithdrawAmount(detail.getClearingId(),
+								detail.getWithdrawAmount());
+						});
+
 					}
-					moneyLogDao.insertSelective(builder.build());
 				}
 
 

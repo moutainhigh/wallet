@@ -1,37 +1,53 @@
 package com.rfchina.wallet.server.service;
 
 import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Lists;
+import com.rfchina.biztools.functional.MaxIdIterator;
 import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.platform.common.misc.Triple;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.DateUtil;
+import com.rfchina.wallet.domain.exception.WalletResponseException;
+import com.rfchina.wallet.domain.mapper.WalletConfigMapper;
 import com.rfchina.wallet.domain.mapper.ext.BankCodeDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletFinanceDao;
+import com.rfchina.wallet.domain.misc.EnumDef.BizValidateType;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderSubStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderType;
+import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.MqConstant;
+import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.GatewayTrans;
 import com.rfchina.wallet.domain.model.WalletCard;
+import com.rfchina.wallet.domain.model.WalletClearing;
+import com.rfchina.wallet.domain.model.WalletConfig;
 import com.rfchina.wallet.domain.model.WalletFinance;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletOrderCriteria;
+import com.rfchina.wallet.domain.model.WalletTunnel;
+import com.rfchina.wallet.domain.model.WalletWithdrawDetail;
 import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
 import com.rfchina.wallet.server.bank.pudong.domain.predicate.ExactErrPredicate;
 import com.rfchina.wallet.server.bank.pudong.domain.util.ExceptionUtil;
+import com.rfchina.wallet.server.mapper.ext.WalletClearingExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCompanyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletUserExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletWithdrawDetailExtDao;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.PayTuple;
+import com.rfchina.wallet.server.model.ext.WithdrawResp;
 import com.rfchina.wallet.server.msic.EnumWallet.CardPro;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.GwPayeeType;
 import com.rfchina.wallet.server.msic.EnumWallet.GwProgress;
 import com.rfchina.wallet.server.msic.EnumWallet.NotifyType;
+import com.rfchina.wallet.server.msic.EnumWallet.WithdrawType;
 import com.rfchina.wallet.server.service.handler.common.EBankHandler;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
 import java.math.BigDecimal;
@@ -40,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.mail.internet.MimeMessage;
@@ -105,6 +122,18 @@ public class ScheduleService {
 
 	@Autowired
 	private SeniorPayService seniorPayService;
+
+	@Autowired
+	private WalletConfigMapper walletConfigDao;
+
+	@Autowired
+	private WalletTunnelExtDao walletTunnelDao;
+
+	@Autowired
+	private WalletClearingExtDao walletClearingDao;
+
+	@Autowired
+	private WalletWithdrawDetailExtDao walletWithdrawDetailDao;
 
 	/**
 	 * 通道转账
@@ -324,7 +353,7 @@ public class ScheduleService {
 			for (WalletOrder walletOrder : walletOrders) {
 				try {
 					log.info("开始更新高级订单 [{}]", walletOrder.getOrderNo());
-					seniorPayService.updateOrderStatusWithMq(walletOrder.getOrderNo(),true);
+					seniorPayService.updateOrderStatusWithMq(walletOrder.getOrderNo(), true);
 				} catch (Exception e) {
 					log.error("定时更新支付状态, 异常！", e);
 				}
@@ -407,5 +436,92 @@ public class ScheduleService {
 		}
 	}
 
+
+	/**
+	 * 发起自动提现
+	 */
+	public void doWithdraw(WalletConfig walletConfig) {
+
+		WalletTunnel walletTunnel = walletTunnelDao
+			.selectByWalletId(walletConfig.getWalletId(), TunnelType.YUNST.getValue());
+		// 钱包
+		if (walletTunnel.getBalance() < walletConfig.getAutoWithdrawThreshold()) {
+			log.info("[自动提现] 钱包[{}] 未达到自动限额", walletConfig.getWalletId());
+			return;
+		}
+		// 支付单退款
+		WalletCard walletCard = walletCardDao
+			.selectDefCardByWalletId(walletConfig.getWalletId());
+		Optional.ofNullable(walletCard)
+			.orElseThrow(() -> {
+				log.error("[自动提现] 钱包[{}] 未设置默认卡", walletConfig.getWalletId());
+				return new WalletResponseException(EnumWalletResponseCode.BANK_CARD_NOT_EXISTS);
+			});
+
+		if (WithdrawType.COLLECT_ORDER.getValue().byteValue() == walletConfig
+			.getAutoWithdrawType()) {
+			new MaxIdIterator<WalletClearing>().apply(
+				maxId -> walletClearingDao.selectUnWithdraw(walletConfig.getWalletId(), maxId),
+				clearing -> {
+
+					Long remainAmount = clearing.getAmount() - clearing.getWithdrawAmount();
+					if (remainAmount > 0) {
+
+						WithdrawResp order = seniorPayService
+							.withdraw(walletConfig.getWalletId(),
+								walletCard, remainAmount, BizValidateType.NONE.getValue(), null,
+								null);
+						WalletWithdrawDetail withdrawDetail = WalletWithdrawDetail.builder()
+							.withdrawId(order.getWithdrawId())
+							.clearingId(clearing.getId())
+							.collectOrderNo(clearing.getCollectOrderNo())
+							.withdrawAmount(remainAmount)
+							.build();
+						walletWithdrawDetailDao.insertSelective(withdrawDetail);
+					}
+
+					return clearing.getId();
+				});
+		} else if (WithdrawType.WALLET_AMOUNT.getValue().byteValue() == walletConfig
+			.getAutoWithdrawType()) {
+
+			List<WalletClearing> currClearings = Lists.newArrayList();
+			AtomicReference<Long> currAmount = new AtomicReference<>(0L);
+			new MaxIdIterator<WalletClearing>().apply(
+				maxId -> walletClearingDao.selectUnWithdraw(walletConfig.getWalletId(), maxId),
+				clearing -> {
+					Long curr = currAmount.get();
+					if (curr >= walletTunnel.getBalance()) {
+						return Long.MAX_VALUE;
+					}
+					Long remainAmount = clearing.getAmount() - clearing.getWithdrawAmount();
+					currAmount.updateAndGet(x -> x + remainAmount);
+					currClearings.add(clearing);
+					return clearing.getId();
+				});
+			WithdrawResp order = seniorPayService
+				.withdraw(walletConfig.getWalletId(),
+					walletCard, walletTunnel.getBalance(), BizValidateType.NONE.getValue(), null,
+					null);
+			currAmount.set(walletTunnel.getBalance());
+			currClearings.forEach(clearing -> {
+				if (currAmount.get() <= 0) {
+					return;
+				}
+				Long remainAmount = clearing.getAmount() - clearing.getWithdrawAmount();
+				Long withdrawAmount = remainAmount > currAmount.get() ? currAmount.get() : remainAmount;
+				currAmount.updateAndGet(x -> x - withdrawAmount);
+				WalletWithdrawDetail withdrawDetail = WalletWithdrawDetail.builder()
+					.withdrawId(order.getWithdrawId())
+					.clearingId(clearing.getId())
+					.collectOrderNo(clearing.getCollectOrderNo())
+					.withdrawAmount(remainAmount)
+					.build();
+				walletWithdrawDetailDao.insertSelective(withdrawDetail);
+			});
+		}
+
+
+	}
 
 }

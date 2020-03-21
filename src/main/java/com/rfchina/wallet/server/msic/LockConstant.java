@@ -23,6 +23,10 @@ public class LockConstant {
 	 */
 	public static String LOCK_QUARTZ_BALANCE = "quartzBalance";
 	/**
+	 * 定时提现
+	 */
+	public static String LOCK_QUARTZ_WITHDRAW = "quartzWithdraw";
+	/**
 	 * 定时通联通道手续费报表统计
 	 */
 	public static String LOCK_QUARTZ_YUNST_FEE_REPORT = "quartzYunstFeeReprot";

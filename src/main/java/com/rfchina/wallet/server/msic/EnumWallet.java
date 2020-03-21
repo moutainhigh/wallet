@@ -754,4 +754,69 @@ public class EnumWallet {
 		}
 	}
 
+
+	/**
+	 * 配置状态。1：正常，2：失效
+	 */
+	public enum WalletConfigStatus implements Valuable<Byte> {
+		NORMAL((byte) 1, "正常"),
+		FAIL((byte) 2, "失效");
+
+		private Byte value;
+		private String valueName;
+
+		WalletConfigStatus(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}
+	}
+
+	/**
+	 * 自动提现状态。1：开启，2：关闭
+	 */
+	public enum AutoWithdrawStatus implements Valuable<Byte> {
+		OPEN((byte) 1, "开启"),
+		CLOSE((byte) 2, "关闭");
+
+		private Byte value;
+		private String valueName;
+
+		AutoWithdrawStatus(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}
+	}
+
+	/**
+	 * 自动提现类型。1：按余额提现 2：按支付单提现
+	 */
+	public enum WithdrawType implements Valuable<Byte> {
+		WALLET_AMOUNT((byte) 1, "按余额提现"),
+		COLLECT_ORDER((byte) 2, "按支付单提现");
+
+		private Byte value;
+		private String valueName;
+
+		WithdrawType(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}
+	}
+
+
 }

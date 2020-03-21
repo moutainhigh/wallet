@@ -10,11 +10,14 @@ import lombok.Data;
 public class WithdrawResp extends WalletOrder {
 
 	@ApiModelProperty(value = "商户系统用户标识")
-	private String bizUserId ;
+	private String bizUserId;
 
 	@ApiModelProperty(value = "业务票据")
 	private String ticket;
 
 	@ApiModelProperty(name = "signed_params", value = "密码确认时输入参数")
 	private String signedParams;
+
+	@ApiModelProperty(value = "提现id")
+	private Long withdrawId;
 }

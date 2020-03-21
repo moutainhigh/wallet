@@ -30,4 +30,5 @@ public interface WalletCollectInfoExtDao extends WalletCollectInfoMapper {
 		"where id = #{collectInfoId}"
 	})
 	int accuRefundAmount(@Param("collectInfoId") Long collectInfoId, @Param("amount") Long amount);
+
 }

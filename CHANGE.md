@@ -3,6 +3,10 @@
 测试环境
 jenkins job: platform-rfwallet-super-server-test
 ```
+## 1.4.0_2020032118_Beta
+### [变动说明]
+- 自动提现
+
 ## 1.3.0_2020031215_Release
 ### [变动说明]
 - 3.1需求发版

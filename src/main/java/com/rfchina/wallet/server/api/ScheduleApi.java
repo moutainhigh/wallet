@@ -29,4 +29,9 @@ public interface ScheduleApi {
 	 */
 	void quartzCharging(String balanceDate);
 
+	/**
+	 * 定时提现
+	 */
+	void quartzWithdraw();
+
 }

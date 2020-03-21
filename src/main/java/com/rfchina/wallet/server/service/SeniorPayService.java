@@ -311,6 +311,7 @@ public class SeniorPayService {
 				result.setSignedParams(signedParams);
 			}
 
+			result.setWithdrawId(withdraw.getId());
 			return result;
 		} finally {
 			lock.unLock(LockConstant.LOCK_PAY_ORDER + orderNo);
@@ -897,7 +898,7 @@ public class SeniorPayService {
 		}
 	}
 
-	private void syncTunnelAmount(WalletTunnel walletTunnel) {
+	public Wallet syncTunnelAmount(WalletTunnel walletTunnel) {
 		// 通联查余额
 		YunstQueryBalanceResult result = yunstUserHandler
 			.queryBalance(walletTunnel.getBizUserId());
@@ -912,6 +913,7 @@ public class SeniorPayService {
 		wallet.setFreezeAmount(walletTunnel.getFreezenAmount());
 		wallet.setBalanceUpdTime(new Date());
 		walletDao.updateByPrimaryKeySelective(wallet);
+		return wallet;
 	}
 
 

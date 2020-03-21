@@ -114,4 +114,20 @@ public class ScheduleController {
 
 		return "success";
 	}
+
+	@RequestMapping(value = UrlConstant.QUARTZ_WITHDRAW, method = RequestMethod.POST)
+	@FuScheduleTaskReporter
+	public String quartzWithdraw(
+		@RequestParam("schedule_id") String scheduleId,
+		@RequestParam("timestamp") String timestamp,
+		@RequestParam("sign") String sign) {
+
+		log.info("scheduler: 开始执行任务[{}]", "quartzWithdraw");
+
+		scheduleApi.quartzWithdraw();
+
+		log.info("scheduler: 完成任务[{}]", "quartzWithdraw");
+
+		return "success";
+	}
 }

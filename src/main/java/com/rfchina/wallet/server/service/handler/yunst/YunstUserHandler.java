@@ -39,6 +39,7 @@ import com.rfchina.wallet.server.bank.yunst.util.YunstTpl;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.msic.EnumYunst.EnumYunstResponse;
 import com.rfchina.wallet.server.msic.EnumYunst.YunstIdType;
+import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.util.IdNumValidUtil;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -50,8 +51,10 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
-@Import(YunstTpl.class)
 public class YunstUserHandler extends YunstBaseHandler {
+
+	@Autowired
+	private ConfigService configService;
 
 	@Autowired
 	private YunstTpl yunstTpl;

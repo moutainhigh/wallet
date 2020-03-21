@@ -1,6 +1,7 @@
 package com.rfchina.wallet.server.bank.yunst.util;
 
 import com.allinpay.yunst.sdk.YunClient;
+import com.allinpay.yunst.sdk.bean.YunConfig;
 import com.allinpay.yunst.sdk.bean.YunRequest;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,17 +19,22 @@ import com.rfchina.wallet.server.bank.yunst.response.YunstBaseResp;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayInvokeStatus;
 import com.rfchina.wallet.server.msic.EnumYunst.YunstMethodName;
 import com.rfchina.wallet.server.service.CacheService;
-
+import com.rfchina.wallet.server.service.ConfigService;
 import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TimeZone;
+import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 @Slf4j
 public class YunstTpl {
+
+	public static final String RESP_OK = "OK";
 
 	@Autowired
 	private GatewayLogMapper gatewayLogDao;
@@ -36,9 +42,49 @@ public class YunstTpl {
 	@Autowired
 	private CacheService cacheService;
 
-	public static final String RESP_OK = "OK";
+	@Autowired
+	ConfigService configService;
+
+	private YunConfig config;
+
+	@PostConstruct
+	public void tryInit() {
+		if (config == null) {
+			synchronized (YunstTpl.class) {
+				if (config == null) {
+					forceInit();
+				}
+			}
+		}
+	}
+
+	public void forceInit() {
+
+		YunConfig newCfg = new YunConfig(
+			configService.getYstServerUrl(),
+			configService.getYstSysId(),
+			configService.getYstPassword(),
+			configService.getYstAlias(),
+			configService.getYstVersion(),
+			configService.getYstPfxPath(),
+			configService.getYstTlCertPath());
+
+		try {
+			log.info("初始化Yunst serverUrl={}, sysId={}, version={}, pfxPath={}, tlCertPath={} ",
+				configService.getYstServerUrl(), configService.getYstSysId(),
+				configService.getYstVersion(), configService.getYstPfxPath(),
+				configService.getYstTlCertPath());
+			YunClient.configure(newCfg);
+		} catch (Exception e) {
+			log.error("", e);
+		}
+
+		config = newCfg;
+	}
+
 
 	public <T extends YunstBaseReq, R> R execute(T reqBody, Class<R> respClz) throws Exception {
+		tryInit();
 		// 封装请求
 		YunRequest reqPkg = this.wrapRequest(reqBody);
 
@@ -62,6 +108,7 @@ public class YunstTpl {
 	}
 
 	public <T extends YunstBaseReq> String signRequest(T reqBody) {
+		tryInit();
 		// 封装请求
 		YunRequest reqPkg = this.wrapRequest(reqBody);
 		try {

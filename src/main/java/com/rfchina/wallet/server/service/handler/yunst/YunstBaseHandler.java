@@ -21,21 +21,7 @@ public abstract class YunstBaseHandler {
 	public static final String MEMBER_TYPE_PREFIX_MCH = "WM";//个人商户
 	public static final String MEMBER_TYPE_PREFIX_COMPANY = "WC";//企业商户
 
-	@Autowired
-	ConfigService configService;
 
-	@PostConstruct
-	public void init() {
-		YunClient
-			.configure(new YunConfig(configService.getYstServerUrl(), configService.getYstSysId(),
-				configService.getYstPassword(), configService.getYstAlias(),
-				configService.getYstVersion(),
-				configService.getYstPfxPath(), configService.getYstTlCertPath()));
-		log.info("初始化Yunst serverUrl={}, sysId={}, version={}, pfxPath={}, tlCertPath={} ",
-			configService.getYstServerUrl(), configService.getYstSysId(),
-			configService.getYstVersion(), configService.getYstPfxPath(),
-			configService.getYstTlCertPath());
-	}
 
 	public String transferToYunstBizUserFormat(Long walletId, Byte type, String env) {
 		switch (type) {
