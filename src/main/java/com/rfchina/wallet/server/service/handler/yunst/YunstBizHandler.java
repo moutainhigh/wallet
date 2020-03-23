@@ -10,6 +10,8 @@ import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EnumUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.MoneyLogMapper;
+import com.rfchina.wallet.domain.mapper.ext.WalletBalanceDetailDao;
+import com.rfchina.wallet.domain.misc.EnumDef.BalanceDetailStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderSubStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderType;
@@ -18,6 +20,7 @@ import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.GatewayTrans;
 import com.rfchina.wallet.domain.model.MoneyLog;
 import com.rfchina.wallet.domain.model.MoneyLog.MoneyLogBuilder;
+import com.rfchina.wallet.domain.model.WalletBalanceDetail;
 import com.rfchina.wallet.domain.model.WalletClearing;
 import com.rfchina.wallet.domain.model.WalletCollect;
 import com.rfchina.wallet.domain.model.WalletCollectInfo;
@@ -30,7 +33,6 @@ import com.rfchina.wallet.domain.model.WalletRefund;
 import com.rfchina.wallet.domain.model.WalletRefundDetail;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.domain.model.WalletWithdraw;
-import com.rfchina.wallet.domain.model.WalletWithdrawDetail;
 import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
 import com.rfchina.wallet.server.bank.yunst.exception.UnknownException;
 import com.rfchina.wallet.server.bank.yunst.request.AgentPayReq;
@@ -83,7 +85,6 @@ import com.rfchina.wallet.server.mapper.ext.WalletRechargeExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRefundDetailExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRefundExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
-import com.rfchina.wallet.server.mapper.ext.WalletWithdrawDetailExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletWithdrawExtDao;
 import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
@@ -176,7 +177,7 @@ public class YunstBizHandler extends EBankHandler {
 	private WalletExtDao walletDao;
 
 	@Autowired
-	private WalletWithdrawDetailExtDao walletWithdrawDetailDao;
+	private WalletBalanceDetailDao walletBalanceDetailDao;
 
 
 	public boolean isSupportTunnelType(Byte tunnelType) {
@@ -591,8 +592,35 @@ public class YunstBizHandler extends EBankHandler {
 			if (walletOrderStatus.isEndStatus()) {
 				order.setEndTime(new Date());
 			}
-
+			// 更新订单状态
 			walletOrderDao.updateByPrimaryKeySelective(order);
+
+			// 更新余额明细
+
+			if (walletOrderStatus.isEndStatus() && OrderType.COLLECT.getValue() != order.getType()
+				&& OrderType.REFUND.getValue() != order.getType()
+				&& !EnumBizTag.RECORD.contains(order.getBizTag())) {
+
+				Byte walletDetailStatus =
+					(OrderStatus.SUCC.getValue().byteValue() == walletOrderStatus.getValue())
+						? BalanceDetailStatus.SUCC.getValue() : BalanceDetailStatus.FAIL.getValue();
+				List<WalletBalanceDetail> details = walletBalanceDetailDao
+					.selectByOrderId(order.getId());
+				details.forEach(detail -> {
+					detail.setStatus(walletDetailStatus);
+					walletBalanceDetailDao.updateByPrimaryKeySelective(detail);
+					if (OrderType.CONSUME.getValue().byteValue() == detail.getType()
+						|| OrderType.DEDUCTION.getValue().byteValue() == detail.getType()
+						|| OrderType.WITHDRAWAL.getValue().byteValue() == detail.getType()) {
+
+						walletBalanceDetailDao.updateDetailFreezen(detail.getRefOrderId(),
+							detail.getRefOrderDetailId(),
+							-detail.getAmount(),
+							BalanceDetailStatus.SUCC.getValue().byteValue() == walletDetailStatus
+								? -detail.getAmount() : detail.getAmount());
+					}
+				});
+			}
 
 			// 记录到流水
 			if (OrderStatus.SUCC.getValue().byteValue() == order.getStatus()
@@ -657,15 +685,6 @@ public class YunstBizHandler extends EBankHandler {
 							walletCollectInfoDao
 								.accuRefundAmount(detail.getCollectInfoId(), detail.getAmount());
 						});
-					} else if (order.getType().byteValue() == OrderType.WITHDRAWAL.getValue()) {
-						WalletWithdraw withdraw = walletWithdrawDao.selectByOrderId(order.getId());
-						List<WalletWithdrawDetail> details = walletWithdrawDetailDao
-							.selectByWithdrawId(withdraw.getId());
-						details.forEach(detail -> {
-							walletClearingDao.accWithdrawAmount(detail.getClearingId(),
-								detail.getWithdrawAmount());
-						});
-
 					}
 				}
 

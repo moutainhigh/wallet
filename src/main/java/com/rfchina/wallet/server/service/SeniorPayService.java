@@ -1,14 +1,19 @@
 package com.rfchina.wallet.server.service;
 
+import com.google.common.collect.Lists;
+import com.rfchina.biztools.functional.MaxIdIterator;
 import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.biztools.lock.SimpleExclusiveLock;
 import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.passport.misc.SessionThreadLocal;
 import com.rfchina.platform.common.misc.Triple;
+import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
+import com.rfchina.wallet.domain.mapper.ext.WalletBalanceDetailDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletConsumeDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
+import com.rfchina.wallet.domain.misc.EnumDef.BalanceDetailStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.BizValidateType;
 import com.rfchina.wallet.domain.misc.EnumDef.DirtyType;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderStatus;
@@ -18,6 +23,7 @@ import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.GatewayTrans;
 import com.rfchina.wallet.domain.model.Wallet;
+import com.rfchina.wallet.domain.model.WalletBalanceDetail;
 import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletClearing;
 import com.rfchina.wallet.domain.model.WalletCollect;
@@ -75,9 +81,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -154,6 +162,11 @@ public class SeniorPayService {
 	@Autowired
 	private SessionThreadLocal sessionThreadLocal;
 
+	@Autowired
+	private WalletBalanceDetailDao walletBalanceDetailDao;
+
+	@Autowired
+	private ScheduleService scheduleService;
 
 	/**
 	 * 充值
@@ -220,6 +233,21 @@ public class SeniorPayService {
 			savePayMethod(recharge.getOrderId(), recharge.getId(), OrderType.RECHARGE.getValue(),
 				payMethod);
 
+			// 余额明细
+			WalletBalanceDetail withdrawDetail = WalletBalanceDetail.builder()
+				.walletId(rechargeOrder.getWalletId())
+				.orderId(rechargeOrder.getId())
+				.orderNo(rechargeOrder.getOrderNo())
+				.orderDetailId(recharge.getId())
+				.type(OrderType.RECHARGE.getValue())
+				.status(BalanceDetailStatus.WAITTING.getValue())
+				.amount(rechargeOrder.getAmount())
+				.balance(rechargeOrder.getAmount())
+				.freezen(0L)
+				.createTime(new Date())
+				.build();
+			walletBalanceDetailDao.insertSelective(withdrawDetail);
+
 			// 支付人
 			WalletTunnel payer = walletTunnelDao
 				.selectByWalletId(walletId, rechargeOrder.getTunnelType());
@@ -232,12 +260,80 @@ public class SeniorPayService {
 		}
 	}
 
+	public WithdrawResp balanceWithdraw(Long walletId, WalletCard walletCard, Long amount,
+		Byte validateType, String jumpUrl, String customerIp) {
+
+		List<WalletBalanceDetail> payDetails = Lists.newArrayList();
+		AtomicReference<Long> remainAmount = new AtomicReference<>(0L);
+		new MaxIdIterator<WalletBalanceDetail>().apply(
+			maxId -> walletBalanceDetailDao.selectUnWithdraw(walletId, maxId),
+			payDetail -> {
+				if (remainAmount.get() >= amount) {
+					return Long.MAX_VALUE;
+				}
+				if (payDetail.getBalance() > 0) {
+					remainAmount.updateAndGet(x -> x + payDetail.getBalance());
+					payDetails.add(payDetail);
+				}
+				return payDetail.getId();
+			});
+		WithdrawResp order = doWithdraw(walletId, walletCard, amount,
+			validateType, jumpUrl, customerIp);
+		remainAmount.set(amount);
+		Optional<String> orderNos = payDetails.stream().map(payDetail -> {
+			if (remainAmount.get() <= 0) {
+				return null;
+			}
+			Long withdrawAmount =
+				payDetail.getBalance() > remainAmount.get() ? remainAmount.get()
+					: payDetail.getBalance();
+			remainAmount.updateAndGet(x -> x - withdrawAmount);
+
+			WalletBalanceDetail withdrawDetail = updateBalanceDetail(order, payDetail,
+				withdrawAmount);
+			return withdrawDetail.getOrderNo();
+
+		}).reduce((x, y) -> x + "," + y);
+
+		log.info("[自动提现] 发起按余额提现  出金单号 {} , 入金单号 {}", order.getOrderNo(),
+			orderNos.orElse(""));
+
+		return order;
+	}
+
+	/**
+	 * 更新提现详细
+	 */
+	public WalletBalanceDetail updateBalanceDetail(WithdrawResp order,
+		WalletBalanceDetail payDetail,
+		Long withdrawAmount) {
+		walletBalanceDetailDao.updateDetailFreezen(payDetail.getOrderId(),
+			payDetail.getOrderDetailId(), withdrawAmount, -withdrawAmount);
+
+		WalletBalanceDetail withdrawDetail = WalletBalanceDetail.builder()
+			.walletId(order.getWalletId())
+			.orderId(order.getId())
+			.orderNo(order.getOrderNo())
+			.orderDetailId(order.getWithdrawId())
+			.refOrderId(payDetail.getOrderId())
+			.refOrderNo(payDetail.getOrderNo())
+			.refOrderDetailId(payDetail.getOrderDetailId())
+			.type(OrderType.WITHDRAWAL.getValue())
+			.status(BalanceDetailStatus.WAITTING.getValue())
+			.amount(-withdrawAmount)
+			.balance(-withdrawAmount)
+			.freezen(0L)
+			.createTime(new Date())
+			.build();
+		walletBalanceDetailDao.insertSelective(withdrawDetail);
+		return withdrawDetail;
+	}
+
 	/**
 	 * 提现
 	 */
-	public WithdrawResp withdraw(Long walletId, WalletCard walletCard, Long amount,
-		Byte validateType, String jumpUrl,
-		String customerIp) {
+	public WithdrawResp doWithdraw(Long walletId, WalletCard walletCard, Long amount,
+		Byte validateType, String jumpUrl, String customerIp) {
 
 		// 检查钱包
 		Wallet payerWallet = verifyService.checkSeniorWallet(walletId);
@@ -294,7 +390,7 @@ public class SeniorPayService {
 			// 提现人
 			WalletTunnel payer = walletTunnelDao
 				.selectByWalletId(withdrawOrder.getWalletId(), withdrawOrder.getTunnelType());
-			// 充值
+			// 提现
 			EBankHandler handler = handlerHelper.selectByTunnelType(withdrawOrder.getTunnelType());
 			WithdrawResp result = handler.withdraw(withdrawOrder, withdraw, payer);
 
@@ -490,6 +586,21 @@ public class SeniorPayService {
 				.build();
 			walletClearingDao.insertSelective(clearing);
 
+			// 余额明细
+			WalletBalanceDetail withdrawDetail = WalletBalanceDetail.builder()
+				.walletId(payOrder.getWalletId())
+				.orderId(payOrder.getId())
+				.orderNo(payOrder.getOrderNo())
+				.orderDetailId(clearing.getId())
+				.type(OrderType.AGENT_PAY.getValue())
+				.status(BalanceDetailStatus.WAITTING.getValue())
+				.amount(payOrder.getAmount())
+				.balance(payOrder.getAmount())
+				.freezen(0L)
+				.createTime(new Date())
+				.build();
+			walletBalanceDetailDao.insertSelective(withdrawDetail);
+
 			// 代付给每个收款人
 			EBankHandler handler = handlerHelper.selectByTunnelType(payOrder.getTunnelType());
 			handler.agentPay(payOrder, clearing);
@@ -676,6 +787,29 @@ public class SeniorPayService {
 				.createTime(new Date())
 				.build();
 			walletConsumeDao.insertSelective(consume);
+
+			// 余额明细
+			WalletBalanceDetail payerDetail = WalletBalanceDetail.builder()
+				.walletId(consumeOrder.getWalletId())
+				.orderId(consumeOrder.getId())
+				.orderNo(consumeOrder.getOrderNo())
+				.orderDetailId(consume.getId())
+				.type(OrderType.DEDUCTION.getValue())
+				.status(BalanceDetailStatus.WAITTING.getValue())
+				.amount(-consumeOrder.getAmount())
+				.balance(-consumeOrder.getAmount())
+				.freezen(0L)
+				.createTime(new Date())
+				.build();
+			walletBalanceDetailDao.insertSelective(payerDetail);
+			WalletBalanceDetail payeeDetail = BeanUtil
+				.newInstance(payerDetail, WalletBalanceDetail.class);
+			payeeDetail.setId(null);
+			payeeDetail.setWalletId(consume.getPayeeWalletId());
+			payeeDetail.setAmount(consumeOrder.getAmount());
+			payeeDetail.setBalance(consumeOrder.getAmount());
+			walletBalanceDetailDao.insertSelective(payerDetail);
+
 			WalletCollectMethod method = savePayMethod(consume.getOrderId(), consume.getId(),
 				OrderType.DEDUCTION.getValue(), req.getWalletPayMethod());
 
