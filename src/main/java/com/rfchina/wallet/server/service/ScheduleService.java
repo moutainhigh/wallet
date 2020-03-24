@@ -447,6 +447,7 @@ public class ScheduleService {
 			log.info("[自动提现] 钱包[{}] 未达到自动限额", walletConfig.getWalletId());
 			return;
 		}
+		log.info("[自动提现] 钱包[{}] 开始自动提现", walletConfig.getWalletId());
 		// 支付单退款
 		WalletCard walletCard = walletCardDao.selectDefCardByWalletId(walletConfig.getWalletId());
 		Optional.ofNullable(walletCard)
@@ -475,9 +476,9 @@ public class ScheduleService {
 
 			seniorPayService
 				.balanceWithdraw(walletConfig.getWalletId(), walletCard, walletTunnel.getBalance(),
-					WithdrawType.WALLET_AMOUNT.getValue(), null, null);
+					BizValidateType.NONE.getValue(), null, null);
 		}
-
+		log.info("[自动提现] 钱包[{}] 结束自动提现", walletConfig.getWalletId());
 
 	}
 

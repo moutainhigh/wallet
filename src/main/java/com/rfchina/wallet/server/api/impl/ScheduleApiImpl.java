@@ -184,7 +184,11 @@ public class ScheduleApiImpl implements ScheduleApi {
 				return walletConfigDao.selectByExampleWithRowbounds(example, new RowBounds(0, 100));
 			}, (walletConfig) -> {
 
-				scheduleService.doWithdraw(walletConfig);
+				try {
+					scheduleService.doWithdraw(walletConfig);
+				} catch (Exception e) {
+					log.error("[自动提现] 钱包提现异常 " + walletConfig.getWalletId(), e);
+				}
 				return walletConfig.getId();
 			});
 		});
