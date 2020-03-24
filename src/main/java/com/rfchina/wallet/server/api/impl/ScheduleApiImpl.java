@@ -141,7 +141,11 @@ public class ScheduleApiImpl implements ScheduleApi {
 			DateUtil.getDate2(DateUtil.addDate2(new Date(), -1))
 			: DateUtil.parse(balanceDate, DateUtil.STANDARD_DTAE_PATTERN);
 		new LockDone(lock).apply(LockConstant.LOCK_QUARTZ_BALANCE, 60, () -> {
-			seniorBalanceService.doBalance(theDay);
+			try {
+				seniorBalanceService.doBalance(theDay);
+			} catch (Exception e) {
+				log.error("", e);
+			}
 		});
 	}
 

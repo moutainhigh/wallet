@@ -120,6 +120,7 @@ public class SeniorBalanceService {
 			Set<BalanceVo> walletDiffSet = diffSet(walletOps, tunnelKey, walletDiffKey);
 			Set<BalanceVo> succSet = diffSet(tunnelOps, tunnelDiffKey, succDiffKey);
 
+			balanceResultDao.deleteByDate(beginDate, endDate);
 			// 完全匹配
 			saveResult(succSet, beginDate, endDate, job.getId(), BalanceResultStatus.SUCC);
 			// 通道条目多
@@ -381,7 +382,6 @@ public class SeniorBalanceService {
 
 	private void saveResult(Set<BalanceVo> resultSet, Date beginDate, Date endDate, Long jobId,
 		BalanceResultStatus status) {
-		balanceResultDao.deleteByDate(beginDate, endDate);
 		// 保存结果
 		resultSet.forEach(value -> {
 			if (value != null) {

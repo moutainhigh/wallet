@@ -222,7 +222,7 @@ public class SeniorWalletTest extends WalletBaseTest {
 
 	@Test
 	public void quartzBalance() {
-		for (int i = 1; i < 1; i++) {
+		for (int i = 1; i < 120; i++) {
 			String newDay = DateUtil.addDate("2020-03-24", -i);
 			log.info(newDay);
 			Map<String, String> params = new HashMap<>();
