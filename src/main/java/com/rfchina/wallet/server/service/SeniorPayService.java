@@ -311,8 +311,10 @@ public class SeniorPayService {
 	 */
 	public WalletBalanceDetail updateBalanceDetail(WithdrawResp order,
 		WalletBalanceDetail payDetail, Long withdrawAmount) {
+
+		Long revertAmount = 0 - withdrawAmount.longValue();
 		walletBalanceDetailDao.updateDetailFreezen(payDetail.getOrderId(),
-			payDetail.getOrderDetailId(), withdrawAmount, -withdrawAmount);
+			payDetail.getOrderDetailId(), withdrawAmount, revertAmount);
 
 		WalletBalanceDetail withdrawDetail = WalletBalanceDetail.builder()
 			.walletId(order.getWalletId())
@@ -324,8 +326,8 @@ public class SeniorPayService {
 			.refOrderDetailId(payDetail.getOrderDetailId())
 			.type(OrderType.WITHDRAWAL.getValue())
 			.status(BalanceDetailStatus.WAITTING.getValue())
-			.amount(-withdrawAmount)
-			.balance(-withdrawAmount)
+			.amount(revertAmount)
+			.balance(revertAmount)
 			.freezen(0L)
 			.createTime(new Date())
 			.build();

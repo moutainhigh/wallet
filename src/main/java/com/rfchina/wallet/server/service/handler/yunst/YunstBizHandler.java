@@ -597,8 +597,8 @@ public class YunstBizHandler extends EBankHandler {
 			walletOrderDao.updateByPrimaryKeySelective(order);
 
 			// 更新余额明细
-
-			if (walletOrderStatus.isEndStatus() && OrderType.COLLECT.getValue() != order.getType()
+			if (walletOrderStatus.isEndStatus()
+				&& OrderType.COLLECT.getValue() != order.getType()
 				&& OrderType.REFUND.getValue() != order.getType()
 				&& !EnumBizTag.RECORD.contains(order.getBizTag())) {
 
@@ -610,15 +610,14 @@ public class YunstBizHandler extends EBankHandler {
 				details.forEach(detail -> {
 					detail.setStatus(walletDetailStatus);
 					walletBalanceDetailDao.updateByPrimaryKeySelective(detail);
-					if (OrderType.CONSUME.getValue().byteValue() == detail.getType()
-						|| OrderType.DEDUCTION.getValue().byteValue() == detail.getType()
-						|| OrderType.WITHDRAWAL.getValue().byteValue() == detail.getType()) {
+
+					if (detail.getAmount() < 0 && detail.getRefOrderId() != null) {
 
 						walletBalanceDetailDao.updateDetailFreezen(detail.getRefOrderId(),
 							detail.getRefOrderDetailId(),
-							-detail.getAmount(),
+							detail.getAmount().longValue(),
 							BalanceDetailStatus.SUCC.getValue().byteValue() == walletDetailStatus
-								? -detail.getAmount() : detail.getAmount());
+								? 0 : detail.getAmount());
 					}
 				});
 			}

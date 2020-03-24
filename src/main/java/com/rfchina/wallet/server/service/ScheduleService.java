@@ -461,13 +461,13 @@ public class ScheduleService {
 			new MaxIdIterator<WalletBalanceDetail>().apply(
 				maxId -> walletBalanceDetailDao.selectUnWithdraw(walletConfig.getWalletId(), maxId),
 				payDetail -> {
-					log.info("[自动提现] 发起按单提现  出金单号 {} ", payDetail.getOrderNo());
+					log.info("[自动提现] 发起按单提现  入金单号 {} ", payDetail.getOrderNo());
 					WithdrawResp order = seniorPayService.doWithdraw(walletConfig.getWalletId(),
 						walletCard, payDetail.getBalance(), BizValidateType.NONE.getValue(),
 						null, null);
 					WalletBalanceDetail withdrawDetail = seniorPayService
 						.updateBalanceDetail(order, payDetail, order.getAmount());
-					log.info("[自动提现] 发起按单提现  入金单号 {}", withdrawDetail.getOrderNo());
+					log.info("[自动提现] 发起按单提现  出金单号 {}", withdrawDetail.getOrderNo());
 					return payDetail.getId();
 				});
 		} else if (WithdrawType.WALLET_AMOUNT.getValue().byteValue() == walletConfig
