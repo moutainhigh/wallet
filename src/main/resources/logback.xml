@@ -22,7 +22,7 @@
     </encoder>
   </appender>
 
-  <logger name="com.rfchina" level="INFO" additivity="false">
+  <logger name="com.rfchina" level="DEBUG" additivity="false">
     <appender-ref ref="FILE"/>
     <appender-ref ref="CONSOLE"/>
   </logger>

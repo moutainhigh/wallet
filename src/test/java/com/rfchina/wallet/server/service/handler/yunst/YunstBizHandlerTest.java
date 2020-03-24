@@ -1,13 +1,12 @@
 package com.rfchina.wallet.server.service.handler.yunst;
 
-import com.rfchina.wallet.domain.mapper.ext.WalletWithdrawDao;
-import com.rfchina.wallet.domain.misc.EnumDef.BizValidateType;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.domain.model.WalletWithdraw;
 import com.rfchina.wallet.server.SpringBaseTest;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletWithdrawExtDao;
 import com.rfchina.wallet.server.model.ext.WithdrawResp;
 import com.rfchina.wallet.server.service.ConfigService;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +29,7 @@ public class YunstBizHandlerTest extends SpringBaseTest {
 	private WalletTunnelExtDao walletTunnelDao;
 
 	@Autowired
-	private WalletWithdrawDao walletWithdrawDao;
+	private WalletWithdrawExtDao walletWithdrawDao;
 
 
 	@Test

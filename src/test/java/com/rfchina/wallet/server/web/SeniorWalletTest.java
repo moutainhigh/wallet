@@ -1,11 +1,12 @@
 package com.rfchina.wallet.server.web;
 
 import com.alibaba.fastjson.JSONObject;
+import com.rfchina.platform.common.http.HttpUtil;
 import com.rfchina.platform.common.security.SecurityCoder;
+import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.SignUtil;
 import com.rfchina.wallet.server.WalletBaseTest;
 import com.rfchina.wallet.server.msic.UrlConstant;
-import io.swagger.annotations.ApiParam;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +14,6 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Slf4j
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
@@ -67,7 +67,8 @@ public class SeniorWalletTest extends WalletBaseTest {
 	 */
 	@Test
 	public void testSeniorWalletAuth() {
-		seniorWalletAuth(2, (byte) 3, 10035L, "观富昌", "6214850201481956", "13710819640", "11111","");
+		seniorWalletAuth(2, (byte) 3, 10035L, "观富昌", "6214850201481956", "13710819640", "11111",
+			"");
 	}
 
 	/**
@@ -217,5 +218,27 @@ public class SeniorWalletTest extends WalletBaseTest {
 		String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
 		params.put("sign", sign);
 		postAndValidateSpecCode(BASE_URL, UrlConstant.SENIOR_WALLET_AGENT_PAY, params, 1001);
+	}
+
+	@Test
+	public void quartzBalance() {
+		for (int i = 1; i < 1; i++) {
+			String newDay = DateUtil.addDate("2020-03-24", -i);
+			log.info(newDay);
+			Map<String, String> params = new HashMap<>();
+			params.put("access_token", getAccessToken(appId, appSecret));
+			params.put("schedule_id", "0");
+			params.put("balance_date", newDay);
+			params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
+			String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
+			params.put("sign", sign);
+
+			String result = HttpUtil
+				.post("http://test.p.rfmember.net/" + UrlConstant.QUARTZ_BALANCE, params);
+			log.info(result);
+
+		}
+
+
 	}
 }

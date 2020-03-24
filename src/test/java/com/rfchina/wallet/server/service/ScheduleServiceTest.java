@@ -51,7 +51,7 @@ public class ScheduleServiceTest extends SpringBaseTest {
 		WalletOrder walletOrder = walletOrderDao.selectByPrimaryKey(1424L);
 		Mockito.doReturn(BeanUtil.newInstance(walletOrder, WithdrawResp.class))
 			.when(seniorPayService)
-			.withdraw(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
+			.doWithdraw(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(),
 				Mockito.any());
 	}
 

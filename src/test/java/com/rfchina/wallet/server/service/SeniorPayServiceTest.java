@@ -71,7 +71,7 @@ public class SeniorPayServiceTest extends SpringBaseTest {
     public void withdraw() {
         WalletCard walletCard = walletCardDao.selectByPrimaryKey(cardId);
         WalletOrder withdraw = seniorPayService
-                .withdraw(payerWalletId, walletCard, 1L, (byte)2, "http://192.168.197.75:7777/#/withdrawSuccess",
+                .doWithdraw(payerWalletId, walletCard, 1L, (byte)2, "http://192.168.197.75:7777/#/withdrawSuccess",
                         "8.8.8.8");
         log.info("withdraw.resp = {}", JsonUtil.toJSON(withdraw));
     }

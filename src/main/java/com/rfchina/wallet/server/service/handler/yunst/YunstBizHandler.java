@@ -358,6 +358,7 @@ public class YunstBizHandler extends EBankHandler {
 			.industryCode(order.getIndustryCode())
 			.industryName(order.getIndustryName())
 			.summary(order.getNote())
+			.extendInfo("")
 			.source(1L)
 			.build();
 
@@ -980,6 +981,12 @@ public class YunstBizHandler extends EBankHandler {
 			}
 			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
 		}
+	}
+
+	private void noteSuffer(String note) {
+		String message = Optional.ofNullable(note).orElse("");
+
+		String summary = (message.length() > 20) ? message.substring(0, 19) : message;
 	}
 
 }

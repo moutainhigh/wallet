@@ -87,7 +87,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -279,8 +278,8 @@ public class SeniorPayService {
 				}
 				return payDetail.getId();
 			});
-		if(remainAmount.get() < amount) {
-			log.error("钱包[{}]入金余额[{}]不足出金余额[{}]",walletId,remainAmount.get(),amount);
+		if (remainAmount.get() < amount) {
+			log.error("钱包[{}]入金余额[{}]不足出金余额[{}]", walletId, remainAmount.get(), amount);
 			throw new WalletResponseException(WALLET_BALANCE_IN_NOT_ENOUGH);
 		}
 		WithdrawResp order = doWithdraw(walletId, walletCard, amount,
@@ -311,8 +310,7 @@ public class SeniorPayService {
 	 * 更新提现详细
 	 */
 	public WalletBalanceDetail updateBalanceDetail(WithdrawResp order,
-		WalletBalanceDetail payDetail,
-		Long withdrawAmount) {
+		WalletBalanceDetail payDetail, Long withdrawAmount) {
 		walletBalanceDetailDao.updateDetailFreezen(payDetail.getOrderId(),
 			payDetail.getOrderDetailId(), withdrawAmount, -withdrawAmount);
 
