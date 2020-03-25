@@ -223,7 +223,7 @@ public class SeniorWalletTest extends WalletBaseTest {
 	@Test
 	public void quartzBalance() {
 		for (int i = 1; i < 120; i++) {
-			String newDay = DateUtil.addDate("2020-03-24", -i);
+			String newDay = DateUtil.addDate("2020-01-08", -i);
 			log.info(newDay);
 			Map<String, String> params = new HashMap<>();
 			params.put("access_token", getAccessToken(appId, appSecret));
@@ -233,9 +233,13 @@ public class SeniorWalletTest extends WalletBaseTest {
 			String sign = SignUtil.sign(params, SecurityCoder.md5((appSecret + appId).getBytes()));
 			params.put("sign", sign);
 
-			String result = HttpUtil
-				.post("http://test.p.rfmember.net/" + UrlConstant.QUARTZ_BALANCE, params);
-			log.info(result);
+			try {
+				String result = HttpUtil
+					.post("http://test.p.rfmember.net/" + UrlConstant.QUARTZ_BALANCE, params);
+				log.info(result);
+			} catch (Exception e) {
+				log.error("", e);
+			}
 
 		}
 

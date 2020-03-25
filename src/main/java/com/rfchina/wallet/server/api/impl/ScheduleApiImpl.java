@@ -142,7 +142,9 @@ public class ScheduleApiImpl implements ScheduleApi {
 			: DateUtil.parse(balanceDate, DateUtil.STANDARD_DTAE_PATTERN);
 		new LockDone(lock).apply(LockConstant.LOCK_QUARTZ_BALANCE, 60, () -> {
 			try {
+				log.info("[定时对账] 开始日期 {}", theDay);
 				seniorBalanceService.doBalance(theDay);
+				log.info("[定时对账] 结束");
 			} catch (Exception e) {
 				log.error("", e);
 			}

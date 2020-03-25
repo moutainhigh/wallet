@@ -132,6 +132,9 @@ public class ScheduleService {
 	@Autowired
 	private WalletBalanceDetailDao walletBalanceDetailDao;
 
+	@Autowired
+	private WalletBalanceDetailService walletBalanceDetailService;
+
 	/**
 	 * 通道转账
 	 */
@@ -465,8 +468,9 @@ public class ScheduleService {
 					WithdrawResp order = seniorPayService.doWithdraw(walletConfig.getWalletId(),
 						walletCard, payDetail.getBalance(), BizValidateType.NONE.getValue(),
 						null, null);
-					WalletBalanceDetail withdrawDetail = seniorPayService
-						.updateBalanceDetail(order, payDetail, order.getAmount());
+					WalletBalanceDetail withdrawDetail = walletBalanceDetailService
+						.consumePayDetail(order, order.getWithdrawId(), payDetail,
+							order.getAmount());
 					log.info("[自动提现] 发起按单提现  出金单号 {}", withdrawDetail.getOrderNo());
 					return payDetail.getId();
 				});

@@ -296,7 +296,7 @@ public class YunstBizHandler extends EBankHandler {
 			.withdrawType(EnumYunstWithdrawType.D0.getValue())
 			.industryCode(order.getIndustryCode())
 			.industryName(order.getIndustryName())
-			.summary(order.getNote())
+			.summary(order.getOrderNo())	// 海荣需求，提现传单号到银行流水
 			.source(EnumYunstDeviceType.MOBILE.getValue())
 			.build();
 
@@ -613,11 +613,12 @@ public class YunstBizHandler extends EBankHandler {
 
 					if (detail.getAmount() < 0 && detail.getRefOrderId() != null) {
 
+						long unFreezen = detail.getAmount().longValue();
 						walletBalanceDetailDao.updateDetailFreezen(detail.getRefOrderId(),
 							detail.getRefOrderDetailId(),
-							detail.getAmount().longValue(),
+							unFreezen,
 							BalanceDetailStatus.SUCC.getValue().byteValue() == walletDetailStatus
-								? 0 : detail.getAmount());
+								? 0 : -detail.getAmount());
 					}
 				});
 			}

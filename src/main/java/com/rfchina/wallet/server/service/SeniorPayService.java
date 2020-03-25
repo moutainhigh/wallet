@@ -1,14 +1,11 @@
 package com.rfchina.wallet.server.service;
 
-import static com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode.WALLET_BALANCE_IN_NOT_ENOUGH;
-
-import com.google.common.collect.Lists;
-import com.rfchina.biztools.functional.MaxIdIterator;
 import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.biztools.lock.SimpleExclusiveLock;
 import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.passport.misc.SessionThreadLocal;
 import com.rfchina.platform.common.misc.Triple;
+import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletBalanceDetailDao;
@@ -83,7 +80,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -168,6 +164,9 @@ public class SeniorPayService {
 
 	@Autowired
 	private ScheduleService scheduleService;
+
+	@Autowired
+	private WalletBalanceDetailService walletBalanceDetailService;
 
 	/**
 	 * 充值
@@ -264,76 +263,26 @@ public class SeniorPayService {
 	public WithdrawResp balanceWithdraw(Long walletId, WalletCard walletCard, Long amount,
 		Byte validateType, String jumpUrl, String customerIp) {
 
-		List<WalletBalanceDetail> payDetails = Lists.newArrayList();
-		AtomicReference<Long> remainAmount = new AtomicReference<>(0L);
-		new MaxIdIterator<WalletBalanceDetail>().apply(
-			maxId -> walletBalanceDetailDao.selectUnWithdraw(walletId, maxId),
-			payDetail -> {
-				if (remainAmount.get() >= amount) {
-					return Long.MAX_VALUE;
-				}
-				if (payDetail.getBalance() > 0) {
-					remainAmount.updateAndGet(x -> x + payDetail.getBalance());
-					payDetails.add(payDetail);
-				}
-				return payDetail.getId();
-			});
-		if (remainAmount.get() < amount) {
-			log.error("钱包[{}]入金余额[{}]不足出金余额[{}]", walletId, remainAmount.get(), amount);
-			throw new WalletResponseException(WALLET_BALANCE_IN_NOT_ENOUGH);
-		}
-		WithdrawResp order = doWithdraw(walletId, walletCard, amount,
-			validateType, jumpUrl, customerIp);
-		remainAmount.set(amount);
+		List<Tuple<WalletBalanceDetail, Long>> payDetails = walletBalanceDetailService
+			.selectDetailToPay(walletId, amount);
+		// 提现
+		WithdrawResp order = doWithdraw(walletId, walletCard, amount, validateType, jumpUrl,
+			customerIp);
+		// 更新余额明细
 		Optional<String> orderNos = payDetails.stream().map(payDetail -> {
-			if (remainAmount.get() <= 0) {
-				return null;
-			}
-			Long withdrawAmount =
-				payDetail.getBalance() > remainAmount.get() ? remainAmount.get()
-					: payDetail.getBalance();
-			remainAmount.updateAndGet(x -> x - withdrawAmount);
 
-			WalletBalanceDetail withdrawDetail = updateBalanceDetail(order, payDetail,
-				withdrawAmount);
+			WalletBalanceDetail withdrawDetail = walletBalanceDetailService
+				.consumePayDetail(order, order.getWithdrawId(), payDetail.left, payDetail.right);
 			return withdrawDetail.getOrderNo();
 
 		}).reduce((x, y) -> x + "," + y);
 
-		log.info("[自动提现] 发起按余额提现  出金单号 {} , 入金单号 {}", order.getOrderNo(),
+		log.info("发起余额出金  出金单号 {} , 入金单号 {}", order.getOrderNo(),
 			orderNos.orElse(""));
 
 		return order;
 	}
 
-	/**
-	 * 更新提现详细
-	 */
-	public WalletBalanceDetail updateBalanceDetail(WithdrawResp order,
-		WalletBalanceDetail payDetail, Long withdrawAmount) {
-
-		Long revertAmount = 0 - withdrawAmount.longValue();
-		walletBalanceDetailDao.updateDetailFreezen(payDetail.getOrderId(),
-			payDetail.getOrderDetailId(), withdrawAmount, revertAmount);
-
-		WalletBalanceDetail withdrawDetail = WalletBalanceDetail.builder()
-			.walletId(order.getWalletId())
-			.orderId(order.getId())
-			.orderNo(order.getOrderNo())
-			.orderDetailId(order.getWithdrawId())
-			.refOrderId(payDetail.getOrderId())
-			.refOrderNo(payDetail.getOrderNo())
-			.refOrderDetailId(payDetail.getOrderDetailId())
-			.type(OrderType.WITHDRAWAL.getValue())
-			.status(BalanceDetailStatus.WAITTING.getValue())
-			.amount(revertAmount)
-			.balance(revertAmount)
-			.freezen(0L)
-			.createTime(new Date())
-			.build();
-		walletBalanceDetailDao.insertSelective(withdrawDetail);
-		return withdrawDetail;
-	}
 
 	/**
 	 * 提现
@@ -795,26 +744,19 @@ public class SeniorPayService {
 			walletConsumeDao.insertSelective(consume);
 
 			// 余额明细
-			WalletBalanceDetail payerDetail = WalletBalanceDetail.builder()
-				.walletId(consumeOrder.getWalletId())
-				.orderId(consumeOrder.getId())
-				.orderNo(consumeOrder.getOrderNo())
-				.orderDetailId(consume.getId())
-				.type(OrderType.DEDUCTION.getValue())
-				.status(BalanceDetailStatus.WAITTING.getValue())
-				.amount(-consumeOrder.getAmount())
-				.balance(-consumeOrder.getAmount())
-				.freezen(0L)
-				.createTime(new Date())
-				.build();
-			walletBalanceDetailDao.insertSelective(payerDetail);
-			WalletBalanceDetail payeeDetail = BeanUtil
-				.newInstance(payerDetail, WalletBalanceDetail.class);
-			payeeDetail.setId(null);
-			payeeDetail.setWalletId(consume.getPayeeWalletId());
-			payeeDetail.setAmount(consumeOrder.getAmount());
-			payeeDetail.setBalance(consumeOrder.getAmount());
-			walletBalanceDetailDao.insertSelective(payerDetail);
+			List<Tuple<WalletBalanceDetail, Long>> details = walletBalanceDetailService.
+				selectDetailToPay(consumeOrder.getWalletId(), consumeOrder.getAmount());
+			details.forEach(payDetail -> {
+				WalletBalanceDetail payerDetail = walletBalanceDetailService.consumePayDetail(
+					consumeOrder, consume.getId(), payDetail.left, payDetail.right);
+				WalletBalanceDetail payeeDetail = BeanUtil
+					.newInstance(payerDetail, WalletBalanceDetail.class);
+				payeeDetail.setId(null);
+				payeeDetail.setWalletId(consume.getPayeeWalletId());
+				payeeDetail.setAmount(payDetail.right);
+				payeeDetail.setBalance(payDetail.right);
+				walletBalanceDetailDao.insertSelective(payerDetail);
+			});
 
 			WalletCollectMethod method = savePayMethod(consume.getOrderId(), consume.getId(),
 				OrderType.DEDUCTION.getValue(), req.getWalletPayMethod());
