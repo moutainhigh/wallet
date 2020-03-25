@@ -50,6 +50,7 @@ public class WalletBalanceDetailService {
 			.amount(revertAmount)
 			.balance(revertAmount)
 			.freezen(0L)
+			.refFreezeMode(mode.getValue())
 			.createTime(new Date())
 			.build();
 		walletBalanceDetailDao.insertSelective(withdrawDetail);
