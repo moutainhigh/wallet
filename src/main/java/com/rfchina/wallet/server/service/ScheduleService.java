@@ -40,6 +40,7 @@ import com.rfchina.wallet.server.mapper.ext.WalletUserExtDao;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.PayTuple;
 import com.rfchina.wallet.server.model.ext.WithdrawResp;
+import com.rfchina.wallet.server.msic.EnumWallet.BalanceFreezeMode;
 import com.rfchina.wallet.server.msic.EnumWallet.CardPro;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.GwPayeeType;
@@ -470,7 +471,7 @@ public class ScheduleService {
 						null, null);
 					WalletBalanceDetail withdrawDetail = walletBalanceDetailService
 						.consumePayDetail(order, order.getWithdrawId(), payDetail,
-							order.getAmount());
+							order.getAmount(), BalanceFreezeMode.FREEZEN);
 					log.info("[自动提现] 发起按单提现  出金单号 {}", withdrawDetail.getOrderNo());
 					return payDetail.getId();
 				});
@@ -479,7 +480,7 @@ public class ScheduleService {
 
 			seniorPayService
 				.balanceWithdraw(walletConfig.getWalletId(), walletCard, walletTunnel.getBalance(),
-					BizValidateType.NONE.getValue(), null, null);
+					BizValidateType.NONE.getValue(), null, null, BalanceFreezeMode.FREEZEN);
 		}
 		log.info("[自动提现] 钱包[{}] 结束自动提现", walletConfig.getWalletId());
 

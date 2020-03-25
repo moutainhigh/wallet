@@ -10,6 +10,7 @@ import com.rfchina.wallet.domain.mapper.ext.WalletBalanceDetailDao;
 import com.rfchina.wallet.domain.misc.EnumDef.BalanceDetailStatus;
 import com.rfchina.wallet.domain.model.WalletBalanceDetail;
 import com.rfchina.wallet.domain.model.WalletOrder;
+import com.rfchina.wallet.server.msic.EnumWallet.BalanceFreezeMode;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -28,11 +29,13 @@ public class WalletBalanceDetailService {
 	 * 消费余额明细
 	 */
 	public WalletBalanceDetail consumePayDetail(WalletOrder order, Long detailId,
-		WalletBalanceDetail payDetail, Long withdrawAmount) {
+		WalletBalanceDetail payDetail, Long withdrawAmount, BalanceFreezeMode mode) {
 
 		Long revertAmount = 0 - withdrawAmount.longValue();
-		walletBalanceDetailDao.updateDetailFreezen(payDetail.getOrderId(),
-			payDetail.getOrderDetailId(), withdrawAmount, revertAmount);
+		if(BalanceFreezeMode.FREEZEN.getValue().byteValue() == mode.getValue()) {
+			walletBalanceDetailDao.updateDetailFreezen(payDetail.getOrderId(),
+				payDetail.getOrderDetailId(), withdrawAmount, revertAmount);
+		}
 
 		WalletBalanceDetail withdrawDetail = WalletBalanceDetail.builder()
 			.walletId(order.getWalletId())

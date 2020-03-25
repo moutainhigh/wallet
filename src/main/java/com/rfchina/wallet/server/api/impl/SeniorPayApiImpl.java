@@ -29,6 +29,7 @@ import com.rfchina.wallet.server.model.ext.SettleResp;
 import com.rfchina.wallet.server.model.ext.UnifiedConfirmVo;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.model.ext.WithdrawResp;
+import com.rfchina.wallet.server.msic.EnumWallet.BalanceFreezeMode;
 import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.SeniorBalanceService;
 import com.rfchina.wallet.server.service.SeniorPayService;
@@ -109,7 +110,7 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 		@ParamValid(nullable = false) String accessToken,
 		@ParamValid(nullable = false) Long walletId,
 		@ParamValid(nullable = false) Long cardId,
-		@ParamValid(nullable = false,min = 1) Long amount,
+		@ParamValid(nullable = false, min = 1) Long amount,
 		@ParamValid(nullable = false) Integer validateType,
 		@ParamValid(nullable = true) String jumpUrl,
 		@ParamValid(nullable = false) String customerIp) {
@@ -121,8 +122,8 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 			jumpUrl = checkBlankUrl(jumpUrl);
 		}
 
-		WithdrawResp withdraw = seniorPayService
-			.balanceWithdraw(walletId, walletCard, amount, validateType.byteValue(), jumpUrl, customerIp);
+		WithdrawResp withdraw = seniorPayService.balanceWithdraw(walletId, walletCard, amount,
+			validateType.byteValue(), jumpUrl, customerIp, BalanceFreezeMode.NO_FREEZE);
 
 		UnifiedConfirmVo confirmVo = BeanUtil.newInstance(withdraw, UnifiedConfirmVo.class);
 		confirmVo.setOrderId(withdraw.getId());

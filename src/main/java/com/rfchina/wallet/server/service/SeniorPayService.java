@@ -64,6 +64,7 @@ import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
 import com.rfchina.wallet.server.model.ext.SettleResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.model.ext.WithdrawResp;
+import com.rfchina.wallet.server.msic.EnumWallet.BalanceFreezeMode;
 import com.rfchina.wallet.server.msic.EnumWallet.CardPro;
 import com.rfchina.wallet.server.msic.EnumWallet.ChannelType;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
@@ -261,7 +262,7 @@ public class SeniorPayService {
 	}
 
 	public WithdrawResp balanceWithdraw(Long walletId, WalletCard walletCard, Long amount,
-		Byte validateType, String jumpUrl, String customerIp) {
+		Byte validateType, String jumpUrl, String customerIp, BalanceFreezeMode mode) {
 
 		List<Tuple<WalletBalanceDetail, Long>> payDetails = walletBalanceDetailService
 			.selectDetailToPay(walletId, amount);
@@ -271,8 +272,8 @@ public class SeniorPayService {
 		// 更新余额明细
 		Optional<String> orderNos = payDetails.stream().map(payDetail -> {
 
-			WalletBalanceDetail withdrawDetail = walletBalanceDetailService
-				.consumePayDetail(order, order.getWithdrawId(), payDetail.left, payDetail.right);
+			WalletBalanceDetail withdrawDetail = walletBalanceDetailService.consumePayDetail(order,
+				order.getWithdrawId(), payDetail.left, payDetail.right, mode);
 			return withdrawDetail.getOrderNo();
 
 		}).reduce((x, y) -> x + "," + y);
@@ -748,7 +749,8 @@ public class SeniorPayService {
 				selectDetailToPay(consumeOrder.getWalletId(), consumeOrder.getAmount());
 			details.forEach(payDetail -> {
 				WalletBalanceDetail payerDetail = walletBalanceDetailService.consumePayDetail(
-					consumeOrder, consume.getId(), payDetail.left, payDetail.right);
+					consumeOrder, consume.getId(), payDetail.left, payDetail.right,
+					BalanceFreezeMode.FREEZEN);
 				WalletBalanceDetail payeeDetail = BeanUtil
 					.newInstance(payerDetail, WalletBalanceDetail.class);
 				payeeDetail.setId(null);

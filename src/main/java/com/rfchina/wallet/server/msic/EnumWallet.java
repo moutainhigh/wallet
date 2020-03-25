@@ -818,5 +818,25 @@ public class EnumWallet {
 		}
 	}
 
+	/**
+	 * 余额冻结模式
+	 */
+	public enum BalanceFreezeMode implements Valuable<Byte> {
+		NO_FREEZE((byte) 1, "不使用冻结"),
+		FREEZEN((byte) 2, "预冻结");
+
+		private Byte value;
+		private String valueName;
+
+		BalanceFreezeMode(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}
+	}
 
 }

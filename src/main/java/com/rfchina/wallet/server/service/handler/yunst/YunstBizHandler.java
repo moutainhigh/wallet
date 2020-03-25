@@ -89,6 +89,7 @@ import com.rfchina.wallet.server.mapper.ext.WalletWithdrawExtDao;
 import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.model.ext.WithdrawResp;
+import com.rfchina.wallet.server.msic.EnumWallet.BalanceFreezeMode;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
 import com.rfchina.wallet.server.msic.EnumWallet.DebitType;
 import com.rfchina.wallet.server.msic.EnumWallet.EnumBizTag;
@@ -296,7 +297,7 @@ public class YunstBizHandler extends EBankHandler {
 			.withdrawType(EnumYunstWithdrawType.D0.getValue())
 			.industryCode(order.getIndustryCode())
 			.industryName(order.getIndustryName())
-			.summary(order.getOrderNo())	// 海荣需求，提现传单号到银行流水
+			.summary(order.getOrderNo())    // 海荣需求，提现传单号到银行流水
 			.source(EnumYunstDeviceType.MOBILE.getValue())
 			.build();
 
@@ -612,13 +613,21 @@ public class YunstBizHandler extends EBankHandler {
 					walletBalanceDetailDao.updateByPrimaryKeySelective(detail);
 
 					if (detail.getAmount() < 0 && detail.getRefOrderId() != null) {
-
-						long unFreezen = detail.getAmount().longValue();
+						long unFreezen = 0;
+						long balance = 0;
+						if (BalanceFreezeMode.NO_FREEZE.getValue().byteValue() == detail
+							.getRefFreezeMode()) {
+							unFreezen = 0;
+							balance = BalanceDetailStatus.SUCC.getValue().byteValue()
+								== walletDetailStatus ? detail.getAmount() : 0;
+						} else if (BalanceFreezeMode.FREEZEN.getValue().byteValue() == detail
+							.getRefFreezeMode()) {
+							unFreezen = detail.getAmount();
+							balance = BalanceDetailStatus.SUCC.getValue().byteValue()
+								== walletDetailStatus ? 0 : -detail.getAmount();
+						}
 						walletBalanceDetailDao.updateDetailFreezen(detail.getRefOrderId(),
-							detail.getRefOrderDetailId(),
-							unFreezen,
-							BalanceDetailStatus.SUCC.getValue().byteValue() == walletDetailStatus
-								? 0 : -detail.getAmount());
+							detail.getRefOrderDetailId(), unFreezen, balance);
 					}
 				});
 			}
