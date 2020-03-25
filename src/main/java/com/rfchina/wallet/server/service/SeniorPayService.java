@@ -269,17 +269,20 @@ public class SeniorPayService {
 		// 提现
 		WithdrawResp order = doWithdraw(walletId, walletCard, amount, validateType, jumpUrl,
 			customerIp);
-		// 更新余额明细
-		Optional<String> orderNos = payDetails.stream().map(payDetail -> {
+		if(BalanceFreezeMode.FREEZEN.getValue().byteValue() == mode.getValue()) {
+			// 锁定余额明细
+			Optional<String> orderNos = payDetails.stream().map(payDetail -> {
 
-			WalletBalanceDetail withdrawDetail = walletBalanceDetailService.consumePayDetail(order,
-				order.getWithdrawId(), payDetail.left, payDetail.right, mode);
-			return withdrawDetail.getOrderNo();
+				WalletBalanceDetail withdrawDetail = walletBalanceDetailService
+					.consumePayDetail(order,
+						order.getWithdrawId(), payDetail.left, payDetail.right, mode);
+				return withdrawDetail.getOrderNo();
 
-		}).reduce((x, y) -> x + "," + y);
+			}).reduce((x, y) -> x + "," + y);
 
-		log.info("发起余额出金  出金单号 {} , 入金单号 {}", order.getOrderNo(),
-			orderNos.orElse(""));
+			log.info("发起余额出金  出金单号 {} , 入金单号 {}", order.getOrderNo(),
+				orderNos.orElse(""));
+		}
 
 		return order;
 	}

@@ -5,6 +5,7 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.rfchina.platform.biztools.fileserver.HttpFile;
 import com.rfchina.platform.common.misc.Triple;
+import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EnumUtil;
@@ -104,6 +105,7 @@ import com.rfchina.wallet.server.msic.EnumYunst.YunstOrderStatus;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.GatewayTransService;
+import com.rfchina.wallet.server.service.WalletBalanceDetailService;
 import com.rfchina.wallet.server.service.handler.common.EBankHandler;
 import java.io.File;
 import java.net.URL;
@@ -179,6 +181,9 @@ public class YunstBizHandler extends EBankHandler {
 
 	@Autowired
 	private WalletBalanceDetailDao walletBalanceDetailDao;
+
+	@Autowired
+	private WalletBalanceDetailService walletBalanceDetailService;
 
 
 	public boolean isSupportTunnelType(Byte tunnelType) {
@@ -611,6 +616,8 @@ public class YunstBizHandler extends EBankHandler {
 				details.forEach(detail -> {
 					detail.setStatus(walletDetailStatus);
 					walletBalanceDetailDao.updateByPrimaryKeySelective(detail);
+					log.info("[自动提现] 更新余额明细单状态 单号 {} , 状态 {}", order.getOrderNo(),
+						walletDetailStatus);
 
 					if (detail.getAmount() < 0 && detail.getRefOrderId() != null) {
 						long unFreezen = 0;
@@ -628,8 +635,27 @@ public class YunstBizHandler extends EBankHandler {
 						}
 						walletBalanceDetailDao.updateDetailFreezen(detail.getRefOrderId(),
 							detail.getRefOrderDetailId(), unFreezen, balance);
+						log.info("[自动提现] 更新入金余额 入金单号 {} , 状态 {}", detail.getRefOrderNo(),
+							walletDetailStatus);
 					}
 				});
+				if (details.isEmpty() && OrderType.WITHDRAWAL.getValue() == order.getType()) {
+					WalletWithdraw withdraw = walletWithdrawDao.selectByOrderId(order.getId());
+					List<Tuple<WalletBalanceDetail, Long>> payDetails = walletBalanceDetailService
+						.selectDetailToPay(order.getWalletId(), order.getAmount());
+					// 锁定余额明细
+					Optional<String> orderNos = payDetails.stream().map(payDetail -> {
+
+						WalletBalanceDetail withdrawDetail = walletBalanceDetailService
+							.consumePayDetail(order, withdraw.getId(), payDetail.left,
+								payDetail.right, BalanceFreezeMode.NO_FREEZE);
+						return withdrawDetail.getOrderNo();
+
+					}).reduce((x, y) -> x + "," + y);
+
+					log.info("发起余额提现出金  出金单号 {} , 入金单号 {}", order.getOrderNo(),
+						orderNos.orElse(""));
+				}
 			}
 
 			// 记录到流水
