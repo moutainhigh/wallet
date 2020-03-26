@@ -80,7 +80,7 @@ public class WalletBalanceDetailService {
 				}
 				return payDetail.getId();
 			});
-		if (remainAmount.get() < amount) {
+		if (remainAmount.get() > 0) {
 			log.error("钱包[{}]入金余额[{}]不足出金金额[{}]", walletId, remainAmount.get(), amount);
 			throw new WalletResponseException(WALLET_BALANCE_IN_NOT_ENOUGH);
 		}
