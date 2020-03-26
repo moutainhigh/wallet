@@ -3,6 +3,9 @@
 测试环境
 jenkins job: platform-rfwallet-super-server-test
 ```
+## 1.4.0_2020032615_Release
+- 自动提现功能上线
+
 ## 1.4.0_2020032515_Beta
 ### [变动说明]
 - 提现增加冻结模式，自动冻结、手动不冻结
