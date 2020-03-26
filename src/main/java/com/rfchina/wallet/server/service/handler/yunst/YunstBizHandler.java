@@ -639,16 +639,35 @@ public class YunstBizHandler extends EBankHandler {
 							walletDetailStatus);
 					}
 				});
-				if (details.isEmpty() && OrderType.WITHDRAWAL.getValue() == order.getType()) {
+				if (details.isEmpty() && OrderType.WITHDRAWAL.getValue() == order.getType()
+					&& BalanceDetailStatus.SUCC.getValue().byteValue() == walletDetailStatus) {
 					WalletWithdraw withdraw = walletWithdrawDao.selectByOrderId(order.getId());
 					List<Tuple<WalletBalanceDetail, Long>> payDetails = walletBalanceDetailService
 						.selectDetailToPay(order.getWalletId(), order.getAmount());
 					// 锁定余额明细
-					Optional<String> orderNos = payDetails.stream().map(payDetail -> {
+					Optional<String> orderNos = payDetails.stream().map(tuple -> {
+						WalletBalanceDetail payDetail = tuple.left;
+						walletBalanceDetailDao.updateDetailFreezen(payDetail.getOrderId(),
+							payDetail.getOrderDetailId(), 0L, - tuple.right);
 
-						WalletBalanceDetail withdrawDetail = walletBalanceDetailService
-							.consumePayDetail(order, withdraw.getId(), payDetail.left,
-								payDetail.right, BalanceFreezeMode.NO_FREEZE);
+						WalletBalanceDetail withdrawDetail = WalletBalanceDetail.builder()
+							.walletId(order.getWalletId())
+							.orderId(order.getId())
+							.orderNo(order.getOrderNo())
+							.orderDetailId(withdraw.getId())
+							.refOrderId(payDetail.getOrderId())
+							.refOrderNo(payDetail.getOrderNo())
+							.refOrderDetailId(payDetail.getOrderDetailId())
+							.type(order.getType())
+							.status(BalanceDetailStatus.SUCC.getValue())
+							.amount(- tuple.right)
+							.balance(- tuple.right)
+							.freezen(0L)
+							.refFreezeMode(BalanceFreezeMode.NO_FREEZE.getValue())
+							.createTime(new Date())
+							.build();
+						walletBalanceDetailDao.insertSelective(withdrawDetail);
+
 						return withdrawDetail.getOrderNo();
 
 					}).reduce((x, y) -> x + "," + y);
