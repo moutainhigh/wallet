@@ -194,15 +194,7 @@ public class SeniorWalletService {
 	 */
 	public void seniorWalletBindPhone(WalletTunnel walletTunnel, String mobile,
 		String verifyCode) throws Exception {
-
-		try {
-			yunstUserHandler.bindPhone(walletTunnel.getBizUserId(), mobile, verifyCode);
-		} catch (CommonGatewayException e) {
-			if (!EnumYunstResponse.ALREADY_BIND_PHONE.getValue().equals(e.getBankErrCode())) {
-				log.error("高级钱包-绑定手机异常: walletId:" + walletTunnel.getWalletId(), e);
-				throw e;
-			}
-		}
+		yunstUserHandler.bindPhone(walletTunnel.getBizUserId(), mobile, verifyCode);
 		walletTunnel.setSecurityTel(mobile);
 		walletTunnelDao.updateByPrimaryKeySelective(walletTunnel);
 	}

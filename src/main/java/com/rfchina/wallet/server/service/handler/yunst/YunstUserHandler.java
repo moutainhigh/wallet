@@ -200,6 +200,9 @@ public class YunstUserHandler extends YunstBaseHandler {
 			if (EnumYunstResponse.ALREADY_BIND_PHONE.getValue().equals(e.getBankErrCode())) {
 				log.warn("高级钱包-通道已绑定手机: bizUserId:{}", bizUserId);
 			}
+			if (EnumYunstResponse.VERIFYCODE_ERROR.getValue().equals(e.getBankErrCode())) {
+				log.warn("高级钱包-验证码错误: bizUserId:{}", bizUserId);
+			}
 			throw e;
 		} catch (Exception e) {
 			log.error("未定义异常", e);

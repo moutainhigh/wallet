@@ -86,6 +86,7 @@ public class EnumYunst {
 		ALREADY_EXISTS_MEMEBER("30000", "用户已存在"),
 		ALREADY_BIND_PHONE("30024", "已绑定手机"),
 		ALREADY_REALNAME_AUTH("30007", "已实名验证"),
+		VERIFYCODE_ERROR("20011", "验证码错误"),
 		;
 
 		private String value;

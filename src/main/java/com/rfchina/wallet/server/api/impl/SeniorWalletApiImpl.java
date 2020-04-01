@@ -23,6 +23,7 @@ import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletPerson;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.api.SeniorWalletApi;
+import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq.CompanyBasicInfo;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult;
@@ -177,6 +178,9 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 		Objects.requireNonNull(walletTunnel);
 		try {
 			seniorWalletService.seniorWalletBindPhone(walletTunnel, mobile, verifyCode);
+		} catch (CommonGatewayException e) {
+			log.error("高级钱包绑定手机失败", e);
+			throw e;
 		} catch (Exception e) {
 			log.error("高级钱包绑定手机失败", e);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
