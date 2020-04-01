@@ -123,7 +123,7 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 		}
 
 		WithdrawResp withdraw = seniorPayService.balanceWithdraw(walletId, walletCard, amount,
-			validateType.byteValue(), jumpUrl, customerIp, BalanceFreezeMode.NO_FREEZE);
+			validateType.byteValue(), jumpUrl, customerIp, BalanceFreezeMode.NO_FREEZE, false);
 
 		UnifiedConfirmVo confirmVo = BeanUtil.newInstance(withdraw, UnifiedConfirmVo.class);
 		confirmVo.setOrderId(withdraw.getId());

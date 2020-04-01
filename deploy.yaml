@@ -49,6 +49,8 @@ spec:
               mountPath: %{app_path}/logs
             - name: yunst-cert
               mountPath: %{app_path}/yunst
+            - name: balance-file
+              mountPath: %{app_path}/balance_file
       volumes:
         - name: %{service_name}-logs
           hostPath:
@@ -57,3 +59,5 @@ spec:
         - name: yunst-cert
           configMap:
             name: yunst-cert
+        - name: balance-file
+          emptyDir: {}

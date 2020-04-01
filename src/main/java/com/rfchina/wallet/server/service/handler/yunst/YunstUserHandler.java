@@ -11,6 +11,7 @@ import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
 import com.rfchina.wallet.server.bank.yunst.exception.UnknownException;
 import com.rfchina.wallet.server.bank.yunst.request.QueryBalanceReq;
+import com.rfchina.wallet.server.bank.yunst.request.UnBindPhoneReq;
 import com.rfchina.wallet.server.bank.yunst.request.UpdatePayPwdReq;
 import com.rfchina.wallet.server.bank.yunst.request.UpdatePhoneByPayPwdReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstApplyBindBankCardReq;
@@ -25,6 +26,7 @@ import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetPayPwdReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSignContractReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstUnBindBankCardReq;
+import com.rfchina.wallet.server.bank.yunst.response.UnBindPhoneResp;
 import com.rfchina.wallet.server.bank.yunst.response.result.ApplyBindBankCardResp;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstBindBankCardResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstBindPhoneResult;
@@ -46,7 +48,6 @@ import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -58,6 +59,9 @@ public class YunstUserHandler extends YunstBaseHandler {
 
 	@Autowired
 	private YunstTpl yunstTpl;
+
+	@Autowired
+	private WalletTunnelExtDao walletTunnelDao;
 
 	/**
 	 * 创建会员
@@ -135,9 +139,6 @@ public class YunstUserHandler extends YunstBaseHandler {
 		return yunstTpl.signRequest(req);
 	}
 
-	@Autowired
-	private WalletTunnelExtDao walletTunnelDao;
-
 	/**
 	 * 委托扣款协议签约(生成前端H5 url)
 	 */
@@ -207,6 +208,25 @@ public class YunstUserHandler extends YunstBaseHandler {
 	}
 
 	/**
+	 * 解绑手机
+	 */
+	public UnBindPhoneResp unBindPhone(String bizUserId, String phone,
+		String verificationCode) {
+		UnBindPhoneReq req = UnBindPhoneReq.builder()
+			.bizUserId(bizUserId)
+			.phone(phone)
+			.verificationCode(verificationCode)
+			.build();
+		try {
+			return yunstTpl.execute(req, UnBindPhoneResp.class);
+		} catch (Exception e) {
+			log.error("[解绑手机] 异常",e);
+			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
+		}
+
+	}
+
+	/**
 	 * 修改绑定手机
 	 */
 	public String updateSecurityTel(String bizUserId, String realName, String oldPhone,
@@ -265,7 +285,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 		String realName, Long identityType, String idNo) throws Exception {
 		String identityNo;
 		try {
-			if ("H04496326".equals(idNo)){
+			if ("H04496326".equals(idNo)) {
 				identityType = 99L;
 			}
 			identityNo = RSAUtil.encrypt(idNo);
@@ -303,7 +323,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 	 */
 	public YunstSetCompanyInfoResult setCompanyInfo(String bizUserId, Boolean isAuth,
 		YunstSetCompanyInfoReq.CompanyBasicInfo companyBasicInfo) throws Exception {
-		if (!IdNumValidUtil.isIDNumber(companyBasicInfo.getLegalIds())){
+		if (!IdNumValidUtil.isIDNumber(companyBasicInfo.getLegalIds())) {
 			companyBasicInfo.setIdentityType(99L);
 		}
 //		if ("H04496326".equals(companyBasicInfo.getLegalIds())){

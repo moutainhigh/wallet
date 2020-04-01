@@ -262,14 +262,15 @@ public class SeniorPayService {
 	}
 
 	public WithdrawResp balanceWithdraw(Long walletId, WalletCard walletCard, Long amount,
-		Byte validateType, String jumpUrl, String customerIp, BalanceFreezeMode mode) {
+		Byte validateType, String jumpUrl, String customerIp, BalanceFreezeMode mode,
+		boolean isException) {
 
 		List<Tuple<WalletBalanceDetail, Long>> payDetails = walletBalanceDetailService
-			.selectDetailToPay(walletId, amount);
+			.selectDetailToPay(walletId, amount, isException);
 		// 提现
 		WithdrawResp order = doWithdraw(walletId, walletCard, amount, validateType, jumpUrl,
 			customerIp);
-		if(BalanceFreezeMode.FREEZEN.getValue().byteValue() == mode.getValue()) {
+		if (BalanceFreezeMode.FREEZEN.getValue().byteValue() == mode.getValue()) {
 			// 锁定余额明细
 			Optional<String> orderNos = payDetails.stream().map(payDetail -> {
 
@@ -747,9 +748,21 @@ public class SeniorPayService {
 				.build();
 			walletConsumeDao.insertSelective(consume);
 
+			WalletCollectMethod method = savePayMethod(consume.getOrderId(), consume.getId(),
+				OrderType.DEDUCTION.getValue(), req.getWalletPayMethod());
+
+			WalletTunnel payer = walletTunnelDao
+				.selectByWalletId(consumeOrder.getWalletId(), consumeOrder.getTunnelType());
+			WalletTunnel payee = walletTunnelDao
+				.selectByWalletId(consume.getPayeeWalletId(), consumeOrder.getTunnelType());
+
+			EBankHandler handler = handlerHelper.selectByTunnelType(consumeOrder.getTunnelType());
+			WalletCollectResp result = handler.consume(consumeOrder, consume, payer, payee,
+				Arrays.asList(method));
+
 			// 余额明细
 			List<Tuple<WalletBalanceDetail, Long>> details = walletBalanceDetailService.
-				selectDetailToPay(consumeOrder.getWalletId(), consumeOrder.getAmount());
+				selectDetailToPay(consumeOrder.getWalletId(), consumeOrder.getAmount(), false);
 			details.forEach(payDetail -> {
 				WalletBalanceDetail payerDetail = walletBalanceDetailService.consumePayDetail(
 					consumeOrder, consume.getId(), payDetail.left, payDetail.right,
@@ -762,18 +775,6 @@ public class SeniorPayService {
 				payeeDetail.setBalance(payDetail.right);
 				walletBalanceDetailDao.insertSelective(payerDetail);
 			});
-
-			WalletCollectMethod method = savePayMethod(consume.getOrderId(), consume.getId(),
-				OrderType.DEDUCTION.getValue(), req.getWalletPayMethod());
-
-			WalletTunnel payer = walletTunnelDao
-				.selectByWalletId(consumeOrder.getWalletId(), consumeOrder.getTunnelType());
-			WalletTunnel payee = walletTunnelDao
-				.selectByWalletId(consume.getPayeeWalletId(), consumeOrder.getTunnelType());
-
-			EBankHandler handler = handlerHelper.selectByTunnelType(consumeOrder.getTunnelType());
-			WalletCollectResp result = handler.consume(consumeOrder, consume, payer, payee,
-				Arrays.asList(method));
 
 			return result;
 		} finally {

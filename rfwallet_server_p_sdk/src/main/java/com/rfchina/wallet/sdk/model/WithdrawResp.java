@@ -118,6 +118,9 @@ public class WithdrawResp  {
     @ApiModelProperty("钱包id")
     private Long walletId ;
 
+    @ApiModelProperty("提现id")
+    private Long withdrawId ;
+
 
 }
 

@@ -105,6 +105,20 @@ public class SeniorWalletController {
 			seniorWalletApi.bindPhone(accessToken, channelType, walletId, mobile, verifyCode));
 	}
 
+	@ApiOperation("高级钱包-解绑手机")
+	@PostMapping(UrlConstant.WALLET_SENIOR_UNBIND_PHONE)
+	public ResponseValue unBindPhone(
+		@RequestParam("access_token") String accessToken,
+		@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = true, example = "1") @RequestParam("channel_type") Byte channelType,
+		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+		@ApiParam(value = "手机号码", required = true) @RequestParam("mobile") String mobile,
+		@ApiParam(value = "短信验证码", required = true) @RequestParam("verify_code") String verifyCode) {
+
+		seniorWalletApi.unBindPhone(accessToken, channelType, walletId, mobile, verifyCode);
+		return new ResponseValue(EnumResponseCode.COMMON_SUCCESS, null);
+	}
+
+
 	@ApiOperation("高级钱包-个人认证")
 	@PostMapping(UrlConstant.WALLET_SENIOR_PERSON_AUTHENTICATION)
 	public ResponseValue<PageVo> seniorPersonAuthentication(

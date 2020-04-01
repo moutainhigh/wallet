@@ -575,6 +575,32 @@
 }
 ```
 
+###  高级钱包-解绑手机
+
+请求地址: /wallet_server/v1/m/senior/wallet/unbind_phone
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|channel_type|是|渠道类型 1:浦发银企直连,2:通联云商通|
+|mobile|是|手机号码|
+|verify_code|是|短信验证码|
+|wallet_id|是|钱包id|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+  
+}
+```
+
 ###  高级钱包-修改支付密码
 
 请求地址: /wallet_server/v1/m/senior/wallet/update_pay_pwd

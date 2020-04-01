@@ -36,6 +36,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -162,11 +163,11 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@SignVerify
 	@ParamVerify
 	public Wallet bindPhone(
-		String accessToken,
-		Byte tunnelType,
-		Long walletId,
-		String mobile,
-		String verifyCode) {
+		@ParamValid(nullable = false) String accessToken,
+		@ParamValid(nullable = false) Byte tunnelType,
+		@ParamValid(nullable = false) Long walletId,
+		@ParamValid(nullable = false) String mobile,
+		@ParamValid(nullable = false) String verifyCode) {
 
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		Objects.requireNonNull(wallet);
@@ -182,6 +183,26 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 				"高级钱包绑定手机失败");
 		}
 		return wallet;
+	}
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
+	@ParamVerify
+	public void unBindPhone(
+		@ParamValid(nullable = false) String accessToken,
+		@ParamValid(nullable = false) Byte tunnelType,
+		@ParamValid(nullable = false) Long walletId,
+		@ParamValid(nullable = false) String mobile,
+		@ParamValid(nullable = false) String verifyCode) {
+
+		// 查渠道用户
+		WalletTunnel walletTunnel = walletTunnelDao.selectByTunnelTypeAndWalletId(tunnelType,
+			walletId);
+		Optional.ofNullable(walletTunnel)
+			.orElseThrow(() ->
+				new WalletResponseException(EnumWalletResponseCode.TUNNEL_INFO_NOT_EXISTS));
+		seniorWalletService.unBindPhone(walletTunnel, mobile, verifyCode);
 	}
 
 	@Log

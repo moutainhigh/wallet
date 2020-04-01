@@ -150,4 +150,9 @@ public interface SeniorWalletApi {
 	 */
 	YunstMemberInfoResult.CompanyInfoResult seniorWalletCompanyAuditOffline(String accessToken,
 		Long walletId, YunstSetCompanyInfoReq.CompanyBasicInfo companyBasicInfo);
+
+	/**
+	 * 解绑手机
+	 */
+	void unBindPhone(String accessToken, Byte channelType, Long walletId, String mobile, String verifyCode);
 }

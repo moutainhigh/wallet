@@ -207,6 +207,20 @@ public class SeniorWalletService {
 		walletTunnelDao.updateByPrimaryKeySelective(walletTunnel);
 	}
 
+
+	/**
+	 * 高级钱包-解绑手机
+	 */
+	public void unBindPhone(WalletTunnel walletTunnel, String mobile,
+		String verifyCode) {
+
+		yunstUserHandler.unBindPhone(walletTunnel.getBizUserId(), mobile, verifyCode);
+		log.info("[高级钱包][解绑手机] bizUserId={},mobile={}", walletTunnel.getBizUserId(), mobile);
+
+		walletTunnel.setSecurityTel(null);
+		walletTunnelDao.updateByPrimaryKey(walletTunnel);
+	}
+
 	/**
 	 * 高级钱包个人修改绑定手机
 	 */
@@ -325,7 +339,7 @@ public class SeniorWalletService {
 		walletDao.updateByPrimaryKeySelective(wallet);
 
 		// 发送钱包事件
-		walletEventService.sendEventMq(EnumDef.WalletEventType.CHANGE,wallet.getId());
+		walletEventService.sendEventMq(EnumDef.WalletEventType.CHANGE, wallet.getId());
 	}
 
 
@@ -520,7 +534,9 @@ public class SeniorWalletService {
 			&&
 			EnumDef.WalletTunnelAuditStatus.AUDIT_SUCCESS.getValue().byteValue() == walletTunnel
 				.getStatus() &&
-			walletTunnel.getCheckTime().compareTo(DateUtil.parse(memberInfo.getCheckTime(), DateUtil.STANDARD_DTAETIME_PATTERN)) == -1) {
+			walletTunnel.getCheckTime().compareTo(
+				DateUtil.parse(memberInfo.getCheckTime(), DateUtil.STANDARD_DTAETIME_PATTERN))
+				== -1) {
 			walletTunnel.setFailReason(null);
 			walletTunnel.setSecurityTel(memberInfo.getPhone());
 			walletTunnel.setCheckTime(
@@ -560,9 +576,9 @@ public class SeniorWalletService {
 		boolean needUpdate = !Optional.ofNullable(walletTunnel.getIsDirty()).isPresent()
 			|| walletTunnel.getIsDirty() != DirtyType.NORMAL.getValue().byteValue();
 		Wallet wallet = walletDao.selectByPrimaryKey(walletTunnel.getWalletId());
-		if (!needUpdate){
+		if (!needUpdate) {
 			needUpdate = !Optional.ofNullable(wallet.getBalanceUpdTime()).isPresent()
-				|| DateUtil.addSecs(wallet.getBalanceUpdTime(),1800).before(new Date());
+				|| DateUtil.addSecs(wallet.getBalanceUpdTime(), 1800).before(new Date());
 		}
 
 		if (needUpdate) {
@@ -673,7 +689,7 @@ public class SeniorWalletService {
 
 	public static void main(String[] args) {
 		WalletTunnel walletTunnel = new WalletTunnel();
-		walletTunnel.setIsDirty((byte)1);
+		walletTunnel.setIsDirty((byte) 1);
 		boolean needUpdate = !Optional.ofNullable(walletTunnel.getIsDirty()).isPresent() || Optional
 			.ofNullable(walletTunnel.getIsDirty())
 			.filter(dirty -> dirty != DirtyType.NORMAL.getValue().byteValue()).isPresent();

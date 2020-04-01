@@ -480,7 +480,7 @@ public class ScheduleService {
 
 			seniorPayService
 				.balanceWithdraw(walletConfig.getWalletId(), walletCard, walletTunnel.getBalance(),
-					BizValidateType.NONE.getValue(), null, null, BalanceFreezeMode.FREEZEN);
+					BizValidateType.NONE.getValue(), null, null, BalanceFreezeMode.FREEZEN, true);
 		}
 		log.info("[自动提现] 钱包[{}] 结束自动提现", walletConfig.getWalletId());
 

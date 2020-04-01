@@ -218,6 +218,10 @@ public class UrlConstant {
 	 * 高级钱包绑定手机
 	 */
 	public static final String WALLET_SENIOR_BIND_PHONE = VERSION + "/m/senior/wallet/bind_phone";
+	/**
+	 * 高级钱包解绑手机
+	 */
+	public static final String WALLET_SENIOR_UNBIND_PHONE = VERSION + "/m/senior/wallet/unbind_phone";
 
 	/**
 	 * 高级钱包商家资料审核（通道）
