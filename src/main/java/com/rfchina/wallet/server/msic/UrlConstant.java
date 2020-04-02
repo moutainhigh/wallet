@@ -245,6 +245,10 @@ public class UrlConstant {
 	 */
 	public static final String WALLET_SENIOR_UPDATE_PAY_PWD = VERSION + "/m/senior/wallet/update_pay_pwd";
 	/**
+	 * 高级钱包-重置支付密码
+	 */
+	public static final String WALLET_SENIOR_RESET_PAY_PWD = VERSION + "/m/senior/wallet/reset_pay_pwd";
+	/**
 	 * 高级钱包-修改绑定手机
 	 */
 	public static final String WALLET_SENIOR_UPDATE_SECURITY_TEL = VERSION + "/m/senior/wallet/update_security_tel";

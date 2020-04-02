@@ -356,6 +356,15 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
+	public String resetPayPwd(String accessToken, Long walletId, String jumpUrl) {
+		verifyService.checkSeniorWallet(walletId);
+		return seniorWalletService.resetTunnelPayPwd(walletId, jumpUrl);
+	}
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
+	@Override
 	public String signBalanceProtocol(String accessToken, Long walletId, String jumpUrl) {
 		try {
 			return seniorWalletService.signBalanceProtocol(walletId, jumpUrl);

@@ -11,6 +11,7 @@ import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
 import com.rfchina.wallet.server.bank.yunst.exception.UnknownException;
 import com.rfchina.wallet.server.bank.yunst.request.QueryBalanceReq;
+import com.rfchina.wallet.server.bank.yunst.request.ResetPayPwdReq;
 import com.rfchina.wallet.server.bank.yunst.request.UnBindPhoneReq;
 import com.rfchina.wallet.server.bank.yunst.request.UpdatePayPwdReq;
 import com.rfchina.wallet.server.bank.yunst.request.UpdatePhoneByPayPwdReq;
@@ -131,6 +132,29 @@ public class YunstUserHandler extends YunstBaseHandler {
 		UpdatePayPwdReq req = UpdatePayPwdReq.builder()
 			.bizUserId(channel.getBizUserId())
 			.name(person.getName())
+			.identityType(YunstIdType.ID_CARD.getValue())
+			.identityNo(encryptIdNo)
+			.jumpUrl(jumpUrl)
+			.backUrl(configService.getYunstNotifybackUrl())
+			.build();
+		return yunstTpl.signRequest(req);
+	}
+
+	/**
+	 * 设置支付密码(个人)
+	 */
+	public String resetPayPwd(WalletPerson person, WalletTunnel channel, String jumpUrl) {
+
+		String encryptIdNo = null;
+		try {
+			encryptIdNo = RSAUtil.encrypt(person.getIdNo());
+		} catch (Exception e) {
+			log.error("身份证加密错误", e);
+		}
+		ResetPayPwdReq req = ResetPayPwdReq.builder()
+			.bizUserId(channel.getBizUserId())
+			.name(person.getName())
+			.phone(channel.getSecurityTel())
 			.identityType(YunstIdType.ID_CARD.getValue())
 			.identityNo(encryptIdNo)
 			.jumpUrl(jumpUrl)

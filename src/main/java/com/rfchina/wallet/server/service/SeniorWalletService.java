@@ -470,6 +470,18 @@ public class SeniorWalletService {
 	}
 
 	/**
+	 * 高级钱包-重置支付密码
+	 */
+	public String resetTunnelPayPwd(Long walletId, String jumpUrl) {
+		WalletPerson person = walletPersonDao.selectByWalletId(walletId);
+		WalletTunnel channel = verifyService.checkChannel(walletId, TunnelType.YUNST);
+
+		jumpUrl = configService.getYunstJumpUrlPrefix() + jumpUrl;
+		String signedParam = yunstUserHandler.resetPayPwd(person, channel, jumpUrl);
+		return configService.getYunstUpdatePayPasswordUrl() + "?" + signedParam;
+	}
+
+	/**
 	 * 高级钱包企业会员信息
 	 */
 	public CompanyInfoResult seniorWalletGetCompanyInfo(Long walletId)

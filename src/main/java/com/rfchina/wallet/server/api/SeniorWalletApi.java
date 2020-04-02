@@ -109,9 +109,14 @@ public interface SeniorWalletApi {
 	String personSetPayPassword(String accessToken, Long walletId, String jumpUrl);
 
 	/**
-	 * 重置支付密码
+	 * 更新支付密码
 	 */
 	String updatePayPwd(String accessToken, Long walletId, String jumpUrl);
+
+	/**
+	 * 重置支付密码
+	 */
+	String resetPayPwd(String accessToken, Long walletId, String jumpUrl);
 
 	/**
 	 * 高级钱包获取企业用户信息

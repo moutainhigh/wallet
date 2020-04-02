@@ -216,6 +216,18 @@ public class SeniorWalletController {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, pageVo);
 	}
 
+	@ApiOperation("高级钱包-重置支付密码")
+	@PostMapping(UrlConstant.WALLET_SENIOR_RESET_PAY_PWD)
+	public ResponseValue<PageVo> resetPayPwd(
+		@RequestParam("access_token") String accessToken,
+		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+		@ApiParam(value = "前端跳转地址", required = true) @RequestParam("jump_url") String jumpUrl) {
+
+		String redirectUrl = seniorWalletApi.resetPayPwd(accessToken, walletId, jumpUrl);
+		PageVo pageVo = PageVo.builder().url(redirectUrl).build();
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, pageVo);
+	}
+
 	@ApiOperation("高级钱包-个人信息")
 	@PostMapping(UrlConstant.WALLET_SENIOR_PERSON_INFO)
 	public ResponseValue<YunstMemberInfoResult.PersonInfoResult> seniorWalletPersonInfo(
