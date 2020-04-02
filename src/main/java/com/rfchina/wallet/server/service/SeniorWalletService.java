@@ -478,7 +478,7 @@ public class SeniorWalletService {
 
 		jumpUrl = configService.getYunstJumpUrlPrefix() + jumpUrl;
 		String signedParam = yunstUserHandler.resetPayPwd(person, channel, jumpUrl);
-		return configService.getYunstUpdatePayPasswordUrl() + "?" + signedParam;
+		return configService.getYunstResetPayPwdUrl() + "?" + signedParam;
 	}
 
 	/**

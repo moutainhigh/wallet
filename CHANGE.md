@@ -3,6 +3,9 @@
 测试环境
 jenkins job: platform-rfwallet-super-server-test
 ```
+## 1.4.1_b1_2020040110_Beta
+- 重置密码、手机接口
+
 ## 1.4.0_2020032615_Release
 - 自动提现功能上线
 
