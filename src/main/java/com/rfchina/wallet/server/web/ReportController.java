@@ -73,4 +73,6 @@ public class ReportController {
 		StatCharging statCharging = seniorChargingApi.queryChargingByCurrentMonth(accessToken);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, statCharging);
 	}
+
+
 }

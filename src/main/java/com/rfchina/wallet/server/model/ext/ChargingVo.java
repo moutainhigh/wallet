@@ -3,6 +3,7 @@ package com.rfchina.wallet.server.model.ext;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderType;
 import com.rfchina.wallet.server.msic.EnumYunst.YunstMethodName;
 import io.swagger.annotations.ApiModelProperty;
+import java.math.BigDecimal;
 import java.util.Date;
 import lombok.Data;
 
@@ -23,6 +24,12 @@ public class ChargingVo {
 
 	@ApiModelProperty(name = "tunnel_succ_time", value = "通道成功时间")
 	private Date tunnelSuccTime;
+
+	@ApiModelProperty(name="charging_type", value = "计费方式，1按次收费，2按比率收费")
+	private Byte chargingType;
+
+	@ApiModelProperty(name="charging_value", value = "计费单价，计费比例或金额")
+	private BigDecimal chargingValue;
 
 	public String getMethodName() {
 		if (OrderType.RECHARGE.getValue().equals(type)) {
@@ -48,13 +55,6 @@ public class ChargingVo {
 			return 1L;
 		}
 		return null;
-	}
-
-	public Long getTunnelFee(){
-		if (OrderType.WITHDRAWAL.getValue().equals(type)) {
-			return null;
-		}
-		return tunnelFee;
 	}
 
 }

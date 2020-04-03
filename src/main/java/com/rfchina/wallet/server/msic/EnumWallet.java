@@ -489,7 +489,6 @@ public class EnumWallet {
 	}
 
 
-
 	/**
 	 * 钱包余额 21：微信小程序 22：微信原生APP 23：微信原生H5 24：微信JS支付(公众号) 25：微信扫码支付(正扫) 31：支付宝扫码支付(正扫)
 	 * 32：支付宝JS支付(生活号) 33：支付宝原生
@@ -839,4 +838,47 @@ public class EnumWallet {
 		}
 	}
 
+
+	/**
+	 * 余额冻结模式
+	 */
+	public enum FeeConfigKey implements Valuable<String> {
+		YUNST_WITHDRAW("YUNST_WITHDRAW", "提现手续费配置"),
+		YUNST_PERSON_AUDIT("YUNST_PERSON_AUDIT", "个人认证收费"),
+		YUNST_COMPANY_AUDIT("YUNST_COMPANY_AUDIT", "商户认证收费");
+
+		private String value;
+		private String valueName;
+
+		FeeConfigKey(String value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public String getValue() {
+			return value;
+		}
+	}
+
+	/**
+	 * 计费类型 1按次收费，2按比率收费
+	 */
+	public enum ChargingType implements Valuable<Byte> {
+		ONCE((byte) 1, "按次收费"),
+		RATE((byte) 2, "按比率收费");
+
+		private Byte value;
+		private String valueName;
+
+		ChargingType(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}
+	}
 }
