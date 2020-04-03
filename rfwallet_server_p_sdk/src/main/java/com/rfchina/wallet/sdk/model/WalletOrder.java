@@ -1,7 +1,6 @@
 package com.rfchina.wallet.sdk.model;
 
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import lombok.Data;
 import java.util.List;
 import java.util.Map;
