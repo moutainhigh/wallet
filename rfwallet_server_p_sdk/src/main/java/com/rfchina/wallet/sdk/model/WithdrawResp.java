@@ -28,6 +28,12 @@ public class WithdrawResp  {
     @ApiModelProperty("商户系统用户标识")
     private String bizUserId ;
 
+    @ApiModelProperty("计费方式，1按次收费，2按比率收费")
+    private Integer chargingType ;
+
+    @ApiModelProperty("计费单价，计费比例或金额")
+    private BigDecimal chargingValue ;
+
     @ApiModelProperty("创建日期")
     private String createTime ;
 

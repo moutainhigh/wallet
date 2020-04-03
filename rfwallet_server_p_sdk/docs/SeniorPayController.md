@@ -35,6 +35,8 @@
     batch_no:""  , //钱包批次号
     biz_no:""  , //业务凭证号
     biz_tag:""  , //业务标识。1: 有退款 2: 已记流水
+    charging_type:""  , //计费方式，1按次收费，2按比率收费
+    charging_value:""  , //计费单价，计费比例或金额
     create_time:""  , //创建日期
     curr_try_times:""  , //当前尝试次数
     end_time:""  , //结束时间
@@ -124,6 +126,8 @@
     batch_no:""  , //钱包批次号
     biz_no:""  , //业务凭证号
     biz_tag:""  , //业务标识。1: 有退款 2: 已记流水
+    charging_type:""  , //计费方式，1按次收费，2按比率收费
+    charging_value:""  , //计费单价，计费比例或金额
     create_time:""  , //创建日期
     curr_try_times:""  , //当前尝试次数
     end_time:""  , //结束时间
@@ -185,6 +189,8 @@
     batch_no:""  , //钱包批次号
     biz_no:""  , //业务凭证号
     biz_tag:""  , //业务标识。1: 有退款 2: 已记流水
+    charging_type:""  , //计费方式，1按次收费，2按比率收费
+    charging_value:""  , //计费单价，计费比例或金额
     create_time:""  , //创建日期
     curr_try_times:""  , //当前尝试次数
     end_time:""  , //结束时间
@@ -246,6 +252,8 @@
     batch_no:""  , //钱包批次号
     biz_no:""  , //业务凭证号
     biz_tag:""  , //业务标识。1: 有退款 2: 已记流水
+    charging_type:""  , //计费方式，1按次收费，2按比率收费
+    charging_value:""  , //计费单价，计费比例或金额
     create_time:""  , //创建日期
     curr_try_times:""  , //当前尝试次数
     end_time:""  , //结束时间
@@ -304,6 +312,8 @@
     batch_no:""  , //钱包批次号
     biz_no:""  , //业务凭证号
     biz_tag:""  , //业务标识。1: 有退款 2: 已记流水
+    charging_type:""  , //计费方式，1按次收费，2按比率收费
+    charging_value:""  , //计费单价，计费比例或金额
     create_time:""  , //创建日期
     curr_try_times:""  , //当前尝试次数
     end_time:""  , //结束时间
@@ -370,6 +380,8 @@
     batch_no:""  , //钱包批次号
     biz_no:""  , //业务凭证号
     biz_tag:""  , //业务标识。1: 有退款 2: 已记流水
+    charging_type:""  , //计费方式，1按次收费，2按比率收费
+    charging_value:""  , //计费单价，计费比例或金额
     create_time:""  , //创建日期
     curr_try_times:""  , //当前尝试次数
     end_time:""  , //结束时间
@@ -480,6 +492,8 @@
     biz_no:""  , //业务凭证号
     biz_tag:""  , //业务标识。1: 有退款 2: 已记流水
     biz_user_id:""  , //商户系统用户标识
+    charging_type:""  , //计费方式，1按次收费，2按比率收费
+    charging_value:""  , //计费单价，计费比例或金额
     create_time:""  , //创建日期
     curr_try_times:""  , //当前尝试次数
     end_time:""  , //结束时间
