@@ -111,7 +111,6 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	}
 
 	@Log
-
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override

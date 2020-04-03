@@ -284,6 +284,14 @@ public class UrlConstant {
 	 * 高级钱包余额明细
 	 */
 	public static final String WALLET_SENIOR_ORDER_DETAIL= VERSION + "/m/senior/wallet/order_detail";
+	/**
+	 * 钱包配置-获取全局配置
+	 */
+	public static final String WALLET_GET_UNI_CONFIG = VERSION + "/m/senior/wallet/get_uni_config";
+	/**
+	 * 钱包配置-更新全局配置
+	 */
+	public static final String WALLET_UPDATE_UNI_CONFIG = VERSION + "/m/senior/wallet/update_uni_config";
 
 	/**
 	 * 云商通统一回调

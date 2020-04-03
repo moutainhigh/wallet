@@ -3,11 +3,11 @@ package com.rfchina.wallet.server.service;
 import com.rfchina.app.model.App;
 import com.rfchina.passport.misc.SessionThreadLocal;
 import com.rfchina.platform.common.utils.BeanUtil;
-import com.rfchina.wallet.domain.mapper.WalletConfigMapper;
 import com.rfchina.wallet.domain.mapper.ext.WalletOrderDao;
 import com.rfchina.wallet.domain.model.WalletConfig;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.server.SpringBaseTest;
+import com.rfchina.wallet.server.mapper.ext.WalletConfigExtDao;
 import com.rfchina.wallet.server.model.ext.WithdrawResp;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +29,7 @@ public class ScheduleServiceTest extends SpringBaseTest {
 	private SeniorPayService seniorPayService;
 
 	@Autowired
-	private WalletConfigMapper walletConfigDao;
+	private WalletConfigExtDao walletConfigDao;
 
 	@Autowired
 	private SessionThreadLocal sessionThreadLocal;

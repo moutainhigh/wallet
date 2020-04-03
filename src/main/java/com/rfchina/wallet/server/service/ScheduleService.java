@@ -7,7 +7,6 @@ import com.rfchina.platform.common.misc.Triple;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
-import com.rfchina.wallet.domain.mapper.WalletConfigMapper;
 import com.rfchina.wallet.domain.mapper.ext.BankCodeDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletBalanceDetailDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
@@ -32,6 +31,7 @@ import com.rfchina.wallet.server.bank.pudong.domain.predicate.ExactErrPredicate;
 import com.rfchina.wallet.server.bank.pudong.domain.util.ExceptionUtil;
 import com.rfchina.wallet.server.mapper.ext.WalletClearingExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCompanyExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletConfigExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
@@ -122,7 +122,7 @@ public class ScheduleService {
 	private SeniorPayService seniorPayService;
 
 	@Autowired
-	private WalletConfigMapper walletConfigDao;
+	private WalletConfigExtDao walletConfigDao;
 
 	@Autowired
 	private WalletTunnelExtDao walletTunnelDao;

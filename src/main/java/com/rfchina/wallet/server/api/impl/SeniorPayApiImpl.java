@@ -13,11 +13,15 @@ import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderStatus;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.BalanceJob;
+import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletCard;
+import com.rfchina.wallet.domain.model.WalletConfig;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.server.api.SeniorPayApi;
+import com.rfchina.wallet.server.mapper.ext.WalletConfigExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import com.rfchina.wallet.server.model.ext.AgentPayReq.Reciever;
 import com.rfchina.wallet.server.model.ext.CollectReq;
@@ -76,6 +80,9 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 	@Autowired
 	private SeniorBalanceService seniorBalanceService;
 
+	@Autowired
+	private WalletConfigExtDao walletConfigDao;
+
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
@@ -100,7 +107,6 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 		return resp;
 	}
 
-
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
@@ -115,6 +121,26 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 		@ParamValid(nullable = true) String jumpUrl,
 		@ParamValid(nullable = false) String customerIp) {
 
+		// 判断最小手动提现金额
+		Wallet wallet = verifyService.checkSeniorWallet(walletId);
+		WalletConfig config = walletConfigDao.selectUniCfg();
+		if (config != null) {
+			if (WalletType.COMPANY.getValue().byteValue() == wallet.getType()) {
+				Optional.ofNullable(config.getManualWithdrawCompanyMin())
+					.filter(c -> c.longValue() > amount)
+					.ifPresent(c -> {
+						throw new WalletResponseException(
+							EnumWalletResponseCode.WALLET_WITHDRAW_NOT_ENOUGH, String.valueOf(c/100));
+					});
+			} else if (WalletType.PERSON.getValue().byteValue() == wallet.getType()) {
+				Optional.ofNullable(config.getManualWithdrawCompanyMin())
+					.filter(c -> c.longValue() > amount)
+					.ifPresent(c -> {
+						throw new WalletResponseException(
+							EnumWalletResponseCode.WALLET_WITHDRAW_NOT_ENOUGH, String.valueOf(c/100));
+					});
+			}
+		}
 		WalletCard walletCard = walletCardDao.selectByPrimaryKey(cardId);
 		verifyService.checkCard(walletCard);
 		// 检查回调域名
