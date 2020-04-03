@@ -186,7 +186,8 @@ public class ScheduleApiImpl implements ScheduleApi {
 				Criteria criteria = example.createCriteria();
 				criteria.andIdGreaterThan(maxId)
 					.andAutoWithdrawStatusEqualTo(AutoWithdrawStatus.OPEN.getValue())
-					.andStatusEqualTo(WalletConfigStatus.NORMAL.getValue());
+					.andStatusEqualTo(WalletConfigStatus.NORMAL.getValue())
+					.andWalletIdGreaterThan(0L);
 				return walletConfigDao.selectByExampleWithRowbounds(example, new RowBounds(0, 100));
 			}, (walletConfig) -> {
 
