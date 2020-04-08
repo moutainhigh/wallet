@@ -6,6 +6,7 @@ import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
+import com.rfchina.wallet.domain.model.BankCode;
 import com.rfchina.wallet.domain.model.WalletPerson;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
@@ -36,17 +37,18 @@ import com.rfchina.wallet.server.bank.yunst.response.result.YunstSendVerificatio
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstSetCompanyInfoResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstUnBindBankCardResult;
 import com.rfchina.wallet.server.bank.yunst.util.YunstTpl;
+import com.rfchina.wallet.server.mapper.ext.BankCodeExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.msic.EnumYunst.EnumYunstResponse;
 import com.rfchina.wallet.server.msic.EnumYunst.YunstIdType;
 import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.util.IdNumValidUtil;
+import java.util.Objects;
 import java.util.TimeZone;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -58,6 +60,9 @@ public class YunstUserHandler extends YunstBaseHandler {
 
 	@Autowired
 	private YunstTpl yunstTpl;
+
+	@Autowired
+	private BankCodeExtDao bankCodeExtDao;
 
 	/**
 	 * 创建会员
@@ -311,6 +316,11 @@ public class YunstUserHandler extends YunstBaseHandler {
 //		}
 		companyBasicInfo.setLegalIds(RSAUtil.encrypt(companyBasicInfo.getLegalIds()));
 		companyBasicInfo.setAccountNo(RSAUtil.encrypt(companyBasicInfo.getAccountNo()));
+
+		BankCode bankCode = bankCodeExtDao.selectByClassName(companyBasicInfo.getParentBankName());
+		if (Objects.nonNull(bankCode)){
+			companyBasicInfo.setParentBankName(bankCode.getTlBankName());
+		}
 		YunstSetCompanyInfoReq.YunstSetCompanyInfoReqBuilder builder = YunstSetCompanyInfoReq
 			.builder$()
 			.bizUserId(bizUserId)
