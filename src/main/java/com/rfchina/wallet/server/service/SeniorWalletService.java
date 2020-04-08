@@ -408,13 +408,14 @@ public class SeniorWalletService {
 	/**
 	 * 高级钱包绑定申请绑定手机
 	 */
-	public void seniorWalletApplyBindPhone(Integer channelType, Long walletId,
-		String telephone) throws Exception {
+	public void sendVerifyCode(Integer channelType, Long walletId,
+		String telephone, Integer smsCodeType) throws Exception {
+
 		WalletTunnel walletChannel = walletTunnelDao
 			.selectByTunnelTypeAndWalletId(channelType.byteValue(), walletId);
 		if (channelType.intValue() == TunnelType.YUNST.getValue().intValue()) {
 			yunstUserHandler.sendVerificationCode(walletChannel.getBizUserId(), telephone,
-				EnumVerifyCodeType.YUNST_BIND_PHONE.getValue());
+				smsCodeType);
 		}
 	}
 

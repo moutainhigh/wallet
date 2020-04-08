@@ -74,10 +74,9 @@ public class SeniorWalletController {
 		@ApiParam(value = "短信类型", required = true) @RequestParam("sms_type") Integer smsCodeType)
 		throws Exception {
 
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
-			seniorWalletApi
-				.seniorWalletSmsCodeVerification(accessToken, source, channelType, walletId, mobile,
-					smsCodeType));
+		WalletTunnel tunnel = seniorWalletApi.seniorWalletSmsCodeVerification(accessToken,
+			source, channelType, walletId, mobile, smsCodeType);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, tunnel);
 	}
 
 	@ApiOperation("高级钱包-修改手机")

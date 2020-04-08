@@ -238,4 +238,28 @@ public class EnumYunst {
 			return value;
 		}
 	}
+
+	/**
+	 * 短信验证码类型
+	 */
+	public enum EnumVerifyCodeType implements Valuable<Integer> {
+
+		/**
+		 * 云商通绑定手机
+		 */
+		BIND_PHONE(9),
+		UNBIND_PHONE(6)
+		;
+
+		private Integer value;
+
+		EnumVerifyCodeType(Integer value) {
+			this.value = value;
+		}
+
+		@Override
+		public Integer getValue() {
+			return value;
+		}
+	}
 }

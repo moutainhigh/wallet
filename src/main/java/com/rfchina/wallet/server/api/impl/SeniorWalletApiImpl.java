@@ -31,6 +31,7 @@ import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResul
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.PersonInfoResult;
 import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
+import com.rfchina.wallet.server.msic.EnumYunst;
 import com.rfchina.wallet.server.service.SeniorWalletService;
 import com.rfchina.wallet.server.service.VerifyService;
 import java.util.Arrays;
@@ -126,8 +127,9 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
 				"发送云商通账户绑定手机验证码失败,未创建高级钱包用户, 查无此钱包");
 		}
+		if (smsCodeType.intValue() == EnumYunst.EnumVerifyCodeType.BIND_PHONE.getValue()
+			|| smsCodeType.intValue() == EnumYunst.EnumVerifyCodeType.UNBIND_PHONE.getValue()) {
 
-		if (smsCodeType == EnumDef.EnumVerifyCodeType.YUNST_BIND_PHONE.getValue().intValue()) {
 			if (EnumDef.WalletSource.FHT_CORP.getValue().intValue() == source
 				&& EnumDef.WalletTunnelAuditStatus.AUDIT_SUCCESS.getValue().byteValue()
 				!= walletChannel.getStatus()) {
@@ -136,8 +138,7 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 					"企业用户资料通道未审核通过");
 			}
 			try {
-				seniorWalletService
-					.seniorWalletApplyBindPhone(channelType, walletId, mobile);
+				seniorWalletService.sendVerifyCode(channelType, walletId, mobile, smsCodeType);
 			} catch (Exception e) {
 				log.error("发送云商通账户绑定手机验证码失败", e);
 				throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
