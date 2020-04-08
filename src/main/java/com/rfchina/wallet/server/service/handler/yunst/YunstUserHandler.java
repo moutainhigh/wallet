@@ -246,7 +246,9 @@ public class YunstUserHandler extends YunstBaseHandler {
 			.build();
 		try {
 			return yunstTpl.execute(req, UnBindPhoneResp.class);
-		} catch (Exception e) {
+		} catch (CommonGatewayException e){
+			throw e;
+		}catch (Exception e) {
 			log.error("[解绑手机] 异常",e);
 			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
 		}
