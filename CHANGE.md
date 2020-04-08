@@ -3,8 +3,9 @@
 测试环境
 jenkins job: platform-rfwallet-super-server-test
 ```
-## 1.4.1_b3_2020040813_Beta
-- 优化解绑提示语
+
+## 1.4.1_b4_2020040814_Beta
+- 对公账号增加通联对公账号别名映射
 
 ## 1.4.1_b3_2020040318_Beta
 - 增加手续费配置
