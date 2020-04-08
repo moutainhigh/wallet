@@ -3,6 +3,8 @@
 测试环境
 jenkins job: platform-rfwallet-super-server-test
 ```
+## 1.4.1_b5_2020040815_Beta
+- 修改短信验证码接口
 
 ## 1.4.1_b4_2020040814_Beta
 - 对公账号增加通联对公账号别名映射
