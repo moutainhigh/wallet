@@ -13,7 +13,7 @@
     <!-- 日志文件 -->
     <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
       <fileNamePattern>logs/${HOSTNAME}_%d{yyyy-MM-dd}.log</fileNamePattern>
-      <maxHistory>60</maxHistory>
+      <maxHistory>180</maxHistory>
     </rollingPolicy>
 
     <encoder>

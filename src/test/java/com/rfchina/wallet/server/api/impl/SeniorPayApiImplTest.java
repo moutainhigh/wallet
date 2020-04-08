@@ -1,8 +1,14 @@
 package com.rfchina.wallet.server.api.impl;
 
 import com.rfchina.platform.common.utils.JsonUtil;
+import com.rfchina.wallet.domain.exception.WalletResponseException;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletType;
+import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
+import com.rfchina.wallet.domain.model.Wallet;
+import com.rfchina.wallet.domain.model.WalletConfig;
 import com.rfchina.wallet.server.SpringApiTest;
 import com.rfchina.wallet.server.api.SeniorPayApi;
+import com.rfchina.wallet.server.mapper.ext.WalletConfigExtDao;
 import com.rfchina.wallet.server.model.ext.AgentPayReq;
 import com.rfchina.wallet.server.model.ext.CollectReq;
 import com.rfchina.wallet.server.model.ext.CollectReq.Reciever;
@@ -11,7 +17,11 @@ import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Balance;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.CodePay;
 import com.rfchina.wallet.server.model.ext.DeductionReq;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
+import com.rfchina.wallet.server.service.ConfigService;
+import com.rfchina.wallet.server.service.SeniorBalanceService;
+import com.rfchina.wallet.server.service.VerifyService;
 import java.util.Arrays;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +38,37 @@ public class SeniorPayApiImplTest extends SpringApiTest {
 
 	@Autowired
 	private SeniorPayApi seniorPayApi;
+
+	@Autowired
+	private VerifyService verifyService;
+
+	@Autowired
+	private WalletConfigExtDao walletConfigDao;
+
+	@Test
+	public void withdrawLimit(){
+		Long amount = 1L;
+		// 判断最小手动提现金额
+		Wallet wallet = verifyService.checkSeniorWallet(3L);
+		WalletConfig config = walletConfigDao.selectUniCfg();
+		if (config != null) {
+			if (WalletType.COMPANY.getValue().byteValue() == wallet.getType()) {
+				Optional.ofNullable(config.getManualWithdrawCompanyMin())
+					.filter(c -> c.longValue() > amount)
+					.ifPresent(c -> {
+						throw new WalletResponseException(
+							EnumWalletResponseCode.WALLET_WITHDRAW_NOT_ENOUGH, String.valueOf(c/100));
+					});
+			} else if (WalletType.PERSON.getValue().byteValue() == wallet.getType()) {
+				Optional.ofNullable(config.getManualWithdrawCompanyMin())
+					.filter(c -> c.longValue() > amount)
+					.ifPresent(c -> {
+						throw new WalletResponseException(
+							EnumWalletResponseCode.WALLET_WITHDRAW_NOT_ENOUGH, String.valueOf(c/100));
+					});
+			}
+		}
+	}
 
 	@Test
 	public void collect() {

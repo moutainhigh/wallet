@@ -121,23 +121,25 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 		@ParamValid(nullable = true) String jumpUrl,
 		@ParamValid(nullable = false) String customerIp) {
 
+		log.info("钱包提现 walletId={},amount={}", walletId, amount);
 		// 判断最小手动提现金额
 		Wallet wallet = verifyService.checkSeniorWallet(walletId);
 		WalletConfig config = walletConfigDao.selectUniCfg();
 		if (config != null) {
+			log.info("开启限额 {}", config);
 			if (WalletType.COMPANY.getValue().byteValue() == wallet.getType()) {
 				Optional.ofNullable(config.getManualWithdrawCompanyMin())
 					.filter(c -> c.longValue() > amount)
 					.ifPresent(c -> {
 						throw new WalletResponseException(
-							EnumWalletResponseCode.WALLET_WITHDRAW_NOT_ENOUGH, String.valueOf(c/100));
+							EnumWalletResponseCode.WALLET_WITHDRAW_NOT_ENOUGH, String.valueOf((double)c/100));
 					});
 			} else if (WalletType.PERSON.getValue().byteValue() == wallet.getType()) {
-				Optional.ofNullable(config.getManualWithdrawCompanyMin())
+				Optional.ofNullable(config.getManualWithdrawPersonMin())
 					.filter(c -> c.longValue() > amount)
 					.ifPresent(c -> {
 						throw new WalletResponseException(
-							EnumWalletResponseCode.WALLET_WITHDRAW_NOT_ENOUGH, String.valueOf(c/100));
+							EnumWalletResponseCode.WALLET_WITHDRAW_NOT_ENOUGH, String.valueOf((double)c/100));
 					});
 			}
 		}
