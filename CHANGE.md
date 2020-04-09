@@ -3,6 +3,9 @@
 测试环境
 jenkins job: platform-rfwallet-super-server-test
 ```
+## 1.4.1_2020040916_Release
+- 3.2版本发布
+
 ## 1.4.1_b5_2020040815_Beta
 - 修改短信验证码接口
 
