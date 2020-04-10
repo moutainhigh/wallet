@@ -11,7 +11,6 @@ import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderType;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
-import com.rfchina.wallet.domain.misc.EnumDef.WalletType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.BalanceJob;
 import com.rfchina.wallet.domain.model.BalanceJobCriteria;
@@ -39,7 +38,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.*;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
@@ -174,8 +177,8 @@ public class SeniorBalanceService {
 		// 发送通知邮件
 		try {
 			EmailUtil.EmailBody emailBody = new EmailUtil.EmailBody(
-				"**********[钱包服务]["+configService.getEnv()+"]对账异常通知 " + statDate, errMsg,
-					configService.getEmailSender(),configService.getEmailSender());
+				"**********[钱包服务][" + configService.getEnv() + "]对账异常通知 " + statDate, errMsg,
+				configService.getEmailSender(), configService.getEmailSender());
 			String errorContract = configService.getNotifyContract();
 			if (StringUtils.isNotBlank(errorContract)) {
 				for (String email : errorContract.split(",")) {
@@ -347,10 +350,8 @@ public class SeniorBalanceService {
 					.selectByExampleWithRowbounds(tunnelExample, new RowBounds(offset, limit));
 				return list.stream()
 					.map(v -> {
-						return "提现".equals(v.getTunnelOrderType()) ?
-								v.getOrderNo() + SPLIT_TAG + v.getTotalAmount().longValue()+ SPLIT_TAG + 0
-								:v.getOrderNo() + SPLIT_TAG + v.getTotalAmount().longValue() + SPLIT_TAG
-								+ v.getChannelFeeAmount().longValue();
+						return v.getOrderNo() + SPLIT_TAG + v.getTotalAmount().longValue()
+							+ SPLIT_TAG + v.getChannelFeeAmount().longValue();
 					}).collect(Collectors.toList());
 			});
 		// 加载钱包数据
@@ -367,8 +368,9 @@ public class SeniorBalanceService {
 					.selectByExampleWithRowbounds(OrderExample, new RowBounds(offset, limit));
 				return orders.stream()
 					.map(order -> {
-						return order.getOrderNo() + SPLIT_TAG + order.getAmount().longValue() + SPLIT_TAG
-								+  Optional.ofNullable(order.getTunnelFee()).orElse(0L);
+						return order.getOrderNo() + SPLIT_TAG + order.getAmount().longValue()
+							+ SPLIT_TAG
+							+ Optional.ofNullable(order.getTunnelFee()).orElse(0L);
 					}).collect(Collectors.toList());
 			});
 
