@@ -109,9 +109,14 @@ public interface SeniorWalletApi {
 	String personSetPayPassword(String accessToken, Long walletId, String jumpUrl);
 
 	/**
-	 * 重置支付密码
+	 * 更新支付密码
 	 */
 	String updatePayPwd(String accessToken, Long walletId, String jumpUrl);
+
+	/**
+	 * 重置支付密码
+	 */
+	String resetPayPwd(String accessToken, Long walletId, String jumpUrl);
 
 	/**
 	 * 高级钱包获取企业用户信息
@@ -150,4 +155,9 @@ public interface SeniorWalletApi {
 	 */
 	YunstMemberInfoResult.CompanyInfoResult seniorWalletCompanyAuditOffline(String accessToken,
 		Long walletId, YunstSetCompanyInfoReq.CompanyBasicInfo companyBasicInfo);
+
+	/**
+	 * 解绑手机
+	 */
+	void unBindPhone(String accessToken, Byte channelType, Long walletId, String mobile, String verifyCode);
 }

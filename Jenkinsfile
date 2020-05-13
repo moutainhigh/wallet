@@ -2,11 +2,12 @@ def label = "pipeline"
 
 def yaml_file = "deploy.yaml"
 def docker_hub = "hub.thinkinpower.net"
-def service_name = "wallet-server"
+def service_name = "rfwallet-server"
 def team_ns = "platform"
 def replicas = 2
 def live_path = "/index"
 def memory_max = "1536Mi"
+def log_pre_path = "test-"
 
 def docker_file = "Dockerfile"
 def jar_path = "build/libs"
@@ -23,10 +24,7 @@ podTemplate(label: label) {
 
      stage('Build') {
        container('gradle') {
-         sh """
-            rm -rf ${gradle_repo}/rfwallet-domain || echo 0
-            gradle clean :bootJar
-            """
+         sh 'gradle clean :bootJar'
        }
      }
 
@@ -57,6 +55,7 @@ podTemplate(label: label) {
               sed -i "s#%{replicas}#${replicas}#g" ${yaml_file}
               sed -i "s#%{live_path}#${live_path}#g" ${yaml_file}
               sed -i "s#%{memory_max}#${memory_max}#g" ${yaml_file}
+              sed -i "s#%{log_pre_path}#${log_pre_path}#g" ${yaml_file}
               cat  ${yaml_file}
               kubectl apply -f ${yaml_file}
               """

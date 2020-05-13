@@ -67,6 +67,7 @@ import com.rfchina.wallet.server.model.ext.WithdrawResp;
 import com.rfchina.wallet.server.msic.EnumWallet.BalanceFreezeMode;
 import com.rfchina.wallet.server.msic.EnumWallet.CardPro;
 import com.rfchina.wallet.server.msic.EnumWallet.ChannelType;
+import com.rfchina.wallet.server.msic.EnumWallet.ChargingType;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
 import com.rfchina.wallet.server.msic.EnumWallet.GwProgress;
 import com.rfchina.wallet.server.msic.LockConstant;
@@ -200,8 +201,9 @@ public class SeniorPayService {
 		try {
 			lock.acquireLock(LockConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);
 
+			BigDecimal rate = payMethod.getRate(configService);
 			BigDecimal tunnelFee = new BigDecimal(amount)
-				.multiply(payMethod.getRate(configService))
+				.multiply(rate)
 				.setScale(0, EBankHandler.getRoundingMode());
 			WalletOrder rechargeOrder = WalletOrder.builder()
 				.orderNo(orderNo)
@@ -216,6 +218,8 @@ public class SeniorPayService {
 				.status(OrderStatus.WAITTING.getValue())
 				.tunnelType(TunnelType.YUNST.getValue())
 				.tunnelFee(tunnelFee.longValue())
+				.chargingType(ChargingType.RATE.getValue())
+				.chargingValue(rate)
 				.note("钱包充值")
 				.sourceAppId(sessionThreadLocal.getApp().getId())
 				.industryCode(INDUSTRY_CODE)
@@ -262,14 +266,15 @@ public class SeniorPayService {
 	}
 
 	public WithdrawResp balanceWithdraw(Long walletId, WalletCard walletCard, Long amount,
-		Byte validateType, String jumpUrl, String customerIp, BalanceFreezeMode mode) {
+		Byte validateType, String jumpUrl, String customerIp, BalanceFreezeMode mode,
+		boolean isException) {
 
 		List<Tuple<WalletBalanceDetail, Long>> payDetails = walletBalanceDetailService
-			.selectDetailToPay(walletId, amount);
+			.selectDetailToPay(walletId, amount, isException);
 		// 提现
 		WithdrawResp order = doWithdraw(walletId, walletCard, amount, validateType, jumpUrl,
 			customerIp);
-		if(BalanceFreezeMode.FREEZEN.getValue().byteValue() == mode.getValue()) {
+		if (BalanceFreezeMode.FREEZEN.getValue().byteValue() == mode.getValue()) {
 			// 锁定余额明细
 			Optional<String> orderNos = payDetails.stream().map(payDetail -> {
 
@@ -325,6 +330,8 @@ public class SeniorPayService {
 				.progress(GwProgress.WAIT_SEND.getValue())
 				.status(OrderStatus.WAITTING.getValue())
 				.tunnelType(TunnelType.YUNST.getValue())
+				.chargingType(ChargingType.ONCE.getValue())
+				.chargingValue(new BigDecimal("80"))
 				.note("钱包提现")
 				.expireTime(getDefExpireTime(null))
 				.sourceAppId(sessionThreadLocal.getApp().getId())
@@ -402,8 +409,9 @@ public class SeniorPayService {
 
 		try {
 			lock.acquireLock(LockConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);
+			BigDecimal rate = req.getWalletPayMethod().getRate(configService);
 			BigDecimal tunnelFee = new BigDecimal(req.getAmount())
-				.multiply(req.getWalletPayMethod().getRate(configService))
+				.multiply(rate)
 				.setScale(0, EBankHandler.getRoundingMode());
 			WalletOrder collectOrder = WalletOrder.builder()
 				.orderNo(orderNo)
@@ -418,6 +426,8 @@ public class SeniorPayService {
 				.status(OrderStatus.WAITTING.getValue())
 				.tunnelType(TunnelType.YUNST.getValue())
 				.tunnelFee(tunnelFee.longValue())
+				.chargingType(ChargingType.RATE.getValue())
+				.chargingValue(rate)
 				.note(req.getNote())
 				.sourceAppId(sessionThreadLocal.getApp().getId())
 				.industryCode(req.getIndustryCode())
@@ -614,12 +624,14 @@ public class SeniorPayService {
 		Long refundAmount = refundList.stream()
 			.collect(Collectors.summingLong(RefundInfo::getAmount));
 		BigDecimal tunnelFee = BigDecimal.ZERO;
+		BigDecimal rate = BigDecimal.ZERO;
 		try {
 			List<WalletCollectMethod> methods = walletCollectMethodDao
 				.selectByCollectId(walletCollect.getId(), OrderType.COLLECT.getValue());
 			WalletPayMethod payMethod = getPayMethod(methods.get(0));
+			rate = payMethod.getRate(configService);
 			tunnelFee = new BigDecimal(walletCollect.getRefundLimit() - refundAmount)
-				.multiply(payMethod.getRate(configService))
+				.multiply(rate)
 				.setScale(0, EBankHandler.getRoundingMode());
 
 		} catch (Exception e) {
@@ -651,6 +663,8 @@ public class SeniorPayService {
 				.tunnelType(TunnelType.YUNST.getValue())
 				.tunnelFee(tunnelFee.longValue() - walletCollect.getRemainTunnelFee())
 				.sourceAppId(sessionThreadLocal.getApp().getId())
+				.chargingType(ChargingType.RATE.getValue())
+				.chargingValue(rate)
 				.note(note)
 				.createTime(new Date())
 				.build();
@@ -747,9 +761,21 @@ public class SeniorPayService {
 				.build();
 			walletConsumeDao.insertSelective(consume);
 
+			WalletCollectMethod method = savePayMethod(consume.getOrderId(), consume.getId(),
+				OrderType.DEDUCTION.getValue(), req.getWalletPayMethod());
+
+			WalletTunnel payer = walletTunnelDao
+				.selectByWalletId(consumeOrder.getWalletId(), consumeOrder.getTunnelType());
+			WalletTunnel payee = walletTunnelDao
+				.selectByWalletId(consume.getPayeeWalletId(), consumeOrder.getTunnelType());
+
+			EBankHandler handler = handlerHelper.selectByTunnelType(consumeOrder.getTunnelType());
+			WalletCollectResp result = handler.consume(consumeOrder, consume, payer, payee,
+				Arrays.asList(method));
+
 			// 余额明细
 			List<Tuple<WalletBalanceDetail, Long>> details = walletBalanceDetailService.
-				selectDetailToPay(consumeOrder.getWalletId(), consumeOrder.getAmount());
+				selectDetailToPay(consumeOrder.getWalletId(), consumeOrder.getAmount(), false);
 			details.forEach(payDetail -> {
 				WalletBalanceDetail payerDetail = walletBalanceDetailService.consumePayDetail(
 					consumeOrder, consume.getId(), payDetail.left, payDetail.right,
@@ -762,18 +788,6 @@ public class SeniorPayService {
 				payeeDetail.setBalance(payDetail.right);
 				walletBalanceDetailDao.insertSelective(payerDetail);
 			});
-
-			WalletCollectMethod method = savePayMethod(consume.getOrderId(), consume.getId(),
-				OrderType.DEDUCTION.getValue(), req.getWalletPayMethod());
-
-			WalletTunnel payer = walletTunnelDao
-				.selectByWalletId(consumeOrder.getWalletId(), consumeOrder.getTunnelType());
-			WalletTunnel payee = walletTunnelDao
-				.selectByWalletId(consume.getPayeeWalletId(), consumeOrder.getTunnelType());
-
-			EBankHandler handler = handlerHelper.selectByTunnelType(consumeOrder.getTunnelType());
-			WalletCollectResp result = handler.consume(consumeOrder, consume, payer, payee,
-				Arrays.asList(method));
 
 			return result;
 		} finally {
@@ -976,7 +990,7 @@ public class SeniorPayService {
 					WalletConsume walletConsume = walletConsumeDao.selectByOrderId(order.getId());
 					WalletTunnel payeeTunnel = walletTunnelDao
 						.selectByWalletId(walletConsume.getPayeeWalletId(), order.getTunnelType());
-					syncTunnelAmount(payeeTunnel);
+					Optional.ofNullable(payeeTunnel).ifPresent(t -> syncTunnelAmount(t));
 				}
 			}
 			return rs;

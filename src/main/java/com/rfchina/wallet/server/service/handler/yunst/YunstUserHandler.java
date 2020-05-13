@@ -6,11 +6,14 @@ import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
+import com.rfchina.wallet.domain.model.BankCode;
 import com.rfchina.wallet.domain.model.WalletPerson;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
 import com.rfchina.wallet.server.bank.yunst.exception.UnknownException;
 import com.rfchina.wallet.server.bank.yunst.request.QueryBalanceReq;
+import com.rfchina.wallet.server.bank.yunst.request.ResetPayPwdReq;
+import com.rfchina.wallet.server.bank.yunst.request.UnBindPhoneReq;
 import com.rfchina.wallet.server.bank.yunst.request.UpdatePayPwdReq;
 import com.rfchina.wallet.server.bank.yunst.request.UpdatePhoneByPayPwdReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstApplyBindBankCardReq;
@@ -25,6 +28,7 @@ import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetPayPwdReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSignContractReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstUnBindBankCardReq;
+import com.rfchina.wallet.server.bank.yunst.response.UnBindPhoneResp;
 import com.rfchina.wallet.server.bank.yunst.response.result.ApplyBindBankCardResp;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstBindBankCardResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstBindPhoneResult;
@@ -36,17 +40,18 @@ import com.rfchina.wallet.server.bank.yunst.response.result.YunstSendVerificatio
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstSetCompanyInfoResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstUnBindBankCardResult;
 import com.rfchina.wallet.server.bank.yunst.util.YunstTpl;
+import com.rfchina.wallet.server.mapper.ext.BankCodeExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.msic.EnumYunst.EnumYunstResponse;
 import com.rfchina.wallet.server.msic.EnumYunst.YunstIdType;
 import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.util.IdNumValidUtil;
+import java.util.Objects;
 import java.util.TimeZone;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -58,6 +63,12 @@ public class YunstUserHandler extends YunstBaseHandler {
 
 	@Autowired
 	private YunstTpl yunstTpl;
+
+	@Autowired
+	private WalletTunnelExtDao walletTunnelDao;
+
+	@Autowired
+	private BankCodeExtDao bankCodeExtDao;
 
 	/**
 	 * 创建会员
@@ -135,8 +146,28 @@ public class YunstUserHandler extends YunstBaseHandler {
 		return yunstTpl.signRequest(req);
 	}
 
-	@Autowired
-	private WalletTunnelExtDao walletTunnelDao;
+	/**
+	 * 设置支付密码(个人)
+	 */
+	public String resetPayPwd(WalletPerson person, WalletTunnel channel, String jumpUrl) {
+
+		String encryptIdNo = null;
+		try {
+			encryptIdNo = RSAUtil.encrypt(person.getIdNo());
+		} catch (Exception e) {
+			log.error("身份证加密错误", e);
+		}
+		ResetPayPwdReq req = ResetPayPwdReq.builder()
+			.bizUserId(channel.getBizUserId())
+			.name(person.getName())
+			.phone(channel.getSecurityTel())
+			.identityType(YunstIdType.ID_CARD.getValue())
+			.identityNo(encryptIdNo)
+			.jumpUrl(jumpUrl)
+			.backUrl(configService.getYunstNotifybackUrl())
+			.build();
+		return yunstTpl.signRequest(req);
+	}
 
 	/**
 	 * 委托扣款协议签约(生成前端H5 url)
@@ -199,11 +230,35 @@ public class YunstUserHandler extends YunstBaseHandler {
 			if (EnumYunstResponse.ALREADY_BIND_PHONE.getValue().equals(e.getBankErrCode())) {
 				log.warn("高级钱包-通道已绑定手机: bizUserId:{}", bizUserId);
 			}
+			if (EnumYunstResponse.VERIFYCODE_ERROR.getValue().equals(e.getBankErrCode())) {
+				log.warn("高级钱包-验证码错误: bizUserId:{}", bizUserId);
+			}
 			throw e;
 		} catch (Exception e) {
 			log.error("未定义异常", e);
 			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
 		}
+	}
+
+	/**
+	 * 解绑手机
+	 */
+	public UnBindPhoneResp unBindPhone(String bizUserId, String phone,
+		String verificationCode) {
+		UnBindPhoneReq req = UnBindPhoneReq.builder()
+			.bizUserId(bizUserId)
+			.phone(phone)
+			.verificationCode(verificationCode)
+			.build();
+		try {
+			return yunstTpl.execute(req, UnBindPhoneResp.class);
+		} catch (CommonGatewayException e){
+			throw e;
+		}catch (Exception e) {
+			log.error("[解绑手机] 异常",e);
+			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
+		}
+
 	}
 
 	/**
@@ -265,7 +320,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 		String realName, Long identityType, String idNo) throws Exception {
 		String identityNo;
 		try {
-			if ("H04496326".equals(idNo)){
+			if ("H04496326".equals(idNo)) {
 				identityType = 99L;
 			}
 			identityNo = RSAUtil.encrypt(idNo);
@@ -303,7 +358,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 	 */
 	public YunstSetCompanyInfoResult setCompanyInfo(String bizUserId, Boolean isAuth,
 		YunstSetCompanyInfoReq.CompanyBasicInfo companyBasicInfo) throws Exception {
-		if (!IdNumValidUtil.isIDNumber(companyBasicInfo.getLegalIds())){
+		if (!IdNumValidUtil.isIDNumber(companyBasicInfo.getLegalIds())) {
 			companyBasicInfo.setIdentityType(99L);
 		}
 //		if ("H04496326".equals(companyBasicInfo.getLegalIds())){
@@ -311,6 +366,11 @@ public class YunstUserHandler extends YunstBaseHandler {
 //		}
 		companyBasicInfo.setLegalIds(RSAUtil.encrypt(companyBasicInfo.getLegalIds()));
 		companyBasicInfo.setAccountNo(RSAUtil.encrypt(companyBasicInfo.getAccountNo()));
+
+		BankCode bankCode = bankCodeExtDao.selectByClassName(companyBasicInfo.getParentBankName());
+		if (Objects.nonNull(bankCode)){
+			companyBasicInfo.setParentBankName(bankCode.getTlBankName());
+		}
 		YunstSetCompanyInfoReq.YunstSetCompanyInfoReqBuilder builder = YunstSetCompanyInfoReq
 			.builder$()
 			.bizUserId(bizUserId)

@@ -32,7 +32,7 @@ public class WalletBalanceDetailService {
 		WalletBalanceDetail payDetail, Long withdrawAmount, BalanceFreezeMode mode) {
 
 		Long revertAmount = 0 - withdrawAmount.longValue();
-		if(BalanceFreezeMode.FREEZEN.getValue().byteValue() == mode.getValue()) {
+		if (BalanceFreezeMode.FREEZEN.getValue().byteValue() == mode.getValue()) {
 			walletBalanceDetailDao.updateDetailFreezen(payDetail.getOrderId(),
 				payDetail.getOrderDetailId(), withdrawAmount, revertAmount);
 		}
@@ -60,7 +60,8 @@ public class WalletBalanceDetailService {
 	/**
 	 * 选择提现余额
 	 */
-	public List<Tuple<WalletBalanceDetail, Long>> selectDetailToPay(Long walletId, Long amount) {
+	public List<Tuple<WalletBalanceDetail, Long>> selectDetailToPay(Long walletId, Long amount,
+		boolean isException) {
 
 		List<Tuple<WalletBalanceDetail, Long>> payDetails = Lists.newArrayList();
 		AtomicReference<Long> remainAmount = new AtomicReference<>(0L);
@@ -81,8 +82,10 @@ public class WalletBalanceDetailService {
 				return payDetail.getId();
 			});
 		if (remainAmount.get() > 0) {
-			log.error("钱包[{}]入金余额[{}]不足出金金额[{}]", walletId, remainAmount.get(), amount);
-			throw new WalletResponseException(WALLET_BALANCE_IN_NOT_ENOUGH);
+			log.error("钱包[{}]入金余额[{}]不足出金金额[{}]", walletId, amount - remainAmount.get(), amount);
+			if (isException) {
+				throw new WalletResponseException(WALLET_BALANCE_IN_NOT_ENOUGH);
+			}
 		}
 		return payDetails;
 	}

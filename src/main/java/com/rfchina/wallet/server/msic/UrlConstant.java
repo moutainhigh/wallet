@@ -218,6 +218,10 @@ public class UrlConstant {
 	 * 高级钱包绑定手机
 	 */
 	public static final String WALLET_SENIOR_BIND_PHONE = VERSION + "/m/senior/wallet/bind_phone";
+	/**
+	 * 高级钱包解绑手机
+	 */
+	public static final String WALLET_SENIOR_UNBIND_PHONE = VERSION + "/m/senior/wallet/unbind_phone";
 
 	/**
 	 * 高级钱包商家资料审核（通道）
@@ -240,6 +244,10 @@ public class UrlConstant {
 	 * 高级钱包-修改支付密码
 	 */
 	public static final String WALLET_SENIOR_UPDATE_PAY_PWD = VERSION + "/m/senior/wallet/update_pay_pwd";
+	/**
+	 * 高级钱包-重置支付密码
+	 */
+	public static final String WALLET_SENIOR_RESET_PAY_PWD = VERSION + "/m/senior/wallet/reset_pay_pwd";
 	/**
 	 * 高级钱包-修改绑定手机
 	 */
@@ -276,6 +284,14 @@ public class UrlConstant {
 	 * 高级钱包余额明细
 	 */
 	public static final String WALLET_SENIOR_ORDER_DETAIL= VERSION + "/m/senior/wallet/order_detail";
+	/**
+	 * 钱包配置-获取全局配置
+	 */
+	public static final String WALLET_GET_UNI_CONFIG = VERSION + "/m/senior/wallet/get_uni_config";
+	/**
+	 * 钱包配置-更新全局配置
+	 */
+	public static final String WALLET_UPDATE_UNI_CONFIG = VERSION + "/m/senior/wallet/update_uni_config";
 
 	/**
 	 * 云商通统一回调

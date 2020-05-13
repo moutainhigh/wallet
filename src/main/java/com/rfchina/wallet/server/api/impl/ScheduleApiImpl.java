@@ -7,7 +7,6 @@ import com.rfchina.biztools.lock.SimpleExclusiveLock;
 import com.rfchina.passport.misc.SessionThreadLocal;
 import com.rfchina.platform.common.annotation.Log;
 import com.rfchina.platform.common.utils.DateUtil;
-import com.rfchina.wallet.domain.mapper.WalletConfigMapper;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderType;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.model.WalletConfig;
@@ -15,6 +14,7 @@ import com.rfchina.wallet.domain.model.WalletConfigCriteria;
 import com.rfchina.wallet.domain.model.WalletConfigCriteria.Criteria;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.server.api.ScheduleApi;
+import com.rfchina.wallet.server.mapper.ext.WalletConfigExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import com.rfchina.wallet.server.msic.EnumWallet.AutoWithdrawStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.LockStatus;
@@ -60,7 +60,7 @@ public class ScheduleApiImpl implements ScheduleApi {
 	private SeniorChargingService seniorChargingService;
 
 	@Autowired
-	private WalletConfigMapper walletConfigDao;
+	private WalletConfigExtDao walletConfigDao;
 
 	@Autowired
 	private SessionThreadLocal sessionThreadLocal;
@@ -186,7 +186,8 @@ public class ScheduleApiImpl implements ScheduleApi {
 				Criteria criteria = example.createCriteria();
 				criteria.andIdGreaterThan(maxId)
 					.andAutoWithdrawStatusEqualTo(AutoWithdrawStatus.OPEN.getValue())
-					.andStatusEqualTo(WalletConfigStatus.NORMAL.getValue());
+					.andStatusEqualTo(WalletConfigStatus.NORMAL.getValue())
+					.andWalletIdGreaterThan(0L);
 				return walletConfigDao.selectByExampleWithRowbounds(example, new RowBounds(0, 100));
 			}, (walletConfig) -> {
 

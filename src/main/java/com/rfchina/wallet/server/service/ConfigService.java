@@ -130,6 +130,9 @@ public class ConfigService {
 	@Value("${yunst.updatePayPassword.gateway.url}")
 	private String yunstUpdatePayPasswordUrl;
 
+	@Value("${yunst.resetPayPwd.url}")
+	private String yunstResetPayPwdUrl;
+
 	@Value("${yunst.personChangeBindPhone.gateway.url}")
 	private String yunstPersonChangeBindPhoneUrl;
 

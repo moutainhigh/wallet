@@ -26,6 +26,8 @@
     list: [ {
     biz_no:""  , //业务凭证号
     biz_time:""  , //业务时间
+    charging_type:""  , //计费方式，1按次收费，2按比率收费
+    charging_value:""  , //计费单价，计费比例或金额
     create_time:""  , //创建日期
     deleted:""  , //是否删除 0：正常 1：已删除
     event:""  , //事件
@@ -71,16 +73,19 @@
     list: [ {
     charging_date:""  , //统计日期
     company_verify_count:""  , //公司验证次数
+    company_verify_fee:""  , //公司认证总费用
     create_time:""  , //创建日期
     deleted:""  , //是否删除 0：正常 1：已删除
     id:""  , //id
     local_pay_fee:""  , //本地的支付手续费,单位分
     local_recharge_fee:""  , //本地的充值手续费,单位分
     person_verify_count:""  , //个人验证次数
+    person_verify_fee:""  , //个人认证总费用
     third_pay_fee:""  , //第三方的支付手续费,单位分
     third_recharge_fee:""  , //第三方的充值手续费,单位分
     tunnel_type:""  , //渠道类型。1: 浦发银企直连，2：通联云商通
-    withdraw_count:""   //提现次数
+    withdraw_count:""  , //提现次数
+    withdraw_fee:""   //提现总费用
 }  ]  , 
     page_limit:""  , //
     page_num:""  , //
@@ -135,16 +140,19 @@
    , "data":  {
     charging_date:""  , //统计日期
     company_verify_count:""  , //公司验证次数
+    company_verify_fee:""  , //公司认证总费用
     create_time:""  , //创建日期
     deleted:""  , //是否删除 0：正常 1：已删除
     id:""  , //id
     local_pay_fee:""  , //本地的支付手续费,单位分
     local_recharge_fee:""  , //本地的充值手续费,单位分
     person_verify_count:""  , //个人验证次数
+    person_verify_fee:""  , //个人认证总费用
     third_pay_fee:""  , //第三方的支付手续费,单位分
     third_recharge_fee:""  , //第三方的充值手续费,单位分
     tunnel_type:""  , //渠道类型。1: 浦发银企直连，2：通联云商通
-    withdraw_count:""   //提现次数
+    withdraw_count:""  , //提现次数
+    withdraw_fee:""   //提现总费用
 }  
 }
 ```

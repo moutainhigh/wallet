@@ -86,6 +86,7 @@ public class EnumYunst {
 		ALREADY_EXISTS_MEMEBER("30000", "用户已存在"),
 		ALREADY_BIND_PHONE("30024", "已绑定手机"),
 		ALREADY_REALNAME_AUTH("30007", "已实名验证"),
+		VERIFYCODE_ERROR("20011", "验证码错误"),
 		;
 
 		private String value;
@@ -234,6 +235,30 @@ public class EnumYunst {
 		}
 
 		public Boolean getValue() {
+			return value;
+		}
+	}
+
+	/**
+	 * 短信验证码类型
+	 */
+	public enum EnumVerifyCodeType implements Valuable<Integer> {
+
+		/**
+		 * 云商通绑定手机
+		 */
+		BIND_PHONE(9),
+		UNBIND_PHONE(6)
+		;
+
+		private Integer value;
+
+		EnumVerifyCodeType(Integer value) {
+			this.value = value;
+		}
+
+		@Override
+		public Integer getValue() {
 			return value;
 		}
 	}

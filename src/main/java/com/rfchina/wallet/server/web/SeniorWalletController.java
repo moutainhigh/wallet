@@ -74,10 +74,9 @@ public class SeniorWalletController {
 		@ApiParam(value = "短信类型", required = true) @RequestParam("sms_type") Integer smsCodeType)
 		throws Exception {
 
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
-			seniorWalletApi
-				.seniorWalletSmsCodeVerification(accessToken, source, channelType, walletId, mobile,
-					smsCodeType));
+		WalletTunnel tunnel = seniorWalletApi.seniorWalletSmsCodeVerification(accessToken,
+			source, channelType, walletId, mobile, smsCodeType);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, tunnel);
 	}
 
 	@ApiOperation("高级钱包-修改手机")
@@ -104,6 +103,20 @@ public class SeniorWalletController {
 		return new ResponseValue<Wallet>(EnumResponseCode.COMMON_SUCCESS,
 			seniorWalletApi.bindPhone(accessToken, channelType, walletId, mobile, verifyCode));
 	}
+
+	@ApiOperation("高级钱包-解绑手机")
+	@PostMapping(UrlConstant.WALLET_SENIOR_UNBIND_PHONE)
+	public ResponseValue unBindPhone(
+		@RequestParam("access_token") String accessToken,
+		@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = true, example = "1") @RequestParam("channel_type") Byte channelType,
+		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+		@ApiParam(value = "手机号码", required = true) @RequestParam("mobile") String mobile,
+		@ApiParam(value = "短信验证码", required = true) @RequestParam("verify_code") String verifyCode) {
+
+		seniorWalletApi.unBindPhone(accessToken, channelType, walletId, mobile, verifyCode);
+		return new ResponseValue(EnumResponseCode.COMMON_SUCCESS, null);
+	}
+
 
 	@ApiOperation("高级钱包-个人认证")
 	@PostMapping(UrlConstant.WALLET_SENIOR_PERSON_AUTHENTICATION)
@@ -198,6 +211,18 @@ public class SeniorWalletController {
 		@ApiParam(value = "前端跳转地址", required = true) @RequestParam("jump_url") String jumpUrl) {
 
 		String redirectUrl = seniorWalletApi.updatePayPwd(accessToken, walletId, jumpUrl);
+		PageVo pageVo = PageVo.builder().url(redirectUrl).build();
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, pageVo);
+	}
+
+	@ApiOperation("高级钱包-重置支付密码")
+	@PostMapping(UrlConstant.WALLET_SENIOR_RESET_PAY_PWD)
+	public ResponseValue<PageVo> resetPayPwd(
+		@RequestParam("access_token") String accessToken,
+		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+		@ApiParam(value = "前端跳转地址", required = true) @RequestParam("jump_url") String jumpUrl) {
+
+		String redirectUrl = seniorWalletApi.resetPayPwd(accessToken, walletId, jumpUrl);
 		PageVo pageVo = PageVo.builder().url(redirectUrl).build();
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, pageVo);
 	}

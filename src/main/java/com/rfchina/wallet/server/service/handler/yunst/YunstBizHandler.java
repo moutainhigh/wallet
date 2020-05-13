@@ -643,7 +643,7 @@ public class YunstBizHandler extends EBankHandler {
 					&& BalanceDetailStatus.SUCC.getValue().byteValue() == walletDetailStatus) {
 					WalletWithdraw withdraw = walletWithdrawDao.selectByOrderId(order.getId());
 					List<Tuple<WalletBalanceDetail, Long>> payDetails = walletBalanceDetailService
-						.selectDetailToPay(order.getWalletId(), order.getAmount());
+						.selectDetailToPay(order.getWalletId(), order.getAmount(),false);
 					// 锁定余额明细
 					Optional<String> orderNos = payDetails.stream().map(tuple -> {
 						WalletBalanceDetail payDetail = tuple.left;

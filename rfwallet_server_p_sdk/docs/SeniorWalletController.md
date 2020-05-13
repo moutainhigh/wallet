@@ -1,3 +1,29 @@
+###  高级钱包-重置支付密码
+
+请求地址: /wallet_server/v1/m/senior/wallet/reset_pay_pwd
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|jump_url|是|前端跳转地址|
+|wallet_id|是|钱包id|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+   , "data":  {
+    url:""   //
+}  
+}
+```
+
 ###  高级钱包-余额明细
 
 请求地址: /wallet_server/v1/m/senior/wallet/order_detail
@@ -30,6 +56,8 @@
     batch_no:""  , //钱包批次号
     biz_no:""  , //业务凭证号
     biz_tag:""  , //业务标识。1: 有退款 2: 已记流水
+    charging_type:""  , //计费方式，1按次收费，2按比率收费
+    charging_value:""  , //计费单价，计费比例或金额
     create_time:""  , //创建日期
     curr_try_times:""  , //当前尝试次数
     end_time:""  , //结束时间
@@ -572,6 +600,32 @@
     tunnel_user_id:""  , //银行用户标识
     wallet_id:""   //钱包id
 }  
+}
+```
+
+###  高级钱包-解绑手机
+
+请求地址: /wallet_server/v1/m/senior/wallet/unbind_phone
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|channel_type|是|渠道类型 1:浦发银企直连,2:通联云商通|
+|mobile|是|手机号码|
+|verify_code|是|短信验证码|
+|wallet_id|是|钱包id|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+  
 }
 ```
 
