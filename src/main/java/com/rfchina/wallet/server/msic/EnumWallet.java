@@ -453,7 +453,9 @@ public class EnumWallet {
 		WECHAT((byte) 2, "微信"),
 		ALIPAY((byte) 4, "支付宝"),
 		CODEPAY((byte) 8, "统一刷卡"),
-		BANKCARD((byte) 16, "银行卡");
+		BANKCARD((byte) 16, "银行卡"),
+		POS((byte) 32, "POS机当面付"),
+		;
 
 		private Byte value;
 		private String valueName;
@@ -505,6 +507,7 @@ public class EnumWallet {
 		ALIPAY_AppOpen((byte) 33, "支付宝原生"),
 		CODEPAY((byte) 41, "扫码支付"),
 		BANKCARD((byte) 51, "银行卡快捷支付"),
+		POS((byte) 61, "POS机当面付"),
 		;
 
 		private Byte value;

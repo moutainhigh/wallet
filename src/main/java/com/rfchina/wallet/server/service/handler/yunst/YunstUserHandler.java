@@ -16,6 +16,7 @@ import com.rfchina.wallet.server.bank.yunst.request.ResetPayPwdReq;
 import com.rfchina.wallet.server.bank.yunst.request.UnBindPhoneReq;
 import com.rfchina.wallet.server.bank.yunst.request.UpdatePayPwdReq;
 import com.rfchina.wallet.server.bank.yunst.request.UpdatePhoneByPayPwdReq;
+import com.rfchina.wallet.server.bank.yunst.request.VspTermidReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstApplyBindBankCardReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstBalanceProtocolReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstBindBankCardReq;
@@ -29,6 +30,7 @@ import com.rfchina.wallet.server.bank.yunst.request.YunstSetPayPwdReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSignContractReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstUnBindBankCardReq;
 import com.rfchina.wallet.server.bank.yunst.response.UnBindPhoneResp;
+import com.rfchina.wallet.server.bank.yunst.response.VspTermidResp;
 import com.rfchina.wallet.server.bank.yunst.response.result.ApplyBindBankCardResp;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstBindBankCardResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstBindPhoneResult;
@@ -252,10 +254,10 @@ public class YunstUserHandler extends YunstBaseHandler {
 			.build();
 		try {
 			return yunstTpl.execute(req, UnBindPhoneResp.class);
-		} catch (CommonGatewayException e){
+		} catch (CommonGatewayException e) {
 			throw e;
-		}catch (Exception e) {
-			log.error("[解绑手机] 异常",e);
+		} catch (Exception e) {
+			log.error("[解绑手机] 异常", e);
 			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
 		}
 
@@ -368,7 +370,7 @@ public class YunstUserHandler extends YunstBaseHandler {
 		companyBasicInfo.setAccountNo(RSAUtil.encrypt(companyBasicInfo.getAccountNo()));
 
 		BankCode bankCode = bankCodeExtDao.selectByClassName(companyBasicInfo.getParentBankName());
-		if (Objects.nonNull(bankCode)){
+		if (Objects.nonNull(bankCode)) {
 			companyBasicInfo.setParentBankName(bankCode.getTlBankName());
 		}
 		YunstSetCompanyInfoReq.YunstSetCompanyInfoReqBuilder builder = YunstSetCompanyInfoReq
@@ -452,6 +454,29 @@ public class YunstUserHandler extends YunstBaseHandler {
 			log.error("查询余额错误 " + bizUserId, e);
 			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
 		}
+	}
+
+
+	public VspTermidResp vspTermid(String bizUserId, String vspMerchantid, String vspCusid,
+		String appId, String vspTermid) {
+		VspTermidReq req = VspTermidReq.builder()
+			.bizUserId(bizUserId)
+			.vspMerchantid(vspMerchantid)
+			.vspCusid(vspCusid)
+			.appid(appId)
+			.operationType("set")
+			.vspTermid(vspTermid)
+			.build();
+		try {
+			return yunstTpl.execute(req, VspTermidResp.class);
+		}catch (CommonGatewayException e){
+			log.error("" + bizUserId, e);
+			throw e;
+		} catch (Exception e) {
+			log.error("会员收银宝渠道商户信息及终端信息绑定错误 " + bizUserId, e);
+			throw new UnknownException(EnumWalletResponseCode.UNDEFINED_ERROR);
+		}
+
 	}
 
 }

@@ -56,6 +56,7 @@ import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Alipay;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Balance;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.BankCard;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.CodePay;
+import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Pos;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.WalletPayMethodBuilder;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Wechat;
 import com.rfchina.wallet.server.model.ext.DeductionReq;
@@ -869,6 +870,12 @@ public class SeniorPayService {
 				.amount(bankCard.getAmount())
 				.openId(bankCard.getBankCardNo())
 				.cardType(bankCard.getCardType());
+		} else if (payMethod.getPos() != null) {
+			Pos pos = payMethod.getPos();
+			builder.channelType(ChannelType.POS.getValue())
+				.payType(CollectPayType.POS.getValue())
+				.amount(pos.getAmount())
+				.sellerId(pos.getVspCusid());
 		}
 		WalletCollectMethod method = builder.build();
 		walletCollectMethodDao.insertSelective(method);

@@ -73,6 +73,9 @@ public class CollectReq {
 		@ApiModelProperty(value = "银行卡支付")
 		private BankCard bankCard;
 
+		@ApiModelProperty(value = "POS机当面付")
+		private Pos pos;
+
 		@ApiModelProperty(hidden = true)
 		public byte getMethods() {
 			byte method = 0;
@@ -86,6 +89,8 @@ public class CollectReq {
 				method |= ChannelType.CODEPAY.getValue().byteValue();
 			} else if (bankCard != null) {
 				method |= ChannelType.BANKCARD.getValue().byteValue();
+			} else if (pos != null) {
+				method |= ChannelType.POS.getValue().byteValue();
 			}
 			return method;
 		}
@@ -103,6 +108,8 @@ public class CollectReq {
 				bigDecimal = bigDecimal.add(new BigDecimal(
 					(WalletCardType.CREDIT.getValue().equals(bankCard.cardType)) ?
 						configService.getCreditCardRate() : configService.getDebitCardRate()));
+			} else if(pos != null){
+				bigDecimal = bigDecimal.add(new BigDecimal("0.0033"));
 			}
 			return bigDecimal;
 		}
@@ -208,6 +215,24 @@ public class CollectReq {
 
 			@ApiModelProperty(value = "银行卡类型 1-储蓄卡 2-信用卡")
 			private Byte cardType;
+
+		}
+
+		@ApiModel
+		@Data
+		@Builder
+		@NoArgsConstructor
+		@AllArgsConstructor
+		public static class Pos {
+
+			@ApiModelProperty(name = "pay_type", value = "51：银行卡快捷支付")
+			private Byte payType;
+
+			@ApiModelProperty(value = "集团模式：收银宝子商户号", required = true)
+			private String vspCusid;
+
+			@ApiModelProperty(required = true, value = "支付金额")
+			private Long amount;
 
 		}
 

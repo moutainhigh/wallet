@@ -31,6 +31,7 @@ public class WalletPayMethod  {
     @ApiModelProperty(value = "银行卡支付")
     private BankCard bankCard;
 
-
+    @ApiModelProperty(value = "POS机当面付")
+    private Pos pos;
 }
 

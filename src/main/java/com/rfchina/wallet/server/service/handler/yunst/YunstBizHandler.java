@@ -48,6 +48,7 @@ import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMe
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod.BankCard.CardQuickPay;
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod.CodePay;
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod.CodePay.CodePayVsp;
+import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod.Pos;
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod.Wechat;
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod.Wechat.AppOpen;
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod.Wechat.H5Open;
@@ -874,6 +875,13 @@ public class YunstBizHandler extends EBankHandler {
 					.amount(m.getAmount())
 					.build();
 				payMethod.put(CollectPayMethod.BankCard.KEY_QuickPayVsp, bankCard);
+			} else if(CollectPayType.POS.getValue().byteValue() ==
+				m.getPayType().byteValue()){
+				Pos pos = Pos.builder()
+					.vspCusid(m.getSellerId())
+					.amount(m.getAmount())
+					.build();
+				payMethod.put(CollectPayMethod.Pos.KEY_POS, pos);
 			}
 		});
 		return payMethod;

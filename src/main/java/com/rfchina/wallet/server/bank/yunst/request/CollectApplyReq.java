@@ -132,7 +132,7 @@ public class CollectApplyReq implements YunstBaseReq {
 				private String limitPay;
 
 				@ApiModelProperty(required = true, value = "微信小程序支付appid参数,当商户有多个小程序或公众号时接口指定上送")
-				private String subAppid ;
+				private String subAppid;
 
 				@ApiModelProperty(required = true, value = "支付金额,单位:分")
 				private Long amount;
@@ -325,7 +325,19 @@ public class CollectApplyReq implements YunstBaseReq {
 			}
 		}
 
+		@ApiModel
+		@Getter
+		@Builder
+		public static class Pos {
 
+			public static String KEY_POS = "ORDER_VSPPAY";
+
+			@ApiModelProperty(value = "集团模式：收银宝子商户号", required = true)
+			private String vspCusid;
+
+			@ApiModelProperty(required = true, value = "支付金额")
+			private Long amount;
+		}
 	}
 
 }

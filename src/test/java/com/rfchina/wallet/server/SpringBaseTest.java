@@ -3,23 +3,17 @@ package com.rfchina.wallet.server;
 import com.alibaba.fastjson.JSON;
 import com.allinpay.yunst.sdk.YunClient;
 import com.allinpay.yunst.sdk.bean.YunConfig;
+import com.rfchina.app.model.App;
 import com.rfchina.passport.misc.SessionThreadLocal;
-import com.rfchina.platform.common.security.SecurityCoder;
-import com.rfchina.platform.common.utils.BeanUtil;
-import com.rfchina.platform.common.utils.SignUtil;
-import com.rfchina.wallet.server.service.AppService;
 import com.rfchina.wallet.server.service.ConfigService;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -33,6 +27,9 @@ public class SpringBaseTest {
 
 	@Autowired
 	private ConfigService configService;
+
+	@Autowired
+	private SessionThreadLocal sessionThreadLocal;
 
 	private StackTraceElement currMethod() {
 		return Thread.currentThread().getStackTrace()[3];
@@ -56,10 +53,15 @@ public class SpringBaseTest {
 				configService.getYstSysId(),
 				configService.getYstPassword(), configService.getYstAlias(),
 				configService.getYstVersion(),
-				"/data/support/yunst/2001081503374814494.pfx",
-				"/data/support/yunst/TLCert.cer"));
+				"/data/support/dev-key/yunst3/2001081503374814494.pfx",
+				"/data/support/dev-key/yunst3/TLCert.cer"));
 		}
 	}
 
-
+	@Before
+	public void initSess() {
+		App app = new App();
+		app.setId(configService.getAppId());
+		sessionThreadLocal.addApp(app);
+	}
 }
