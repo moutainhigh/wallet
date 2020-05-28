@@ -448,4 +448,12 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	}
 
 
+	@Log
+	@Override
+	public void bindTerminal(Long walletId, String vspMerchantid, String vspCusid, String appId,
+		String vspTermid) {
+
+		seniorWalletService.bindTerminal(walletId, vspMerchantid, vspCusid, appId, vspTermid);
+	}
+
 }

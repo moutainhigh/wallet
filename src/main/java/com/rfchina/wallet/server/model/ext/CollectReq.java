@@ -102,6 +102,24 @@ public class CollectReq {
 		}
 
 		@ApiModelProperty(hidden = true)
+		public boolean hasMethod(ChannelType type) {
+			if (type.getValue().byteValue() == ChannelType.BALANCE.getValue().byteValue()) {
+				return balance != null;
+			} else if (type.getValue().byteValue() == ChannelType.WECHAT.getValue().byteValue()) {
+				return wechat != null;
+			} else if (type.getValue().byteValue() == ChannelType.ALIPAY.getValue().byteValue()) {
+				return alipay != null;
+			} else if (type.getValue().byteValue() == ChannelType.CODEPAY.getValue().byteValue()) {
+				return codePay != null;
+			} else if (type.getValue().byteValue() == ChannelType.BANKCARD.getValue().byteValue()) {
+				return bankCard != null;
+			} else if (type.getValue().byteValue() == ChannelType.POS.getValue().byteValue()) {
+				return pos != null;
+			}
+			return false;
+		}
+
+		@ApiModelProperty(hidden = true)
 		public BigDecimal getRate(ConfigService configService) {
 			BigDecimal bigDecimal = new BigDecimal("0");
 			if (balance != null) {
@@ -114,8 +132,8 @@ public class CollectReq {
 				bigDecimal = bigDecimal.add(new BigDecimal(
 					(WalletCardType.CREDIT.getValue().equals(bankCard.cardType)) ?
 						configService.getCreditCardRate() : configService.getDebitCardRate()));
-			} else if(pos != null){
-				bigDecimal = bigDecimal.add(new BigDecimal("0.0033"));
+			} else if (pos != null) {
+				bigDecimal = bigDecimal.add(new BigDecimal("0"));
 			}
 			return bigDecimal;
 		}
@@ -256,6 +274,9 @@ public class CollectReq {
 
 		@ApiModelProperty(value = "金额,单位:分")
 		private Long amount;
+
+		@ApiModelProperty(name = "role_type", value = "角色类型，1：项目方(POS主收款方)，2：平台方，4：分帐方")
+		private Byte roleType;
 
 	}
 }

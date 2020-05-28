@@ -15,7 +15,7 @@ public class YunstUserHandlerTest extends SpringBaseTest {
 	@Test
 	public void vspTermid() {
 
-		String bizUserId = "TESTWU305";
+		String bizUserId = "TESTWC299";
 		String vspMerchantid = "56058104816VDT7";
 		String vspCusid = "56058104816U8U6";
 		String appId = "00183310";

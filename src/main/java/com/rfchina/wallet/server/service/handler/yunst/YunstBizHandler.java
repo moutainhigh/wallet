@@ -38,6 +38,7 @@ import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
 import com.rfchina.wallet.server.bank.yunst.exception.UnknownException;
 import com.rfchina.wallet.server.bank.yunst.request.AgentPayReq;
 import com.rfchina.wallet.server.bank.yunst.request.AgentPayReq.CollectPay;
+import com.rfchina.wallet.server.bank.yunst.request.AgentPayReq.SplitRule;
 import com.rfchina.wallet.server.bank.yunst.request.CardBinReq;
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq;
 import com.rfchina.wallet.server.bank.yunst.request.CollectApplyReq.CollectPayMethod;
@@ -92,7 +93,9 @@ import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.model.ext.WithdrawResp;
 import com.rfchina.wallet.server.msic.EnumWallet.BalanceFreezeMode;
+import com.rfchina.wallet.server.msic.EnumWallet.BudgetMode;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
+import com.rfchina.wallet.server.msic.EnumWallet.CollectRoleType;
 import com.rfchina.wallet.server.msic.EnumWallet.DebitType;
 import com.rfchina.wallet.server.msic.EnumWallet.EnumBizTag;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
@@ -117,6 +120,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -336,16 +340,25 @@ public class YunstBizHandler extends EBankHandler {
 	 */
 	public WalletCollectResp collect(WalletOrder order, WalletCollect collect,
 		List<WalletCollectInfo> clearInfos, WalletTunnel payer) {
+
 		// 收款人
-		List<RecieveInfo> receives = clearInfos.stream().map(info -> {
+		Stream<WalletCollectInfo> infoStream = clearInfos.stream();
+		boolean budgetOnAgentPay = collect.getBudgetMode() != null
+			&& collect.getBudgetMode().byteValue() == BudgetMode.ON_AGENTPAY.getValue();
+		if (budgetOnAgentPay) {
+			infoStream = infoStream.filter(
+				info -> CollectRoleType.PROJECTOR.getValue().byteValue() == info.getRoleType());
+		}
+		List<RecieveInfo> receives = infoStream.map(info -> {
 			WalletTunnel receiver = walletChannelDao
 				.selectByWalletId(info.getPayeeWalletId(), order.getTunnelType());
 			return RecieveInfo.builder()
 				.bizUserId(receiver.getBizUserId())
-				.amount(info.getBudgetAmount())
+				.amount(budgetOnAgentPay ? order.getAmount() : info.getBudgetAmount())
 				.build();
 		}).collect(Collectors.toList());
 
+		// 收款方式
 		List<WalletCollectMethod> methods = walletCollectMethodDao
 			.selectByCollectId(collect.getId(), OrderType.COLLECT.getValue());
 
@@ -405,43 +418,65 @@ public class YunstBizHandler extends EBankHandler {
 	/**
 	 * 代付
 	 */
-	public void agentPay(WalletOrder order, WalletClearing clearing) {
+	public void agentPay(WalletOrder clearOrder, WalletClearing clearing,
+		WalletCollect walletCollect, List<WalletCollectInfo> collectInfos) {
 
 		// 登记代付数额
 		CollectPay collectPay = CollectPay.builder()
 			.bizOrderNo(clearing.getCollectOrderNo())
 			.amount(clearing.getAmount())
 			.build();
-		WalletTunnel tunnel = walletTunnelExtDao
-			.selectByWalletId(order.getWalletId(), order.getTunnelType());
+		WalletTunnel projectTunnel = null;
+		WalletTunnel clearTunnel = walletTunnelExtDao
+			.selectByWalletId(clearOrder.getWalletId(), clearOrder.getTunnelType());
+		List<SplitRule> splitRules = null;
+		if (walletCollect.getBudgetMode() != null
+			&& walletCollect.getBudgetMode().byteValue() == BudgetMode.ON_AGENTPAY.getValue()) {
+			Optional<Long> opt = collectInfos.stream().filter(
+				info -> info.getRoleType().byteValue() == CollectRoleType.PROJECTOR.getValue())
+				.map(WalletCollectInfo::getPayeeWalletId)
+				.findAny();
+			projectTunnel = walletTunnelExtDao
+				.selectByWalletId(opt.orElse(0L), clearOrder.getTunnelType());
+			if (clearOrder.getWalletId().longValue() != projectTunnel.getWalletId()) {
+				splitRules = Arrays.asList(SplitRule.builder()
+					.bizUserId(clearTunnel.getBizUserId())
+					.amount(clearing.getAmount())
+					.fee(0L)
+					.build()
+				);
+			}
+		} else {
+			projectTunnel = clearTunnel;
+		}
 		AgentPayReq req = AgentPayReq.builder()
-			.bizOrderNo(order.getOrderNo())
+			.bizOrderNo(clearOrder.getOrderNo())
 			.collectPayList(Lists.newArrayList(collectPay))
-			.bizUserId(tunnel.getBizUserId())
+			.bizUserId(projectTunnel.getBizUserId())
 			.accountSetNo(configService.getUserAccSet())  // 产品需求代付到余额账户
 			.backUrl(configService.getYunstRecallPrefix() + UrlConstant.YUNST_ORDER_RECALL)
 			.amount(clearing.getAmount())
 			.fee(0L)
-			.splitRuleList(null)
+			.splitRuleList(splitRules)
 			.tradeCode(TRADE_CODESTRING_AGENTPAY)
-			.summary(order.getNote())
+			.summary(clearOrder.getNote())
 			.build();
 
-		order.setProgress(UniProgress.SENDED.getValue());
-		order.setStartTime(new Date());
+		clearOrder.setProgress(UniProgress.SENDED.getValue());
+		clearOrder.setStartTime(new Date());
 		try {
 			AgentPayResp resp = yunstTpl.execute(req, AgentPayResp.class);
-			order.setTunnelOrderNo(resp.getOrderNo());
+			clearOrder.setTunnelOrderNo(resp.getOrderNo());
 			if (StringUtils.isNotBlank(resp.getPayStatus())
 				&& "fail".equals(resp.getPayStatus())) {
-				order.setStatus(OrderStatus.FAIL.getValue());
-				order.setTunnelErrMsg(resp.getPayFailMessage());
+				clearOrder.setStatus(OrderStatus.FAIL.getValue());
+				clearOrder.setTunnelErrMsg(resp.getPayFailMessage());
 			}
-			walletOrderDao.updateByPrimaryKeySelective(order);
+			walletOrderDao.updateByPrimaryKeySelective(clearOrder);
 		} catch (CommonGatewayException e) {
-			dealGatewayError(order, e);
+			dealGatewayError(clearOrder, e);
 		} catch (Exception e) {
-			dealUndefinedError(order, e);
+			dealUndefinedError(clearOrder, e);
 			return;
 		}
 	}
@@ -647,12 +682,12 @@ public class YunstBizHandler extends EBankHandler {
 					&& BalanceDetailStatus.SUCC.getValue().byteValue() == walletDetailStatus) {
 					WalletWithdraw withdraw = walletWithdrawDao.selectByOrderId(order.getId());
 					List<Tuple<WalletBalanceDetail, Long>> payDetails = walletBalanceDetailService
-						.selectDetailToPay(order.getWalletId(), order.getAmount(),false);
+						.selectDetailToPay(order.getWalletId(), order.getAmount(), false);
 					// 锁定余额明细
 					Optional<String> orderNos = payDetails.stream().map(tuple -> {
 						WalletBalanceDetail payDetail = tuple.left;
 						walletBalanceDetailDao.updateDetailFreezen(payDetail.getOrderId(),
-							payDetail.getOrderDetailId(), 0L, - tuple.right);
+							payDetail.getOrderDetailId(), 0L, -tuple.right);
 
 						WalletBalanceDetail withdrawDetail = WalletBalanceDetail.builder()
 							.walletId(order.getWalletId())
@@ -664,8 +699,8 @@ public class YunstBizHandler extends EBankHandler {
 							.refOrderDetailId(payDetail.getOrderDetailId())
 							.type(order.getType())
 							.status(BalanceDetailStatus.SUCC.getValue())
-							.amount(- tuple.right)
-							.balance(- tuple.right)
+							.amount(-tuple.right)
+							.balance(-tuple.right)
 							.freezen(0L)
 							.refFreezeMode(BalanceFreezeMode.NO_FREEZE.getValue())
 							.createTime(new Date())
@@ -878,8 +913,8 @@ public class YunstBizHandler extends EBankHandler {
 					.amount(m.getAmount())
 					.build();
 				payMethod.put(CollectPayMethod.BankCard.KEY_QuickPayVsp, bankCard);
-			} else if(CollectPayType.POS.getValue().byteValue() ==
-				m.getPayType().byteValue()){
+			} else if (CollectPayType.POS.getValue().byteValue() ==
+				m.getPayType().byteValue()) {
 				Pos pos = Pos.builder()
 					.vspCusid(m.getSellerId())
 					.amount(m.getAmount())

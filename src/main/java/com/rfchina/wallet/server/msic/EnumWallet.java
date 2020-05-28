@@ -884,4 +884,49 @@ public class EnumWallet {
 			return value;
 		}
 	}
+
+	/**
+	 * 角色类型，1：项目方(POS主收款方)，2：平台方，4：分帐方
+	 */
+	public enum CollectRoleType implements Valuable<Byte> {
+		PROJECTOR((byte) 1, "项目方"),
+		PLATFORMER((byte) 2, "平台方"),
+		BUDGETER((byte) 4, "分帐方"),
+		;
+
+		private Byte value;
+		private String valueName;
+
+		CollectRoleType(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}
+	}
+
+	/**
+	 * 分帐模式。1：代收分帐，2：代付抽佣
+	 */
+	public enum BudgetMode implements Valuable<Byte> {
+		ON_COLLECT((byte) 1, "代收分帐"),
+		ON_AGENTPAY((byte) 2, "代付抽佣"),
+		;
+
+		private Byte value;
+		private String valueName;
+
+		BudgetMode(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}
+	}
 }

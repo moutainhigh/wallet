@@ -13,7 +13,6 @@ import com.rfchina.wallet.domain.misc.EnumDef.DirtyType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumDefBankCard;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumIdType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumPublicAccount;
-import com.rfchina.wallet.domain.misc.EnumDef.EnumVerifyCodeType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletAuditType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletCardStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
@@ -676,6 +675,17 @@ public class SeniorWalletService {
 		int effectRows = walletCardDao.updateByPrimaryKeySelective(walletCard);
 		if (effectRows != 1) {
 			log.error("更新对公账号信息审核时间失败");
+		}
+	}
+
+	public void bindTerminal(Long walletId, String vspMerchantid, String vspCusid, String appId,
+		String vspTermid) {
+
+		WalletTunnel tunnel = walletTunnelDao
+			.selectByWalletId(walletId, TunnelType.YUNST.getValue());
+		if (tunnel != null) {
+			yunstUserHandler
+				.vspTermid(tunnel.getBizUserId(), vspMerchantid, vspCusid, appId, vspTermid);
 		}
 	}
 

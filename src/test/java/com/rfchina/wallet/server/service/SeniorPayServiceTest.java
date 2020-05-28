@@ -19,6 +19,7 @@ import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
 import com.rfchina.wallet.server.model.ext.SettleResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
+import com.rfchina.wallet.server.msic.EnumWallet.CollectRoleType;
 import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -41,7 +42,8 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 
 	private Long payerWalletId = 301L;
 	private Long payeeWalletId = 305L;
-	private Long platWalletId = 299L;
+	//	private Long platWalletId = 299L;
+	private Long platWalletId = 314L;
 	private Long cardId = 17L;
 
 
@@ -108,13 +110,15 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 			.amount(2L)
 			.build();
 
-		Reciever reciever = Reciever.builder()
+		Reciever mch = Reciever.builder()
 			.walletId(payeeWalletId)
 			.amount(1L)
+			.roleType(CollectRoleType.PROJECTOR.getValue())
 			.build();
-		Reciever clone = Reciever.builder()
+		Reciever plat = Reciever.builder()
 			.walletId(platWalletId)
 			.amount(1L)
+			.roleType(CollectRoleType.BUDGETER.getValue())
 			.build();
 		CollectReq req = CollectReq.builder()
 			.bizNo(String.valueOf(System.currentTimeMillis()))
@@ -125,7 +129,7 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 			.expireTime(null)
 			.industryCode("1010")
 			.industryName("保险代理")
-			.recievers(Arrays.asList(reciever, clone))
+			.recievers(Arrays.asList(plat,mch))
 			.walletPayMethod(WalletPayMethod.builder().pos(pos).build())
 //			.walletPayMethod(WalletPayMethod.builder().codePay(codePay).build())
 			.build();
@@ -137,10 +141,10 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	@Test
 	public void agentPay() {
 		AgentPayReq.Reciever reciever = new AgentPayReq.Reciever();
-		reciever.setWalletId(payeeWalletId);
+		reciever.setWalletId(platWalletId);
 		reciever.setAmount(1L);
 		reciever.setFeeAmount(0L);
-		WalletOrder order = walletOrderDao.selectByOrderNo("WC20191204761161144");
+		WalletOrder order = walletOrderDao.selectByOrderNo("DWC2020052815219693");
 		SettleResp resp = seniorPayService
 			.agentPay(order, String.valueOf(System.currentTimeMillis())
 				, reciever, "note");

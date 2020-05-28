@@ -68,6 +68,7 @@ import com.rfchina.wallet.server.model.ext.SettleResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.model.ext.WithdrawResp;
 import com.rfchina.wallet.server.msic.EnumWallet.BalanceFreezeMode;
+import com.rfchina.wallet.server.msic.EnumWallet.BudgetMode;
 import com.rfchina.wallet.server.msic.EnumWallet.CardPro;
 import com.rfchina.wallet.server.msic.EnumWallet.ChannelType;
 import com.rfchina.wallet.server.msic.EnumWallet.ChargingType;
@@ -427,6 +428,7 @@ public class SeniorPayService {
 			BigDecimal tunnelFee = new BigDecimal(req.getAmount())
 				.multiply(rate)
 				.setScale(0, EBankHandler.getRoundingMode());
+
 			WalletOrder collectOrder = WalletOrder.builder()
 				.orderNo(orderNo)
 				.batchNo(batchNo)
@@ -462,6 +464,8 @@ public class SeniorPayService {
 				.refundLimit(req.getAmount())
 				.remainTunnelFee(tunnelFee.longValue())
 				.validateType(validateType)
+				.budgetMode(req.getWalletPayMethod().hasMethod(ChannelType.POS)
+					? BudgetMode.ON_AGENTPAY.getValue() : BudgetMode.ON_COLLECT.getValue())
 				.createTime(new Date())
 				.build();
 			walletCollectDao.insertSelective(collect);
@@ -472,6 +476,7 @@ public class SeniorPayService {
 			List<WalletCollectInfo> collectInfos = req.getRecievers().stream().map(reciever -> {
 				WalletCollectInfo clearInfo = WalletCollectInfo.builder()
 					.collectId(collect.getId())
+					.roleType(reciever.getRoleType())
 					.payeeWalletId(reciever.getWalletId())
 					.budgetAmount(reciever.getAmount())
 					.clearAmount(0L)
@@ -544,7 +549,7 @@ public class SeniorPayService {
 		try {
 			lock.acquireLock(LockConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);
 
-			WalletOrder payOrder = WalletOrder.builder()
+			WalletOrder clearOrder = WalletOrder.builder()
 				.orderNo(orderNo)
 				.batchNo(batchNo)
 				.bizNo(bizNo)
@@ -558,11 +563,11 @@ public class SeniorPayService {
 				.sourceAppId(sessionThreadLocal.getApp().getId())
 				.createTime(new Date())
 				.build();
-			walletOrderDao.insertSelective(payOrder);
+			walletOrderDao.insertSelective(clearOrder);
 
 			// 代付明细
 			WalletClearing clearing = WalletClearing.builder()
-				.orderId(payOrder.getId())
+				.orderId(clearOrder.getId())
 				.collectOrderNo(collectOrder.getOrderNo())
 				.collectInfoId(collectInfo.getId())
 				.agentWalletId(configService.getAgentEntWalletId())
@@ -573,25 +578,25 @@ public class SeniorPayService {
 
 			// 余额明细
 			WalletBalanceDetail withdrawDetail = WalletBalanceDetail.builder()
-				.walletId(payOrder.getWalletId())
-				.orderId(payOrder.getId())
-				.orderNo(payOrder.getOrderNo())
+				.walletId(clearOrder.getWalletId())
+				.orderId(clearOrder.getId())
+				.orderNo(clearOrder.getOrderNo())
 				.orderDetailId(clearing.getId())
 				.type(OrderType.AGENT_PAY.getValue())
 				.status(BalanceDetailStatus.WAITTING.getValue())
-				.amount(payOrder.getAmount())
-				.balance(payOrder.getAmount())
+				.amount(clearOrder.getAmount())
+				.balance(clearOrder.getAmount())
 				.freezen(0L)
 				.createTime(new Date())
 				.build();
 			walletBalanceDetailDao.insertSelective(withdrawDetail);
 
 			// 代付给每个收款人
-			EBankHandler handler = handlerHelper.selectByTunnelType(payOrder.getTunnelType());
-			handler.agentPay(payOrder, clearing);
+			EBankHandler handler = handlerHelper.selectByTunnelType(clearOrder.getTunnelType());
+			handler.agentPay(clearOrder, clearing, walletCollect, collectInfos);
 
 			return SettleResp.builder()
-				.order(payOrder)
+				.order(clearOrder)
 				.clearing(clearing)
 				.build();
 		} finally {

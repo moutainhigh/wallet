@@ -71,7 +71,9 @@ public abstract class EBankHandler {
 	/**
 	 * 代付
 	 */
-	public void agentPay(WalletOrder order, WalletClearing clearings) {
+	public void agentPay(WalletOrder order, WalletClearing clearings,
+		WalletCollect walletCollect,
+		List<WalletCollectInfo> collectInfos) {
 		throw new RuntimeException();
 	}
 

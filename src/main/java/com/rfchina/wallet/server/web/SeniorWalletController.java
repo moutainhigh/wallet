@@ -292,4 +292,19 @@ public class SeniorWalletController {
 					}));
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result);
 	}
+
+	@ApiOperation("高级钱包-商家绑定终端")
+	@PostMapping(UrlConstant.WALLET_BIND_TERMINAL)
+	public ResponseValue bindTerminal(
+		@RequestParam("access_token") String accessToken,
+		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+		@ApiParam(value = "集团号", required = true) @RequestParam("vsp_merchantid") String vspMerchantid,
+		@ApiParam(value = "子商户号", required = true) @RequestParam("vsp_cusid") String vspCusid,
+		@ApiParam(value = "APPID", required = true) @RequestParam("app_id") String appId,
+		@ApiParam(value = "终端号", required = true) @RequestParam("vsp_termid") String vspTermid
+	) {
+
+		seniorWalletApi.bindTerminal(walletId,vspMerchantid,vspCusid,appId,vspTermid);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
+	}
 }

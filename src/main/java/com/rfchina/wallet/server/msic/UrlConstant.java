@@ -22,7 +22,7 @@ public class UrlConstant {
 	public static final String SENIOR_WALLET_COLLECT_SYNC = VERSION + "/m/senior/pay/collect_sync";
 
 	/**
-	 * 高级钱包-清算
+	 * 高级钱包-单笔清算
 	 */
 	public static final String SENIOR_WALLET_AGENT_PAY = VERSION + "/m/senior/pay/agent_pay";
 
@@ -327,4 +327,10 @@ public class UrlConstant {
 	 * 当月手续费报表
 	 */
 	public static final String REPORT_CUR_CHARGING_QUERY = VERSION + "/m/report/cur_charging_query";
+
+
+	/**
+	 * 会员绑定终端
+	 */
+	public static final String WALLET_BIND_TERMINAL = VERSION + "/m/senior/wallet/bind_terminal";
 }

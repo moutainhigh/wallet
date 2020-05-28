@@ -107,7 +107,7 @@ public class SeniorPayController {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result);
 	}
 
-	@ApiOperation("高级钱包-代付")
+	@ApiOperation("高级钱包-单笔代付")
 	@PostMapping(UrlConstant.SENIOR_WALLET_AGENT_PAY)
 	public ResponseValue<SettleResp> agentPay(
 		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,

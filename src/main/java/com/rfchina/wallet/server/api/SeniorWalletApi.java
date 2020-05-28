@@ -160,4 +160,8 @@ public interface SeniorWalletApi {
 	 * 解绑手机
 	 */
 	void unBindPhone(String accessToken, Byte channelType, Long walletId, String mobile, String verifyCode);
+
+	/** 绑定终端 **/
+	void bindTerminal(Long walletId, String vspMerchantid, String vspCusid, String appId, String vspTermid);
+
 }

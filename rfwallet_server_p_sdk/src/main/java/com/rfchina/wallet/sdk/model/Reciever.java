@@ -22,6 +22,7 @@ public class Reciever  {
     @ApiModelProperty("收款人钱包ID")
     private Long walletId ;
 
-
+    @ApiModelProperty(name="role_type", value = "角色类型，1：项目方(POS主收款方)，2：平台方，4：分帐方")
+    private Byte roleType;
 }
 
