@@ -240,6 +240,7 @@ public class YunstBizHandler extends EBankHandler {
 			.payMethod(getMethodMap(methods, true))
 			.industryCode(order.getIndustryCode())
 			.industryName(order.getIndustryName())
+			.goodsName(order.getGoodName())
 			.summary(order.getNote())
 			.source(EnumYunstDeviceType.MOBILE.getValue())
 			.build();
@@ -365,6 +366,8 @@ public class YunstBizHandler extends EBankHandler {
 			.industryCode(order.getIndustryCode())
 			.industryName(order.getIndustryName())
 			.summary(order.getNote())
+			.goodsName(order.getGoodName())
+			.goodsDesc(order.getGoodDesc())
 			.extendInfo("")
 			.source(1L)
 			.build();

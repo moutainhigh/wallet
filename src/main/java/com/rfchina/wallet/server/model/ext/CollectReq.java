@@ -51,6 +51,12 @@ public class CollectReq {
 	@ApiModelProperty(name = "wallet_pay_method", value = "钱包支付方式")
 	private WalletPayMethod walletPayMethod;
 
+	@ApiModelProperty(value = "商品名称")
+	private String goodName;
+
+	@ApiModelProperty(value = "商品描述")
+	private String goodDesc;
+
 	@ApiModel
 	@Data
 	@Builder

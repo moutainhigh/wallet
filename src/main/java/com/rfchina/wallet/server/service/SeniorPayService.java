@@ -3,7 +3,9 @@ package com.rfchina.wallet.server.service;
 import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.biztools.lock.SimpleExclusiveLock;
 import com.rfchina.biztools.mq.PostMq;
+import com.rfchina.mch.sdk.model.ChargingConfig;
 import com.rfchina.passport.misc.SessionThreadLocal;
+import com.rfchina.platform.biztools.CacheHashMap;
 import com.rfchina.platform.common.misc.Triple;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.BeanUtil;
@@ -70,6 +72,7 @@ import com.rfchina.wallet.server.msic.EnumWallet.CardPro;
 import com.rfchina.wallet.server.msic.EnumWallet.ChannelType;
 import com.rfchina.wallet.server.msic.EnumWallet.ChargingType;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
+import com.rfchina.wallet.server.msic.EnumWallet.FeeConfigKey;
 import com.rfchina.wallet.server.msic.EnumWallet.GwProgress;
 import com.rfchina.wallet.server.msic.LockConstant;
 import com.rfchina.wallet.server.service.handler.common.EBankHandler;
@@ -86,6 +89,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -171,6 +175,10 @@ public class SeniorPayService {
 	@Autowired
 	private WalletBalanceDetailService walletBalanceDetailService;
 
+	@Autowired
+	@Qualifier(value = "feeMap")
+	private CacheHashMap<String, ChargingConfig> feeMap;
+
 	/**
 	 * 充值
 	 */
@@ -221,10 +229,12 @@ public class SeniorPayService {
 				.tunnelFee(tunnelFee.longValue())
 				.chargingType(ChargingType.RATE.getValue())
 				.chargingValue(rate)
-				.note("钱包充值")
+				.note(null)
 				.sourceAppId(sessionThreadLocal.getApp().getId())
 				.industryCode(INDUSTRY_CODE)
 				.industryName(INDUSTRY_NAME)
+				.goodName("钱包充值")
+				.goodDesc(null)
 				.createTime(new Date())
 				.build();
 			walletOrderDao.insertSelective(rechargeOrder);
@@ -320,6 +330,8 @@ public class SeniorPayService {
 
 		try {
 			lock.acquireLock(LockConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);
+
+			ChargingConfig config = feeMap.get(FeeConfigKey.YUNST_WITHDRAW.getValue());
 			WalletOrder withdrawOrder = WalletOrder.builder()
 				.orderNo(orderNo)
 				.batchNo(batchNo)
@@ -331,8 +343,9 @@ public class SeniorPayService {
 				.progress(GwProgress.WAIT_SEND.getValue())
 				.status(OrderStatus.WAITTING.getValue())
 				.tunnelType(TunnelType.YUNST.getValue())
-				.chargingType(ChargingType.ONCE.getValue())
-				.chargingValue(new BigDecimal("80"))
+				.chargingType(config != null ? config.getType().byteValue() : null)
+				.chargingValue(config != null ? config.getChargingValue() : null)
+				.tunnelFee(config != null ? config.getChargingValue().longValue() : null)
 				.note("钱包提现")
 				.expireTime(getDefExpireTime(null))
 				.sourceAppId(sessionThreadLocal.getApp().getId())
@@ -433,6 +446,8 @@ public class SeniorPayService {
 				.sourceAppId(sessionThreadLocal.getApp().getId())
 				.industryCode(req.getIndustryCode())
 				.industryName(req.getIndustryName())
+				.goodName(req.getGoodName())
+				.goodDesc(req.getGoodDesc())
 				.createTime(new Date())
 				.build();
 			walletOrderDao.insertSelective(collectOrder);

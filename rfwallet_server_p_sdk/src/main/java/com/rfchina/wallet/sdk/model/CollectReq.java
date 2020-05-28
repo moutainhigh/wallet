@@ -44,6 +44,11 @@ public class CollectReq  {
     @ApiModelProperty("钱包支付方式")
     private WalletPayMethod walletPayMethod ;
 
+    @ApiModelProperty(value = "商品名称")
+    private String goodName;
+
+    @ApiModelProperty(value = "商品描述")
+    private String goodDesc;
 
 }
 

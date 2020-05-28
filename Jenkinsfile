@@ -6,7 +6,7 @@ def service_name = "rfwallet-server"
 def team_ns = "platform"
 def replicas = 2
 def live_path = "/index"
-def memory_max = "1536Mi"
+def memory_max = "768Mi"
 def log_pre_path = "test-"
 
 def docker_file = "Dockerfile"
