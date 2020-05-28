@@ -55,8 +55,9 @@ spec:
               mountPath: %{app_path}/logs
             - name: yunst-cert
               mountPath: %{app_path}/yunst
-            - name: balance-file
+            - name: %{service_name}-ceph
               mountPath: %{app_path}/balance_file
+              subPath: %{service_name}/files/balance_file
       volumes:
         - name: %{service_name}-logs
           hostPath:
@@ -65,5 +66,10 @@ spec:
         - name: yunst-cert
           configMap:
             name: yunst-cert
-        - name: balance-file
-          emptyDir: {}
+        - name: %{service_name}-ceph
+          flexVolume:
+            driver: ceph.rook.io/rook
+            fsType: ceph
+            options:
+              fsName: myfs
+              clusterNamespace: rook-ceph

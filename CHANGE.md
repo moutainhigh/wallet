@@ -1,7 +1,7 @@
 # 版本更新日志
 ```
 测试环境
-jenkins job: platform-rfwallet-super-server-test
+jenkins job: platform-rfwallet-server-test
 ```
 ## 1.5.0_b1_2020052811_Beta
 - 增加POS支付

@@ -12,7 +12,6 @@ import com.rfchina.wallet.server.model.ext.CollectReq;
 import com.rfchina.wallet.server.model.ext.CollectReq.Reciever;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Balance;
-import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.CodePay;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Pos;
 import com.rfchina.wallet.server.model.ext.DeductionReq;
 import com.rfchina.wallet.server.model.ext.RechargeResp;
@@ -92,39 +91,43 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 //			.payerWalletId(platWalletId)
 //			.amount(1L)
 //			.build();
-		CodePay codePay = CodePay.builder()
-			.payType(CollectPayType.CODEPAY.getValue())
-			.authcode("134923871200237362")
-			.vspCusid("56058104816U8U6")
-			.amount(1L)
-			.build();
+//		CodePay codePay = CodePay.builder()
+//			.payType(CollectPayType.CODEPAY.getValue())
+//			.authcode("134923871200237362")
+//			.vspCusid("56058104816U8U6")
+//			.amount(1L)
+//			.build();
 //		BankCard bankCard = BankCard.builder()
 //			.payType(CollectPayType.BANKCARD.getValue())
 //			.bankCardNo("6214850201481956")
 //			.amount(1L)
 //			.build();
-//		Pos pos = Pos.builder()
-//			.payType(CollectPayType.POS.getValue())
-//			.vspCusid("56058104816U8U6")
-//			.amount(1L)
-//			.build();
+		Pos pos = Pos.builder()
+			.payType(CollectPayType.POS.getValue())
+			.vspCusid("56058104816U8U6")
+			.amount(2L)
+			.build();
 
 		Reciever reciever = Reciever.builder()
 			.walletId(payeeWalletId)
 			.amount(1L)
 			.build();
+		Reciever clone = Reciever.builder()
+			.walletId(platWalletId)
+			.amount(1L)
+			.build();
 		CollectReq req = CollectReq.builder()
 			.bizNo(String.valueOf(System.currentTimeMillis()))
-			.amount(1L)
+			.amount(2L)
 			.note("")
 			.fee(0L)
 			.validateType((byte) 0)
 			.expireTime(null)
 			.industryCode("1010")
 			.industryName("保险代理")
-			.recievers(Arrays.asList(reciever))
-//			.walletPayMethod(WalletPayMethod.builder().pos(pos).build())
-			.walletPayMethod(WalletPayMethod.builder().codePay(codePay).build())
+			.recievers(Arrays.asList(reciever, clone))
+			.walletPayMethod(WalletPayMethod.builder().pos(pos).build())
+//			.walletPayMethod(WalletPayMethod.builder().codePay(codePay).build())
 			.build();
 		WalletCollectResp collect = seniorPayService.collect(req, "", "");
 		log.info("预代收 {}", JsonUtil.toJSON(collect));
