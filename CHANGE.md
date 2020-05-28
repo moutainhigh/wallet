@@ -3,6 +3,9 @@
 测试环境
 jenkins job: platform-rfwallet-super-server-test
 ```
+## 1.5.0_b1_2020052811_Beta
+- 增加POS支付
+
 ## 1.4.2_b1_2020041012_Beta
 - 代收增加商品名称
 
