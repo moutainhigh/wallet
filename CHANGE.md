@@ -3,6 +3,9 @@
 测试环境
 jenkins job: platform-rfwallet-server-test
 ```
+## 1.5.1_b2_2020052922_Beta 1.5.1_2020052920_Release
+- 新增终端接口
+
 ## 1.5.1_b1_2020052920_Beta 1.5.1_2020052920_Release
 - 新增终端接口
 
