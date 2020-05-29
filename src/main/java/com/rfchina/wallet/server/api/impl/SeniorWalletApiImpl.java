@@ -13,6 +13,7 @@ import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletConsumeDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletOrderDao;
+import com.rfchina.wallet.domain.mapper.ext.WalletTerminalDao;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletProgress;
@@ -21,6 +22,9 @@ import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletPerson;
+import com.rfchina.wallet.domain.model.WalletTerminal;
+import com.rfchina.wallet.domain.model.WalletTerminalCriteria;
+import com.rfchina.wallet.domain.model.WalletTerminalCriteria.Criteria;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.api.SeniorWalletApi;
 import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
@@ -33,6 +37,7 @@ import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResul
 import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.msic.EnumYunst;
+import com.rfchina.wallet.server.msic.EnumYunst.EnumTerminalStatus;
 import com.rfchina.wallet.server.service.SeniorWalletService;
 import com.rfchina.wallet.server.service.VerifyService;
 import java.util.Arrays;
@@ -41,6 +46,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.session.RowBounds;
+import org.eclipse.jetty.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -72,6 +79,9 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 
 	@Autowired
 	private WalletConsumeDao walletConsumeDao;
+
+	@Autowired
+	private WalletTerminalDao walletTerminalDao;
 
 
 	@Log
@@ -451,10 +461,94 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 
 	@Log
 	@Override
-	public VspTermidResp bindTerminal(Long walletId, String vspMerchantid, String vspCusid, String appId,
-		String vspTermid) {
+	public VspTermidResp bindTerminal(String bizUserId, String vspMerchantid, String vspCusid,
+		String appId, String vspTermid) {
 
-		return seniorWalletService.bindTerminal(walletId, vspMerchantid, vspCusid, appId, vspTermid);
+		return seniorWalletService
+			.bindTerminal(bizUserId, vspMerchantid, vspCusid, appId, vspTermid);
+	}
+
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
+	@ParamVerify
+	@Override
+	public Pagination<WalletTerminal> queryTerminal(Long walletId, String vspCusid,
+		String vspTermid, String province, String mchId, int limit, int offset) {
+
+		WalletTerminalCriteria example = new WalletTerminalCriteria();
+		Criteria criteria = example.createCriteria();
+		if (walletId != null) {
+			criteria.andWalletIdEqualTo(walletId);
+		}
+		if (StringUtil.isNotBlank(vspCusid)) {
+			criteria.andVspCusidEqualTo(vspCusid);
+		}
+		if (StringUtil.isNotBlank(vspTermid)) {
+			criteria.andVspTermidEqualTo(vspTermid);
+		}
+		if (StringUtil.isNotBlank(province)) {
+			criteria.andProvinceEqualTo(province);
+		}
+		if (StringUtil.isNotBlank(mchId)) {
+			criteria.andMchIdEqualTo(mchId);
+		}
+		example.setOrderByClause("id desc");
+		List<WalletTerminal> walletTerminals = walletTerminalDao
+			.selectByExampleWithRowbounds(example, new RowBounds(offset, limit));
+		long count = walletTerminalDao.countByExample(example);
+
+		return new Pagination.PaginationBuilder<WalletTerminal>()
+			.data(walletTerminals)
+			.total(count)
+			.pageLimit(limit)
+			.offset(offset)
+			.build();
+	}
+
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
+	@ParamVerify
+	@Override
+	public void bindTerminal(Long walletId, Long terminalId) {
+		WalletTerminal walletTerminal = walletTerminalDao.selectByPrimaryKey(terminalId);
+		Optional.ofNullable(walletTerminal)
+			.ifPresent(p -> {
+				WalletTunnel tunnel = walletTunnelDao
+					.selectByWalletId(walletId, TunnelType.YUNST.getValue());
+				VspTermidResp resp = seniorWalletService.bindTerminal(tunnel.getBizUserId()
+					, p.getVspMerchantid(), p.getVspCusid(), p.getAppId(), p.getVspTermid());
+
+				if (resp.getResult().equalsIgnoreCase("OK") && !resp.getVspTermidList().isEmpty()) {
+					walletTerminal.setWalletId(walletId);
+					walletTerminal.setBindTime(new Date());
+					walletTerminal.setStatus(EnumTerminalStatus.BIND.getValue());
+					walletTerminalDao.updateByPrimaryKeySelective(walletTerminal);
+				}
+			});
+	}
+
+	@Override
+	public void createTerminal(String appId, String vspMerchantid, String vspCusid,
+		String vspTermid, String province, String mchId, String mchName, String shopAddress) {
+
+		WalletTerminal terminal = WalletTerminal.builder()
+			.vspMerchantid(vspMerchantid)
+			.vspCusid(vspCusid)
+			.appId(appId)
+			.vspTermid(vspTermid)
+			.province(province)
+			.mchId(mchId)
+			.mchName(mchName)
+			.shopAddress(shopAddress)
+			.status(EnumTerminalStatus.NULL.getValue())
+			.createTime(new Date())
+			.build();
+
+		walletTerminalDao.insertSelective(terminal);
 	}
 
 }

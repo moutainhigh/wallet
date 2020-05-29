@@ -120,6 +120,7 @@
     class_name:""  , //所属分类行名
     id:""  , //ID
     province_name:""  , //所属地区
+    tl_bank_name:""  , //通联对应银行名称
     weight:""   //
 }  
 }
@@ -409,7 +410,7 @@
 }  , 
     wallet_tunnel:{
     balance:""  , //银行余额
-    balance_protocol_no:""  , //扣款协议号
+    balance_protocol_no:""  , //扣款协议编号
     balance_protocol_req_sn:""  , //扣款协议请求流水号
     biz_user_id:""  , //业务用户标识
     check_time:""  , //审核时间
@@ -515,7 +516,7 @@
 }  , 
     wallet_tunnel:{
     balance:""  , //银行余额
-    balance_protocol_no:""  , //扣款协议号
+    balance_protocol_no:""  , //扣款协议编号
     balance_protocol_req_sn:""  , //扣款协议请求流水号
     biz_user_id:""  , //业务用户标识
     check_time:""  , //审核时间

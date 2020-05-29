@@ -1,7 +1,6 @@
 package com.rfchina.wallet.sdk.model;
 
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import lombok.Data;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +45,12 @@ public class RechargeResp  {
 
     @ApiModelProperty("扩展参数")
     private String extendInfo ;
+
+    @ApiModelProperty("商品描述")
+    private String goodDesc ;
+
+    @ApiModelProperty("商品名称")
+    private String goodName ;
 
     @ApiModelProperty("id")
     private Long id ;

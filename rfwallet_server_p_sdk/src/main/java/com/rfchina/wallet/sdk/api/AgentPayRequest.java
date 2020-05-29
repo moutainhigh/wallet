@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 
 
-/** 高级钱包-代付 */
+/** 高级钱包-单笔代付 */
 @Builder
 public class AgentPayRequest extends  AbstractApiRequest {
 

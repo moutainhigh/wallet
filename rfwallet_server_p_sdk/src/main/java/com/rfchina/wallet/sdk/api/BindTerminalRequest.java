@@ -9,25 +9,28 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 
 
-/** 通过UID查询钱包信息（企业or个人） */
+/** 高级钱包-商家绑定终端 */
 @Builder
-public class QueryWalletInfoByUidRequest extends  AbstractApiRequest {
+public class BindTerminalRequest extends  AbstractApiRequest {
 
   @ApiModelProperty("access_token")
   private String accessToken ;
 
-  @ApiModelProperty("用户ID")
-  private Long userId ;
+  @ApiModelProperty("终端id")
+  private Long terminalId ;
+
+  @ApiModelProperty("钱包id")
+  private Long walletId ;
 
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/wallet/query_wallet_info_by_uid";
+    return "/wallet_server/v1/m/senior/wallet/bind_terminal";
   }
 
   @Override
   public Class<?> getResponseModelClass() {
-    return WalletInfoResp.class;
+    return Map.class;
   }
 
   @Override
@@ -36,8 +39,11 @@ public class QueryWalletInfoByUidRequest extends  AbstractApiRequest {
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
       }
-      if(userId != null){
-        parameters.put("user_id", userId.toString());
+      if(terminalId != null){
+        parameters.put("terminal_id", terminalId.toString());
+      }
+      if(walletId != null){
+        parameters.put("wallet_id", walletId.toString());
       }
     return parameters;
   }

@@ -1,4 +1,4 @@
-###  高级钱包-代付
+###  高级钱包-单笔代付
 
 请求地址: /wallet_server/v1/m/senior/pay/agent_pay
 
@@ -41,6 +41,8 @@
     curr_try_times:""  , //当前尝试次数
     end_time:""  , //结束时间
     expire_time:""  , //过期时间
+    good_desc:""  , //商品描述
+    good_name:""  , //商品名称
     id:""  , //id
     industry_code:""  , //行业代码（由渠道分配
     industry_name:""  , //行业名称（由渠道分配）
@@ -132,6 +134,8 @@
     curr_try_times:""  , //当前尝试次数
     end_time:""  , //结束时间
     expire_time:""  , //过期时间
+    good_desc:""  , //商品描述
+    good_name:""  , //商品名称
     id:""  , //id
     industry_code:""  , //行业代码（由渠道分配
     industry_name:""  , //行业名称（由渠道分配）
@@ -195,6 +199,8 @@
     curr_try_times:""  , //当前尝试次数
     end_time:""  , //结束时间
     expire_time:""  , //过期时间
+    good_desc:""  , //商品描述
+    good_name:""  , //商品名称
     id:""  , //id
     industry_code:""  , //行业代码（由渠道分配
     industry_name:""  , //行业名称（由渠道分配）
@@ -258,6 +264,8 @@
     curr_try_times:""  , //当前尝试次数
     end_time:""  , //结束时间
     expire_time:""  , //过期时间
+    good_desc:""  , //商品描述
+    good_name:""  , //商品名称
     id:""  , //id
     industry_code:""  , //行业代码（由渠道分配
     industry_name:""  , //行业名称（由渠道分配）
@@ -319,6 +327,8 @@
     end_time:""  , //结束时间
     expire_time:""  , //过期时间
     extend_info:""  , //扩展参数
+    good_desc:""  , //商品描述
+    good_name:""  , //商品名称
     id:""  , //id
     industry_code:""  , //行业代码（由渠道分配
     industry_name:""  , //行业名称（由渠道分配）
@@ -386,6 +396,8 @@
     curr_try_times:""  , //当前尝试次数
     end_time:""  , //结束时间
     expire_time:""  , //过期时间
+    good_desc:""  , //商品描述
+    good_name:""  , //商品名称
     id:""  , //id
     industry_code:""  , //行业代码（由渠道分配
     industry_name:""  , //行业名称（由渠道分配）
@@ -498,6 +510,8 @@
     curr_try_times:""  , //当前尝试次数
     end_time:""  , //结束时间
     expire_time:""  , //过期时间
+    good_desc:""  , //商品描述
+    good_name:""  , //商品名称
     id:""  , //id
     industry_code:""  , //行业代码（由渠道分配
     industry_name:""  , //行业名称（由渠道分配）

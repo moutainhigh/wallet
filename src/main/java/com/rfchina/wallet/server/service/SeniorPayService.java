@@ -14,6 +14,7 @@ import com.rfchina.wallet.domain.mapper.ext.WalletBalanceDetailDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletConsumeDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
+import com.rfchina.wallet.domain.mapper.ext.WalletTerminalDao;
 import com.rfchina.wallet.domain.misc.EnumDef.BalanceDetailStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.BizValidateType;
 import com.rfchina.wallet.domain.misc.EnumDef.DirtyType;
@@ -37,6 +38,7 @@ import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletRecharge;
 import com.rfchina.wallet.domain.model.WalletRefund;
 import com.rfchina.wallet.domain.model.WalletRefundDetail;
+import com.rfchina.wallet.domain.model.WalletTerminal;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.domain.model.WalletWithdraw;
 import com.rfchina.wallet.server.bank.yunst.response.SmsPayResp;
@@ -73,8 +75,10 @@ import com.rfchina.wallet.server.msic.EnumWallet.CardPro;
 import com.rfchina.wallet.server.msic.EnumWallet.ChannelType;
 import com.rfchina.wallet.server.msic.EnumWallet.ChargingType;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
+import com.rfchina.wallet.server.msic.EnumWallet.CollectRoleType;
 import com.rfchina.wallet.server.msic.EnumWallet.FeeConfigKey;
 import com.rfchina.wallet.server.msic.EnumWallet.GwProgress;
+import com.rfchina.wallet.server.msic.EnumYunst.EnumTerminalStatus;
 import com.rfchina.wallet.server.msic.LockConstant;
 import com.rfchina.wallet.server.service.handler.common.EBankHandler;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
@@ -180,6 +184,9 @@ public class SeniorPayService {
 	@Qualifier(value = "feeMap")
 	private CacheHashMap<String, ChargingConfig> feeMap;
 
+	@Autowired
+	private WalletTerminalDao walletTerminalDao;
+
 	/**
 	 * 充值
 	 */
@@ -248,7 +255,7 @@ public class SeniorPayService {
 				.build();
 			walletRechargeDao.insertSelective(recharge);
 			savePayMethod(recharge.getOrderId(), recharge.getId(), OrderType.RECHARGE.getValue(),
-				payMethod);
+				payMethod, null);
 
 			// 余额明细
 			WalletBalanceDetail withdrawDetail = WalletBalanceDetail.builder()
@@ -469,8 +476,12 @@ public class SeniorPayService {
 				.createTime(new Date())
 				.build();
 			walletCollectDao.insertSelective(collect);
+			Optional<Long> opt = req.getRecievers().stream()
+				.filter(r -> r.getRoleType().byteValue() == CollectRoleType.PROJECTOR.getValue())
+				.map(r -> r.getWalletId())
+				.findAny();
 			savePayMethod(collect.getOrderId(), collect.getId(), OrderType.COLLECT.getValue(),
-				req.getWalletPayMethod());
+				req.getWalletPayMethod(), opt.orElse(null));
 
 			// 生成清分记录
 			List<WalletCollectInfo> collectInfos = req.getRecievers().stream().map(reciever -> {
@@ -783,7 +794,7 @@ public class SeniorPayService {
 			walletConsumeDao.insertSelective(consume);
 
 			WalletCollectMethod method = savePayMethod(consume.getOrderId(), consume.getId(),
-				OrderType.DEDUCTION.getValue(), req.getWalletPayMethod());
+				OrderType.DEDUCTION.getValue(), req.getWalletPayMethod(), null);
 
 			WalletTunnel payer = walletTunnelDao
 				.selectByWalletId(consumeOrder.getWalletId(), consumeOrder.getTunnelType());
@@ -848,7 +859,7 @@ public class SeniorPayService {
 	 * 保存支付方式
 	 */
 	private WalletCollectMethod savePayMethod(Long orderId, Long collectId, Byte type,
-		WalletPayMethod payMethod) {
+		WalletPayMethod payMethod, Long walletId) {
 		// 支付方式
 		WalletCollectMethodBuilder builder = WalletCollectMethod.builder()
 			.refId(collectId)
@@ -894,8 +905,12 @@ public class SeniorPayService {
 			Pos pos = payMethod.getPos();
 			builder.channelType(ChannelType.POS.getValue())
 				.payType(CollectPayType.POS.getValue())
-				.amount(pos.getAmount())
-				.sellerId(pos.getVspCusid());
+				.amount(pos.getAmount());
+			// 珏衡需求： sellerId本地表查询
+			WalletTerminal walletTerminal = walletTerminalDao
+				.selectByWalletId(walletId, EnumTerminalStatus.BIND.getValue());
+			Optional.ofNullable(walletTerminal)
+				.ifPresent(t -> builder.sellerId(t.getVspCusid()));
 		}
 		WalletCollectMethod method = builder.build();
 		walletCollectMethodDao.insertSelective(method);

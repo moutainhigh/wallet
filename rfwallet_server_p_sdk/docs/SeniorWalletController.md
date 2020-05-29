@@ -1,3 +1,143 @@
+###  高级钱包-商家绑定终端
+
+请求地址: /wallet_server/v1/m/senior/wallet/bind_terminal2
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|app_id|是|APPID|
+|biz_user_id|是|渠道用户ID|
+|vsp_cusid|是|子商户号|
+|vsp_merchantid|是|集团号|
+|vsp_termid|是|终端号|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+   , "data":  {
+    biz_user_id:""  , //商户系统用户标识，商户系统中唯一编号。
+    result:""  , //绑定、查询收银宝终端号结果
+    vsp_termid_list: [ {
+    set_date:""  , //绑定时间
+    vsp_cusid:""  , //收银宝商户号  单商户模式：商户收银宝商户号  集团模式：收银宝子商户号
+    vsp_merchantid:""  , //收银宝集团商户号 集团模式：集团商户收银宝商户号单商户模式：不返
+    vsp_termid:""   //收银宝终端号
+}  ]   
+}  
+}
+```
+
+###  高级钱包-商家绑定终端
+
+请求地址: /wallet_server/v1/m/senior/wallet/bind_terminal
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|terminal_id|是|终端id|
+|wallet_id|是|钱包id|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+  
+}
+```
+
+###  高级钱包-新增终端
+
+请求地址: /wallet_server/v1/m/senior/wallet/create_terminal
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|mch_id|是|商家id|
+|mch_name|是|商家名称|
+|province|是|省份|
+|shop_address|是|门店地址|
+|vsp_cusid|是|通联appId|
+|vsp_cusid|是|子商户号|
+|vsp_merchantid|是|集团商户号|
+|vsp_termid|是|终端号|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+  
+}
+```
+
+###  高级钱包-终端列表
+
+请求地址: /wallet_server/v1/m/senior/wallet/query_terminal
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|limit|是|limit|
+|mch_id|是|商家id|
+|offset|是|offset|
+|province|是|省份|
+|vsp_cusid|是|子商户号|
+|vsp_termid|是|终端号|
+|wallet_id|是|钱包id|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+   , "data":  {
+    list: [ {
+    app_id:""  , //通联appId
+    bind_time:""  , //绑定时间
+    create_time:""  , //创建时间
+    id:""  , //id
+    mch_id:""  , //商家id
+    mch_name:""  , //商家id
+    province:""  , //省份
+    shop_address:""  , //门店地址
+    status:""  , //状态： 0：未绑定，1：已绑定，2：已解绑
+    unbind_time:""  , //绑定时间
+    vsp_cusid:""  , //子商户号
+    vsp_merchantid:""  , //集团商户号
+    vsp_termid:""  , //终端号
+    wallet_id:""   //钱包id
+}  ]  , 
+    page_limit:""  , //
+    page_num:""  , //
+    total:""  , //
+    total_page:""   //
+}  
+}
+```
+
 ###  高级钱包-重置支付密码
 
 请求地址: /wallet_server/v1/m/senior/wallet/reset_pay_pwd
@@ -62,6 +202,8 @@
     curr_try_times:""  , //当前尝试次数
     end_time:""  , //结束时间
     expire_time:""  , //过期时间
+    good_desc:""  , //商品描述
+    good_name:""  , //商品名称
     id:""  , //id
     industry_code:""  , //行业代码（由渠道分配
     industry_name:""  , //行业名称（由渠道分配）
@@ -270,7 +412,7 @@
   "msg": ""//消息
    , "data":  {
     balance:""  , //银行余额
-    balance_protocol_no:""  , //扣款协议号
+    balance_protocol_no:""  , //扣款协议编号
     balance_protocol_req_sn:""  , //扣款协议请求流水号
     biz_user_id:""  , //业务用户标识
     check_time:""  , //审核时间
@@ -366,7 +508,7 @@
   "msg": ""//消息
    , "data":  {
     balance:""  , //银行余额
-    balance_protocol_no:""  , //扣款协议号
+    balance_protocol_no:""  , //扣款协议编号
     balance_protocol_req_sn:""  , //扣款协议请求流水号
     biz_user_id:""  , //业务用户标识
     check_time:""  , //审核时间
@@ -535,7 +677,7 @@
   "msg": ""//消息
    , "data":  {
     balance:""  , //银行余额
-    balance_protocol_no:""  , //扣款协议号
+    balance_protocol_no:""  , //扣款协议编号
     balance_protocol_req_sn:""  , //扣款协议请求流水号
     biz_user_id:""  , //业务用户标识
     check_time:""  , //审核时间
@@ -580,7 +722,7 @@
   "msg": ""//消息
    , "data":  {
     balance:""  , //银行余额
-    balance_protocol_no:""  , //扣款协议号
+    balance_protocol_no:""  , //扣款协议编号
     balance_protocol_req_sn:""  , //扣款协议请求流水号
     biz_user_id:""  , //业务用户标识
     check_time:""  , //审核时间

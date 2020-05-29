@@ -8,6 +8,7 @@ import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletOrder;
+import com.rfchina.wallet.domain.model.WalletTerminal;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.api.SeniorWalletApi;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
@@ -295,10 +296,10 @@ public class SeniorWalletController {
 	}
 
 	@ApiOperation("高级钱包-商家绑定终端")
-	@PostMapping(UrlConstant.WALLET_BIND_TERMINAL)
+	@PostMapping(UrlConstant.WALLET_BIND_TERMINAL2)
 	public ResponseValue<VspTermidResp> bindTerminal(
 		@RequestParam("access_token") String accessToken,
-		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+		@ApiParam(value = "渠道用户ID", required = true) @RequestParam("biz_user_id") String bizUserId,
 		@ApiParam(value = "集团号", required = true) @RequestParam("vsp_merchantid") String vspMerchantid,
 		@ApiParam(value = "子商户号", required = true) @RequestParam("vsp_cusid") String vspCusid,
 		@ApiParam(value = "APPID", required = true) @RequestParam("app_id") String appId,
@@ -306,7 +307,56 @@ public class SeniorWalletController {
 	) {
 
 		VspTermidResp resp = seniorWalletApi
-			.bindTerminal(walletId, vspMerchantid, vspCusid, appId, vspTermid);
+			.bindTerminal(bizUserId, vspMerchantid, vspCusid, appId, vspTermid);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, resp);
+	}
+
+	@ApiOperation("高级钱包-商家绑定终端")
+	@PostMapping(UrlConstant.WALLET_BIND_TERMINAL)
+	public ResponseValue bindTerminal(
+		@RequestParam("access_token") String accessToken,
+		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+		@ApiParam(value = "终端id", required = true) @RequestParam("terminal_id") Long terminalId
+	) {
+
+		seniorWalletApi.bindTerminal(walletId, terminalId);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
+	}
+
+	@ApiOperation("高级钱包-终端列表")
+	@PostMapping(UrlConstant.WALLET_QUERY_TERMINAL)
+	public ResponseValue<Pagination<WalletTerminal>> queryTerminal(
+		@RequestParam("access_token") String accessToken,
+		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
+		@ApiParam(value = "子商户号", required = true) @RequestParam("vsp_cusid") String vspCusid,
+		@ApiParam(value = "终端号", required = true) @RequestParam("vsp_termid") String vspTermid,
+		@ApiParam(value = "省份", required = true) @RequestParam("province") String province,
+		@ApiParam(value = "商家id", required = true) @RequestParam("mch_id") String mchId,
+		@ApiParam(value = "limit", required = true) @RequestParam("limit") Integer limit,
+		@ApiParam(value = "offset", required = true) @RequestParam("offset") Integer offset
+	) {
+
+		Pagination<WalletTerminal> page = seniorWalletApi
+			.queryTerminal(walletId, vspCusid, vspTermid, province, mchId, limit, offset);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, page);
+	}
+
+	@ApiOperation("高级钱包-新增终端")
+	@PostMapping(UrlConstant.WALLET_CREATE_TERMINAL)
+	public ResponseValue createTerminal(
+		@RequestParam("access_token") String accessToken,
+		@ApiParam(value = "通联appId", required = true) @RequestParam("vsp_cusid") String appId,
+		@ApiParam(value = "集团商户号", required = true) @RequestParam("vsp_merchantid") String vspMerchantid,
+		@ApiParam(value = "子商户号", required = true) @RequestParam("vsp_cusid") String vspCusid,
+		@ApiParam(value = "终端号", required = true) @RequestParam("vsp_termid") String vspTermid,
+		@ApiParam(value = "省份", required = true) @RequestParam("province") String province,
+		@ApiParam(value = "商家id", required = true) @RequestParam("mch_id") String mchId,
+		@ApiParam(value = "商家名称", required = true) @RequestParam("mch_name") String mchName,
+		@ApiParam(value = "门店地址", required = true) @RequestParam("shop_address") String shopAddress
+	) {
+
+		seniorWalletApi.createTerminal(appId, vspMerchantid, vspCusid, vspTermid, province,
+			mchId, mchName, shopAddress);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
 }

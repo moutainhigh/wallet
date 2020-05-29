@@ -1,7 +1,6 @@
 package com.rfchina.wallet.sdk.model;
 
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import lombok.Data;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +42,12 @@ public class WalletCollectResp  {
 
     @ApiModelProperty("过期时间")
     private String expireTime ;
+
+    @ApiModelProperty("商品描述")
+    private String goodDesc ;
+
+    @ApiModelProperty("商品名称")
+    private String goodName ;
 
     @ApiModelProperty("id")
     private Long id ;

@@ -679,22 +679,26 @@ public class SeniorWalletService {
 		}
 	}
 
-	public VspTermidResp bindTerminal(Long walletId, String vspMerchantid, String vspCusid, String appId,
-		String vspTermid) {
+	public VspTermidResp bindTerminal(String bizUserId, String vspMerchantid, String vspCusid,
+		String appId, String vspTermid) {
 
+		VspTermidResp resp = yunstUserHandler.vspTermid(bizUserId, vspMerchantid
+			, vspCusid, appId, vspTermid, "query");
+		if (resp.getVspTermidList().isEmpty()) {
+			resp = yunstUserHandler.vspTermid(bizUserId, vspMerchantid
+				, vspCusid, appId, vspTermid, "set");
+		}
+		return resp;
+	}
+
+	public VspTermidResp bindTerminal(Long walletId, String vspMerchantid, String vspCusid,
+		String appId, String vspTermid) {
 		WalletTunnel tunnel = walletTunnelDao
 			.selectByWalletId(walletId, TunnelType.YUNST.getValue());
-		if (tunnel != null) {
-			VspTermidResp resp = yunstUserHandler.vspTermid(tunnel.getBizUserId(), vspMerchantid
-				, vspCusid, appId, vspTermid, "query");
-			if(resp.getVspTermidList().isEmpty()){
-				resp = yunstUserHandler.vspTermid(tunnel.getBizUserId(), vspMerchantid
-					, vspCusid, appId, vspTermid, "set");
-			}
-			return resp;
-		}
 
-		return null;
+		VspTermidResp resp = yunstUserHandler.vspTermid(tunnel.getBizUserId(), vspMerchantid
+			, vspCusid, appId, vspTermid, "set");
+		return resp;
 	}
 
 

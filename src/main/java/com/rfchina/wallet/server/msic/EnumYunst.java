@@ -248,8 +248,7 @@ public class EnumYunst {
 		 * 云商通绑定手机
 		 */
 		BIND_PHONE(9),
-		UNBIND_PHONE(6)
-		;
+		UNBIND_PHONE(6);
 
 		private Integer value;
 
@@ -259,6 +258,28 @@ public class EnumYunst {
 
 		@Override
 		public Integer getValue() {
+			return value;
+		}
+	}
+
+	/**
+	 * 终端状态： 0：未绑定，1：已绑定，2：已解绑
+	 */
+	public enum EnumTerminalStatus implements Valuable<Byte> {
+
+		NULL((byte) 0),
+		BIND((byte) 1),
+		UNBIND((byte) 2),
+		;
+
+		private Byte value;
+
+		EnumTerminalStatus(Byte value) {
+			this.value = value;
+		}
+
+		@Override
+		public Byte getValue() {
 			return value;
 		}
 	}

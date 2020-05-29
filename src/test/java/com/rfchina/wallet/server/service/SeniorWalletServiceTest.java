@@ -46,11 +46,11 @@ public class SeniorWalletServiceTest extends SpringBaseTest {
 	@Test
 	public void bindTerminal() {
 
-		Long walletId = 1000001L;
 		String vspMerchantid = "56058104816W6FX";
 		String vspCusid = "56058104816WAUX";
+		String vspTermid = "12243798";
 		String appId = "00184083";
-		String vspTermid = "12243792";
+		Long walletId = 1027532L;
 
 		VspTermidResp resp = seniorWalletService
 			.bindTerminal(walletId, vspMerchantid, vspCusid, appId, vspTermid);
