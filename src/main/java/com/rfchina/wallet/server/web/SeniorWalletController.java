@@ -297,7 +297,7 @@ public class SeniorWalletController {
 
 	@ApiOperation("高级钱包-商家绑定终端")
 	@PostMapping(UrlConstant.WALLET_BIND_TERMINAL2)
-	public ResponseValue<VspTermidResp> bindTerminal(
+	public ResponseValue<VspTermidResp> bindTerminal2(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "渠道用户ID", required = true) @RequestParam("biz_user_id") String bizUserId,
 		@ApiParam(value = "集团号", required = true) @RequestParam("vsp_merchantid") String vspMerchantid,
@@ -327,11 +327,11 @@ public class SeniorWalletController {
 	@PostMapping(UrlConstant.WALLET_QUERY_TERMINAL)
 	public ResponseValue<Pagination<WalletTerminal>> queryTerminal(
 		@RequestParam("access_token") String accessToken,
-		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
-		@ApiParam(value = "子商户号", required = true) @RequestParam("vsp_cusid") String vspCusid,
-		@ApiParam(value = "终端号", required = true) @RequestParam("vsp_termid") String vspTermid,
-		@ApiParam(value = "省份", required = true) @RequestParam("province") String province,
-		@ApiParam(value = "商家id", required = true) @RequestParam("mch_id") String mchId,
+		@ApiParam(value = "钱包id", required = false) @RequestParam("wallet_id") Long walletId,
+		@ApiParam(value = "子商户号", required = false) @RequestParam("vsp_cusid") String vspCusid,
+		@ApiParam(value = "终端号", required = false) @RequestParam("vsp_termid") String vspTermid,
+		@ApiParam(value = "省份", required = false) @RequestParam("province") String province,
+		@ApiParam(value = "商家id", required = false) @RequestParam("mch_id") String mchId,
 		@ApiParam(value = "limit", required = true) @RequestParam("limit") Integer limit,
 		@ApiParam(value = "offset", required = true) @RequestParam("offset") Integer offset
 	) {
