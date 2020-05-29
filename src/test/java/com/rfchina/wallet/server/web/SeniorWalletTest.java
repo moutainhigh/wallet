@@ -207,11 +207,11 @@ public class SeniorWalletTest extends WalletBaseTest {
 
 	@Test
 	public void testAgentPay() {
-		String receiveList = "{\"wallet_id\":299,\"amount\":2}";
+		String receiveList = "{\"wallet_id\":305,\"amount\":2}";
 		Map<String, String> params = new HashMap<>();
 		params.put("access_token", getAccessToken(appId, appSecret));
 		params.put("biz_no", "jUnitTest");
-		params.put("collect_order_no", "TWC2020021321088436");
+		params.put("collect_order_no", "TWC2020052811951514");
 		params.put("agent_pay_req", receiveList);
 		params.put("note", "手动代付");
 		params.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));

@@ -458,13 +458,13 @@ public class YunstUserHandler extends YunstBaseHandler {
 
 
 	public VspTermidResp vspTermid(String bizUserId, String vspMerchantid, String vspCusid,
-		String appId, String vspTermid) {
+		String appId, String vspTermid, String oper) {
 		VspTermidReq req = VspTermidReq.builder()
 			.bizUserId(bizUserId)
 			.vspMerchantid(vspMerchantid)
 			.vspCusid(vspCusid)
 			.appid(appId)
-			.operationType("set")
+			.operationType(oper)
 			.vspTermid(vspTermid)
 			.build();
 		try {

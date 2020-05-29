@@ -11,6 +11,7 @@ import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.api.SeniorWalletApi;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
+import com.rfchina.wallet.server.bank.yunst.response.VspTermidResp;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult;
 import com.rfchina.wallet.server.model.ext.PageVo;
 import com.rfchina.wallet.server.msic.UrlConstant;
@@ -295,7 +296,7 @@ public class SeniorWalletController {
 
 	@ApiOperation("高级钱包-商家绑定终端")
 	@PostMapping(UrlConstant.WALLET_BIND_TERMINAL)
-	public ResponseValue bindTerminal(
+	public ResponseValue<VspTermidResp> bindTerminal(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
 		@ApiParam(value = "集团号", required = true) @RequestParam("vsp_merchantid") String vspMerchantid,
@@ -304,7 +305,8 @@ public class SeniorWalletController {
 		@ApiParam(value = "终端号", required = true) @RequestParam("vsp_termid") String vspTermid
 	) {
 
-		seniorWalletApi.bindTerminal(walletId,vspMerchantid,vspCusid,appId,vspTermid);
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
+		VspTermidResp resp = seniorWalletApi
+			.bindTerminal(walletId, vspMerchantid, vspCusid, appId, vspTermid);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, resp);
 	}
 }

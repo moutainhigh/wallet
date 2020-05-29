@@ -23,7 +23,7 @@ public class VspTermidResp {
 
 	@Data
 	@ApiModel(description = "5.14 已绑定收银宝终端号列表")
-	public class VspTermid {
+	public static class VspTermid {
 
 		@ApiModelProperty(value = "收银宝集团商户号 集团模式：集团商户收银宝商户号单商户模式：不返")
 		private String vspMerchantid;

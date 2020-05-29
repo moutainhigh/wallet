@@ -35,6 +35,7 @@ import com.rfchina.wallet.domain.model.WalletTunnel.WalletTunnelBuilder;
 import com.rfchina.wallet.domain.model.WalletVerifyHis;
 import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
+import com.rfchina.wallet.server.bank.yunst.response.VspTermidResp;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstCreateMemberResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.CompanyInfoResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.PersonInfoResult;
@@ -678,15 +679,22 @@ public class SeniorWalletService {
 		}
 	}
 
-	public void bindTerminal(Long walletId, String vspMerchantid, String vspCusid, String appId,
+	public VspTermidResp bindTerminal(Long walletId, String vspMerchantid, String vspCusid, String appId,
 		String vspTermid) {
 
 		WalletTunnel tunnel = walletTunnelDao
 			.selectByWalletId(walletId, TunnelType.YUNST.getValue());
 		if (tunnel != null) {
-			yunstUserHandler
-				.vspTermid(tunnel.getBizUserId(), vspMerchantid, vspCusid, appId, vspTermid);
+			VspTermidResp resp = yunstUserHandler.vspTermid(tunnel.getBizUserId(), vspMerchantid
+				, vspCusid, appId, vspTermid, "query");
+			if(resp.getVspTermidList().isEmpty()){
+				resp = yunstUserHandler.vspTermid(tunnel.getBizUserId(), vspMerchantid
+					, vspCusid, appId, vspTermid, "set");
+			}
+			return resp;
 		}
+
+		return null;
 	}
 
 

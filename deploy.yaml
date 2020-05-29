@@ -42,7 +42,7 @@ spec:
           lifecycle:
             preStop:
               exec:
-                command: ["/bin/bash", "-c", "sleep 30"]
+                command: ["/bin/sh", "-c", "sleep 30"]
           resources:
             requests:
               cpu: "5m"

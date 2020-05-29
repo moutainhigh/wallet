@@ -26,6 +26,7 @@ import com.rfchina.wallet.server.api.SeniorWalletApi;
 import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq.CompanyBasicInfo;
+import com.rfchina.wallet.server.bank.yunst.response.VspTermidResp;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.CompanyInfoResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.PersonInfoResult;
@@ -450,10 +451,10 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 
 	@Log
 	@Override
-	public void bindTerminal(Long walletId, String vspMerchantid, String vspCusid, String appId,
+	public VspTermidResp bindTerminal(Long walletId, String vspMerchantid, String vspCusid, String appId,
 		String vspTermid) {
 
-		seniorWalletService.bindTerminal(walletId, vspMerchantid, vspCusid, appId, vspTermid);
+		return seniorWalletService.bindTerminal(walletId, vspMerchantid, vspCusid, appId, vspTermid);
 	}
 
 }
