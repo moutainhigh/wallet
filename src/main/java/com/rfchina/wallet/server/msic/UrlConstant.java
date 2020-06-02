@@ -340,4 +340,7 @@ public class UrlConstant {
 
 	/** 新增终端 */
 	public static final String WALLET_CREATE_TERMINAL = VERSION + "/m/senior/wallet/create_terminal";
+
+	/** 修改钱包 */
+	public static final String WALLET_MODIFY = VERSION + "/m/wallet/modify_wallet";
 }

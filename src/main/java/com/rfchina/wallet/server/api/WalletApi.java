@@ -156,4 +156,7 @@ public interface WalletApi {
 	 * 查询钱包基本信息
 	 */
     WalletBaseInfoVo queryWalletBaseInfo(String accessToken, Long walletId);
+
+    /** 修改钱包信息 */
+	Wallet modifyWallet(String accessToken, Long walletId, String title);
 }

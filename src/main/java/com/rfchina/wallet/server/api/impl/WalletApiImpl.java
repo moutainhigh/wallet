@@ -25,7 +25,13 @@ import com.rfchina.wallet.domain.misc.EnumDef.OrderStatus;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
-import com.rfchina.wallet.domain.model.*;
+import com.rfchina.wallet.domain.model.ApplyStatusChange;
+import com.rfchina.wallet.domain.model.BankCode;
+import com.rfchina.wallet.domain.model.Wallet;
+import com.rfchina.wallet.domain.model.WalletCard;
+import com.rfchina.wallet.domain.model.WalletOrder;
+import com.rfchina.wallet.domain.model.WalletOwner;
+import com.rfchina.wallet.domain.model.WalletUser;
 import com.rfchina.wallet.domain.model.ext.Bank;
 import com.rfchina.wallet.domain.model.ext.BankArea;
 import com.rfchina.wallet.domain.model.ext.BankClass;
@@ -147,7 +153,8 @@ public class WalletApiImpl implements WalletApi {
 		@ParamValid(nullable = true) String email
 	) {
 		try {
-			return walletService.createMchWallet(type, title, source, mchId,companyName,tel,email);
+			return walletService
+				.createMchWallet(type, title, source, mchId, companyName, tel, email);
 		} catch (Exception e) {
 			log.error("创建钱包失败", e);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
@@ -323,23 +330,24 @@ public class WalletApiImpl implements WalletApi {
 	@Override
 	public void bindMchWallet(String accessToken, Long walletId, Byte source, String mchId) {
 		EnumDef.WalletSource walletSource = EnumUtil.parse(EnumDef.WalletSource.class, source);
-		walletService.bindMchWallet(walletId,walletSource,mchId);
+		walletService.bindMchWallet(walletId, walletSource, mchId);
 	}
 
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER, EnumTokenType.APP})
 	@SignVerify
 	@Override
-    public WalletBaseInfoVo queryWalletBaseInfo(String accessToken, Long walletId) {
+	public WalletBaseInfoVo queryWalletBaseInfo(String accessToken, Long walletId) {
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		List<WalletOwner> walletOwners = walletOwnerDao.selectByWalletId(walletId);
 		return WalletBaseInfoVo.builder()
-				.wallet(wallet)
-				.walletOwnerList(walletOwners)
-				.build();
-    }
+			.wallet(wallet)
+			.walletOwnerList(walletOwners)
+			.build();
+	}
 
-    @Log
+
+	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER, EnumTokenType.APP})
 	@SignVerify
 	@Override
@@ -350,5 +358,16 @@ public class WalletApiImpl implements WalletApi {
 			.collect(Collectors.toList());
 	}
 
+
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
+	@Override
+	public Wallet modifyWallet(String accessToken, Long walletId, String title) {
+		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
+		wallet.setTitle(title);
+		walletDao.updateByPrimaryKeySelective(wallet);
+		return wallet;
+	}
 
 }

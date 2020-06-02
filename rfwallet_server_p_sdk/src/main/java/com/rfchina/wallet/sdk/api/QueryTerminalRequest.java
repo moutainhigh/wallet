@@ -19,11 +19,11 @@ public class QueryTerminalRequest extends  AbstractApiRequest {
   @ApiModelProperty("limit")
   private Integer limit ;
 
-  @ApiModelProperty("商家id")
-  private String mchId ;
-
   @ApiModelProperty("offset")
   private Integer offset ;
+
+  @ApiModelProperty("商家id")
+  private String mchId ;
 
   @ApiModelProperty("省份")
   private String province ;
@@ -57,11 +57,11 @@ public class QueryTerminalRequest extends  AbstractApiRequest {
       if(limit != null){
         parameters.put("limit", limit.toString());
       }
-      if(mchId != null){
-        parameters.put("mch_id", mchId.toString());
-      }
       if(offset != null){
         parameters.put("offset", offset.toString());
+      }
+      if(mchId != null){
+        parameters.put("mch_id", mchId.toString());
       }
       if(province != null){
         parameters.put("province", province.toString());

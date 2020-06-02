@@ -70,11 +70,11 @@
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
 |access_token|是|access_token|
+|app_id|是|通联appId|
 |mch_id|是|商家id|
 |mch_name|是|商家名称|
 |province|是|省份|
 |shop_address|是|门店地址|
-|vsp_cusid|是|通联appId|
 |vsp_cusid|是|子商户号|
 |vsp_merchantid|是|集团商户号|
 |vsp_termid|是|终端号|
@@ -101,12 +101,12 @@
 |:-- |:-- |:--   |
 |access_token|是|access_token|
 |limit|是|limit|
-|mch_id|是|商家id|
 |offset|是|offset|
-|province|是|省份|
-|vsp_cusid|是|子商户号|
-|vsp_termid|是|终端号|
-|wallet_id|是|钱包id|
+|mch_id|否|商家id|
+|province|否|省份|
+|vsp_cusid|否|子商户号|
+|vsp_termid|否|终端号|
+|wallet_id|否|钱包id|
 
 返回数据
 ```

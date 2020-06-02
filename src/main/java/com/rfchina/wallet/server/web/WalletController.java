@@ -21,7 +21,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import java.util.List;
 import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -84,8 +83,8 @@ public class WalletController {
 		@ApiParam(value = "钱包ID", required = true, example = "2") @RequestParam("wallet_id") Long walletId
 	) {
 
-		WalletBaseInfoVo wallet = walletApi.queryWalletBaseInfo(accessToken,walletId);
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,wallet);
+		WalletBaseInfoVo wallet = walletApi.queryWalletBaseInfo(accessToken, walletId);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, wallet);
 	}
 
 	@ApiOperation("钱包列表")
@@ -117,7 +116,7 @@ public class WalletController {
 		@ApiParam(value = "公司邮箱", required = false) @RequestParam(value = "email", required = false) String email
 	) {
 		Wallet wallet = walletApi.createMchWallet(accessToken, type, title, source,
-				mchId, companyName, tel, email);
+			mchId, companyName, tel, email);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, wallet);
 	}
 
@@ -261,5 +260,19 @@ public class WalletController {
 		List<WalletCardVo> resp = walletApi.queryWalletCard(accessToken, walletId);
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, resp);
+	}
+
+
+	@ApiOperation("修改钱包信息")
+	@PostMapping(UrlConstant.WALLET_MODIFY)
+	public ResponseValue<Wallet> modifyWallet(
+		@RequestParam("access_token") String accessToken,
+		@ApiParam(value = "钱包ID", required = true) @RequestParam("wallet_id") Long walletId,
+		@ApiParam(value = "钱包标题", required = true) @RequestParam("title") String title
+	) {
+
+		Wallet wallet = walletApi.modifyWallet(accessToken, walletId, title);
+
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, wallet);
 	}
 }

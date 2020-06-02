@@ -9,32 +9,23 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 
 
-/** 高级钱包-新增终端 */
+/** 高级钱包-商家绑定终端 */
 @Builder
-public class CreateTerminalRequest extends  AbstractApiRequest {
+public class BindTerminal2Request extends  AbstractApiRequest {
 
   @ApiModelProperty("access_token")
   private String accessToken ;
 
-  @ApiModelProperty("通联appId")
+  @ApiModelProperty("APPID")
   private String appId ;
 
-  @ApiModelProperty("商家id")
-  private String mchId ;
-
-  @ApiModelProperty("商家名称")
-  private String mchName ;
-
-  @ApiModelProperty("省份")
-  private String province ;
-
-  @ApiModelProperty("门店地址")
-  private String shopAddress ;
+  @ApiModelProperty("渠道用户ID")
+  private String bizUserId ;
 
   @ApiModelProperty("子商户号")
   private String vspCusid ;
 
-  @ApiModelProperty("集团商户号")
+  @ApiModelProperty("集团号")
   private String vspMerchantid ;
 
   @ApiModelProperty("终端号")
@@ -43,12 +34,12 @@ public class CreateTerminalRequest extends  AbstractApiRequest {
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/senior/wallet/create_terminal";
+    return "/wallet_server/v1/m/senior/wallet/bind_terminal2";
   }
 
   @Override
   public Class<?> getResponseModelClass() {
-    return Map.class;
+    return VspTermidResp.class;
   }
 
   @Override
@@ -60,17 +51,8 @@ public class CreateTerminalRequest extends  AbstractApiRequest {
       if(appId != null){
         parameters.put("app_id", appId.toString());
       }
-      if(mchId != null){
-        parameters.put("mch_id", mchId.toString());
-      }
-      if(mchName != null){
-        parameters.put("mch_name", mchName.toString());
-      }
-      if(province != null){
-        parameters.put("province", province.toString());
-      }
-      if(shopAddress != null){
-        parameters.put("shop_address", shopAddress.toString());
+      if(bizUserId != null){
+        parameters.put("biz_user_id", bizUserId.toString());
       }
       if(vspCusid != null){
         parameters.put("vsp_cusid", vspCusid.toString());
