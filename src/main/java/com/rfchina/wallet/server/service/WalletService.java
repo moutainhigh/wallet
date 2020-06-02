@@ -207,16 +207,10 @@ public class WalletService {
 				, String.valueOf(walletId));
 		}
 
-		if (wallet.getLevel() == EnumWalletLevel.SENIOR.getValue().byteValue()
-			&& Objects.nonNull(wallet.getAuditType())
-			&& wallet.getAuditType() == EnumWalletAuditType.ALLINPAY
-			.getValue().byteValue()) {
+		if (wallet.getLevel() == EnumWalletLevel.SENIOR.getValue().byteValue()) {
 			try {
 				WalletTunnel walletTunnel = seniorWalletService
 					.getWalletTunnelInfo(TunnelType.YUNST.getValue(), walletId);
-				wallet.setWalletBalance(walletTunnel.getBalance());
-				wallet.setFreezeAmount(walletTunnel.getFreezenAmount());
-
 				builder.walletTunnel(walletTunnel);
 			} catch (Exception e) {
 				log.error("获取高级钱包渠道信息失败 walletId:{}", walletId);

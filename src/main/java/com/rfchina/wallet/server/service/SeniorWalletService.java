@@ -65,6 +65,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import sun.net.www.protocol.http.HttpURLConnection.TunnelState;
 
 @Slf4j
 @Service
@@ -585,6 +586,9 @@ public class SeniorWalletService {
 			needUpdate = !Optional.ofNullable(wallet.getBalanceUpdTime()).isPresent()
 				|| DateUtil.addSecs(wallet.getBalanceUpdTime(), 1800).before(new Date());
 		}
+		needUpdate = needUpdate
+			&& WalletTunnelAuditStatus.AUDIT_SUCCESS.getValue().byteValue() == walletTunnel
+			.getStatus().byteValue();
 
 		if (needUpdate) {
 			updateBalance(walletTunnel, wallet);
