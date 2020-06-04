@@ -3,6 +3,9 @@
 测试环境
 jenkins job: platform-rfwallet-server-test
 ```
+## 1.6.0_b1_2020060218_Beta
+- 多个富力钱包功能
+
 ## 1.5.1_b2_2020052922_Beta 1.5.1_2020052920_Release
 - 新增终端接口
 
