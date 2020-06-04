@@ -45,7 +45,7 @@ public class CreateMchWalletRequest extends  AbstractApiRequest {
 
   @Override
   public Class<?> getResponseModelClass() {
-    return Wallet.class;
+    return WalletVo.class;
   }
 
   @Override

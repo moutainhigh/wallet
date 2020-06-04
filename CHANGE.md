@@ -3,6 +3,9 @@
 测试环境
 jenkins job: platform-rfwallet-server-test
 ```
+## 1.6.0_b2_2020060416_Beta
+- 修改商家审核流程
+
 ## 1.6.0_b1_2020060218_Beta
 - 多个富力钱包功能
 
