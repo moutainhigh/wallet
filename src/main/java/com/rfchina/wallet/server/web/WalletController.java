@@ -15,6 +15,7 @@ import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.WalletBaseInfoVo;
 import com.rfchina.wallet.server.model.ext.WalletCardVo;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
+import com.rfchina.wallet.server.model.ext.WalletVo;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -106,7 +107,7 @@ public class WalletController {
 
 	@ApiOperation("开通未审核的钱包")
 	@PostMapping(UrlConstant.M_CREATE_MCH_WALLET)
-	public ResponseValue<Wallet> createMchWallet(@RequestParam("access_token") String accessToken,
+	public ResponseValue<WalletVo> createMchWallet(@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包类型， 1：企业钱包，2：个人钱包", required = true, example = "2") @RequestParam("type") Byte type,
 		@ApiParam(value = "钱包标题，通常是姓名或公司名", required = true, example = "测试个人钱包") @RequestParam("title") String title,
 		@ApiParam(value = "钱包来源，1： 富慧通-企业商家，2： 富慧通-个人商家，3： 用户", required = true, example = "2") @RequestParam("source") Byte source,
@@ -115,7 +116,7 @@ public class WalletController {
 		@ApiParam(value = "公司电话", required = false) @RequestParam(value = "tel", required = false) String tel,
 		@ApiParam(value = "公司邮箱", required = false) @RequestParam(value = "email", required = false) String email
 	) {
-		Wallet wallet = walletApi.createMchWallet(accessToken, type, title, source,
+		WalletVo wallet = walletApi.createMchWallet(accessToken, type, title, source,
 			mchId, companyName, tel, email);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, wallet);
 	}

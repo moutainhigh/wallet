@@ -7,6 +7,7 @@ import com.rfchina.platform.common.misc.ResponseCode;
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.common.misc.SymbolConstant;
 import com.rfchina.platform.common.page.Pagination;
+import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.platform.common.utils.RegexUtil;
@@ -54,6 +55,7 @@ import com.rfchina.wallet.server.mapper.ext.WalletUserExtDao;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp.WalletInfoRespBuilder;
+import com.rfchina.wallet.server.model.ext.WalletVo;
 import com.rfchina.wallet.server.msic.EnumWallet.CardPro;
 import com.rfchina.wallet.server.msic.EnumWallet.GwPayeeType;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
@@ -273,7 +275,7 @@ public class WalletService {
 	 * 开通未审核的钱包
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-	public Wallet createMchWallet(Byte type, String title, Byte source, String mchId,
+	public WalletVo createMchWallet(Byte type, String title, Byte source, String mchId,
 		String companyName, String tel, String email) throws Exception {
 
 		Wallet wallet = Wallet.builder()
@@ -301,7 +303,7 @@ public class WalletService {
 		walletCompanyDao.insertSelective(walletCompany);
 
 		// 创建通联会员
-		seniorWalletService
+		WalletTunnel tunnel = seniorWalletService
 			.createTunnel(TunnelType.YUNST.getValue().intValue(), wallet.getId(), source);
 
 		// 关联商家和钱包
@@ -316,7 +318,10 @@ public class WalletService {
 		// 发送钱包事件
 		walletEventService.sendEventMq(EnumDef.WalletEventType.CREATE, wallet.getId()
 			, wallet.getLevel(), wallet.getStatus(), Arrays.asList(walletOwner));
-		return wallet;
+
+		WalletVo walletVo = BeanUtil.newInstance(wallet, WalletVo.class);
+		walletVo.setBizUserId(tunnel.getBizUserId());
+		return walletVo;
 	}
 
 

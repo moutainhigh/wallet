@@ -17,6 +17,7 @@ import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.WalletBaseInfoVo;
 import com.rfchina.wallet.server.model.ext.WalletCardVo;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
+import com.rfchina.wallet.server.model.ext.WalletVo;
 import java.util.Date;
 import java.util.List;
 
@@ -46,7 +47,7 @@ public interface WalletApi {
 	/**
 	 * 开通未审核的钱包
 	 */
-	Wallet createMchWallet(String accessToken, Byte type, String title, Byte source,
+	WalletVo createMchWallet(String accessToken, Byte type, String title, Byte source,
 		 String mchId, String companyName, String tel, String email);
 
 	/**

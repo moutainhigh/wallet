@@ -43,6 +43,7 @@ import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.WalletBaseInfoVo;
 import com.rfchina.wallet.server.model.ext.WalletCardVo;
 import com.rfchina.wallet.server.model.ext.WalletInfoResp;
+import com.rfchina.wallet.server.model.ext.WalletVo;
 import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.JuniorPayService;
 import com.rfchina.wallet.server.service.MqService;
@@ -143,7 +144,7 @@ public class WalletApiImpl implements WalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public Wallet createMchWallet(String accessToken,
+	public WalletVo createMchWallet(String accessToken,
 		@ParamValid(nullable = false) Byte type,
 		@ParamValid(nullable = false) String title,
 		@ParamValid(nullable = false) Byte source,
