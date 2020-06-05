@@ -108,6 +108,11 @@ public class UrlConstant {
 	public static final String QUARTZ_WITHDRAW = VERSION + "/schedule/quartz_withdraw";
 
 	/**
+	 * 定时同步通道信息
+	 */
+	public static final String QUARTZ_SYNC_TUNNEL = VERSION + "/schedule/quartz_sync_tunnel";
+
+	/**
 	 * 查询钱包信息（企业or个人）
 	 */
 	public static final String M_WALLET_QUERY_INFO = VERSION + "/m/wallet/query_wallet_info";

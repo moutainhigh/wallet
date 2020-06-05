@@ -11,6 +11,8 @@ import com.rfchina.wallet.domain.mapper.ext.BankCodeDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletBalanceDetailDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletFinanceDao;
+import com.rfchina.wallet.domain.mapper.ext.WalletTunnelDao;
+import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.BizValidateType;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderSubStatus;
@@ -29,6 +31,7 @@ import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.bank.pudong.domain.exception.IGatewayError;
 import com.rfchina.wallet.server.bank.pudong.domain.predicate.ExactErrPredicate;
 import com.rfchina.wallet.server.bank.pudong.domain.util.ExceptionUtil;
+import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.CompanyInfoResult;
 import com.rfchina.wallet.server.mapper.ext.WalletClearingExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCompanyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletConfigExtDao;
@@ -39,6 +42,7 @@ import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletUserExtDao;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.PayTuple;
+import com.rfchina.wallet.server.model.ext.SLWalletMqMessage;
 import com.rfchina.wallet.server.model.ext.WithdrawResp;
 import com.rfchina.wallet.server.msic.EnumWallet.BalanceFreezeMode;
 import com.rfchina.wallet.server.msic.EnumWallet.CardPro;
@@ -47,8 +51,11 @@ import com.rfchina.wallet.server.msic.EnumWallet.GwPayeeType;
 import com.rfchina.wallet.server.msic.EnumWallet.GwProgress;
 import com.rfchina.wallet.server.msic.EnumWallet.NotifyType;
 import com.rfchina.wallet.server.msic.EnumWallet.WithdrawType;
+import com.rfchina.wallet.server.msic.EnumWallet.YunstCompanyInfoAuditStatus;
 import com.rfchina.wallet.server.service.handler.common.EBankHandler;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
+import com.rfchina.wallet.server.service.handler.yunst.YunstNotifyHandler;
+import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
@@ -135,6 +142,13 @@ public class ScheduleService {
 
 	@Autowired
 	private WalletBalanceDetailService walletBalanceDetailService;
+
+	@Autowired
+	private YunstNotifyHandler yunstNotifyHandler;
+
+	@Autowired
+	private YunstUserHandler yunstUserHandler;
+
 
 	/**
 	 * 通道转账
@@ -484,6 +498,58 @@ public class ScheduleService {
 		}
 		log.info("[自动提现] 钱包[{}] 结束自动提现", walletConfig.getWalletId());
 
+	}
+
+	@PostMq(routingKey = MqConstant.WALLET_SENIOR_COMPANY_AUDIT)
+	public SLWalletMqMessage syncTunnel(WalletTunnel walletTunnel){
+		try {
+
+
+			CompanyInfoResult companyInfo = (CompanyInfoResult) yunstUserHandler
+				.getMemberInfo(walletTunnel.getBizUserId());
+
+			// 审核中
+			if (YunstCompanyInfoAuditStatus.WAITING.getValue().longValue()
+				== companyInfo.getStatus().longValue()) {
+				return null;
+			}
+
+			Date checkTime = DateUtil
+				.parse(companyInfo.getCheckTime(), DateUtil.STANDARD_DTAETIME_PATTERN);
+			walletTunnel.setCheckTime(checkTime);
+
+			boolean isPass = false;
+			// 终态
+			if (YunstCompanyInfoAuditStatus.SUCCESS.getValue().longValue()
+				== companyInfo.getStatus()) {
+
+				walletTunnel.setSecurityTel(companyInfo.getPhone());
+				yunstNotifyHandler.handleAuditSucc(walletTunnel);
+				isPass = true;
+
+			} else if (YunstCompanyInfoAuditStatus.FAIL.getValue().longValue()
+				== companyInfo.getStatus()) {
+
+				walletTunnel.setStatus(EnumDef.WalletTunnelAuditStatus.AUDIT_FAIL.getValue()
+					.byteValue());
+				walletTunnel.setFailReason(companyInfo.getFailReason());
+				walletTunnel.setRemark(companyInfo.getRemark());
+				walletTunnelDao.updateByPrimaryKey(walletTunnel);
+
+			}
+
+			return SLWalletMqMessage.builder()
+				.walletId(walletTunnel.getWalletId())
+				.isPass(isPass)
+				.checkTime(companyInfo.getCheckTime())
+				.failReason(companyInfo.getFailReason())
+				.build();
+
+		}catch (Exception e){
+			log.error("定时任务同步通道信息错误",e);
+		}
+
+		return null;
 	}
 
 }

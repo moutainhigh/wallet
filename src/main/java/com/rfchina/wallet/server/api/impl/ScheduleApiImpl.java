@@ -4,28 +4,42 @@ import com.rfchina.app.model.App;
 import com.rfchina.biztools.functional.MaxIdIterator;
 import com.rfchina.biztools.functionnal.LockDone;
 import com.rfchina.biztools.lock.SimpleExclusiveLock;
+import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.passport.misc.SessionThreadLocal;
 import com.rfchina.platform.common.annotation.Log;
 import com.rfchina.platform.common.utils.DateUtil;
+import com.rfchina.wallet.domain.mapper.ext.WalletTunnelDao;
+import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderType;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelAuditStatus;
+import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.model.WalletConfig;
 import com.rfchina.wallet.domain.model.WalletConfigCriteria;
 import com.rfchina.wallet.domain.model.WalletConfigCriteria.Criteria;
 import com.rfchina.wallet.domain.model.WalletOrder;
+import com.rfchina.wallet.domain.model.WalletTunnel;
+import com.rfchina.wallet.domain.model.WalletTunnelCriteria;
 import com.rfchina.wallet.server.api.ScheduleApi;
+import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.CompanyInfoResult;
 import com.rfchina.wallet.server.mapper.ext.WalletConfigExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
+import com.rfchina.wallet.server.model.ext.SLWalletMqMessage;
 import com.rfchina.wallet.server.msic.EnumWallet.AutoWithdrawStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.LockStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletConfigStatus;
+import com.rfchina.wallet.server.msic.EnumWallet.YunstCompanyInfoAuditStatus;
 import com.rfchina.wallet.server.msic.LockConstant;
 import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.ScheduleService;
 import com.rfchina.wallet.server.service.SeniorBalanceService;
 import com.rfchina.wallet.server.service.SeniorChargingService;
 import com.rfchina.wallet.server.service.WalletService;
+import com.rfchina.wallet.server.service.handler.yunst.YunstBaseHandler.YunstMemberType;
+import com.rfchina.wallet.server.service.handler.yunst.YunstNotifyHandler;
+import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -64,6 +78,9 @@ public class ScheduleApiImpl implements ScheduleApi {
 
 	@Autowired
 	private SessionThreadLocal sessionThreadLocal;
+
+	@Autowired
+	private WalletTunnelExtDao walletTunnelDao;
 
 
 	@Log
@@ -197,6 +214,28 @@ public class ScheduleApiImpl implements ScheduleApi {
 					log.error("[自动提现] 钱包提现异常 " + walletConfig.getWalletId(), e);
 				}
 				return walletConfig.getId();
+			});
+		});
+	}
+
+
+	@Override
+	public void quartzSyncTunnel() {
+		new LockDone(lock).apply(LockConstant.LOCK_QUARTZ_SYNC_TUNNEL, 1800, () -> {
+			new MaxIdIterator<WalletTunnel>().apply((maxId) -> {
+
+				WalletTunnelCriteria example = new WalletTunnelCriteria();
+				WalletTunnelCriteria.Criteria criteria = example.createCriteria();
+				criteria.andIdGreaterThan(maxId)
+					.andStatusEqualTo(WalletTunnelAuditStatus.WAITING_AUDIT.getValue().byteValue())
+					.andMemberTypeEqualTo(YunstMemberType.COMPANY.getValue().byteValue())
+					.andWalletIdGreaterThan(0L);
+				return walletTunnelDao
+					.selectByExampleWithRowbounds(example, new RowBounds(0, 100));
+			}, (walletTunnel) -> {
+
+				scheduleService.syncTunnel(walletTunnel);
+				return walletTunnel.getId();
 			});
 		});
 	}

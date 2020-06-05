@@ -3,6 +3,9 @@
 测试环境
 jenkins job: platform-rfwallet-server-test
 ```
+## 1.6.0_b3_2020060514_Beta
+- 增加通道信息同步定时任务
+
 ## 1.6.0_b2_2020060416_Beta
 - 修改商家审核流程
 

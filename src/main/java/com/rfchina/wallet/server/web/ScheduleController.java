@@ -130,4 +130,20 @@ public class ScheduleController {
 
 		return "success";
 	}
+
+	@RequestMapping(value = UrlConstant.QUARTZ_SYNC_TUNNEL, method = RequestMethod.POST)
+	@FuScheduleTaskReporter
+	public String quartzSyncTunnel(
+		@RequestParam("schedule_id") String scheduleId,
+		@RequestParam("timestamp") String timestamp,
+		@RequestParam("sign") String sign
+	){
+		log.info("scheduler: 开始执行任务[{}]", "quartzSyncTunnel");
+
+		scheduleApi.quartzSyncTunnel();
+
+		log.info("scheduler: 完成任务[{}]", "quartzSyncTunnel");
+
+		return "success";
+	}
 }

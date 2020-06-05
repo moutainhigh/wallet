@@ -34,4 +34,6 @@ public interface ScheduleApi {
 	 */
 	void quartzWithdraw();
 
+	/** 定时同步通道信息 */
+	void quartzSyncTunnel();
 }
