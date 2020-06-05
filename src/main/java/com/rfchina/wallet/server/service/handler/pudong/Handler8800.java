@@ -308,8 +308,7 @@ public class Handler8800 extends EBankHandler {
 							OrderStatus status;
 							// 核心拒绝的，需要进一步判断错误码
 							if (TransStatus8804.REJECT.getValue().equals(transStatus.getValue())) {
-								status = exactErrPredicate.test(err) ? OrderStatus.FAIL
-									: OrderStatus.WAITTING;
+								status = OrderStatus.FAIL;
 							} else {
 								status = OrderStatus.parsePuDong8804(rs.getTransStatus());
 							}
