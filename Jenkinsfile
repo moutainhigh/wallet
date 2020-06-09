@@ -57,7 +57,7 @@ podTemplate(label: label) {
               sed -i "s#%{memory_max}#${memory_max}#g" ${yaml_file}
               sed -i "s#%{log_pre_path}#${log_pre_path}#g" ${yaml_file}
               cat  ${yaml_file}
-              kubectl apply -f ${yaml_file}
+              # kubectl apply -f ${yaml_file}
               """
          }
      }

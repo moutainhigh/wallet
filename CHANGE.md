@@ -3,6 +3,9 @@
 测试环境
 jenkins job: platform-rfwallet-server-test
 ```
+## 1.6.0_b5_2020060916_Beta
+- 重构商家审批流程
+
 ## 1.6.0_b4_2020060515_Beta
 - 浦发网银核心拒绝订单失败
 
