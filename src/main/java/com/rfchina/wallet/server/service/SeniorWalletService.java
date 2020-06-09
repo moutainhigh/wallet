@@ -10,25 +10,19 @@ import com.rfchina.platform.sdk2.ApiClient;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.DirtyType;
-import com.rfchina.wallet.domain.misc.EnumDef.EnumDefBankCard;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumIdType;
-import com.rfchina.wallet.domain.misc.EnumDef.EnumPublicAccount;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletAuditType;
-import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletCardStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.EnumDef.VerifyChannel;
-import com.rfchina.wallet.domain.misc.EnumDef.WalletCardType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletProgress;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletSource;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelAuditStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelSignContract;
-import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyChannel;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyRefType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.Wallet;
-import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletPerson;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.domain.model.WalletTunnel.WalletTunnelBuilder;
@@ -53,20 +47,14 @@ import com.rfchina.wallet.server.service.handler.yunst.YunstBaseHandler.YunstMem
 import com.rfchina.wallet.server.service.handler.yunst.YunstNotifyHandler;
 import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
 import java.util.Date;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import sun.net.www.protocol.http.HttpURLConnection.TunnelState;
 
 @Slf4j
 @Service
@@ -290,7 +278,7 @@ public class SeniorWalletService {
 				.walletId(walletTunnel.getWalletId())
 				.refId(walletTunnel.getId())
 				.type(WalletVerifyRefType.PERSON.getValue().byteValue())
-				.verifyChannel(WalletVerifyChannel.TONGLIAN.getValue().byteValue())
+				.verifyChannel(VerifyChannel.YUNST.getValue())
 				.verifyType(WalletVerifyType.TWO_FACTOR.getValue().byteValue())
 				.verifyTime(curDate)
 				.createTime(curDate)

@@ -14,14 +14,12 @@ import com.rfchina.wallet.domain.misc.EnumDef.WalletProgress;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelSetPayPwd;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelSignContract;
-import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyChannel;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyRefType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyType;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.model.ChannelNotify;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletCard;
-import com.rfchina.wallet.domain.model.WalletCompany;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.domain.model.WalletVerifyHis;
 import com.rfchina.wallet.server.bank.yunst.response.YunstNotify;
@@ -31,7 +29,6 @@ import com.rfchina.wallet.server.mapper.ext.WalletCompanyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletVerifyHisExtDao;
 import com.rfchina.wallet.server.model.ext.SLWalletMqMessage;
-import com.rfchina.wallet.server.model.ext.SLWalletMqMessage.SLWalletMqMessageBuilder;
 import com.rfchina.wallet.server.msic.EnumWallet.YunstCompanyInfoAuditStatus;
 import com.rfchina.wallet.server.service.SeniorWalletService;
 import com.rfchina.wallet.server.service.WalletEventService;
@@ -149,7 +146,7 @@ public class YunstNotifyHandler {
 					.walletId(walletTunnel.getWalletId())
 					.refId(walletTunnel.getId())
 					.type(WalletVerifyRefType.COMPANY.getValue().byteValue())
-					.verifyChannel(WalletVerifyChannel.TONGLIAN.getValue().byteValue())
+					.verifyChannel(VerifyChannel.YUNST.getValue())
 					.verifyType(WalletVerifyType.COMPANY_VERIFY.getValue().byteValue())
 					.verifyTime(walletTunnel.getCheckTime())
 					.createTime(walletTunnel.getCheckTime())
