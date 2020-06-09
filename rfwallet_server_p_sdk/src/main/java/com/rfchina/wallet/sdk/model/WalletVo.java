@@ -67,6 +67,9 @@ public class WalletVo  {
     @ApiModelProperty("钱包余额")
     private Long walletBalance ;
 
+    @ApiModelProperty(name="tunnel_user_id", value = "银行用户标识")
+    private String tunnelUserId;
+
 
 }
 

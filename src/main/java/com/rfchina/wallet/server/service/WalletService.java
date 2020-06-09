@@ -321,6 +321,7 @@ public class WalletService {
 
 		WalletVo walletVo = BeanUtil.newInstance(wallet, WalletVo.class);
 		walletVo.setBizUserId(tunnel.getBizUserId());
+		walletVo.setTunnelUserId(tunnel.getTunnelUserId());
 		return walletVo;
 	}
 

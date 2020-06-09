@@ -60,4 +60,7 @@ public class WalletVo {
 
 	@ApiModelProperty(name = "biz_user_id", value = "通道会员id")
 	private String bizUserId;
+
+	@ApiModelProperty(name="tunnel_user_id", value = "银行用户标识")
+	private String tunnelUserId;
 }

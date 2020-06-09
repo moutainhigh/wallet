@@ -43,6 +43,7 @@ import com.rfchina.wallet.server.mapper.ext.WalletUserExtDao;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
 import com.rfchina.wallet.server.model.ext.PayTuple;
 import com.rfchina.wallet.server.model.ext.SLWalletMqMessage;
+import com.rfchina.wallet.server.model.ext.SLWalletMqMessage.SLWalletMqMessageBuilder;
 import com.rfchina.wallet.server.model.ext.WithdrawResp;
 import com.rfchina.wallet.server.msic.EnumWallet.BalanceFreezeMode;
 import com.rfchina.wallet.server.msic.EnumWallet.CardPro;
@@ -501,14 +502,14 @@ public class ScheduleService {
 	}
 
 	@PostMq(routingKey = MqConstant.WALLET_SENIOR_COMPANY_AUDIT)
-	public SLWalletMqMessage syncTunnel(WalletTunnel walletTunnel){
+	public SLWalletMqMessage syncCompanyTunnel(WalletTunnel walletTunnel){
 		try {
 
 
 			CompanyInfoResult companyInfo = (CompanyInfoResult) yunstUserHandler
 				.getMemberInfo(walletTunnel.getBizUserId());
 
-			// 审核中
+			// 审核中，不发MQ
 			if (YunstCompanyInfoAuditStatus.WAITING.getValue().longValue()
 				== companyInfo.getStatus().longValue()) {
 				return null;
@@ -518,29 +519,23 @@ public class ScheduleService {
 				.parse(companyInfo.getCheckTime(), DateUtil.STANDARD_DTAETIME_PATTERN);
 			walletTunnel.setCheckTime(checkTime);
 
-			boolean isPass = false;
+			SLWalletMqMessageBuilder builder = SLWalletMqMessage.builder();
 			// 终态
 			if (YunstCompanyInfoAuditStatus.SUCCESS.getValue().longValue()
 				== companyInfo.getStatus()) {
 
-				walletTunnel.setSecurityTel(companyInfo.getPhone());
-				yunstNotifyHandler.handleAuditSucc(walletTunnel);
-				isPass = true;
+				yunstNotifyHandler.handleAuditSucc(walletTunnel,companyInfo);
+				builder.isPass(true);
 
 			} else if (YunstCompanyInfoAuditStatus.FAIL.getValue().longValue()
 				== companyInfo.getStatus()) {
 
-				walletTunnel.setStatus(EnumDef.WalletTunnelAuditStatus.AUDIT_FAIL.getValue()
-					.byteValue());
-				walletTunnel.setFailReason(companyInfo.getFailReason());
-				walletTunnel.setRemark(companyInfo.getRemark());
-				walletTunnelDao.updateByPrimaryKey(walletTunnel);
-
+				yunstNotifyHandler.handleAuditFail(walletTunnel,companyInfo.getFailReason()
+					,companyInfo.getRemark());
+				builder.isPass(false);
 			}
 
-			return SLWalletMqMessage.builder()
-				.walletId(walletTunnel.getWalletId())
-				.isPass(isPass)
+			return builder.walletId(walletTunnel.getWalletId())
 				.checkTime(companyInfo.getCheckTime())
 				.failReason(companyInfo.getFailReason())
 				.build();

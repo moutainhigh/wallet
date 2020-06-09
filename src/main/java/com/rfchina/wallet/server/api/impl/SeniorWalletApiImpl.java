@@ -284,9 +284,10 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public WalletTunnel seniorWalletCompanyAudit(String accessToken, Integer channelType,
+	public WalletTunnel setCompanyInfo(String accessToken, Integer channelType,
 		Integer auditType, Long walletId,
 		YunstSetCompanyInfoReq.CompanyBasicInfo companyBasicInfo) {
+
 		WalletTunnel walletTunnel = walletChannelDao
 			.selectByTunnelTypeAndWalletId(channelType.byteValue(), walletId);
 		if (Objects.isNull(walletTunnel)) {
@@ -303,7 +304,7 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 			seniorWalletService.upgradeWalletLevel(walletId);
 		}
 		return seniorWalletService
-			.seniorWalletCompanyAudit(channelType, walletId, auditType, companyBasicInfo);
+			.setCompanyInfo(channelType, walletId, auditType, companyBasicInfo);
 	}
 
 
@@ -311,12 +312,10 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public YunstMemberInfoResult.CompanyInfoResult seniorWalletCompanyAuditOffline(
-		String accessToken, Long walletId,
-		CompanyBasicInfo companyBasicInfo) {
+	public YunstMemberInfoResult.CompanyInfoResult manualCompanyAudit(
+		String accessToken, Long walletId) {
 		try {
-			return seniorWalletService
-				.seniorWalletCompanyAuditOffline(walletId, companyBasicInfo);
+			return seniorWalletService.resetCompanyAudit(walletId);
 		} catch (Exception e) {
 			log.error("高级钱包线下确认更新企业信息失败", e);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
@@ -391,7 +390,8 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public CompanyInfoResult seniorWalletGetCompanyInfo(String accessToken, Long walletId) {
+	public CompanyInfoResult getCompanyInfo(String accessToken, Long walletId) {
+
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		Objects.requireNonNull(wallet);
 		if (wallet.getLevel() != EnumDef.EnumWalletLevel.SENIOR.getValue().byteValue()) {
@@ -401,8 +401,7 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 		}
 
 		try {
-			return seniorWalletService
-				.seniorWalletGetCompanyInfo(walletId);
+			return seniorWalletService.getCompanyInfo(walletId);
 		} catch (Exception e) {
 			log.error("高级钱包获取企业会员信息失败", e);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
@@ -414,14 +413,17 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@Override
-	public PersonInfoResult seniorWalletGetPersonInfo(String accessToken, Long walletId) {
+	public PersonInfoResult getPersonInfo(String accessToken, Long walletId) {
+
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
 		Objects.requireNonNull(wallet);
+
 		if (wallet.getLevel() != EnumDef.EnumWalletLevel.SENIOR.getValue().byteValue()) {
 			log.error("高级钱包获取个人用户信息失败, 钱包不是高级钱包, walletId: {}", walletId);
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
 				"高级钱包获取个人用户信息失败, 钱包不是高级钱包");
 		}
+
 		try {
 			return seniorWalletService.seniorWalletGetPersonInfo(walletId);
 		} catch (Exception e) {

@@ -284,7 +284,7 @@ public class UrlConstant {
 	/**
 	 * 高级钱包线下确认更新企业信息
 	 */
-	public static final String WALLET_SENIOR_UPDATE_COMPANY_INFO_OFFLINE= VERSION + "/m/senior/wallet/update_company_info_offline";
+	public static final String M_WALLET_MANUAL_COMPANY_AUDIT = VERSION + "/m/senior/wallet/manual_company_audit";
 	/**
 	 * 高级钱包余额明细
 	 */

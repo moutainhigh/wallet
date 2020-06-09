@@ -50,6 +50,7 @@ import com.rfchina.wallet.server.mapper.ext.WalletVerifyHisExtDao;
 import com.rfchina.wallet.server.msic.EnumWallet.YunstCompanyInfoAuditStatus;
 import com.rfchina.wallet.server.msic.EnumYunst.EnumYunstResponse;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBaseHandler.YunstMemberType;
+import com.rfchina.wallet.server.service.handler.yunst.YunstNotifyHandler;
 import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
 import java.util.Date;
 import java.util.List;
@@ -104,6 +105,9 @@ public class SeniorWalletService {
 
 	@Autowired
 	private WalletEventService walletEventService;
+
+	@Autowired
+	private YunstNotifyHandler yunstNotifyHandler;
 
 
 	/**
@@ -340,57 +344,42 @@ public class SeniorWalletService {
 	 * 高级钱包企业资料审核
 	 */
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-	public WalletTunnel seniorWalletCompanyAudit(Integer channelType, Long walletId,
+	public WalletTunnel setCompanyInfo(Integer channelType, Long walletId,
 		Integer auditType, YunstSetCompanyInfoReq.CompanyBasicInfo companyBasicInfo) {
-		WalletTunnel walletChannel = walletTunnelDao
+
+		WalletTunnel walletTunnel = walletTunnelDao
 			.selectByTunnelTypeAndWalletId(channelType.byteValue(), walletId);
-		walletChannel.setStatus(
-			EnumDef.WalletTunnelAuditStatus.WAITING_AUDIT.getValue().byteValue());
-		CardInfo cardInfo = CardInfo.builder()
-			.cardNo(companyBasicInfo.getAccountNo())
-			.parentBankName(companyBasicInfo.getParentBankName())
-			.bankName(companyBasicInfo.getBankName())
-			.build();
 		if (channelType == TunnelType.YUNST.getValue().intValue()) {
 			try {
+				// 发送到通联审核
 				boolean isAuth =
 					auditType == EnumDef.WalletTunnelAuditType.AUTO.getValue().intValue();
-				YunstSetCompanyInfoResult yunstSetCompanyInfoResult = yunstUserHandler
-					.setCompanyInfo(walletChannel.getBizUserId(),
-						isAuth, companyBasicInfo);
-				Objects.requireNonNull(yunstSetCompanyInfoResult);
+				YunstSetCompanyInfoResult setCompanyResp = yunstUserHandler.setCompanyInfo(
+					walletTunnel.getBizUserId(),isAuth, companyBasicInfo);
+				Objects.requireNonNull(setCompanyResp);
 
-				log.info("通联审核结果:{}", JsonUtil.toJSON(yunstSetCompanyInfoResult));
-				Long result = yunstSetCompanyInfoResult.getResult();
-				String failReason = yunstSetCompanyInfoResult.getFailReason();
-				String remark = yunstSetCompanyInfoResult.getRemark();
-				Date curDate = new Date();
-				if (Objects.nonNull(result)) {
+				log.info("通联审核结果:{}", JsonUtil.toJSON(setCompanyResp));
+				Long result = setCompanyResp.getResult();
+				// 自动审核时
+				if (isAuth && Objects.nonNull(result)) {
+
 					if (YunstCompanyInfoAuditStatus.SUCCESS.getValue() == result.longValue()) {
-						walletChannel.setStatus(
-							EnumDef.WalletTunnelAuditStatus.AUDIT_SUCCESS.getValue()
-								.byteValue());
-						walletChannel.setFailReason(null);
-						walletChannel.setCheckTime(curDate);
-
-						this.synchronizeCompanyTunnelInfo(walletId, walletChannel);
-						this.synchronizePublicAccountToWalletCard(walletId, cardInfo, curDate);
+						// 自动审核通过
+						CompanyInfoResult companyInfo = (CompanyInfoResult) yunstUserHandler
+							.getMemberInfo(walletTunnel.getBizUserId());
+						yunstNotifyHandler.handleAuditSucc(walletTunnel,companyInfo);
 					} else if (YunstCompanyInfoAuditStatus.FAIL.getValue() == result.longValue()) {
-						walletChannel.setStatus(
-							EnumDef.WalletTunnelAuditStatus.AUDIT_FAIL.getValue()
-								.byteValue());
-						walletChannel.setFailReason(failReason);
+						// 自动审核失败
+						yunstNotifyHandler.handleAuditFail(walletTunnel,
+							setCompanyResp.getFailReason(),setCompanyResp.getRemark());
 					}
-					walletChannel.setCheckTime(curDate);
 				} else {
-					walletChannel.setStatus(
-						EnumDef.WalletTunnelAuditStatus.WAITING_AUDIT.getValue()
-							.byteValue());
-					walletChannel.setFailReason(null);
-					this.synchronizePublicAccountToWalletCard(walletId, cardInfo, null);
+					// 审核进行中
+					yunstNotifyHandler.handleAuditWaiting(walletTunnel);
+					CompanyInfoResult companyInfo = (CompanyInfoResult) yunstUserHandler
+						.getMemberInfo(walletTunnel.getBizUserId());
+					yunstNotifyHandler.updateCompanyCard(walletTunnel.getWalletId(),companyInfo);
 				}
-				walletChannel.setRemark(remark);
-				walletTunnelDao.updateByPrimaryKeySelective(walletChannel);
 
 			} catch (CommonGatewayException cge) {
 				log.error("高级钱包企业信息审核失败 msg:{}", cge.getBankErrMsg());
@@ -402,8 +391,8 @@ public class SeniorWalletService {
 					e.getMessage());
 			}
 		}
-		log.info("高级钱包企业信息审核状态:{},walletId:{}", walletChannel.getStatus(), walletId);
-		return walletChannel;
+		log.info("高级钱包企业信息审核状态:{},walletId:{}", walletTunnel.getStatus(), walletId);
+		return walletTunnel;
 	}
 
 	/**
@@ -486,85 +475,50 @@ public class SeniorWalletService {
 	/**
 	 * 高级钱包企业会员信息
 	 */
-	public CompanyInfoResult seniorWalletGetCompanyInfo(Long walletId)
-		throws Exception {
-		WalletTunnel walletTunnel = walletTunnelDao
-			.selectByTunnelTypeAndWalletId(TunnelType.YUNST.getValue(), walletId);
+	public CompanyInfoResult getCompanyInfo(Long walletId) throws Exception {
+
+		WalletTunnel walletTunnel = walletTunnelDao.selectByTunnelTypeAndWalletId(
+			TunnelType.YUNST.getValue(), walletId);
 		Objects.requireNonNull(walletTunnel);
-		CompanyInfoResult memberInfo = (CompanyInfoResult) yunstUserHandler
-			.getMemberInfo(walletTunnel.getBizUserId());
-		if (YunstCompanyInfoAuditStatus.WAITING.getValue().longValue() != memberInfo.getStatus()
-			.longValue()
-			&& WalletTunnelAuditStatus.WAITING_AUDIT.getValue().byteValue() == walletTunnel
-			.getStatus()) {
-			if (YunstCompanyInfoAuditStatus.SUCCESS.getValue().longValue() == memberInfo
-				.getStatus()) {
-				walletTunnel.setStatus(
-					EnumDef.WalletTunnelAuditStatus.AUDIT_SUCCESS.getValue()
-						.byteValue());
-				walletTunnel.setFailReason(null);
-				walletTunnel.setSecurityTel(memberInfo.getPhone());
-				this.synchronizeCompanyTunnelInfo(walletId, walletTunnel);
-				this.updateNonVerifyPublicAccountToWalletCard(walletId,
-					walletTunnel.getCheckTime());
-			} else if (YunstCompanyInfoAuditStatus.FAIL.getValue().longValue() == memberInfo
-				.getStatus()) {
-				walletTunnel.setStatus(
-					EnumDef.WalletTunnelAuditStatus.AUDIT_FAIL.getValue()
-						.byteValue());
-				walletTunnel.setFailReason(memberInfo.getFailReason());
-				walletTunnel.setRemark(memberInfo.getRemark());
-			}
-			walletTunnel.setCheckTime(
-				DateUtil.parse(memberInfo.getCheckTime(), DateUtil.STANDARD_DTAETIME_PATTERN));
-			walletTunnelDao.updateByPrimaryKey(walletTunnel);
-		}
-		return memberInfo;
+		// 查通道信息
+		return (CompanyInfoResult) yunstUserHandler.getMemberInfo(walletTunnel.getBizUserId());
 	}
 
 
-	public CompanyInfoResult seniorWalletCompanyAuditOffline(Long walletId,
-		YunstSetCompanyInfoReq.CompanyBasicInfo companyBasicInfo)
+	public CompanyInfoResult resetCompanyAudit(Long walletId)
 		throws Exception {
+
 		WalletTunnel walletTunnel = walletTunnelDao
 			.selectByTunnelTypeAndWalletId(TunnelType.YUNST.getValue(), walletId);
 		Objects.requireNonNull(walletTunnel);
-		CompanyInfoResult memberInfo = (CompanyInfoResult) yunstUserHandler
+
+		// 查通道会员信息
+		CompanyInfoResult companyInfo = (CompanyInfoResult) yunstUserHandler
 			.getMemberInfo(walletTunnel.getBizUserId());
-		CardInfo cardInfo = CardInfo.builder()
-			.cardNo(companyBasicInfo.getAccountNo())
-			.parentBankName(companyBasicInfo.getParentBankName())
-			.bankName(companyBasicInfo.getBankName())
-			.build();
-		if (YunstCompanyInfoAuditStatus.SUCCESS.getValue().longValue() == memberInfo.getStatus()
-			&&
-			EnumDef.WalletTunnelAuditStatus.AUDIT_SUCCESS.getValue().byteValue() == walletTunnel
-				.getStatus() &&
-			walletTunnel.getCheckTime().compareTo(
-				DateUtil.parse(memberInfo.getCheckTime(), DateUtil.STANDARD_DTAETIME_PATTERN))
-				== -1) {
-			walletTunnel.setFailReason(null);
-			walletTunnel.setSecurityTel(memberInfo.getPhone());
-			walletTunnel.setCheckTime(
-				DateUtil.parse(memberInfo.getCheckTime(), DateUtil.STANDARD_DTAETIME_PATTERN));
-			walletTunnelDao.updateByPrimaryKey(walletTunnel);
-			this.synchronizeCompanyTunnelInfo(walletId, walletTunnel);
-			this.synchronizePublicAccountToWalletCard(walletId, cardInfo,
-				walletTunnel.getCheckTime());
+
+		// 通道成功而且
+		if (YunstCompanyInfoAuditStatus.SUCCESS.getValue().longValue() == companyInfo.getStatus()
+			&& EnumDef.WalletTunnelAuditStatus.AUDIT_SUCCESS.getValue().byteValue() == walletTunnel
+				.getStatus()
+			&& walletTunnel.getCheckTime().before(
+				DateUtil.parse(companyInfo.getCheckTime(), DateUtil.STANDARD_DTAETIME_PATTERN))
+		) {
+			log.info("手动刷新企业会员{}", walletTunnel.getBizUserId());
+			yunstNotifyHandler.handleAuditSucc(walletTunnel, companyInfo);
 		}
-		return memberInfo;
+		return companyInfo;
 	}
 
 	/**
 	 * 高级钱包个人会员信息
 	 */
 	public PersonInfoResult seniorWalletGetPersonInfo(Long walletId) throws Exception {
+
 		WalletTunnel walletTunnel = walletTunnelDao
 			.selectByTunnelTypeAndWalletId(TunnelType.YUNST.getValue(), walletId);
 		Objects.requireNonNull(walletTunnel);
-		PersonInfoResult memberInfo = (PersonInfoResult) yunstUserHandler
-			.getMemberInfo(walletTunnel.getBizUserId());
-		return memberInfo;
+
+		return (PersonInfoResult) yunstUserHandler.getMemberInfo(walletTunnel.getBizUserId());
 	}
 
 	/**
@@ -625,64 +579,6 @@ public class SeniorWalletService {
 	}
 
 
-	private void synchronizeCompanyTunnelInfo(Long walletId, WalletTunnel walletTunnel) {
-		if (EnumDef.WalletTunnelAuditStatus.AUDIT_SUCCESS.getValue()
-			.byteValue() == walletTunnel.getStatus()) {
-			WalletVerifyHis walletVerifyHis = walletVerifyHisExtDao
-				.selectByWalletIdAndRefIdAndType(walletId, walletTunnel.getId(),
-					WalletVerifyRefType.COMPANY.getValue().byteValue());
-			if (null == walletVerifyHis
-				|| walletVerifyHis.getVerifyTime().compareTo(walletTunnel.getCheckTime()) == -1) {
-				walletVerifyHisExtDao.insertSelective(
-					WalletVerifyHis.builder().walletId(walletId)
-						.refId(walletTunnel.getId()).type(
-						WalletVerifyRefType.COMPANY.getValue().byteValue())
-						.verifyChannel(
-							WalletVerifyChannel.TONGLIAN.getValue().byteValue())
-						.verifyType(
-							WalletVerifyType.COMPANY_VERIFY.getValue().byteValue())
-						.verifyTime(walletTunnel.getCheckTime())
-						.createTime(walletTunnel.getCheckTime()).build());
-			}
-		}
-	}
-
-	public void synchronizePublicAccountToWalletCard(Long walletId, CardInfo cardInfo,
-		Date verifyTime) {
-		List<WalletCard> walletCards = walletCardDao
-			.selectPubAccountByWalletId(walletId);
-		if (walletCards != null && !walletCards.isEmpty()) {
-			walletCardDao
-				.updateWalletCard(walletId, EnumWalletCardStatus.UNBIND.getValue(),
-					EnumWalletCardStatus.BIND.getValue(),
-					EnumPublicAccount.YES.getValue(), EnumDefBankCard.NO.getValue());
-		}
-		walletCardDao.insertSelective(
-			WalletCard.builder()
-				.cardType(WalletCardType.DEPOSIT.getValue())
-				.walletId(walletId)
-				.bankCode(" ")
-				.bankName(cardInfo.getParentBankName())
-				.depositBank(cardInfo.getBankName())
-				.bankAccount(cardInfo.getCardNo())
-				.verifyChannel(VerifyChannel.YUNST.getValue())
-				.verifyTime(verifyTime)
-				.isPublic(EnumPublicAccount.YES.getValue().byteValue())
-				.isDef(EnumDefBankCard.YES.getValue().byteValue())
-				.status(EnumWalletCardStatus.BIND.getValue().byteValue())
-				.build());
-	}
-
-	public void updateNonVerifyPublicAccountToWalletCard(Long walletId, Date verifyTime) {
-		WalletCard walletCard = walletCardDao.selectNonVerifyPubAccountByWalletId(walletId);
-		Objects.requireNonNull(walletCard);
-		walletCard.setVerifyTime(verifyTime);
-		int effectRows = walletCardDao.updateByPrimaryKeySelective(walletCard);
-		if (effectRows != 1) {
-			log.error("更新对公账号信息审核时间失败");
-		}
-	}
-
 	public VspTermidResp bindTerminal(String bizUserId, String vspMerchantid, String vspCusid,
 		String appId, String vspTermid) {
 
@@ -706,24 +602,4 @@ public class SeniorWalletService {
 	}
 
 
-	@Getter
-	@Setter
-	@Builder
-	@ToString
-	static class CardInfo {
-
-		private String cardNo;
-		private String parentBankName;
-		private String bankName;
-	}
-
-
-	public static void main(String[] args) {
-		WalletTunnel walletTunnel = new WalletTunnel();
-		walletTunnel.setIsDirty((byte) 1);
-		boolean needUpdate = !Optional.ofNullable(walletTunnel.getIsDirty()).isPresent() || Optional
-			.ofNullable(walletTunnel.getIsDirty())
-			.filter(dirty -> dirty != DirtyType.NORMAL.getValue().byteValue()).isPresent();
-		System.out.println(needUpdate);
-	}
 }

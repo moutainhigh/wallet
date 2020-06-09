@@ -1,4 +1,4 @@
-from openjdk:8-jre-alpine
+from hub.thinkinpower.net/platform/server-jre:8u191-20200518
 maintainer nzm "niezengming@rfchina.com"
 
 workdir %{app_path}

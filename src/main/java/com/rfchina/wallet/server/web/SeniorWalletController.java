@@ -11,9 +11,11 @@ import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletTerminal;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.api.SeniorWalletApi;
-import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
+import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq.CompanyBasicInfo;
 import com.rfchina.wallet.server.bank.yunst.response.VspTermidResp;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult;
+import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.CompanyInfoResult;
+import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.PersonInfoResult;
 import com.rfchina.wallet.server.model.ext.PageVo;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import io.swagger.annotations.Api;
@@ -154,20 +156,18 @@ public class SeniorWalletController {
 	@PostMapping(UrlConstant.WALLET_SENIOR_COMPANY_INFO_AUDIT)
 	public ResponseValue<WalletTunnel> seniorWalletCompanyInfoAudit(
 		@RequestParam("access_token") String accessToken,
-		@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = true, example = "1") @RequestParam("channel_type")
-			Integer channelType,
+		@ApiParam(value = "渠道类型 1:浦发银企直连,2:通联云商通", required = true, example = "1") @RequestParam("channel_type") Integer channelType,
 		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
 		@ApiParam(value = "审核方式", required = true) @RequestParam("audit_type") Integer auditType,
-		@ApiParam(value = "企业信息(json)", required = true) @RequestParam("company_basic_info")
-			String companyBasicInfo) {
+		@ApiParam(value = "企业信息(json)", required = true) @RequestParam("company_basic_info") String companyBasicInfo) {
+
+		CompanyBasicInfo companyInfo = JsonUtil.toObject(companyBasicInfo, CompanyBasicInfo.class,
+			objectMapper -> {
+				objectMapper.setTimeZone(TimeZone.getDefault());
+				objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			});
 		WalletTunnel walletChannel = seniorWalletApi
-			.seniorWalletCompanyAudit(accessToken, channelType, auditType, walletId,
-				JsonUtil.toObject(companyBasicInfo, YunstSetCompanyInfoReq.CompanyBasicInfo.class,
-					objectMapper -> {
-						objectMapper.setTimeZone(TimeZone.getDefault());
-						objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
-							false);
-					}));
+			.setCompanyInfo(accessToken, channelType, auditType, walletId, companyInfo);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, walletChannel);
 	}
 
@@ -235,8 +235,8 @@ public class SeniorWalletController {
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId) {
 
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
-			seniorWalletApi.seniorWalletGetPersonInfo(accessToken, walletId));
+		PersonInfoResult result = seniorWalletApi.getPersonInfo(accessToken, walletId);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,result);
 	}
 
 
@@ -244,10 +244,11 @@ public class SeniorWalletController {
 	@PostMapping(UrlConstant.WALLET_SENIOR_COMPANY_INFO)
 	public ResponseValue<YunstMemberInfoResult.CompanyInfoResult> seniorWalletCompanyInfo(
 		@RequestParam("access_token") String accessToken,
-		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId) {
+		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId
+	) {
 
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
-			seniorWalletApi.seniorWalletGetCompanyInfo(accessToken, walletId));
+		CompanyInfoResult result = seniorWalletApi.getCompanyInfo(accessToken, walletId);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,result);
 	}
 
 
@@ -278,20 +279,14 @@ public class SeniorWalletController {
 
 
 	@ApiOperation("高级钱包-线下确认更新企业信息")
-	@PostMapping(UrlConstant.WALLET_SENIOR_UPDATE_COMPANY_INFO_OFFLINE)
-	public ResponseValue<YunstMemberInfoResult.CompanyInfoResult> seniorWalletCompanyInfoAuditOffline(
+	@PostMapping(UrlConstant.M_WALLET_MANUAL_COMPANY_AUDIT)
+	public ResponseValue<YunstMemberInfoResult.CompanyInfoResult> manualCompanyAudit(
 		@RequestParam("access_token") String accessToken,
-		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
-		@ApiParam(value = "企业信息(json)", required = true) @RequestParam("company_basic_info") String companyBasicInfo) {
+		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId
+	) {
 
 		YunstMemberInfoResult.CompanyInfoResult result = seniorWalletApi
-			.seniorWalletCompanyAuditOffline(accessToken, walletId,
-				JsonUtil.toObject(companyBasicInfo, YunstSetCompanyInfoReq.CompanyBasicInfo.class,
-					objectMapper -> {
-						objectMapper.setTimeZone(TimeZone.getDefault());
-						objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
-							false);
-					}));
+			.manualCompanyAudit(accessToken, walletId);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result);
 	}
 

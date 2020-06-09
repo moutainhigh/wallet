@@ -88,6 +88,57 @@
 }
 ```
 
+###  高级钱包-线下确认更新企业信息
+
+请求地址: /wallet_server/v1/m/senior/wallet/manual_company_audit
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|company_basic_info|是|企业信息(json)|
+|wallet_id|是|钱包id|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+   , "data":  {
+    account_no:""  , //企业对公账户账号
+    auth_type:""  , //认证类型(三证或一证)
+    bank_city_no:""  , //开户行地区代码
+    bank_name:""  , //开户行支行名称
+    business_license:""  , //营业执照号(三证)
+    check_time:""  , //审核时间
+    city:""  , //开户行所在市
+    company_address:""  , //企业地址
+    company_name:""  , //企业名称
+    exp_license:""  , //统一社会信用/营业执照号到期时间 格式:yyyy-MM-dd
+    fail_reason:""  , //审核失败原因
+    identity_type:""  , //法人证件类型
+    is_sign_contract:""  , //是否已签电子协议
+    legal_ids:""  , //法人证件号码
+    legal_name:""  , //法人姓名
+    legal_phone:""  , //法人手机号码
+    organization_code:""  , //组织机构代码(三证)
+    parent_bank_name:""  , //开户银行名称
+    phone:""  , //手机号码
+    province:""  , //开户行所在省
+    remark:""  , //备注
+    status:""  , //审核状态
+    tax_register:""  , //税务登记证(三证)
+    telephone:""  , //联系电话
+    uni_credit:""  , //统一社会信用(一证)
+    union_bank:""   //支付行号,12位数字
+}  
+}
+```
+
 ###  高级钱包-终端列表
 
 请求地址: /wallet_server/v1/m/senior/wallet/query_terminal
@@ -333,57 +384,6 @@
     title:""  , //钱包标题，通常是姓名或公司名
     type:""  , //钱包类型， 1：企业钱包，2：个人钱包
     wallet_balance:""   //钱包余额
-}  
-}
-```
-
-###  高级钱包-线下确认更新企业信息
-
-请求地址: /wallet_server/v1/m/senior/wallet/update_company_info_offline
-
-请求类型: POST
-
-请求参数:
-
-
-| 参数名 | 是否必须 | 描述 |
-|:-- |:-- |:--   |
-|access_token|是|access_token|
-|company_basic_info|是|企业信息(json)|
-|wallet_id|是|钱包id|
-
-返回数据
-```
-{
-  "code": 1001,//状态码
-  "msg": ""//消息
-   , "data":  {
-    account_no:""  , //企业对公账户账号
-    auth_type:""  , //认证类型(三证或一证)
-    bank_city_no:""  , //开户行地区代码
-    bank_name:""  , //开户行支行名称
-    business_license:""  , //营业执照号(三证)
-    check_time:""  , //审核时间
-    city:""  , //开户行所在市
-    company_address:""  , //企业地址
-    company_name:""  , //企业名称
-    exp_license:""  , //统一社会信用/营业执照号到期时间 格式:yyyy-MM-dd
-    fail_reason:""  , //审核失败原因
-    identity_type:""  , //法人证件类型
-    is_sign_contract:""  , //是否已签电子协议
-    legal_ids:""  , //法人证件号码
-    legal_name:""  , //法人姓名
-    legal_phone:""  , //法人手机号码
-    organization_code:""  , //组织机构代码(三证)
-    parent_bank_name:""  , //开户银行名称
-    phone:""  , //手机号码
-    province:""  , //开户行所在省
-    remark:""  , //备注
-    status:""  , //审核状态
-    tax_register:""  , //税务登记证(三证)
-    telephone:""  , //联系电话
-    uni_credit:""  , //统一社会信用(一证)
-    union_bank:""   //支付行号,12位数字
 }  
 }
 ```

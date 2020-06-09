@@ -83,7 +83,7 @@ public interface SeniorWalletApi {
 	 * @param walletId 必填, 钱包id
 	 * @param companyBasicInfo 必填, 企业基本信息
 	 */
-	WalletTunnel seniorWalletCompanyAudit(String accessToken, Integer channelType,
+	WalletTunnel setCompanyInfo(String accessToken, Integer channelType,
 		Integer auditType, Long walletId, YunstSetCompanyInfoReq.CompanyBasicInfo companyBasicInfo);
 
 	/**
@@ -125,7 +125,7 @@ public interface SeniorWalletApi {
 	 *
 	 * @param walletId 必填, 钱包id
 	 */
-	YunstMemberInfoResult.CompanyInfoResult seniorWalletGetCompanyInfo(String accessToken,
+	YunstMemberInfoResult.CompanyInfoResult getCompanyInfo(String accessToken,
 		Long walletId);
 
 	/**
@@ -133,7 +133,7 @@ public interface SeniorWalletApi {
 	 *
 	 * @param walletId 必填, 钱包id
 	 */
-	YunstMemberInfoResult.PersonInfoResult seniorWalletGetPersonInfo(String accessToken,
+	YunstMemberInfoResult.PersonInfoResult getPersonInfo(String accessToken,
 		Long walletId);
 
 	/**
@@ -153,10 +153,8 @@ public interface SeniorWalletApi {
 	 * 高级钱包商家资料线下二次审批确认同步
 	 *
 	 * @param walletId 必填, 钱包id
-	 * @param companyBasicInfo 必填, 企业基本信息
 	 */
-	YunstMemberInfoResult.CompanyInfoResult seniorWalletCompanyAuditOffline(String accessToken,
-		Long walletId, YunstSetCompanyInfoReq.CompanyBasicInfo companyBasicInfo);
+	YunstMemberInfoResult.CompanyInfoResult manualCompanyAudit(String accessToken,Long walletId);
 
 	/**
 	 * 解绑手机

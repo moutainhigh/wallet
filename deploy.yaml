@@ -32,13 +32,17 @@ spec:
             initialDelaySeconds: 120
             periodSeconds: 3
             timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 100
           readinessProbe:
             httpGet:
               path: %{live_path}
               port: 8080
-            initialDelaySeconds: 120
+            initialDelaySeconds: 60
             periodSeconds: 10
             timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 100
           lifecycle:
             preStop:
               exec:
