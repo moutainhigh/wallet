@@ -1,5 +1,6 @@
 package com.rfchina.wallet.server.service;
 
+import com.allinpay.yunst.sdk.util.RSAUtil;
 import com.rfchina.p.user.api.SyncRealInfoRequest;
 import com.rfchina.platform.common.exception.RfchinaResponseException;
 import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
@@ -343,7 +344,7 @@ public class SeniorWalletService {
 				boolean isAuth =
 					auditType == EnumDef.WalletTunnelAuditType.AUTO.getValue().intValue();
 				YunstSetCompanyInfoResult setCompanyResp = yunstUserHandler.setCompanyInfo(
-					walletTunnel.getBizUserId(),isAuth, companyBasicInfo);
+					walletTunnel.getBizUserId(), isAuth, companyBasicInfo);
 				Objects.requireNonNull(setCompanyResp);
 
 				log.info("通联审核结果:{}", JsonUtil.toJSON(setCompanyResp));
@@ -355,18 +356,18 @@ public class SeniorWalletService {
 						// 自动审核通过
 						CompanyInfoResult companyInfo = (CompanyInfoResult) yunstUserHandler
 							.getMemberInfo(walletTunnel.getBizUserId());
-						yunstNotifyHandler.handleAuditSucc(walletTunnel,companyInfo);
+						yunstNotifyHandler.handleAuditSucc(walletTunnel, companyInfo);
 					} else if (YunstCompanyInfoAuditStatus.FAIL.getValue() == result.longValue()) {
 						// 自动审核失败
 						yunstNotifyHandler.handleAuditFail(walletTunnel,
-							setCompanyResp.getFailReason(),setCompanyResp.getRemark());
+							setCompanyResp.getFailReason(), setCompanyResp.getRemark());
 					}
 				} else {
 					// 审核进行中
 					yunstNotifyHandler.handleAuditWaiting(walletTunnel);
 					CompanyInfoResult companyInfo = (CompanyInfoResult) yunstUserHandler
 						.getMemberInfo(walletTunnel.getBizUserId());
-					yunstNotifyHandler.updateCompanyCard(walletTunnel.getWalletId(),companyInfo);
+					yunstNotifyHandler.updateCompanyCard(walletTunnel.getWalletId(), companyInfo);
 				}
 
 			} catch (CommonGatewayException cge) {
@@ -469,7 +470,12 @@ public class SeniorWalletService {
 			TunnelType.YUNST.getValue(), walletId);
 		Objects.requireNonNull(walletTunnel);
 		// 查通道信息
-		return (CompanyInfoResult) yunstUserHandler.getMemberInfo(walletTunnel.getBizUserId());
+		CompanyInfoResult companyInfo = (CompanyInfoResult) yunstUserHandler
+			.getMemberInfo(walletTunnel.getBizUserId());
+
+		companyInfo.setAccountNo(RSAUtil.decrypt(companyInfo.getAccountNo()));
+		companyInfo.setLegalIds(RSAUtil.decrypt(companyInfo.getLegalIds()));
+		return companyInfo;
 	}
 
 
@@ -487,9 +493,9 @@ public class SeniorWalletService {
 		// 通道成功而且
 		if (YunstCompanyInfoAuditStatus.SUCCESS.getValue().longValue() == companyInfo.getStatus()
 			&& EnumDef.WalletTunnelAuditStatus.AUDIT_SUCCESS.getValue().byteValue() == walletTunnel
-				.getStatus()
+			.getStatus()
 			&& walletTunnel.getCheckTime().before(
-				DateUtil.parse(companyInfo.getCheckTime(), DateUtil.STANDARD_DTAETIME_PATTERN))
+			DateUtil.parse(companyInfo.getCheckTime(), DateUtil.STANDARD_DTAETIME_PATTERN))
 		) {
 			log.info("手动刷新企业会员{}", walletTunnel.getBizUserId());
 			yunstNotifyHandler.handleAuditSucc(walletTunnel, companyInfo);
