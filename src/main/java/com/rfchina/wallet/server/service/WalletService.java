@@ -17,7 +17,6 @@ import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletFinanceDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletOwnerDao;
 import com.rfchina.wallet.domain.misc.EnumDef;
-import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletAuditType;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletCardStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumWalletLevel;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderStatus;
@@ -494,7 +493,9 @@ public class WalletService {
 			}
 		}
 		Wallet wallet = walletDao.selectByPrimaryKey(walletId);
-		wallet.setStatus(status);
+		if (WalletStatus.UNVALID.getValue().byteValue() != wallet.getStatus()) {
+			wallet.setStatus(status);
+		}
 		wallet.setAuditType(auditType.byteValue());
 		walletDao.updateByPrimaryKeySelective(wallet);
 

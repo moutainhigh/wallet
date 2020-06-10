@@ -158,9 +158,8 @@ public class YunstNotifyHandler {
 		// 更新钱包进度
 		wallet.setProgress(Optional.ofNullable(wallet.getProgress().intValue()).orElse(0)
 			| WalletProgress.TUNNEL_VALIDATE.getValue().intValue());
-		// 企业钱包激活
-		if (YunstMemberType.COMPANY.getValue().longValue() == walletTunnel.getMemberType()
-			&& WalletStatus.WAIT_AUDIT.getValue().byteValue() == wallet.getStatus()) {
+		// 钱包激活
+		if (WalletStatus.WAIT_AUDIT.getValue().byteValue() == wallet.getStatus()) {
 
 			wallet.setStatus(WalletStatus.ACTIVE.getValue());
 		}
