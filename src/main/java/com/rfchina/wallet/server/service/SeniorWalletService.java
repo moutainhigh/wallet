@@ -490,8 +490,9 @@ public class SeniorWalletService {
 		CompanyInfoResult companyInfo = (CompanyInfoResult) yunstUserHandler
 			.getMemberInfo(walletTunnel.getBizUserId());
 
-		// 通道成功而且
+		// 通道成功而且为企业类型
 		if (YunstCompanyInfoAuditStatus.SUCCESS.getValue().longValue() == companyInfo.getStatus()
+			&& YunstMemberType.COMPANY.getValue().byteValue() == walletTunnel.getMemberType()
 			&& EnumDef.WalletTunnelAuditStatus.AUDIT_SUCCESS.getValue().byteValue() == walletTunnel
 			.getStatus()
 			&& walletTunnel.getCheckTime().before(

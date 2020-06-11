@@ -1,6 +1,8 @@
 package com.rfchina.wallet.server.service.handler.yunst;
 
+import com.allinpay.yunst.sdk.util.RSAUtil;
 import com.rfchina.biztools.mq.PostMq;
+import com.rfchina.platform.common.misc.Try;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
 import com.rfchina.wallet.domain.misc.EnumDef;
@@ -87,7 +89,7 @@ public class YunstNotifyHandler {
 		try {
 
 			if (YunstCompanyInfoAuditStatus.SUCCESS.getValue().longValue() == rtnVal.getResult()) {
-				log.info("通道会员[{}]审核成功",walletTunnel.getBizUserId());
+				log.info("通道会员[{}]审核成功", walletTunnel.getBizUserId());
 				CompanyInfoResult companyInfo = (CompanyInfoResult) yunstUserHandler
 					.getMemberInfo(walletTunnel.getBizUserId());
 				companyInfo.setCheckTime(Optional.ofNullable(rtnVal.getCheckTime())
@@ -100,7 +102,7 @@ public class YunstNotifyHandler {
 
 			} else if (YunstCompanyInfoAuditStatus.FAIL.getValue().longValue() == rtnVal
 				.getResult()) {
-				log.info("通道会员[{}]审核失败",walletTunnel.getBizUserId());
+				log.info("通道会员[{}]审核失败", walletTunnel.getBizUserId());
 				handleAuditFail(walletTunnel, rtnVal.getFailReason(), rtnVal.getRemark());
 				return SLWalletMqMessage.builder()
 					.isPass(false)
@@ -114,7 +116,7 @@ public class YunstNotifyHandler {
 		return null;
 	}
 
-	public void handleAuditFail(WalletTunnel walletTunnel,String failReason,String remark){
+	public void handleAuditFail(WalletTunnel walletTunnel, String failReason, String remark) {
 		walletTunnel.setStatus(EnumDef.WalletTunnelAuditStatus.AUDIT_FAIL.getValue()
 			.byteValue());
 		walletTunnel.setFailReason(failReason);
@@ -128,8 +130,9 @@ public class YunstNotifyHandler {
 			.setStatus(EnumDef.WalletTunnelAuditStatus.AUDIT_SUCCESS.getValue().byteValue());
 		walletTunnel.setFailReason(null);
 		Date checkDate = new Date();
-		if(StringUtil.isNotBlank(companyInfo.getCheckTime())) {
-			checkDate = DateUtil.parse(companyInfo.getCheckTime(), DateUtil.STANDARD_DTAETIME_PATTERN);
+		if (StringUtil.isNotBlank(companyInfo.getCheckTime())) {
+			checkDate = DateUtil
+				.parse(companyInfo.getCheckTime(), DateUtil.STANDARD_DTAETIME_PATTERN);
 		}
 		walletTunnel.setCheckTime(checkDate);
 		walletTunnel.setSecurityTel(companyInfo.getPhone());
@@ -166,8 +169,8 @@ public class YunstNotifyHandler {
 		walletDao.updateByPrimaryKeySelective(wallet);
 
 		// 企业钱包更新银行卡账户
-		if (YunstMemberType.COMPANY.getValue().longValue() == walletTunnel.getMemberType()){
-			updateCompanyCard(wallet.getId(),companyInfo);
+		if (YunstMemberType.COMPANY.getValue().longValue() == walletTunnel.getMemberType()) {
+			updateCompanyCard(wallet.getId(), companyInfo);
 		}
 
 		// 发送钱包事件
@@ -175,7 +178,7 @@ public class YunstNotifyHandler {
 			, wallet.getLevel(), wallet.getStatus());
 	}
 
-	public void handleAuditWaiting(WalletTunnel walletTunnel){
+	public void handleAuditWaiting(WalletTunnel walletTunnel) {
 		walletTunnel.setStatus(
 			EnumDef.WalletTunnelAuditStatus.WAITING_AUDIT.getValue()
 				.byteValue());
@@ -184,27 +187,30 @@ public class YunstNotifyHandler {
 		walletTunnelDao.updateByPrimaryKeySelective(walletTunnel);
 	}
 
-	public void updateCompanyCard(Long walletId,CompanyInfoResult companyInfo){
+	public void updateCompanyCard(Long walletId, CompanyInfoResult companyInfo) {
 		List<WalletCard> walletCards = walletCardDao.selectPubAccountByWalletId(walletId);
 		// 解绑旧卡
 		if (walletCards != null && !walletCards.isEmpty()) {
 			walletCardDao.updateWalletCard(walletId,
-				EnumWalletCardStatus.UNBIND.getValue(),EnumWalletCardStatus.BIND.getValue(),
+				EnumWalletCardStatus.UNBIND.getValue(), EnumWalletCardStatus.BIND.getValue(),
 				EnumPublicAccount.YES.getValue(), EnumDefBankCard.NO.getValue());
 		}
 
 		Date checkDate = new Date();
-		if(StringUtil.isNotBlank(companyInfo.getCheckTime())) {
-			checkDate = DateUtil.parse(companyInfo.getCheckTime(), DateUtil.STANDARD_DTAETIME_PATTERN);
+		if (StringUtil.isNotBlank(companyInfo.getCheckTime())) {
+			checkDate = DateUtil
+				.parse(companyInfo.getCheckTime(), DateUtil.STANDARD_DTAETIME_PATTERN);
 		}
 		// 插入新卡
+		String accountNo = Try.of((String data) -> RSAUtil.decrypt(data), null)
+			.apply(companyInfo.getAccountNo());
 		walletCardDao.insertSelective(WalletCard.builder()
 			.cardType(WalletCardType.DEPOSIT.getValue())
 			.walletId(walletId)
 			.bankCode(" ")
 			.bankName(companyInfo.getParentBankName())
 			.depositBank(companyInfo.getBankName())
-			.bankAccount(companyInfo.getAccountNo())
+			.bankAccount(accountNo)
 			.verifyChannel(VerifyChannel.YUNST.getValue())
 			.verifyTime(checkDate)
 			.isPublic(EnumPublicAccount.YES.getValue().byteValue())
