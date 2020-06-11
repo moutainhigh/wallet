@@ -1042,6 +1042,7 @@ public class SeniorPayService {
 	}
 
 	public Wallet syncTunnelAmount(WalletTunnel walletTunnel) {
+		log.info("[余额同步] 通道记录[{}]更新余额", walletTunnel.getId());
 		// 通联查余额
 		YunstQueryBalanceResult result = yunstUserHandler
 			.queryBalance(walletTunnel.getBizUserId());
@@ -1050,12 +1051,15 @@ public class SeniorPayService {
 		walletTunnel.setFreezenAmount(result.getFreezenAmount());
 		walletTunnel.setIsDirty(DirtyType.NORMAL.getValue());
 		walletTunnelDao.updateByPrimaryKeySelective(walletTunnel);
+		log.info("[余额同步] 通道[{}]更新余额", walletTunnel.getId());
+
 		// 更新钱包余额
 		Wallet wallet = walletDao.selectByPrimaryKey(walletTunnel.getWalletId());
 		wallet.setWalletBalance(walletTunnel.getBalance());
 		wallet.setFreezeAmount(walletTunnel.getFreezenAmount());
 		wallet.setBalanceUpdTime(new Date());
 		walletDao.updateByPrimaryKeySelective(wallet);
+		log.info("[余额同步] 钱包[{}]更新余额", wallet.getId());
 		return wallet;
 	}
 

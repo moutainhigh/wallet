@@ -356,7 +356,7 @@ public class SeniorWalletService {
 						// 自动审核通过
 						CompanyInfoResult companyInfo = (CompanyInfoResult) yunstUserHandler
 							.getMemberInfo(walletTunnel.getBizUserId());
-						yunstNotifyHandler.handleAuditSucc(walletTunnel, companyInfo);
+						yunstNotifyHandler.handleCompanyAuditSucc(walletTunnel, companyInfo);
 					} else if (YunstCompanyInfoAuditStatus.FAIL.getValue() == result.longValue()) {
 						// 自动审核失败
 						yunstNotifyHandler.handleAuditFail(walletTunnel,
@@ -499,7 +499,7 @@ public class SeniorWalletService {
 			DateUtil.parse(companyInfo.getCheckTime(), DateUtil.STANDARD_DTAETIME_PATTERN))
 		) {
 			log.info("手动刷新企业会员{}", walletTunnel.getBizUserId());
-			yunstNotifyHandler.handleAuditSucc(walletTunnel, companyInfo);
+			yunstNotifyHandler.handleCompanyAuditSucc(walletTunnel, companyInfo);
 		}
 		return companyInfo;
 	}
@@ -528,22 +528,7 @@ public class SeniorWalletService {
 			new WalletResponseException(EnumWalletResponseCode.TUNNEL_INFO_NOT_EXISTS,
 				tunnelType + " " + walletId));
 
-		boolean needUpdate = !Optional.ofNullable(walletTunnel.getIsDirty()).isPresent()
-			|| walletTunnel.getIsDirty() != DirtyType.NORMAL.getValue().byteValue();
-		Wallet wallet = walletDao.selectByPrimaryKey(walletTunnel.getWalletId());
-		if (!needUpdate) {
-			needUpdate = !Optional.ofNullable(wallet.getBalanceUpdTime()).isPresent()
-				|| DateUtil.addSecs(wallet.getBalanceUpdTime(), 1800).before(new Date());
-		}
-		needUpdate = needUpdate
-			&& WalletTunnelAuditStatus.AUDIT_SUCCESS.getValue().byteValue() == walletTunnel
-			.getStatus().byteValue();
-
-		if (needUpdate) {
-			updateBalance(walletTunnel, wallet);
-		}
-
-		//特殊处理思力账号
+		//特殊处理思力账号，思力账号不能开通扣款协议
 		if (Objects.nonNull(configService.getAgentEntWalletId())
 			&& configService.getAgentEntWalletId() == walletId.longValue()
 			&& WalletTunnelSignContract.MEMBER.getValue().byteValue() == walletTunnel

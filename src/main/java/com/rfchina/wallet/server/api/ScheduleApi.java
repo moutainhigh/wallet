@@ -36,4 +36,7 @@ public interface ScheduleApi {
 
 	/** 定时同步通道信息 */
 	void quartzSyncTunnel();
+
+	/** 定时同步通道余额 */
+	void quartzSyncBalance();
 }

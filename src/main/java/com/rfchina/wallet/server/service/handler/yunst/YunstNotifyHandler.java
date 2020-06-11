@@ -94,7 +94,7 @@ public class YunstNotifyHandler {
 					.getMemberInfo(walletTunnel.getBizUserId());
 				companyInfo.setCheckTime(Optional.ofNullable(rtnVal.getCheckTime())
 					.orElse(companyInfo.getCheckTime()));
-				handleAuditSucc(walletTunnel, companyInfo);
+				handleCompanyAuditSucc(walletTunnel, companyInfo);
 				return SLWalletMqMessage.builder()
 					.isPass(true)
 					.checkTime(rtnVal.getCheckTime())
@@ -124,7 +124,7 @@ public class YunstNotifyHandler {
 		walletTunnelDao.updateByPrimaryKey(walletTunnel);
 	}
 
-	public void handleAuditSucc(WalletTunnel walletTunnel, CompanyInfoResult companyInfo) {
+	public void handleCompanyAuditSucc(WalletTunnel walletTunnel, CompanyInfoResult companyInfo) {
 
 		walletTunnel
 			.setStatus(EnumDef.WalletTunnelAuditStatus.AUDIT_SUCCESS.getValue().byteValue());
@@ -138,23 +138,28 @@ public class YunstNotifyHandler {
 		walletTunnel.setSecurityTel(companyInfo.getPhone());
 		walletTunnel.setRemark(companyInfo.getRemark());
 		walletTunnelExtDao.updateByPrimaryKey(walletTunnel);
+		log.info("[通道同步]通道[{}]会员[{}]，更新本地通道成功", walletTunnel.getId(),
+			walletTunnel.getBizUserId());
 		// 更新验证记录
+		byte type = WalletVerifyRefType.COMPANY.getValue().byteValue();
+		byte verifyType = WalletVerifyType.COMPANY_VERIFY.getValue().byteValue();
 		WalletVerifyHis walletVerifyHis = walletVerifyHisExtDao
 			.selectByWalletIdAndRefIdAndType(walletTunnel.getWalletId(), walletTunnel.getId(),
-				WalletVerifyRefType.COMPANY.getValue().byteValue());
+				type);
 		if (null == walletVerifyHis
 			|| walletVerifyHis.getVerifyTime().compareTo(walletTunnel.getCheckTime()) == -1) {
-			walletVerifyHisExtDao.insertSelective(
-				WalletVerifyHis.builder()
-					.walletId(walletTunnel.getWalletId())
-					.refId(walletTunnel.getId())
-					.type(WalletVerifyRefType.COMPANY.getValue().byteValue())
-					.verifyChannel(VerifyChannel.YUNST.getValue())
-					.verifyType(WalletVerifyType.COMPANY_VERIFY.getValue().byteValue())
-					.verifyTime(walletTunnel.getCheckTime())
-					.createTime(walletTunnel.getCheckTime())
-					.build()
-			);
+			WalletVerifyHis verifyHis = WalletVerifyHis.builder()
+				.walletId(walletTunnel.getWalletId())
+				.refId(walletTunnel.getId())
+				.type(type)
+				.verifyChannel(VerifyChannel.YUNST.getValue())
+				.verifyType(verifyType)
+				.verifyTime(walletTunnel.getCheckTime())
+				.createTime(walletTunnel.getCheckTime())
+				.build();
+			walletVerifyHisExtDao.insertSelective(verifyHis);
+			log.info("[通道同步]通道[{}]会员[{}]，插入审核日志[{}]", walletTunnel.getId(),
+				walletTunnel.getBizUserId(), verifyHis.getId());
 		}
 
 		Wallet wallet = walletDao.selectByPrimaryKey(walletTunnel.getWalletId());

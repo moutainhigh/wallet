@@ -11,8 +11,6 @@ import com.rfchina.wallet.domain.mapper.ext.BankCodeDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletBalanceDetailDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletFinanceDao;
-import com.rfchina.wallet.domain.mapper.ext.WalletTunnelDao;
-import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.BizValidateType;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderSubStatus;
@@ -502,19 +500,23 @@ public class ScheduleService {
 	}
 
 	@PostMq(routingKey = MqConstant.WALLET_SENIOR_COMPANY_AUDIT)
-	public SLWalletMqMessage syncCompanyTunnel(WalletTunnel walletTunnel){
+	public SLWalletMqMessage syncCompanyTunnel(WalletTunnel walletTunnel) {
 		try {
-
 
 			CompanyInfoResult companyInfo = (CompanyInfoResult) yunstUserHandler
 				.getMemberInfo(walletTunnel.getBizUserId());
 
+			log.info("[通道同步]更新通道[{}]会员[{}]的状态[{}]", walletTunnel.getId(),
+				walletTunnel.getBizUserId(), companyInfo.getStatus());
 			// 审核中，不发MQ
 			if (YunstCompanyInfoAuditStatus.WAITING.getValue().longValue()
 				== companyInfo.getStatus().longValue()) {
+				log.info("[通道同步]更新通道[{}]会员[{}]，终态未明确，不进行更新", walletTunnel.getId(),
+					walletTunnel.getBizUserId());
 				return null;
 			}
 
+			// 设置checkTime
 			Date checkTime = DateUtil
 				.parse(companyInfo.getCheckTime(), DateUtil.STANDARD_DTAETIME_PATTERN);
 			walletTunnel.setCheckTime(checkTime);
@@ -524,14 +526,18 @@ public class ScheduleService {
 			if (YunstCompanyInfoAuditStatus.SUCCESS.getValue().longValue()
 				== companyInfo.getStatus()) {
 
-				yunstNotifyHandler.handleAuditSucc(walletTunnel,companyInfo);
+				log.info("[通道同步]更新通道[{}]会员[{}]，通道成功", walletTunnel.getId(),
+					walletTunnel.getBizUserId());
+				yunstNotifyHandler.handleCompanyAuditSucc(walletTunnel, companyInfo);
 				builder.isPass(true);
 
 			} else if (YunstCompanyInfoAuditStatus.FAIL.getValue().longValue()
 				== companyInfo.getStatus()) {
 
-				yunstNotifyHandler.handleAuditFail(walletTunnel,companyInfo.getFailReason()
-					,companyInfo.getRemark());
+				log.info("[通道同步]更新通道[{}]会员[{}]，通道失败", walletTunnel.getId(),
+					walletTunnel.getBizUserId());
+				yunstNotifyHandler.handleAuditFail(walletTunnel, companyInfo.getFailReason()
+					, companyInfo.getRemark());
 				builder.isPass(false);
 			}
 
@@ -540,8 +546,8 @@ public class ScheduleService {
 				.failReason(companyInfo.getFailReason())
 				.build();
 
-		}catch (Exception e){
-			log.error("定时任务同步通道信息错误",e);
+		} catch (Exception e) {
+			log.error("定时任务同步通道信息错误", e);
 		}
 
 		return null;

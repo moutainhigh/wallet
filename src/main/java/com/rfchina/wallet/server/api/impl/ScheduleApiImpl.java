@@ -7,9 +7,12 @@ import com.rfchina.biztools.lock.SimpleExclusiveLock;
 import com.rfchina.passport.misc.SessionThreadLocal;
 import com.rfchina.platform.common.annotation.Log;
 import com.rfchina.platform.common.utils.DateUtil;
+import com.rfchina.wallet.domain.mapper.ext.WalletDao;
+import com.rfchina.wallet.domain.misc.EnumDef.DirtyType;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderType;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelAuditStatus;
+import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletConfig;
 import com.rfchina.wallet.domain.model.WalletConfigCriteria;
 import com.rfchina.wallet.domain.model.WalletConfigCriteria.Criteria;
@@ -29,11 +32,13 @@ import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.ScheduleService;
 import com.rfchina.wallet.server.service.SeniorBalanceService;
 import com.rfchina.wallet.server.service.SeniorChargingService;
+import com.rfchina.wallet.server.service.SeniorPayService;
 import com.rfchina.wallet.server.service.WalletService;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBaseHandler.YunstMemberType;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +77,12 @@ public class ScheduleApiImpl implements ScheduleApi {
 
 	@Autowired
 	private WalletTunnelExtDao walletTunnelDao;
+
+	@Autowired
+	private WalletDao walletDao;
+
+	@Autowired
+	private SeniorPayService seniorPayService;
 
 
 	@Log
@@ -212,6 +223,7 @@ public class ScheduleApiImpl implements ScheduleApi {
 
 	@Override
 	public void quartzSyncTunnel() {
+
 		new LockDone(lock).apply(LockConstant.LOCK_QUARTZ_SYNC_TUNNEL, 1800, () -> {
 			new MaxIdIterator<WalletTunnel>().apply((maxId) -> {
 
@@ -229,5 +241,42 @@ public class ScheduleApiImpl implements ScheduleApi {
 				return walletTunnel.getId();
 			});
 		});
+	}
+
+
+	@Override
+	public void quartzSyncBalance() {
+
+		new LockDone(lock).apply(LockConstant.LOCK_QUARTZ_SYNC_BALANCE, 1800, () -> {
+
+			new MaxIdIterator<WalletTunnel>().apply((maxId) -> {
+
+				WalletTunnelCriteria example = new WalletTunnelCriteria();
+				WalletTunnelCriteria.Criteria criteria = example.createCriteria();
+				criteria.andIdGreaterThan(maxId)
+					.andStatusEqualTo(WalletTunnelAuditStatus.AUDIT_SUCCESS.getValue().byteValue())
+					.andWalletIdGreaterThan(0L);
+				return walletTunnelDao
+					.selectByExampleWithRowbounds(example, new RowBounds(0, 100));
+			}, (walletTunnel) -> {
+
+				boolean needUpdate = !Optional.ofNullable(walletTunnel.getIsDirty()).isPresent()
+					|| walletTunnel.getIsDirty() != DirtyType.NORMAL.getValue().byteValue();
+				log.info("[余额同步] 通道记录[{}]状态[{}]", walletTunnel.getId(), needUpdate);
+				Wallet wallet = walletDao.selectByPrimaryKey(walletTunnel.getWalletId());
+				if (!needUpdate) {
+					needUpdate = !Optional.ofNullable(wallet.getBalanceUpdTime()).isPresent()
+						|| DateUtil.addSecs(wallet.getBalanceUpdTime(), 1800).before(new Date());
+				}
+				log.info("[余额同步] 钱包记录[{}]状态[{}]", wallet.getId(), needUpdate);
+
+				if (needUpdate) {
+					seniorPayService.syncTunnelAmount(walletTunnel);
+				}
+
+				return walletTunnel.getId();
+			});
+		});
+
 	}
 }

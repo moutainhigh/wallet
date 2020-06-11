@@ -31,6 +31,10 @@ public class LockConstant {
 	 */
 	public static String LOCK_QUARTZ_SYNC_TUNNEL = "quartzSyncTunnel";
 	/**
+	 * 定时同步余额
+	 */
+	public static String LOCK_QUARTZ_SYNC_BALANCE = "quartzSyncBalance";
+	/**
 	 * 定时通联通道手续费报表统计
 	 */
 	public static String LOCK_QUARTZ_YUNST_FEE_REPORT = "quartzYunstFeeReprot";
