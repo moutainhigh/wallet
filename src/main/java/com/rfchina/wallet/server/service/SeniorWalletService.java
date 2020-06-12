@@ -367,7 +367,12 @@ public class SeniorWalletService {
 					yunstNotifyHandler.handleAuditWaiting(walletTunnel);
 					CompanyInfoResult companyInfo = (CompanyInfoResult) yunstUserHandler
 						.getMemberInfo(walletTunnel.getBizUserId());
-					yunstNotifyHandler.updateCompanyCard(walletTunnel.getWalletId(), companyInfo);
+
+					int count = walletCardDao.countPubAccountByWalletId(walletTunnel.getWalletId());
+					if(count == 0 ) {
+						yunstNotifyHandler
+							.updateCompanyCard(walletTunnel.getWalletId(), companyInfo);
+					}
 				}
 
 			} catch (CommonGatewayException cge) {

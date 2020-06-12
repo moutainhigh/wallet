@@ -9,7 +9,7 @@ import org.apache.ibatis.annotations.Update;
 
 public interface WalletCompanyExtDao extends WalletCompanyMapper {
 
-	@Select({"select * from rf_wallet_company where wallet_id = #{walletId}"})
+	@Select({"select * from rf_wallet_company where wallet_id = #{walletId} limit 1"})
 	@ResultMap("com.rfchina.wallet.domain.mapper.WalletCompanyMapper.BaseResultMap")
 	WalletCompany selectByWalletId(@Param("walletId") Long walletId);
 

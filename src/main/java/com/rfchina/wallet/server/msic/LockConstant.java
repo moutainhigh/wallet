@@ -30,6 +30,8 @@ public class LockConstant {
 	 * 定时同步通道
 	 */
 	public static String LOCK_QUARTZ_SYNC_TUNNEL = "quartzSyncTunnel";
+	/** 更新银行卡锁 */
+	public static String LOCK_CARD_UPDATE = "UPDATE_COMPANY_CARD";
 	/**
 	 * 定时同步余额
 	 */
