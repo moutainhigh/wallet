@@ -3,6 +3,9 @@
 测试环境
 jenkins job: platform-rfwallet-server-test
 ```
+## 1.6.0_b6_2020061212_Beta
+- 增加插卡锁
+
 ## 1.6.0_b5_2020061014_Beta
 - 重构商家审批流程
 
