@@ -3,6 +3,9 @@
 测试环境
 jenkins job: platform-rfwallet-server-test
 ```
+## 1.6.1_2020061815_Release
+- 绑定终端小修改
+
 ## 1.6.0_b6_2020061214_Beta 1.6.0_2020061216_Release
 - 3.5发版
 

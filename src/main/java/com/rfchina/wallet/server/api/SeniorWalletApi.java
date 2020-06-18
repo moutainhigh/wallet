@@ -154,7 +154,7 @@ public interface SeniorWalletApi {
 	 *
 	 * @param walletId 必填, 钱包id
 	 */
-	YunstMemberInfoResult.CompanyInfoResult manualCompanyAudit(String accessToken,Long walletId);
+	YunstMemberInfoResult.CompanyInfoResult manualCompanyAudit(String accessToken, Long walletId);
 
 	/**
 	 * 解绑手机
@@ -176,5 +176,6 @@ public interface SeniorWalletApi {
 
 	void bindTerminal(Long walletId, Long terminalId);
 
-	void createTerminal(String appId, String vspMerchantid, String vspCusid, String vspTermid, String province, String mchId, String mchName, String shopAddress);
+	void createTerminal(String appId, String vspMerchantid, String vspCusid, String vspTermid,
+		String province, String mchId, String mchName, String shopAddress);
 }

@@ -29,7 +29,6 @@ import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.api.SeniorWalletApi;
 import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
-import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq.CompanyBasicInfo;
 import com.rfchina.wallet.server.bank.yunst.response.VspTermidResp;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.CompanyInfoResult;
@@ -516,19 +515,31 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@ParamVerify
 	@Override
 	public void bindTerminal(Long walletId, Long terminalId) {
+		log.info("钱包[{}]绑定终端[{}]开始", walletId, terminalId);
 		WalletTerminal walletTerminal = walletTerminalDao.selectByPrimaryKey(terminalId);
 		Optional.ofNullable(walletTerminal)
 			.ifPresent(p -> {
 				WalletTunnel tunnel = walletTunnelDao
 					.selectByWalletId(walletId, TunnelType.YUNST.getValue());
+				Objects.requireNonNull(tunnel);
+				Objects.requireNonNull(tunnel.getBizUserId());
+				Objects.requireNonNull(p.getVspMerchantid());
+				Objects.requireNonNull(p.getVspCusid());
+				Objects.requireNonNull(p.getAppId());
+				Objects.requireNonNull(p.getVspTermid());
+
 				VspTermidResp resp = seniorWalletService.bindTerminal(tunnel.getBizUserId()
 					, p.getVspMerchantid(), p.getVspCusid(), p.getAppId(), p.getVspTermid());
 
-				if (resp.getResult().equalsIgnoreCase("OK") && !resp.getVspTermidList().isEmpty()) {
+				if (resp.getResult().equalsIgnoreCase("OK")) {
 					walletTerminal.setWalletId(walletId);
 					walletTerminal.setBindTime(new Date());
 					walletTerminal.setStatus(EnumTerminalStatus.BIND.getValue());
 					walletTerminalDao.updateByPrimaryKeySelective(walletTerminal);
+					log.info("钱包[{}]绑定终端[{}]成功", walletId, terminalId);
+				}else{
+					throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+						resp.getResult());
 				}
 			});
 	}

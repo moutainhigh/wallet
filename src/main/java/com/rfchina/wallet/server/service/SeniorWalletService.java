@@ -369,7 +369,7 @@ public class SeniorWalletService {
 						.getMemberInfo(walletTunnel.getBizUserId());
 
 					int count = walletCardDao.countPubAccountByWalletId(walletTunnel.getWalletId());
-					if(count == 0 ) {
+					if (count == 0) {
 						yunstNotifyHandler
 							.updateCompanyCard(walletTunnel.getWalletId(), companyInfo);
 					}
@@ -567,13 +567,8 @@ public class SeniorWalletService {
 	public VspTermidResp bindTerminal(String bizUserId, String vspMerchantid, String vspCusid,
 		String appId, String vspTermid) {
 
-		VspTermidResp resp = yunstUserHandler.vspTermid(bizUserId, vspMerchantid
-			, vspCusid, appId, vspTermid, "query");
-		if (resp.getVspTermidList().isEmpty()) {
-			resp = yunstUserHandler.vspTermid(bizUserId, vspMerchantid
-				, vspCusid, appId, vspTermid, "set");
-		}
-		return resp;
+		return yunstUserHandler
+			.vspTermid(bizUserId, vspMerchantid, vspCusid, appId, vspTermid, "set");
 	}
 
 	public VspTermidResp bindTerminal(Long walletId, String vspMerchantid, String vspCusid,

@@ -236,7 +236,7 @@ public class SeniorWalletController {
 		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId) {
 
 		PersonInfoResult result = seniorWalletApi.getPersonInfo(accessToken, walletId);
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,result);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result);
 	}
 
 
@@ -248,7 +248,7 @@ public class SeniorWalletController {
 	) {
 
 		CompanyInfoResult result = seniorWalletApi.getCompanyInfo(accessToken, walletId);
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,result);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result);
 	}
 
 
@@ -322,11 +322,11 @@ public class SeniorWalletController {
 	@PostMapping(UrlConstant.WALLET_QUERY_TERMINAL)
 	public ResponseValue<Pagination<WalletTerminal>> queryTerminal(
 		@RequestParam("access_token") String accessToken,
-		@ApiParam(value = "钱包id", required = false) @RequestParam(value = "wallet_id",required = false) Long walletId,
-		@ApiParam(value = "子商户号", required = false) @RequestParam(value = "vsp_cusid",required = false) String vspCusid,
-		@ApiParam(value = "终端号", required = false) @RequestParam(value = "vsp_termid",required = false) String vspTermid,
-		@ApiParam(value = "省份", required = false) @RequestParam(value = "province",required = false) String province,
-		@ApiParam(value = "商家id", required = false) @RequestParam(value = "mch_id",required = false) String mchId,
+		@ApiParam(value = "钱包id", required = false) @RequestParam(value = "wallet_id", required = false) Long walletId,
+		@ApiParam(value = "子商户号", required = false) @RequestParam(value = "vsp_cusid", required = false) String vspCusid,
+		@ApiParam(value = "终端号", required = false) @RequestParam(value = "vsp_termid", required = false) String vspTermid,
+		@ApiParam(value = "省份", required = false) @RequestParam(value = "province", required = false) String province,
+		@ApiParam(value = "商家id", required = false) @RequestParam(value = "mch_id", required = false) String mchId,
 		@ApiParam(value = "limit", required = true) @RequestParam("limit") Integer limit,
 		@ApiParam(value = "offset", required = true) @RequestParam("offset") Integer offset
 	) {
