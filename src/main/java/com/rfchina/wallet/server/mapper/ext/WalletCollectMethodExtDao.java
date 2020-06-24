@@ -20,10 +20,11 @@ public interface WalletCollectMethodExtDao extends WalletCollectMethodMapper {
 		@Param("type") Byte type);
 
 	@Update({
-		"update rf_wallet_collect_method set payType = {payType}",
+		"select* from rf_wallet_collect_method",
 		"where order_id in ",
 		"select id from rf_wallet_order where order_no = #{orderNo}"
 	})
-	int updatePayTypeByOrderNo(@Param("orderNo") String orderNo,
-		@Param("payType") Byte payType);
+	@ResultMap("com.rfchina.wallet.domain.mapper.WalletCollectMethodMapper.BaseResultMap")
+	WalletCollectMethod getByOrderNo(@Param("orderNo") String orderNo);
+
 }

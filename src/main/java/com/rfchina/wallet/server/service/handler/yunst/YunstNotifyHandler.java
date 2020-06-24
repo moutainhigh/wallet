@@ -26,6 +26,7 @@ import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.model.ChannelNotify;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletCard;
+import com.rfchina.wallet.domain.model.WalletCollectMethod;
 import com.rfchina.wallet.domain.model.WalletCompany;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.domain.model.WalletVerifyHis;
@@ -368,8 +369,14 @@ public class YunstNotifyHandler {
 			} else {
 				return;
 			}
-			// 更新pay_type到rf_wallet_collect_method
-			walletCollectMethodDao.updatePayTypeByOrderNo(rtnVal.getBizOrderNo(), payType);
+			// 根据订单号获取payType
+			WalletCollectMethod method = walletCollectMethodDao
+				.getByOrderNo(rtnVal.getBizOrderNo());
+			// 如果pay_type是61则为pos机支付，更新pay_type到rf_wallet_collect_method
+			if (method.getPayType().equals(CollectPayType.POS.getValue())) {
+				method.setPayType(payType);
+				walletCollectMethodDao.updateByPrimaryKey(method);
+			}
 		}
 	}
 
