@@ -2,10 +2,12 @@ package com.rfchina.wallet.server.service.handler.yunst;
 
 import com.allinpay.yunst.sdk.util.RSAUtil;
 import com.rfchina.biztools.functionnal.LockDone;
+import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.biztools.lock.SimpleExclusiveLock;
 import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.platform.common.misc.Try;
 import com.rfchina.platform.common.utils.DateUtil;
+import com.rfchina.wallet.domain.mapper.ext.WalletCollectMethodDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumDefBankCard;
@@ -30,12 +32,16 @@ import com.rfchina.wallet.domain.model.WalletVerifyHis;
 import com.rfchina.wallet.server.bank.yunst.response.YunstNotify;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.CompanyInfoResult;
 import com.rfchina.wallet.server.mapper.ext.WalletCardExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletCollectMethodExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCompanyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletVerifyHisExtDao;
 import com.rfchina.wallet.server.model.ext.SLWalletMqMessage;
+import com.rfchina.wallet.server.msic.EnumWallet;
+import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
 import com.rfchina.wallet.server.msic.EnumWallet.YunstCompanyInfoAuditStatus;
 import com.rfchina.wallet.server.msic.LockConstant;
+import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.SeniorWalletService;
 import com.rfchina.wallet.server.service.WalletEventService;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBaseHandler.YunstMemberType;
@@ -63,9 +69,13 @@ public class YunstNotifyHandler {
 	private YunstBizHandler yunstBizHandler;
 	@Autowired
 	private SeniorWalletService seniorWalletService;
+	@Autowired
+	private ConfigService configService;
 
 	@Autowired
 	private WalletDao walletDao;
+	@Autowired
+	private WalletCollectMethodExtDao walletCollectMethodDao;
 
 	@Autowired
 	private WalletCompanyExtDao walletCompanyDao;
@@ -327,6 +337,39 @@ public class YunstNotifyHandler {
 		int effectRows = walletTunnelExtDao.updateByPrimaryKeySelective(walletChannel);
 		if (effectRows != 1) {
 			log.error("处理个人设置支付密码失败:bizUserId:{}", bizUserId);
+		}
+	}
+
+	public void handleOrderResult(YunstNotify.OrderResult rtnVal) {
+		// 筛选代付订单
+		String collectOrderPrefix =
+			configService.getOrderNoPrefix() + IdGenerator.PREFIX_WALLE_COLLECT;
+		if (rtnVal.getBizOrderNo().startsWith(collectOrderPrefix)) {
+			Byte payType;
+			String payInterFacetrxcode = Optional.ofNullable(rtnVal.getPayInterfacetrxcode())
+				.orElse(
+					""); // 通道交易类型：VSP501 微信支付;VSP502 微信支付撤销;VSP503 微信支付退款;VSP505 手机QQ 支付;VSP506 手机QQ 支付撤销;VSP507 手机QQ 支付退款;VSP511 支付宝支付;VSP512 支付宝支付撤销;VSP513 支付宝支付退款;VSP551 银联扫码支付;VSP552 银联扫码撤销;VSP553 银联扫码退货
+			if (payInterFacetrxcode.equals("VSP501") ||
+				payInterFacetrxcode.equals("VSP502") ||
+				payInterFacetrxcode.equals("VSP503")) {
+				payType = CollectPayType.POS_WECHAT.getValue();
+			} else if (payInterFacetrxcode.equals("VSP505") ||
+				payInterFacetrxcode.equals("VSP506") ||
+				payInterFacetrxcode.equals("VSP507")) {
+				payType = CollectPayType.POS_QQ.getValue();
+			} else if (payInterFacetrxcode.equals("VSP511") ||
+				payInterFacetrxcode.equals("VSP512") ||
+				payInterFacetrxcode.equals("VSP513")) {
+				payType = CollectPayType.POS_ALIPAY.getValue();
+			} else if (payInterFacetrxcode.equals("VSP551") ||
+				payInterFacetrxcode.equals("VSP552") ||
+				payInterFacetrxcode.equals("VSP53")) {
+				payType = CollectPayType.POS_UNION.getValue();
+			} else {
+				return;
+			}
+			// 更新pay_type到rf_wallet_collect_method
+			walletCollectMethodDao.updatePayTypeByOrderNo(rtnVal.getBizOrderNo(), payType);
 		}
 	}
 
