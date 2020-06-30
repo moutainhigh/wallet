@@ -9,6 +9,7 @@ import com.rfchina.platform.biztools.CacheHashMap;
 import com.rfchina.platform.common.misc.Triple;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.BeanUtil;
+import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletBalanceDetailDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
@@ -68,6 +69,7 @@ import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
 import com.rfchina.wallet.server.model.ext.SettleResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
+import com.rfchina.wallet.server.model.ext.WalletOrderEx;
 import com.rfchina.wallet.server.model.ext.WithdrawResp;
 import com.rfchina.wallet.server.msic.EnumWallet.BalanceFreezeMode;
 import com.rfchina.wallet.server.msic.EnumWallet.BudgetMode;
@@ -87,6 +89,7 @@ import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -971,8 +974,18 @@ public class SeniorPayService {
 	/**
 	 * 订单查询
 	 */
-	public WalletOrder orderQuery(String orderNo) {
-		return walletOrderDao.selectByOrderNo(orderNo);
+	public WalletOrderEx orderQuery(String orderNo) {
+		WalletOrder rs = walletOrderDao.selectByOrderNo(orderNo);
+		WalletOrderEx result = new WalletOrderEx();
+		BeanUtil.copyProperties(rs, result);
+		// 20200629 新增 判断是否为通联pos机订单，如果是，则更新实际支付方式到payType字段
+		if (ChannelType.POS.getValue().equals(rs.getPayMethod())) {
+			// 获取payType
+			WalletCollectMethod method = walletCollectMethodDao
+				.getByOrderNo(rs.getOrderNo());
+			result.setPayType(method.getPayType().intValue());
+		}
+		return result;
 	}
 
 	/**
@@ -1003,8 +1016,8 @@ public class SeniorPayService {
 	}
 
 	@PostMq(routingKey = MqConstant.ORDER_STATUS_CHANGE)
-	public WalletOrder updateOrderStatusWithMq(String orderNo, boolean incQuery) {
-		WalletOrder walletOrder = updateOrderStatus(orderNo, incQuery);
+	public WalletOrderEx updateOrderStatusWithMq(String orderNo, boolean incQuery) {
+		WalletOrderEx walletOrder = updateOrderStatus(orderNo, incQuery);
 		return Optional.ofNullable(walletOrder)
 			.filter(order -> OrderStatus.WAITTING.getValue().byteValue() != order.getStatus()
 				.byteValue())
@@ -1012,7 +1025,7 @@ public class SeniorPayService {
 	}
 
 
-	public WalletOrder updateOrderStatus(String orderNo, boolean incQuery) {
+	public WalletOrderEx updateOrderStatus(String orderNo, boolean incQuery) {
 		WalletOrder order = verifyService.checkOrder(orderNo, OrderStatus.WAITTING.getValue());
 		EBankHandler handler = handlerHelper.selectByTunnelType(order.getTunnelType());
 		try {
@@ -1021,9 +1034,11 @@ public class SeniorPayService {
 				order.setCurrTryTimes(order.getCurrTryTimes() + 1);
 			}
 			List<Triple<WalletOrder, WalletFinance, GatewayTrans>> triples = handler
-				.updateOrderStatus(Arrays.asList(order));
-
+				.updateOrderStatus(Collections.singletonList(order));
 			WalletOrder rs = triples.get(0).x;
+			WalletOrderEx result = new WalletOrderEx();
+			BeanUtil.copyProperties(rs, result);
+
 			if (OrderStatus.SUCC.getValue().byteValue() == rs.getStatus().byteValue()) {
 				WalletTunnel walletTunnel = walletTunnelDao
 					.selectByWalletId(order.getWalletId(), order.getTunnelType());
@@ -1032,10 +1047,18 @@ public class SeniorPayService {
 					WalletConsume walletConsume = walletConsumeDao.selectByOrderId(order.getId());
 					WalletTunnel payeeTunnel = walletTunnelDao
 						.selectByWalletId(walletConsume.getPayeeWalletId(), order.getTunnelType());
-					Optional.ofNullable(payeeTunnel).ifPresent(t -> syncTunnelAmount(t));
+					Optional.ofNullable(payeeTunnel).ifPresent(this::syncTunnelAmount);
+				}
+				// 20200629 新增 判断是否为通联pos机订单，如果是，则更新实际支付方式到payType字段
+				if (ChannelType.POS.getValue().equals(rs.getPayMethod())) {
+					// 获取payType
+					WalletCollectMethod method = walletCollectMethodDao
+						.getByOrderNo(rs.getOrderNo());
+					result.setPayType(method.getPayType().intValue());
 				}
 			}
-			return rs;
+
+			return result;
 		} finally {
 			lock.unLock(LockConstant.LOCK_PAY_ORDER + order.getOrderNo());
 		}

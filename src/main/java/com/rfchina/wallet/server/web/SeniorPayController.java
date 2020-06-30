@@ -22,6 +22,7 @@ import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
 import com.rfchina.wallet.server.model.ext.SettleResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
+import com.rfchina.wallet.server.model.ext.WalletOrderEx;
 import com.rfchina.wallet.server.model.ext.WithdrawResp;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import io.swagger.annotations.Api;
@@ -155,11 +156,11 @@ public class SeniorPayController {
 
 	@ApiOperation("高级钱包-订单结果查询")
 	@PostMapping(UrlConstant.SENIOR_WALLET_ORDER_QUERY)
-	public ResponseValue<WalletOrder> orderQuery(
+	public ResponseValue<WalletOrderEx> orderQuery(
 		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
 		@ApiParam(value = "统一订单号", required = true) @RequestParam("order_no") String orderNo
 	) {
-		WalletOrder order = seniorPayApi.orderQuery(accessToken, orderNo);
+		WalletOrderEx order = seniorPayApi.orderQuery(accessToken, orderNo);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, order);
 	}
 

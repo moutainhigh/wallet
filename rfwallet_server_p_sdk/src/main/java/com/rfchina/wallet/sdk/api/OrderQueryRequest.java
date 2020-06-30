@@ -27,7 +27,7 @@ public class OrderQueryRequest extends  AbstractApiRequest {
 
   @Override
   public Class<?> getResponseModelClass() {
-    return WalletOrder.class;
+    return WalletOrderEx.class;
   }
 
   @Override

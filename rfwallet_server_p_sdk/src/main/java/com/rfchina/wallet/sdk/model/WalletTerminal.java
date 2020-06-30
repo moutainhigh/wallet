@@ -19,6 +19,9 @@ public class WalletTerminal  {
     @ApiModelProperty("绑定时间")
     private String bindTime ;
 
+    @ApiModelProperty("会员ID")
+    private Long bizUserId ;
+
     @ApiModelProperty("创建时间")
     private String createTime ;
 

@@ -32,6 +32,7 @@ import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
 import com.rfchina.wallet.server.model.ext.SettleResp;
 import com.rfchina.wallet.server.model.ext.UnifiedConfirmVo;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
+import com.rfchina.wallet.server.model.ext.WalletOrderEx;
 import com.rfchina.wallet.server.model.ext.WithdrawResp;
 import com.rfchina.wallet.server.msic.EnumWallet.BalanceFreezeMode;
 import com.rfchina.wallet.server.service.ConfigService;
@@ -284,7 +285,7 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 	@SignVerify
 	@Override
 	@ParamVerify
-	public WalletOrder orderQuery(
+	public WalletOrderEx orderQuery(
 		@ParamValid(nullable = false) String accessToken,
 		@ParamValid(nullable = false) String orderNo) {
 		return seniorPayService.orderQuery(orderNo);

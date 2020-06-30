@@ -61,14 +61,14 @@ public class WalletVo  {
     @ApiModelProperty("钱包标题，通常是姓名或公司名")
     private String title ;
 
+    @ApiModelProperty("银行用户标识")
+    private String tunnelUserId ;
+
     @ApiModelProperty("钱包类型， 1：企业钱包，2：个人钱包")
     private Integer type ;
 
     @ApiModelProperty("钱包余额")
     private Long walletBalance ;
-
-    @ApiModelProperty(name="tunnel_user_id", value = "银行用户标识")
-    private String tunnelUserId;
 
 
 }
