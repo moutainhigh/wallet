@@ -19,10 +19,10 @@ public interface WalletCollectMethodExtDao extends WalletCollectMethodMapper {
 	List<WalletCollectMethod> selectByCollectId(@Param("collectId") Long collectId,
 		@Param("type") Byte type);
 
-	@Update({
-		"select* from rf_wallet_collect_method",
+	@Select({
+		"select * from rf_wallet_collect_method",
 		"where order_id in ",
-		"select id from rf_wallet_order where order_no = #{orderNo}"
+		"(select id from rf_wallet_order where order_no = #{orderNo})"
 	})
 	@ResultMap("com.rfchina.wallet.domain.mapper.WalletCollectMethodMapper.BaseResultMap")
 	WalletCollectMethod getByOrderNo(@Param("orderNo") String orderNo);
