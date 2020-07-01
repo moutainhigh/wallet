@@ -155,7 +155,7 @@ public class SeniorPayController {
 	}
 
 	@ApiOperation("高级钱包-订单结果查询")
-	@PostMapping(UrlConstant.SENIOR_WALLET_ORDER_QUERY)
+	@PostMapping({UrlConstant.SENIOR_WALLET_ORDER_QUERY, UrlConstant.U_SENIOR_WALLET_ORDER_QUERY})
 	public ResponseValue<WalletOrderEx> orderQuery(
 		@ApiParam(value = "应用令牌", required = true) @RequestParam("access_token") String accessToken,
 		@ApiParam(value = "统一订单号", required = true) @RequestParam("order_no") String orderNo

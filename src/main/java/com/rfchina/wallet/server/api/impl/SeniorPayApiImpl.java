@@ -281,7 +281,7 @@ public class SeniorPayApiImpl implements SeniorPayApi {
 	}
 
 	@Log
-	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER, EnumTokenType.APP})
 	@SignVerify
 	@Override
 	@ParamVerify

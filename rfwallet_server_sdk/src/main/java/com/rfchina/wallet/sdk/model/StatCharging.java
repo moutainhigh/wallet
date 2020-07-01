@@ -19,6 +19,9 @@ public class StatCharging  {
     @ApiModelProperty("公司验证次数")
     private Long companyVerifyCount ;
 
+    @ApiModelProperty("公司认证总费用")
+    private Long companyVerifyFee ;
+
     @ApiModelProperty("创建日期")
     private String createTime ;
 
@@ -37,6 +40,9 @@ public class StatCharging  {
     @ApiModelProperty("个人验证次数")
     private Long personVerifyCount ;
 
+    @ApiModelProperty("个人认证总费用")
+    private Long personVerifyFee ;
+
     @ApiModelProperty("第三方的支付手续费,单位分")
     private Long thirdPayFee ;
 
@@ -48,6 +54,9 @@ public class StatCharging  {
 
     @ApiModelProperty("提现次数")
     private Long withdrawCount ;
+
+    @ApiModelProperty("提现总费用")
+    private Long withdrawFee ;
 
 
 }
