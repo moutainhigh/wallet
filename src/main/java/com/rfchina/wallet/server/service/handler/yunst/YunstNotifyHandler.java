@@ -349,25 +349,23 @@ public class YunstNotifyHandler {
 			Byte payType;
 			String payInterFacetrxcode = Optional.ofNullable(rtnVal.getPayInterfacetrxcode())
 				.orElse(
-					""); // 通道交易类型：VSP501 微信支付;VSP502 微信支付撤销;VSP503 微信支付退款;VSP505 手机QQ 支付;VSP506 手机QQ 支付撤销;VSP507 手机QQ 支付退款;VSP511 支付宝支付;VSP512 支付宝支付撤销;VSP513 支付宝支付退款;VSP551 银联扫码支付;VSP552 银联扫码撤销;VSP553 银联扫码退货
-			if (payInterFacetrxcode.equals("VSP501") ||
-				payInterFacetrxcode.equals("VSP502") ||
-				payInterFacetrxcode.equals("VSP503")) {
-				payType = CollectPayType.POS_WECHAT.getValue();
-			} else if (payInterFacetrxcode.equals("VSP505") ||
-				payInterFacetrxcode.equals("VSP506") ||
-				payInterFacetrxcode.equals("VSP507")) {
-				payType = CollectPayType.POS_QQ.getValue();
-			} else if (payInterFacetrxcode.equals("VSP511") ||
-				payInterFacetrxcode.equals("VSP512") ||
-				payInterFacetrxcode.equals("VSP513")) {
-				payType = CollectPayType.POS_ALIPAY.getValue();
-			} else if (payInterFacetrxcode.equals("VSP551") ||
-				payInterFacetrxcode.equals("VSP552") ||
-				payInterFacetrxcode.equals("VSP53")) {
-				payType = CollectPayType.POS_UNION.getValue();
-			} else {
-				return;
+					""); // 通道交易类型：VSP501 微信支付;VSP505 手机QQ 支付;VSP511 支付宝支付;VSP551 银联扫码支付;VSP521 收银宝-通联钱包
+			switch (payInterFacetrxcode) {
+				case "VSP501":
+					payType = CollectPayType.POS_WECHAT.getValue();
+					break;
+				case "VSP505":
+					payType = CollectPayType.POS_QQ.getValue();
+					break;
+				case "VSP511":
+					payType = CollectPayType.POS_ALIPAY.getValue();
+					break;
+				case "VSP551":
+				case "VSP001":
+					payType = CollectPayType.POS_UNION.getValue();
+					break;
+				default:
+					return;
 			}
 			// 根据订单号获取payType
 			WalletCollectMethod method = walletCollectMethodDao
