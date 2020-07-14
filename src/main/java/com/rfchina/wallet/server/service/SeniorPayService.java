@@ -383,12 +383,12 @@ public class SeniorPayService {
 			WithdrawResp result = handler.withdraw(withdrawOrder, withdraw, payer);
 
 			// 签名密码验证参数
-			if (validateType == BizValidateType.PASSWORD.getValue().byteValue()) {
+			if (validateType.byteValue() == BizValidateType.PASSWORD.getValue().byteValue()) {
 				String signedParams = ((YunstBizHandler) handler)
 					.pwdGwConfirm(withdrawOrder, payer, jumpUrl, customerIp);
 				signedParams = configService.getYunstPwdConfirmUrl() + "?" + signedParams;
 				result.setSignedParams(signedParams);
-			} else if (validateType == BizValidateType.SMS.getValue().byteValue()) {
+			} else if (validateType.byteValue() == BizValidateType.SMS.getValue().byteValue()) {
 				String signedParams = ((YunstBizHandler) handler)
 					.smsGwConfirm(withdrawOrder, payer, customerIp);
 				signedParams = configService.getYunstSmsConfirmUrl() + "?" + signedParams;

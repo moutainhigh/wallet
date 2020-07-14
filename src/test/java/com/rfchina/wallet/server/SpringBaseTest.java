@@ -49,23 +49,23 @@ public class SpringBaseTest {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 		String name = reader.readLine();
 //		env-test
-//		if (name.startsWith("niezengming")) {
-//			YunClient.configure(new YunConfig(configService.getYstServerUrl(),
-//				configService.getYstSysId(),
-//				configService.getYstPassword(), configService.getYstAlias(),
-//				configService.getYstVersion(),
-//				"/data/support/dev-key/yunst3/2001081503374814494.pfx",
-//				"/data/support/dev-key/yunst3/TLCert.cer"));
-//		}
-//		env-product
 		if (name.startsWith("niezengming")) {
 			YunClient.configure(new YunConfig(configService.getYstServerUrl(),
 				configService.getYstSysId(),
 				configService.getYstPassword(), configService.getYstAlias(),
 				configService.getYstVersion(),
-				"/data/support/dev-key/yunst-pro/2002041713537320330.pfx",
-				"/data/support/dev-key/yunst-pro/TLCert.cer"));
+				"/data/support/dev-key/yunst3/2001081503374814494.pfx",
+				"/data/support/dev-key/yunst3/TLCert.cer"));
 		}
+//		env-product
+//		if (name.startsWith("niezengming")) {
+//			YunClient.configure(new YunConfig(configService.getYstServerUrl(),
+//				configService.getYstSysId(),
+//				configService.getYstPassword(), configService.getYstAlias(),
+//				configService.getYstVersion(),
+//				"/data/support/dev-key/yunst-pro/2002041713537320330.pfx",
+//				"/data/support/dev-key/yunst-pro/TLCert.cer"));
+//		}
 	}
 
 	@Before
