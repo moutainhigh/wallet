@@ -3,6 +3,10 @@
 测试环境
 jenkins job: platform-rfwallet-server-test
 ```
+## 1.7.0_b1_2020070315_Beta 1.7.0_2020070315_Release
+- POS机支付新增渠道区分
+- 新增给业务用的订单查询接口
+
 ## 1.6.1_2020061815_Release
 - 绑定终端小修改
 

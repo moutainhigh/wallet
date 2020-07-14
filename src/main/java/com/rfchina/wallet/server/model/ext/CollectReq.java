@@ -249,7 +249,7 @@ public class CollectReq {
 		@AllArgsConstructor
 		public static class Pos {
 
-			@ApiModelProperty(name = "pay_type", value = "51：银行卡快捷支付")
+			@ApiModelProperty(name = "pay_type", value = "61：建单 62：微信支付 63：手机QQ支付 64：支付宝支付 65：银联支付")
 			private Byte payType;
 
 			@ApiModelProperty(value = "集团模式：收银宝子商户号", required = true)

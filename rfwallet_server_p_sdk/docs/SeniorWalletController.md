@@ -100,7 +100,6 @@
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
 |access_token|是|access_token|
-|company_basic_info|是|企业信息(json)|
 |wallet_id|是|钱包id|
 
 返回数据
@@ -168,6 +167,7 @@
     list: [ {
     app_id:""  , //通联appId
     bind_time:""  , //绑定时间
+    biz_user_id:""  , //会员ID
     create_time:""  , //创建时间
     id:""  , //id
     mch_id:""  , //商家id

@@ -65,4 +65,24 @@ public class YunstNotify {
 	public static class SetPayPwd{
 		private String bizUserId;
 	}
+
+	@Data
+	@NoArgsConstructor
+	@AllArgsConstructor
+	@ToString
+	public static class OrderResult{
+		private Long amount;
+		private String orderNo;
+		private String termrefnum;
+		private String traceno;
+		private String channelFee;
+		private String channelPaytime;
+		private String extendInfo;
+		private String accttype;
+		private String payInterfaceOutTradeNo;
+		private String buyerBizUserId;
+		private String payInterfacetrxcode;
+		private String payDatetime;
+		private String bizOrderNo;
+	}
 }

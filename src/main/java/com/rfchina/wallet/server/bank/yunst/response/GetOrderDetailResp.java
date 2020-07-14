@@ -46,7 +46,10 @@ public class GetOrderDetailResp {
 	private String cusid;
 
 	@ApiModelProperty(value = "通道交易流水号")
-	private String payInterfaceOutTradeN;
+	private String payInterfaceOutTradeNo;
+
+	@ApiModelProperty(value = "通道交易类型 VSP501-微信支付 VSP502-微信支付撤销 VSP503-微信支付退款 VSP505-手机QQ支付 VSP506-手机QQ支付撤销 VSP507-手机QQ支付退款 VSP511-支付宝支付 VSP512-支付宝支付撤销 VSP513-支付宝支付退款 VSP551-银联扫码支付 VSP552-银联扫码撤销 VSP553-银联扫码退货")
+	private String payInterfacetrxcode;
 
 	@ApiModelProperty(value = "收银宝终端流水")
 	private String traceno;

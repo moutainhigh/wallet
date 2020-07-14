@@ -90,7 +90,14 @@ public class NotifyService {
 				log.error("云商通回调,未知method参数:{}", methodName);
 			}
 		} else if (YunstServiceName.ORDER.getValue().equals(service)) {
-
+			// 20200624 新增pos机支付回写支付方式（微信/qq/银联/支付宝）
+			if (YUNST_NOTIFY_SUCCESS.equals(yunstNotify.getStatus())) {
+				String rtnValJson = JsonUtil.toJSON(yunstNotify.getReturnValue());
+				YunstNotify.OrderResult rtnVal = JsonUtil
+					.toObject(rtnValJson, YunstNotify.OrderResult.class,
+						getObjectMapper());
+				yunstNotifyHandler.handleOrderResult(rtnVal);
+			}
 		} else if (YunstServiceName.MEMBER_PWD.getValue().equals(service)) {
 			if (YunstMethodName.CHANGE_BIND_PHONE.getValue().equals(methodName)) {
 				if (YUNST_NOTIFY_SUCCESS.equals(yunstNotify.getStatus())) {
