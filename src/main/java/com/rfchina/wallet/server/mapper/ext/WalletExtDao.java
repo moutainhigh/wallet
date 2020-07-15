@@ -32,7 +32,7 @@ public interface WalletExtDao extends WalletMapper {
 		"<script>",
 		"select id,type,level,status,title,wallet_balance,freeze_amount from rf_wallet",
 		"where 1=1",
-		"<if test=\"title != null\"> and title =#{title}</if>",
+		"<if test=\"title != null\"> and title like concat(#{title}, '%')</if>",
 		"<if test=\"type != null\"> and type =#{type}</if>",
 		"<if test=\"walletLevel != null\"> and level =#{walletLevel}</if>",
 		"<if test=\"status != null\"> and status =#{status}</if>",
