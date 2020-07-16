@@ -167,6 +167,9 @@ public class ConfigService {
 	@Value("${yunst.agentEnt.walletId}")
 	private Long agentEntWalletId;
 
+	@Value("${yunst.agentPos.walletId}")
+	private Long agentPosWalletId;
+
 	/**
 	 * 异常邮件通知
 	 */
@@ -193,6 +196,7 @@ public class ConfigService {
 
 	@Value("${yunst.feerate.creditcard}")
 	private String creditCardRate;
+
 
 // yunst end
 

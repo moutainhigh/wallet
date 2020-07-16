@@ -475,7 +475,7 @@ public class SeniorPayService {
 				.remainTunnelFee(tunnelFee.longValue())
 				.validateType(validateType)
 				.budgetMode(req.getWalletPayMethod().hasMethod(ChannelType.POS)
-					? BudgetMode.ON_AGENTPAY.getValue() : BudgetMode.ON_COLLECT.getValue())
+					? BudgetMode.SILI_PROXY.getValue() : BudgetMode.ON_COLLECT.getValue())
 				.createTime(new Date())
 				.build();
 			walletCollectDao.insertSelective(collect);
@@ -716,6 +716,7 @@ public class SeniorPayService {
 				.collectOrderNo(collectOrder.getOrderNo())
 				.agentWalletId(configService.getAgentEntWalletId())
 				.collectAmount(collectOrder.getAmount())
+				.budgetMode(walletCollect.getBudgetMode())
 				.createTime(new Date())
 				.build();
 			walletRefundDao.insertSelective(refund);
@@ -737,7 +738,7 @@ public class SeniorPayService {
 
 			// 代付给每个收款人
 			EBankHandler handler = handlerHelper.selectByTunnelType(refundOrder.getTunnelType());
-			handler.refund(refundOrder, refund, details);
+			handler.refund(refundOrder, refund, details, collectInfos);
 			return refundOrder;
 		} finally {
 			lock.unLock(LockConstant.LOCK_PAY_ORDER + orderNo);

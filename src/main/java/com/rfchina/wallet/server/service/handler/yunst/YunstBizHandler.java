@@ -120,7 +120,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -335,6 +334,50 @@ public class YunstBizHandler extends EBankHandler {
 		return null;
 	}
 
+
+	private List<RecieveInfo> getRecievers(Byte budgetMode, Long amount, Byte tunnelType,
+		List<WalletCollectInfo> clearInfos) {
+		if (budgetMode == null || budgetMode.byteValue() == BudgetMode.ON_COLLECT.getValue()) {
+
+			log.info("代收分佣 {}", clearInfos);
+			return clearInfos.stream().map(info -> {
+				WalletTunnel receiver = walletChannelDao
+					.selectByWalletId(info.getPayeeWalletId(), tunnelType);
+				return RecieveInfo.builder()
+					.bizUserId(receiver.getBizUserId())
+					.amount(info.getBudgetAmount())
+					.build();
+			}).collect(Collectors.toList());
+		} else if (budgetMode.byteValue() == BudgetMode.ON_AGENTPAY.getValue()) {
+
+			Optional<WalletCollectInfo> opts = clearInfos.stream().filter(
+				info -> CollectRoleType.PROJECTOR.getValue().byteValue() == info.getRoleType())
+				.findFirst();
+			opts.orElseThrow(() -> new WalletResponseException(
+				EnumWalletResponseCode.WALLET_PROJECTOR_IS_EMPTY));
+
+			log.info("代付抽佣 主收款人[{}]", opts.get().getPayeeWalletId());
+			WalletTunnel receiver = walletChannelDao
+				.selectByWalletId(opts.get().getPayeeWalletId(), tunnelType);
+			return Arrays.asList(RecieveInfo.builder()
+				.bizUserId(receiver.getBizUserId())
+				.amount(amount)
+				.build());
+		} else if (budgetMode.byteValue() == BudgetMode.ON_AGENTPAY.getValue()) {
+
+			log.info("思力代分 主收款人[{}]", configService.getAgentPosWalletId());
+			WalletTunnel receiver = walletChannelDao
+				.selectByWalletId(configService.getAgentPosWalletId(), tunnelType);
+			return Arrays.asList(RecieveInfo.builder()
+				.bizUserId(receiver.getBizUserId())
+				.amount(amount)
+				.build());
+		} else {
+			return null;
+		}
+
+	}
+
 	/**
 	 * 代收
 	 */
@@ -342,21 +385,8 @@ public class YunstBizHandler extends EBankHandler {
 		List<WalletCollectInfo> clearInfos, WalletTunnel payer) {
 
 		// 收款人
-		Stream<WalletCollectInfo> infoStream = clearInfos.stream();
-		boolean budgetOnAgentPay = collect.getBudgetMode() != null
-			&& collect.getBudgetMode().byteValue() == BudgetMode.ON_AGENTPAY.getValue();
-		if (budgetOnAgentPay) {
-			infoStream = infoStream.filter(
-				info -> CollectRoleType.PROJECTOR.getValue().byteValue() == info.getRoleType());
-		}
-		List<RecieveInfo> receives = infoStream.map(info -> {
-			WalletTunnel receiver = walletChannelDao
-				.selectByWalletId(info.getPayeeWalletId(), order.getTunnelType());
-			return RecieveInfo.builder()
-				.bizUserId(receiver.getBizUserId())
-				.amount(budgetOnAgentPay ? order.getAmount() : info.getBudgetAmount())
-				.build();
-		}).collect(Collectors.toList());
+		List<RecieveInfo> recievers = getRecievers(collect.getBudgetMode(), order.getAmount(),
+			order.getTunnelType(), clearInfos);
 
 		// 收款方式
 		List<WalletCollectMethod> methods = walletCollectMethodDao
@@ -367,7 +397,7 @@ public class YunstBizHandler extends EBankHandler {
 		CollectApplyReq req = CollectApplyReq.builder()
 			.bizOrderNo(order.getOrderNo())
 			.payerId(payer.getBizUserId())
-			.recieverList(receives)
+			.recieverList(recievers)
 			.amount(order.getAmount())
 			.fee(0L)
 			.validateType(collect.getValidateType().longValue())
@@ -414,6 +444,56 @@ public class YunstBizHandler extends EBankHandler {
 		return null;
 	}
 
+	private Tuple<WalletTunnel, List<SplitRule>> getSplitRule(Byte budgetMode,
+		WalletOrder clearOrder, WalletClearing clearing, List<WalletCollectInfo> collectInfos) {
+
+		if (budgetMode == null || budgetMode.byteValue() == BudgetMode.ON_COLLECT.getValue()) {
+
+			WalletTunnel clearTunnel = walletTunnelExtDao
+				.selectByWalletId(clearOrder.getWalletId(), clearOrder.getTunnelType());
+			return new Tuple(clearTunnel, null);
+		} else if (budgetMode.byteValue() == BudgetMode.ON_AGENTPAY.getValue()) {
+
+			Optional<Long> opts = collectInfos.stream()
+				.filter(
+					info -> info.getRoleType().byteValue() == CollectRoleType.PROJECTOR.getValue())
+				.map(WalletCollectInfo::getPayeeWalletId)
+				.findFirst();
+			opts.orElseThrow(() -> new WalletResponseException(
+				EnumWalletResponseCode.WALLET_PROJECTOR_IS_EMPTY));
+
+			WalletTunnel projectTunnel = walletTunnelExtDao
+				.selectByWalletId(opts.orElse(0L), clearOrder.getTunnelType());
+			WalletTunnel clearTunnel = walletTunnelExtDao
+				.selectByWalletId(clearOrder.getWalletId(), clearOrder.getTunnelType());
+			if (clearOrder.getWalletId().longValue() != projectTunnel.getWalletId()) {
+				List<SplitRule> splitRules = Arrays.asList(SplitRule.builder()
+					.bizUserId(clearTunnel.getBizUserId())
+					.amount(clearing.getAmount())
+					.fee(0L)
+					.build()
+				);
+				return new Tuple<>(projectTunnel, splitRules);
+			} else {
+				return new Tuple<>(projectTunnel, null);
+			}
+
+		} else if (budgetMode.byteValue() == BudgetMode.SILI_PROXY.getValue()) {
+
+			WalletTunnel projectTunnel = walletTunnelExtDao
+				.selectByWalletId(configService.getAgentPosWalletId(), clearOrder.getTunnelType());
+			WalletTunnel clearTunnel = walletTunnelExtDao
+				.selectByWalletId(clearOrder.getWalletId(), clearOrder.getTunnelType());
+			List<SplitRule> splitRules = Arrays.asList(SplitRule.builder()
+				.bizUserId(clearTunnel.getBizUserId())
+				.amount(clearing.getAmount())
+				.fee(0L)
+				.build()
+			);
+			return new Tuple<>(projectTunnel, splitRules);
+		}
+		return null;
+	}
 
 	/**
 	 * 代付
@@ -421,43 +501,24 @@ public class YunstBizHandler extends EBankHandler {
 	public void agentPay(WalletOrder clearOrder, WalletClearing clearing,
 		WalletCollect walletCollect, List<WalletCollectInfo> collectInfos) {
 
+		// 读取分帐规则
+		Tuple<WalletTunnel, List<SplitRule>> splitRule = getSplitRule(walletCollect.getBudgetMode(),
+			clearOrder, clearing, collectInfos);
+
 		// 登记代付数额
 		CollectPay collectPay = CollectPay.builder()
 			.bizOrderNo(clearing.getCollectOrderNo())
 			.amount(clearing.getAmount())
 			.build();
-		WalletTunnel projectTunnel = null;
-		WalletTunnel clearTunnel = walletTunnelExtDao
-			.selectByWalletId(clearOrder.getWalletId(), clearOrder.getTunnelType());
-		List<SplitRule> splitRules = null;
-		if (walletCollect.getBudgetMode() != null
-			&& walletCollect.getBudgetMode().byteValue() == BudgetMode.ON_AGENTPAY.getValue()) {
-			Optional<Long> opt = collectInfos.stream().filter(
-				info -> info.getRoleType().byteValue() == CollectRoleType.PROJECTOR.getValue())
-				.map(WalletCollectInfo::getPayeeWalletId)
-				.findAny();
-			projectTunnel = walletTunnelExtDao
-				.selectByWalletId(opt.orElse(0L), clearOrder.getTunnelType());
-			if (clearOrder.getWalletId().longValue() != projectTunnel.getWalletId()) {
-				splitRules = Arrays.asList(SplitRule.builder()
-					.bizUserId(clearTunnel.getBizUserId())
-					.amount(clearing.getAmount())
-					.fee(0L)
-					.build()
-				);
-			}
-		} else {
-			projectTunnel = clearTunnel;
-		}
 		AgentPayReq req = AgentPayReq.builder()
 			.bizOrderNo(clearOrder.getOrderNo())
 			.collectPayList(Lists.newArrayList(collectPay))
-			.bizUserId(projectTunnel.getBizUserId())
+			.bizUserId(splitRule.left.getBizUserId())
 			.accountSetNo(configService.getUserAccSet())  // 产品需求代付到余额账户
 			.backUrl(configService.getYunstRecallPrefix() + UrlConstant.YUNST_ORDER_RECALL)
 			.amount(clearing.getAmount())
 			.fee(0L)
-			.splitRuleList(splitRules)
+			.splitRuleList(splitRule.right)
 			.tradeCode(TRADE_CODESTRING_AGENTPAY)
 			.summary(clearOrder.getNote())
 			.build();
@@ -481,26 +542,73 @@ public class YunstBizHandler extends EBankHandler {
 		}
 	}
 
+	private List<RefundInfo> getRefundList(Byte budgetMode, Byte tunnelType,
+		List<WalletRefundDetail> details, List<WalletCollectInfo> collectInfos) {
+
+		if (budgetMode == null || budgetMode.byteValue() == BudgetMode.ON_COLLECT.getValue()) {
+			return details.stream().map(detail -> {
+				WalletTunnel payeeChannel = walletChannelDao
+					.selectByWalletId(detail.getPayeeWalletId(), tunnelType);
+				return RefundInfo.builder()
+					.accountSetNo(null)   //不送：默认从平台中间账户集退款
+					.bizUserId(payeeChannel.getBizUserId())
+					.amount(detail.getAmount())
+					.build();
+			}).collect(Collectors.toList());
+		} else if (budgetMode.byteValue() == BudgetMode.ON_AGENTPAY.getValue()) {
+
+			Long projector = findProjector(collectInfos);
+			Optional<Long> total = details.stream()
+				.map(WalletRefundDetail::getAmount)
+				.reduce((x, y) -> x + y);
+			return Arrays.asList(RefundInfo.builder()
+				.accountSetNo(null)   //不送：默认从平台中间账户集退款
+				.bizUserId(String.valueOf(projector))
+				.amount(total.orElse(0L))
+				.build());
+		} else if (budgetMode.byteValue() == BudgetMode.SILI_PROXY.getValue()) {
+
+			Long projector = configService.getAgentPosWalletId();
+			Optional<Long> total = details.stream()
+				.map(WalletRefundDetail::getAmount)
+				.reduce((x, y) -> x + y);
+			return Arrays.asList(RefundInfo.builder()
+				.accountSetNo(null)   //不送：默认从平台中间账户集退款
+				.bizUserId(String.valueOf(projector))
+				.amount(total.orElse(0L))
+				.build());
+		}
+
+		return null;
+
+	}
+
+	private Long findProjector(List<WalletCollectInfo> collectInfos) {
+		Optional<Long> opts = collectInfos.stream()
+			.filter(
+				info -> info.getRoleType().byteValue() == CollectRoleType.PROJECTOR.getValue())
+			.map(WalletCollectInfo::getPayeeWalletId)
+			.findFirst();
+		opts.orElseThrow(() -> new WalletResponseException(
+			EnumWalletResponseCode.WALLET_PROJECTOR_IS_EMPTY));
+
+		return opts.get();
+	}
+
 
 	/**
 	 * 退款
 	 */
-	public void refund(WalletOrder order, WalletRefund refund, List<WalletRefundDetail> details) {
+	public void refund(WalletOrder refundOrder, WalletRefund refund,
+		List<WalletRefundDetail> details, List<WalletCollectInfo> collectInfos) {
 
-		List<RefundInfo> refundList = details.stream().map(detail -> {
-			WalletTunnel payeeChannel = walletChannelDao
-				.selectByWalletId(detail.getPayeeWalletId(), order.getTunnelType());
-			return RefundInfo.builder()
-				.accountSetNo(null)   //不送：默认从平台中间账户集退款
-				.bizUserId(payeeChannel.getBizUserId())
-				.amount(detail.getAmount())
-				.build();
-		}).collect(Collectors.toList());
+		List<RefundInfo> refundList = getRefundList(refund.getBudgetMode(),
+			refundOrder.getTunnelType(), details, collectInfos);
 
 		WalletTunnel payerChannel = walletChannelDao
-			.selectByWalletId(order.getWalletId(), order.getTunnelType());
+			.selectByWalletId(refundOrder.getWalletId(), refundOrder.getTunnelType());
 		RefundApplyReq req = RefundApplyReq.builder()
-			.bizOrderNo(order.getOrderNo())
+			.bizOrderNo(refundOrder.getOrderNo())
 			.oriBizOrderNo(refund.getCollectOrderNo())
 			.bizUserId(payerChannel.getBizUserId())
 			.refundType(RefundType.D0.getValue())
@@ -512,22 +620,22 @@ public class YunstBizHandler extends EBankHandler {
 			.feeAmount(0L)
 			.build();
 
-		order.setProgress(UniProgress.SENDED.getValue());
-		order.setStartTime(new Date());
+		refundOrder.setProgress(UniProgress.SENDED.getValue());
+		refundOrder.setStartTime(new Date());
 		try {
 			RefundApplyResp resp = yunstTpl.execute(req, RefundApplyResp.class);
-			order.setTunnelOrderNo(resp.getOrderNo());
+			refundOrder.setTunnelOrderNo(resp.getOrderNo());
 			if (StringUtils.isNotBlank(resp.getPayStatus())
 				&& "fail".equals(resp.getPayStatus())) {
-				order.setStatus(OrderStatus.FAIL.getValue());
-				order.setTunnelErrCode(resp.getPayFailMessage());
+				refundOrder.setStatus(OrderStatus.FAIL.getValue());
+				refundOrder.setTunnelErrCode(resp.getPayFailMessage());
 			}
-			walletOrderDao.updateByPrimaryKeySelective(order);
+			walletOrderDao.updateByPrimaryKeySelective(refundOrder);
 		} catch (CommonGatewayException e) {
-			dealGatewayError(order, e);
+			dealGatewayError(refundOrder, e);
 			return;
 		} catch (Exception e) {
-			dealUndefinedError(order, e);
+			dealUndefinedError(refundOrder, e);
 		}
 
 	}

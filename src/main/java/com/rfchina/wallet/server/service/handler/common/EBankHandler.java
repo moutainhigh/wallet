@@ -80,7 +80,8 @@ public abstract class EBankHandler {
 	/**
 	 * 退款
 	 */
-	public void refund(WalletOrder order, WalletRefund refund, List<WalletRefundDetail> details) {
+	public void refund(WalletOrder order, WalletRefund refund, List<WalletRefundDetail> details,
+		List<WalletCollectInfo> collectInfos) {
 		throw new RuntimeException();
 	}
 

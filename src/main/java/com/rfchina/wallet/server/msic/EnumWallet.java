@@ -918,6 +918,7 @@ public class EnumWallet {
 	public enum BudgetMode implements Valuable<Byte> {
 		ON_COLLECT((byte) 1, "代收分帐"),
 		ON_AGENTPAY((byte) 2, "代付抽佣"),
+		SILI_PROXY((byte) 3, "思力分账"),
 		;
 
 		private Byte value;
