@@ -76,7 +76,7 @@ dependencies {
     compile('com.rfchina.support:zipkin-autoconfig:1.1.4')
 
     // 本地依赖
-    compile('com.rfchina:rfchina-commons-utils:2.3.13')
+    compile('com.rfchina:rfchina-commons-utils:2.4.3')
     compile 'com.rfchina:rfchina-platform-passport-common:1.2.1'
     compile('com.rfchina:rfwallet-domain:1.1.11')
     compile('com.rfchina.biztool:IdGenarator:1.0.3')
