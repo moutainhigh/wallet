@@ -14,11 +14,13 @@ import com.rfchina.wallet.server.service.handler.yunst.YunstNotifyHandler;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@Slf4j
 public class YunstRecallController {
 
 	@Autowired
@@ -59,7 +61,9 @@ public class YunstRecallController {
 			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		});
 
+		log.info("[通联回调] 订单[{}] 开始处理回调", rpsResp.getReturnValue().getBizOrderNo());
 		seniorPayService.updateOrderStatusWithMq(rpsResp.getReturnValue().getBizOrderNo(), false);
+		log.info("[通联回调] 订单[{}] 结束处理回调", rpsResp.getReturnValue().getBizOrderNo());
 
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS.getValue(),
 			"Receive Yunst order recall");

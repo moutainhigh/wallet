@@ -341,41 +341,4 @@ public class YunstNotifyHandler {
 		}
 	}
 
-	public void handleOrderResult(YunstNotify.OrderResult rtnVal) {
-		// 筛选代付订单
-		String collectOrderPrefix =
-			configService.getOrderNoPrefix() + IdGenerator.PREFIX_WALLE_COLLECT;
-		if (rtnVal.getBizOrderNo().startsWith(collectOrderPrefix)) {
-			Byte payType;
-			String payInterFacetrxcode = Optional.ofNullable(rtnVal.getPayInterfacetrxcode())
-				.orElse(
-					""); // 通道交易类型：VSP501 微信支付;VSP505 手机QQ 支付;VSP511 支付宝支付;VSP551 银联扫码支付;VSP521 收银宝-通联钱包
-			switch (payInterFacetrxcode) {
-				case "VSP501":
-					payType = CollectPayType.POS_WECHAT.getValue();
-					break;
-				case "VSP505":
-					payType = CollectPayType.POS_QQ.getValue();
-					break;
-				case "VSP511":
-					payType = CollectPayType.POS_ALIPAY.getValue();
-					break;
-				case "VSP551":
-				case "VSP001":
-					payType = CollectPayType.POS_UNION.getValue();
-					break;
-				default:
-					return;
-			}
-			// 根据订单号获取payType
-			WalletCollectMethod method = walletCollectMethodDao
-				.getByOrderNo(rtnVal.getBizOrderNo());
-			// 如果pay_type是61则为pos机支付，更新pay_type到rf_wallet_collect_method
-			if (method.getPayType().equals(CollectPayType.POS.getValue())) {
-				method.setPayType(payType);
-				walletCollectMethodDao.updateByPrimaryKey(method);
-			}
-		}
-	}
-
 }

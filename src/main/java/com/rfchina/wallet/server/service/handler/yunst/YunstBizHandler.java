@@ -102,6 +102,7 @@ import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.GwProgress;
 import com.rfchina.wallet.server.msic.EnumWallet.RefundType;
 import com.rfchina.wallet.server.msic.EnumWallet.UniProgress;
+import com.rfchina.wallet.server.msic.EnumYunst.EnumTrxCode;
 import com.rfchina.wallet.server.msic.EnumYunst.EnumYunstDeviceType;
 import com.rfchina.wallet.server.msic.EnumYunst.EnumYunstWithdrawType;
 import com.rfchina.wallet.server.msic.EnumYunst.YunstFileType;
@@ -109,6 +110,7 @@ import com.rfchina.wallet.server.msic.EnumYunst.YunstOrderStatus;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.GatewayTransService;
+import com.rfchina.wallet.server.service.SeniorPayService;
 import com.rfchina.wallet.server.service.WalletBalanceDetailService;
 import com.rfchina.wallet.server.service.handler.common.EBankHandler;
 import java.io.File;
@@ -617,7 +619,7 @@ public class YunstBizHandler extends EBankHandler {
 		try {
 			GetOrderDetailResp tunnelOrder = queryOrderDetail(order.getOrderNo());
 			if (!order.getOrderNo().equals(tunnelOrder.getBizOrderNo())) {
-				log.error("订单号不匹配， order = {} , channelOrderNo = {}", order,
+				log.error("[订单更新] 订单号不匹配， order = {} , channelOrderNo = {}", order.getOrderNo(),
 					tunnelOrder.getBizOrderNo());
 				throw new WalletResponseException(EnumWalletResponseCode.PAY_IN_STATUS_QUERY_ERROR);
 			}
@@ -640,6 +642,10 @@ public class YunstBizHandler extends EBankHandler {
 			}
 			// 更新订单状态
 			walletOrderDao.updateByPrimaryKeySelective(order);
+			log.error("[订单更新] 订单[{}]：通道状态[{}][{}] 通道时间[{}]", order.getOrderNo(),
+				tunnelOrder.getOrderStatus(), tunnelOrder.getErrorMessage(),
+				tunnelOrder.getPayDatetime());
+			dealPosOrder(tunnelOrder);
 
 			// 更新余额明细
 			if (walletOrderStatus.isEndStatus()
@@ -655,7 +661,7 @@ public class YunstBizHandler extends EBankHandler {
 				details.forEach(detail -> {
 					detail.setStatus(walletDetailStatus);
 					walletBalanceDetailDao.updateByPrimaryKeySelective(detail);
-					log.info("[自动提现] 更新余额明细单状态 单号 {} , 状态 {}", order.getOrderNo(),
+					log.info("[订单更新][自动提现] 更新余额明细单状态 单号 {} , 状态 {}", order.getOrderNo(),
 						walletDetailStatus);
 
 					if (detail.getAmount() < 0 && detail.getRefOrderId() != null) {
@@ -928,7 +934,7 @@ public class YunstBizHandler extends EBankHandler {
 	/**
 	 * 查询订单状态
 	 */
-	private GetOrderDetailResp queryOrderDetail(String orderNo) {
+	public GetOrderDetailResp queryOrderDetail(String orderNo) {
 
 		GetOrderDetailReq req = GetOrderDetailReq.builder().bizOrderNo(orderNo).build();
 		try {
@@ -1083,10 +1089,36 @@ public class YunstBizHandler extends EBankHandler {
 		}
 	}
 
-	private void noteSuffer(String note) {
-		String message = Optional.ofNullable(note).orElse("");
 
-		String summary = (message.length() > 20) ? message.substring(0, 19) : message;
+	private void dealPosOrder(GetOrderDetailResp rtnVal) {
+		// 筛选代付订单
+		String collectOrderPrefix =
+			configService.getOrderNoPrefix() + SeniorPayService.PREFIX_COLLECT;
+		if (rtnVal.getBizOrderNo().startsWith(collectOrderPrefix)) {
+			Optional.ofNullable(rtnVal.getPayInterfacetrxcode())
+				.ifPresent(trxcode -> {
+
+					log.info("[订单更新] 开始更新订单[{}]渠道交易方式", rtnVal.getBizOrderNo());
+					EnumTrxCode trxCode = EnumUtil
+						.parse(EnumTrxCode.class, trxcode);
+					if (trxCode == null) {
+						log.error("[更新订单] 通道交易类型[{}]无枚举值", trxcode);
+					} else if (trxCode.toCollectPayType() != null) {
+						// 根据订单号获取payType
+						WalletCollectMethod method = walletCollectMethodDao
+							.getByOrderNo(rtnVal.getBizOrderNo());
+						// 如果pay_type是61则为pos机支付，更新pay_type到rf_wallet_collect_method
+						if (method != null && method.getPayType()
+							.equals(CollectPayType.POS.getValue())) {
+
+							method.setPayType(trxCode.toCollectPayType().getValue());
+							walletCollectMethodDao.updateByPrimaryKey(method);
+						}
+					} else {
+						log.error("[更新订单] 本地无法匹配通道交易类型[{}]", trxcode);
+					}
+				});
+		}
 	}
 
 }

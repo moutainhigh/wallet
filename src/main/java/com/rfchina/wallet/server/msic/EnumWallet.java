@@ -512,6 +512,7 @@ public class EnumWallet {
 		POS_QQ((byte) 63, "POS机（手机QQ支付）"),
 		POS_ALIPAY((byte) 64, "POS机（支付宝）"),
 		POS_UNION((byte) 65, "POS机（银联）"),
+		POS_UNION_RCODE((byte) 66, "POS机（银联扫码）"),
 		;
 
 		private Byte value;

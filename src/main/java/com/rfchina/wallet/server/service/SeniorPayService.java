@@ -1,5 +1,6 @@
 package com.rfchina.wallet.server.service;
 
+import com.rfchina.biztools.functionnal.LockDone;
 import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.biztools.lock.SimpleExclusiveLock;
 import com.rfchina.biztools.mq.PostMq;
@@ -9,7 +10,6 @@ import com.rfchina.platform.biztools.CacheHashMap;
 import com.rfchina.platform.common.misc.Triple;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.BeanUtil;
-import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletBalanceDetailDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
@@ -1028,40 +1028,45 @@ public class SeniorPayService {
 	public WalletOrderEx updateOrderStatus(String orderNo, boolean incQuery) {
 		WalletOrder order = verifyService.checkOrder(orderNo, OrderStatus.WAITTING.getValue());
 		EBankHandler handler = handlerHelper.selectByTunnelType(order.getTunnelType());
-		try {
-			lock.acquireLock(LockConstant.LOCK_PAY_ORDER + order.getOrderNo(), 5, 0, 1000);
-			if (incQuery) {
-				order.setCurrTryTimes(order.getCurrTryTimes() + 1);
-			}
-			List<Triple<WalletOrder, WalletFinance, GatewayTrans>> triples = handler
-				.updateOrderStatus(Collections.singletonList(order));
-			WalletOrder rs = triples.get(0).x;
-			WalletOrderEx result = new WalletOrderEx();
-			BeanUtil.copyProperties(rs, result);
 
-			if (OrderStatus.SUCC.getValue().byteValue() == rs.getStatus().byteValue()) {
-				WalletTunnel walletTunnel = walletTunnelDao
-					.selectByWalletId(order.getWalletId(), order.getTunnelType());
-				syncTunnelAmount(walletTunnel);
-				if (OrderType.DEDUCTION.getValue().byteValue() == order.getType().byteValue()) {
-					WalletConsume walletConsume = walletConsumeDao.selectByOrderId(order.getId());
-					WalletTunnel payeeTunnel = walletTunnelDao
-						.selectByWalletId(walletConsume.getPayeeWalletId(), order.getTunnelType());
-					Optional.ofNullable(payeeTunnel).ifPresent(this::syncTunnelAmount);
-				}
-				// 20200629 新增 判断是否为通联pos机订单，如果是，则更新实际支付方式到payType字段
-				if (ChannelType.POS.getValue().equals(rs.getPayMethod())) {
-					// 获取payType
-					WalletCollectMethod method = walletCollectMethodDao
-						.getByOrderNo(rs.getOrderNo());
-					result.setPayType(method.getPayType().intValue());
-				}
-			}
+		log.info("[订单更新] 更新订单[{}]", orderNo);
+		return new LockDone(lock)
+			.applyAndReturnThrowable(LockConstant.LOCK_PAY_ORDER + order.getOrderNo(), 5, () -> {
 
-			return result;
-		} finally {
-			lock.unLock(LockConstant.LOCK_PAY_ORDER + order.getOrderNo());
-		}
+				if (incQuery) {
+					order.setCurrTryTimes(order.getCurrTryTimes() + 1);
+				}
+				List<Triple<WalletOrder, WalletFinance, GatewayTrans>> triples = handler
+					.updateOrderStatus(Collections.singletonList(order));
+				WalletOrder rs = triples.get(0).x;
+				WalletOrderEx result = BeanUtil.newInstance(rs, WalletOrderEx.class);
+
+				if (OrderStatus.SUCC.getValue().byteValue() == rs.getStatus().byteValue()) {
+
+					log.info("[订单更新] 订单[{}]成功，同步通道余额", orderNo);
+					WalletTunnel walletTunnel = walletTunnelDao
+						.selectByWalletId(order.getWalletId(), order.getTunnelType());
+					syncTunnelAmount(walletTunnel);
+					if (OrderType.DEDUCTION.getValue().byteValue() == order.getType().byteValue()) {
+						log.info("[订单更新] 订单[{}]更新收款人钱包", orderNo);
+						WalletConsume walletConsume = walletConsumeDao
+							.selectByOrderId(order.getId());
+						WalletTunnel payeeTunnel = walletTunnelDao
+							.selectByWalletId(walletConsume.getPayeeWalletId(),
+								order.getTunnelType());
+						Optional.ofNullable(payeeTunnel).ifPresent(this::syncTunnelAmount);
+					}
+					// 20200629 新增 判断是否为通联pos机订单，如果是，则更新实际支付方式到payType字段
+					if (ChannelType.POS.getValue().equals(rs.getPayMethod())) {
+						// 获取payType
+						WalletCollectMethod method = walletCollectMethodDao
+							.getByOrderNo(rs.getOrderNo());
+						result.setPayType(method.getPayType().intValue());
+					}
+				}
+
+				return result;
+			});
 	}
 
 	public Wallet syncTunnelAmount(WalletTunnel walletTunnel) {

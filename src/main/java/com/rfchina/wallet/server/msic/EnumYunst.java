@@ -2,6 +2,7 @@ package com.rfchina.wallet.server.msic;
 
 import com.rfchina.platform.common.utils.Valuable;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderStatus;
+import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
 
 public class EnumYunst {
 
@@ -281,6 +282,51 @@ public class EnumYunst {
 		@Override
 		public Byte getValue() {
 			return value;
+		}
+	}
+
+	/**
+	 * 通道交易类型 收银宝渠道返回的交易类型
+	 */
+	public enum EnumTrxCode implements Valuable<String> {
+		WEIXIN("VSP501", "微信支付"),
+		QQ("VSP505", "手机QQ支付"),
+		ALIPAY("VSP511", "支付宝支付"),
+		UNION_RCODE("VSP551", "银联扫码支付"),
+		BALANCE("VSP521", "收银宝-通联钱包"),
+		SCAN_CREDIT("VSP011", "收银宝-扫码预消费"),
+		BANK_PAY("VSP001", "收银宝-消费(银行卡)"),
+		BANK_CREDIT("VSP004", "收银宝-预授权"),
+		;
+
+		private String value;
+		private String valueName;
+
+		EnumTrxCode(String value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public String getValue() {
+			return value;
+		}
+
+		public CollectPayType toCollectPayType() {
+			if (WEIXIN.getValue().equalsIgnoreCase(this.getValue())) {
+				return CollectPayType.POS_WECHAT;
+			} else if (QQ.getValue().equalsIgnoreCase(this.getValue())) {
+				return CollectPayType.POS_QQ;
+			} else if (ALIPAY.getValue().equalsIgnoreCase(this.getValue())) {
+				return CollectPayType.POS_ALIPAY;
+			} else if (UNION_RCODE.getValue().equalsIgnoreCase(this.getValue())) {
+				return CollectPayType.POS_UNION_RCODE;
+			} else if (BALANCE.getValue().equalsIgnoreCase(this.getValue())) {
+				return CollectPayType.BALANCE;
+			} else if (BANK_PAY.getValue().equalsIgnoreCase(this.getValue())) {
+				return CollectPayType.POS_UNION;
+			}
+			return null;
 		}
 	}
 }

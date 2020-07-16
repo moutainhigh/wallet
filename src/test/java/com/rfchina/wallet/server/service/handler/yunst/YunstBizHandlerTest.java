@@ -4,6 +4,7 @@ import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.domain.model.WalletWithdraw;
 import com.rfchina.wallet.server.SpringBaseTest;
+import com.rfchina.wallet.server.bank.yunst.response.GetOrderDetailResp;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletWithdrawExtDao;
@@ -65,5 +66,12 @@ public class YunstBizHandlerTest extends SpringBaseTest {
 	public void cardBin() {
 		String result = yunstBizHandler.cardBin("6214850201481956");
 		log.info("cardBin = {}", result);
+	}
+
+	@Test
+	public void queryOrderDetail() {
+		GetOrderDetailResp resp = yunstBizHandler
+			.queryOrderDetail("TWC2020041738884328");
+		log.info("{}", resp);
 	}
 }
