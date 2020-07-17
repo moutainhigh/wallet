@@ -1,5 +1,6 @@
 package com.rfchina.wallet.server.service;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.biztools.lock.SimpleExclusiveLock;
 import com.rfchina.biztools.mq.PostMq;
@@ -9,6 +10,7 @@ import com.rfchina.platform.biztools.CacheHashMap;
 import com.rfchina.platform.common.misc.Triple;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.BeanUtil;
+import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletBalanceDetailDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
@@ -54,6 +56,7 @@ import com.rfchina.wallet.server.mapper.ext.WalletRefundExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletWithdrawExtDao;
 import com.rfchina.wallet.server.model.ext.AgentPayReq.Reciever;
+import com.rfchina.wallet.server.model.ext.AgentPosVo;
 import com.rfchina.wallet.server.model.ext.CollectReq;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Alipay;
@@ -901,16 +904,16 @@ public class SeniorPayService {
 				.openId(bankCard.getBankCardNo())
 				.cardType(bankCard.getCardType());
 		} else if (payMethod.getPos() != null) {
+			AgentPosVo agentPosVo = JsonUtil
+				.toObject(configService.getAgentPosBindInfo(), AgentPosVo.class,
+					objectMapper -> objectMapper
+						.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false));
 			Pos pos = payMethod.getPos();
+			// 珏衡需求： sellerId本地表查询
 			builder.channelType(ChannelType.POS.getValue())
 				.payType(CollectPayType.POS.getValue())
+				.sellerId(agentPosVo.getVspCusid())
 				.amount(pos.getAmount());
-			// 珏衡需求： sellerId本地表查询
-			WalletTerminal walletTerminal = walletTerminalDao
-				.selectByWalletId(configService.getAgentPosWalletId(),
-					EnumTerminalStatus.BIND.getValue());
-			Optional.ofNullable(walletTerminal)
-				.ifPresent(t -> builder.sellerId(t.getVspCusid()));
 		}
 		WalletCollectMethod method = builder.build();
 		walletCollectMethodDao.insertSelective(method);

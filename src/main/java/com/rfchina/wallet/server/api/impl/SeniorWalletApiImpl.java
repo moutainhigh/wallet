@@ -1,5 +1,6 @@
 package com.rfchina.wallet.server.api.impl;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.rfchina.passport.token.EnumTokenType;
 import com.rfchina.passport.token.TokenVerify;
 import com.rfchina.platform.common.annotation.Log;
@@ -9,6 +10,7 @@ import com.rfchina.platform.common.annotation.SignVerify;
 import com.rfchina.platform.common.exception.RfchinaResponseException;
 import com.rfchina.platform.common.misc.ResponseCode;
 import com.rfchina.platform.common.page.Pagination;
+import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletConsumeDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
@@ -35,8 +37,10 @@ import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResul
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.PersonInfoResult;
 import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
+import com.rfchina.wallet.server.model.ext.AgentPosVo;
 import com.rfchina.wallet.server.msic.EnumYunst;
 import com.rfchina.wallet.server.msic.EnumYunst.EnumTerminalStatus;
+import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.SeniorWalletService;
 import com.rfchina.wallet.server.service.VerifyService;
 import java.util.Arrays;
@@ -81,6 +85,9 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 
 	@Autowired
 	private WalletTerminalDao walletTerminalDao;
+
+	@Autowired
+	private ConfigService configService;
 
 
 	@Log
@@ -461,16 +468,6 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 
 
 	@Log
-	@Override
-	public VspTermidResp bindTerminal(String bizUserId, String vspMerchantid, String vspCusid,
-		String appId, String vspTermid) {
-
-		return seniorWalletService
-			.bindTerminal(bizUserId, vspMerchantid, vspCusid, appId, vspTermid);
-	}
-
-
-	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
 	@ParamVerify
@@ -510,59 +507,52 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 
 
 	@Log
-	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
-	@SignVerify
-	@ParamVerify
+//	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+//	@SignVerify
+//	@ParamVerify
 	@Override
-	public void bindTerminal(Long walletId, Long terminalId) {
-		log.info("钱包[{}]绑定终端[{}]开始", walletId, terminalId);
-		WalletTerminal walletTerminal = walletTerminalDao.selectByPrimaryKey(terminalId);
-		Optional.ofNullable(walletTerminal)
-			.ifPresent(p -> {
-				WalletTunnel tunnel = walletTunnelDao
-					.selectByWalletId(walletId, TunnelType.YUNST.getValue());
-				Objects.requireNonNull(tunnel);
-				Objects.requireNonNull(tunnel.getBizUserId());
-				Objects.requireNonNull(p.getVspMerchantid());
-				Objects.requireNonNull(p.getVspCusid());
-				Objects.requireNonNull(p.getAppId());
-				Objects.requireNonNull(p.getVspTermid());
+	public void bindTerminal(String accessToken, String terminalId) {
 
-				VspTermidResp resp = seniorWalletService.bindTerminal(tunnel.getBizUserId()
-					, p.getVspMerchantid(), p.getVspCusid(), p.getAppId(), p.getVspTermid());
+		AgentPosVo agentPosVo = JsonUtil
+			.toObject(configService.getAgentPosBindInfo(), AgentPosVo.class,
+				objectMapper -> objectMapper
+					.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false));
 
-				if (resp.getResult().equalsIgnoreCase("OK")) {
-					walletTerminal.setWalletId(walletId);
-					walletTerminal.setBizUserId(tunnel.getBizUserId());
-					walletTerminal.setBindTime(new Date());
-					walletTerminal.setStatus(EnumTerminalStatus.BIND.getValue());
-					walletTerminalDao.updateByPrimaryKeySelective(walletTerminal);
-					log.info("钱包[{}]绑定终端[{}]成功", walletId, terminalId);
-				}else{
-					throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
-						resp.getResult());
-				}
-			});
-	}
+		log.info("思力主收款人[{}]绑定终端[{}]开始", agentPosVo.getBizUserId(), terminalId);
 
-	@Override
-	public void createTerminal(String appId, String vspMerchantid, String vspCusid,
-		String vspTermid, String province, String mchId, String mchName, String shopAddress) {
+		Objects.requireNonNull(agentPosVo.getBizUserId());
+		Objects.requireNonNull(agentPosVo.getVspMerchantid());
+		Objects.requireNonNull(agentPosVo.getVspCusid());
+		Objects.requireNonNull(agentPosVo.getAppid());
+		Objects.requireNonNull(terminalId);
 
-		WalletTerminal terminal = WalletTerminal.builder()
-			.vspMerchantid(vspMerchantid)
-			.vspCusid(vspCusid)
-			.appId(appId)
-			.vspTermid(vspTermid)
-			.province(province)
-			.mchId(mchId)
-			.mchName(mchName)
-			.shopAddress(shopAddress)
-			.status(EnumTerminalStatus.NULL.getValue())
-			.createTime(new Date())
-			.build();
+		VspTermidResp resp = seniorWalletService.bindTerminal(agentPosVo.getBizUserId()
+			, agentPosVo.getVspMerchantid(), agentPosVo.getVspCusid(), agentPosVo.getAppid(),
+			terminalId);
 
-		walletTerminalDao.insertSelective(terminal);
+		if (resp.getResult().equalsIgnoreCase("OK")) {
+
+			WalletTerminal terminal = WalletTerminal.builder()
+				.walletId(agentPosVo.getWalletId())
+				.bizUserId(agentPosVo.getBizUserId())
+				.bindTime(new Date())
+				.status(EnumTerminalStatus.BIND.getValue())
+				.vspMerchantid(agentPosVo.getVspMerchantid())
+				.vspCusid(agentPosVo.getVspCusid())
+				.appId(agentPosVo.getAppid())
+				.vspTermid(terminalId)
+				.province(agentPosVo.getProvince())
+				.mchId(agentPosVo.getMchId())
+				.mchName(agentPosVo.getMchName())
+				.createTime(new Date())
+				.build();
+			walletTerminalDao.insertSelective(terminal);
+
+			log.info("思力主收款人[{}]绑定终端[{}]成功", agentPosVo.getBizUserId(), terminalId);
+		} else {
+			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+				resp.getResult());
+		}
 	}
 
 }

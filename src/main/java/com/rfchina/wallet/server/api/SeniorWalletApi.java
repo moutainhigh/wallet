@@ -163,19 +163,11 @@ public interface SeniorWalletApi {
 		String verifyCode);
 
 	/**
-	 * 绑定终端
-	 **/
-	VspTermidResp bindTerminal(String bizUserId, String vspMerchantid, String vspCusid,
-		String appId, String vspTermid);
-
-	/**
 	 * 查询终端
 	 */
 	Pagination<WalletTerminal> queryTerminal(Long walletId, String vspCusid,
 		String vspTermid, String province, String mchId, int limit, int offset);
 
-	void bindTerminal(Long walletId, Long terminalId);
+	void bindTerminal(String accessToken, String terminalId);
 
-	void createTerminal(String appId, String vspMerchantid, String vspCusid, String vspTermid,
-		String province, String mchId, String mchName, String shopAddress);
 }

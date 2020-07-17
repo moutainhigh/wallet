@@ -1,7 +1,8 @@
 # 版本更新日志
 ```
 测试环境
-jenkins job: platform-rfwallet-server-test
+
+service: rfwallet-server
 ```
 ## 1.8.0_b1_2020071716_Beta
 - 优化POS支付退款流程

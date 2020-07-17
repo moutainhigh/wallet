@@ -170,6 +170,9 @@ public class ConfigService {
 	@Value("${yunst.agentPos.walletId}")
 	private Long agentPosWalletId;
 
+	@Value("${yunst.agentPos.bindInfo}")
+	private String agentPosBindInfo;
+
 	/**
 	 * 异常邮件通知
 	 */
