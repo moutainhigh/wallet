@@ -9,7 +9,6 @@ import com.rfchina.platform.biztools.CacheHashMap;
 import com.rfchina.platform.common.misc.Triple;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.BeanUtil;
-import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletBalanceDetailDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
@@ -258,7 +257,7 @@ public class SeniorPayService {
 				.build();
 			walletRechargeDao.insertSelective(recharge);
 			savePayMethod(recharge.getOrderId(), recharge.getId(), OrderType.RECHARGE.getValue(),
-				payMethod, null);
+				payMethod);
 
 			// 余额明细
 			WalletBalanceDetail withdrawDetail = WalletBalanceDetail.builder()
@@ -479,12 +478,8 @@ public class SeniorPayService {
 				.createTime(new Date())
 				.build();
 			walletCollectDao.insertSelective(collect);
-			Optional<Long> opt = req.getRecievers().stream()
-				.filter(r -> r.getRoleType().byteValue() == CollectRoleType.PROJECTOR.getValue())
-				.map(r -> r.getWalletId())
-				.findAny();
 			savePayMethod(collect.getOrderId(), collect.getId(), OrderType.COLLECT.getValue(),
-				req.getWalletPayMethod(), opt.orElse(null));
+				req.getWalletPayMethod());
 
 			// 生成清分记录
 			List<WalletCollectInfo> collectInfos = req.getRecievers().stream().map(reciever -> {
@@ -798,7 +793,7 @@ public class SeniorPayService {
 			walletConsumeDao.insertSelective(consume);
 
 			WalletCollectMethod method = savePayMethod(consume.getOrderId(), consume.getId(),
-				OrderType.DEDUCTION.getValue(), req.getWalletPayMethod(), null);
+				OrderType.DEDUCTION.getValue(), req.getWalletPayMethod());
 
 			WalletTunnel payer = walletTunnelDao
 				.selectByWalletId(consumeOrder.getWalletId(), consumeOrder.getTunnelType());
@@ -863,7 +858,7 @@ public class SeniorPayService {
 	 * 保存支付方式
 	 */
 	private WalletCollectMethod savePayMethod(Long orderId, Long collectId, Byte type,
-		WalletPayMethod payMethod, Long walletId) {
+		WalletPayMethod payMethod) {
 		// 支付方式
 		WalletCollectMethodBuilder builder = WalletCollectMethod.builder()
 			.refId(collectId)
@@ -912,7 +907,8 @@ public class SeniorPayService {
 				.amount(pos.getAmount());
 			// 珏衡需求： sellerId本地表查询
 			WalletTerminal walletTerminal = walletTerminalDao
-				.selectByWalletId(walletId, EnumTerminalStatus.BIND.getValue());
+				.selectByWalletId(configService.getAgentPosWalletId(),
+					EnumTerminalStatus.BIND.getValue());
 			Optional.ofNullable(walletTerminal)
 				.ifPresent(t -> builder.sellerId(t.getVspCusid()));
 		}

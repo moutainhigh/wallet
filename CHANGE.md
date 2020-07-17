@@ -3,6 +3,9 @@
 测试环境
 jenkins job: platform-rfwallet-server-test
 ```
+## 1.8.0_b1_2020071716_Beta
+- 优化POS支付退款流程
+
 ## 1.7.1_2020071612_Release
 - 修改手机号正则依赖版本
 

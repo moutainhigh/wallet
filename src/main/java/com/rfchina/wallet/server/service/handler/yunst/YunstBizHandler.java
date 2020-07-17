@@ -363,7 +363,7 @@ public class YunstBizHandler extends EBankHandler {
 				.bizUserId(receiver.getBizUserId())
 				.amount(amount)
 				.build());
-		} else if (budgetMode.byteValue() == BudgetMode.ON_AGENTPAY.getValue()) {
+		} else if (budgetMode.byteValue() == BudgetMode.SILI_PROXY.getValue()) {
 
 			log.info("思力代分 主收款人[{}]", configService.getAgentPosWalletId());
 			WalletTunnel receiver = walletChannelDao

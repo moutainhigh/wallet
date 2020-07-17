@@ -533,6 +533,7 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 
 				if (resp.getResult().equalsIgnoreCase("OK")) {
 					walletTerminal.setWalletId(walletId);
+					walletTerminal.setBizUserId(tunnel.getBizUserId());
 					walletTerminal.setBindTime(new Date());
 					walletTerminal.setStatus(EnumTerminalStatus.BIND.getValue());
 					walletTerminalDao.updateByPrimaryKeySelective(walletTerminal);

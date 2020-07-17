@@ -46,15 +46,6 @@ public class WalletController {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, resp);
 	}
 
-//	@ApiOperation("重做问题单")
-//	@PostMapping(UrlConstant.WALLET_APPLY_REDO)
-//	public ResponseValue redoWalletApply(@RequestParam("access_token") String accessToken,
-//		@ApiParam(value = "流水id", required = true, example = "1") @RequestParam(value = "wallet_log_id")
-//			Long walletLogId) {
-//		walletApi.redoWalletApply(accessToken, walletLogId);
-//		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
-//	}
-
 	@ApiOperation("查询钱包信息（企业or个人）")
 	@PostMapping(UrlConstant.M_WALLET_QUERY_INFO)
 	public ResponseValue<WalletInfoResp> queryWalletInfo(

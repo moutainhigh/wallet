@@ -311,7 +311,8 @@ public class SeniorWalletController {
 	public ResponseValue bindTerminal(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
-		@ApiParam(value = "终端id", required = true) @RequestParam("terminal_id") Long terminalId
+		@ApiParam(value = "终端id", required = true) @RequestParam("terminal_id") Long terminalId,
+		@ApiParam(value = "类型： 1：绑定，2：解绑", required = true) @RequestParam("opt_type") Byte optType
 	) {
 
 		seniorWalletApi.bindTerminal(walletId, terminalId);
