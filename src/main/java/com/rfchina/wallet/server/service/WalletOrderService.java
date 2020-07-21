@@ -53,11 +53,13 @@ public class WalletOrderService {
 		}
 		//拼接邮件内容
 		StringBuilder sb = new StringBuilder(128);
-		sb.append("申请单号").append(" ").append("单据状态").append("\n");
-		walletOrderList.forEach(walletOrder -> sb.append(walletOrder.getOrderNo())
+
+		sb.append("<div><span style=\"font-size:13.3333px;line-height:20px;\">申请单号   单据状态</span></div>");
+		walletOrderList.forEach(walletOrder -> sb.append("<div><span style=\"font-size:13.3333px;line-height:20px;\">")
+				.append(walletOrder.getOrderNo())
 				.append(" ")
 				.append(walletOrder.getStatus())
-				.append("\n"));
+				.append("\n </span></div>"));
 		//发送通知邮件
 		sendNotifyMail(sb.toString());
 		log.info("[发送结算失败订单邮件通知] 订单时间[{}] 成功", formatDate);
