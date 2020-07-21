@@ -6,7 +6,6 @@ import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletTerminal;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
-import com.rfchina.wallet.server.bank.yunst.response.VspTermidResp;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult;
 import java.util.Date;
 
@@ -166,7 +165,8 @@ public interface SeniorWalletApi {
 	 * 查询终端
 	 */
 	Pagination<WalletTerminal> queryTerminal(Long walletId, String vspCusid,
-		String vspTermid, String province, String mchId, int limit, int offset);
+		String vspTermid, String province, String mchId, Byte status, int limit,
+		int offset);
 
 	void bindTerminal(String accessToken, String terminalId);
 

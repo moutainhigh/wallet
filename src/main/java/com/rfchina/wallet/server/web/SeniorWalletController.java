@@ -12,7 +12,6 @@ import com.rfchina.wallet.domain.model.WalletTerminal;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.api.SeniorWalletApi;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq.CompanyBasicInfo;
-import com.rfchina.wallet.server.bank.yunst.response.VspTermidResp;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.CompanyInfoResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.PersonInfoResult;
@@ -291,8 +290,8 @@ public class SeniorWalletController {
 	}
 
 	@ApiOperation("高级钱包-商家绑定终端")
-	@PostMapping(UrlConstant.WALLET_BIND_TERMINAL2)
-	public ResponseValue<VspTermidResp> bindTerminal(
+	@PostMapping(UrlConstant.WALLET_BIND_TERMINAL)
+	public ResponseValue bindTerminal(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "终端号", required = true) @RequestParam("vsp_termid") String vspTermid
 	) {
@@ -311,12 +310,13 @@ public class SeniorWalletController {
 		@ApiParam(value = "终端号", required = false) @RequestParam(value = "vsp_termid", required = false) String vspTermid,
 		@ApiParam(value = "省份", required = false) @RequestParam(value = "province", required = false) String province,
 		@ApiParam(value = "商家id", required = false) @RequestParam(value = "mch_id", required = false) String mchId,
+		@ApiParam(value = "状态： 0：未绑定，1：已绑定，2：已解绑", required = false) @RequestParam(value = "status", required = false) Byte status,
 		@ApiParam(value = "limit", required = true) @RequestParam("limit") Integer limit,
 		@ApiParam(value = "offset", required = true) @RequestParam("offset") Integer offset
 	) {
 
 		Pagination<WalletTerminal> page = seniorWalletApi
-			.queryTerminal(walletId, vspCusid, vspTermid, province, mchId, limit, offset);
+			.queryTerminal(walletId, vspCusid, vspTermid, province, mchId, status, limit, offset);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, page);
 	}
 

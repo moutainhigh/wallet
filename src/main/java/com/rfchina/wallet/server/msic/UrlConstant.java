@@ -342,7 +342,7 @@ public class UrlConstant {
 	/**
 	 * 会员绑定终端
 	 */
-	public static final String WALLET_BIND_TERMINAL2 = VERSION + "/m/senior/wallet/bind_terminal";
+	public static final String WALLET_BIND_TERMINAL = VERSION + "/m/senior/wallet/bind_terminal";
 
 	/** 查询终端列表 */
 	public static final String WALLET_QUERY_TERMINAL = VERSION + "/m/senior/wallet/query_terminal";

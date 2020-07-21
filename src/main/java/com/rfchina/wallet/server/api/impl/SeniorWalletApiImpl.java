@@ -473,7 +473,8 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	@ParamVerify
 	@Override
 	public Pagination<WalletTerminal> queryTerminal(Long walletId, String vspCusid,
-		String vspTermid, String province, String mchId, int limit, int offset) {
+		String vspTermid, String province, String mchId, Byte status, int limit,
+		int offset) {
 
 		WalletTerminalCriteria example = new WalletTerminalCriteria();
 		Criteria criteria = example.createCriteria();
@@ -492,6 +493,9 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 		if (StringUtil.isNotBlank(mchId)) {
 			criteria.andMchIdEqualTo(mchId);
 		}
+		if(status != null){
+			criteria.andStatusEqualTo(status);
+		}
 		example.setOrderByClause("id desc");
 		List<WalletTerminal> walletTerminals = walletTerminalDao
 			.selectByExampleWithRowbounds(example, new RowBounds(offset, limit));
@@ -507,9 +511,9 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 
 
 	@Log
-//	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
-//	@SignVerify
-//	@ParamVerify
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
+	@ParamVerify
 	@Override
 	public void bindTerminal(String accessToken, String terminalId) {
 
