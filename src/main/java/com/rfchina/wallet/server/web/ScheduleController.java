@@ -5,10 +5,7 @@ import com.rfchina.wallet.server.api.ScheduleApi;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -161,6 +158,15 @@ public class ScheduleController {
 
 		log.info("scheduler: 完成任务[{}]", "quartzSyncBalance");
 
+		return "success";
+	}
+
+	@PostMapping(value = UrlConstant.QUARTZ_SYNC_ORDER_SETTLE_FAILED)
+	@FuScheduleTaskReporter
+	public String quartzOrderSettleFailed() {
+		log.info("scheduler: 开始执行任务[{}]", "quartzOrderSettleFailed");
+		scheduleApi.quartzOrderSettleFailed();
+		log.info("scheduler: 完成任务[{}]", "quartzOrderSettleFailed");
 		return "success";
 	}
 }

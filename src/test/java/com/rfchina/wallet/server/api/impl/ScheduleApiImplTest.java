@@ -14,4 +14,9 @@ public class ScheduleApiImplTest extends SpringApiTest {
 	public void quartzCharging() {
 		scheduleApi.quartzCharging(null);
 	}
+
+	@Test
+	public void quartzOrderSettleFailed() {
+		scheduleApi.quartzOrderSettleFailed();
+	}
 }
