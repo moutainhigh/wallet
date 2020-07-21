@@ -2,7 +2,10 @@ package com.rfchina.wallet.server.api.impl;
 
 import static junit.framework.TestCase.assertTrue;
 
+import com.alibaba.fastjson.JSON;
+import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.platform.common.utils.JsonUtil;
+import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.server.SpringApiTest;
 import com.rfchina.wallet.server.api.WalletApi;
 import com.rfchina.wallet.server.model.ext.PayStatusResp;
@@ -36,5 +39,11 @@ public class WalletApiImplTest extends SpringApiTest {
 	public void queryWalletCard() {
 		List<WalletCardVo> walletCardVos = walletApi.queryWalletCard(super.accessToken, 10035L);
 		log.info("{}", JsonUtil.toJSON(walletCardVos));
+	}
+
+	@Test
+	public void walletList(){
+		Pagination<Wallet> walletPagination = walletApi.walletList(super.accessToken, "sn", null, null, null, 100, 0, true);
+		log.info("result: {}", JSON.toJSON(walletPagination));
 	}
 }
