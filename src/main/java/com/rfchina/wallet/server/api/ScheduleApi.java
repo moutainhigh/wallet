@@ -1,7 +1,5 @@
 package com.rfchina.wallet.server.api;
 
-import java.util.Date;
-
 public interface ScheduleApi {
 	/**
 	 * 定时更新支付状态
@@ -39,4 +37,9 @@ public interface ScheduleApi {
 
 	/** 定时同步通道余额 */
 	void quartzSyncBalance();
+
+	/**
+	 * 定时通知结算不成功订单
+	 */
+	void quartzOrderSettleFailed();
 }

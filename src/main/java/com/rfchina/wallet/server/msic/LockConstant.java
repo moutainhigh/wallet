@@ -44,4 +44,9 @@ public class LockConstant {
 	 * 订单锁
 	 */
 	public static String LOCK_PAY_ORDER = "order:";
+
+	/**
+	 * 定时通知结算不成功订单
+	 */
+	public static String LOCK_QUARTZ_ORDER_SETTLE_FAILED = "quartzOrderSettleFailed";
 }

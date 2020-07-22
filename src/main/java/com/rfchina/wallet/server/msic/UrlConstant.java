@@ -117,6 +117,9 @@ public class UrlConstant {
 	/** 定时同步通道余额**/
 	public static final String QUARTZ_SYNC_BALANCE = VERSION + "/schedule/quartz_sync_balance";
 
+	/** 定时通知结算不成功订单**/
+	public static final String QUARTZ_SYNC_ORDER_SETTLE_FAILED = VERSION + "/schedule/quartz_order_settle_failed";
+
 	/**
 	 * 查询钱包信息（企业or个人）
 	 */
