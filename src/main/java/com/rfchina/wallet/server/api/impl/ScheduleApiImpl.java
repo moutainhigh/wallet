@@ -275,8 +275,8 @@ public class ScheduleApiImpl implements ScheduleApi {
 
 	@Override
 	public void quartzOrderSettleFailed() {
-		Date orderDate = DateUtil.getDate2(DateUtil.addDate2(new Date(), -2));
-		log.info("结算通知订单日期:{}", orderDate.toString());
+		Date orderDate = DateUtil.getDate(DateUtil.addDate2(new Date(), -2));
+		log.info("结算通知订单日期:{}", DateUtil.formatDate(orderDate, DateUtil.STANDARD_DTAETIME_PATTERN));
 		new LockDone(lock).apply(LockConstant.LOCK_QUARTZ_ORDER_SETTLE_FAILED, 900, () -> {
 			try {
 				log.info("[定时通知结算不成功订单] 开始");

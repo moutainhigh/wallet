@@ -43,7 +43,7 @@ public class WalletOrderService {
 		//获取orderDate当天和之前结算不成功的订单
 		WalletOrderCriteria walletOrderCriteria = new WalletOrderCriteria();
 		walletOrderCriteria.createCriteria()
-				.andCreateTimeLessThan(orderDate == null ? DateUtil.addDate2(new Date(), -2) : orderDate)
+				.andCreateTimeGreaterThanOrEqualTo(orderDate == null ? DateUtil.addDate2(new Date(), -2) : orderDate)
 				.andTypeEqualTo(EnumDef.OrderType.FINANCE.getValue())
 				.andStatusEqualTo(EnumDef.OrderStatus.WAITTING.getValue());
 		List<WalletOrder> walletOrderList = walletOrderExtDao.selectByExample(walletOrderCriteria);
