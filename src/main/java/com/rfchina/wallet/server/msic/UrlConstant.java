@@ -329,6 +329,11 @@ public class UrlConstant {
 	public static final String REPORT_CHARGING_DETAIL = VERSION + "/m/report/charging_detail";
 
 	/**
+	 * 生成手续费明细xls文档
+	 */
+	public static final String REPORT_CHARGING_DETAIL_EXPORT = VERSION + "/m/report/export_charging_detail";
+
+	/**
 	 * 手续费重做
 	 */
 	public static final String REPORT_CHARGING_REDO = VERSION + "/m/report/charging_redo";

@@ -68,7 +68,7 @@ public class SpringBaseTest {
 //		}
 	}
 
-	@Before
+//	@Before
 	public void initSess() {
 		App app = new App();
 		app.setId(configService.getAppId());

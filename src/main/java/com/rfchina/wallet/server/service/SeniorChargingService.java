@@ -3,6 +3,8 @@ package com.rfchina.wallet.server.service;
 import com.rfchina.biztools.functional.DateIterator;
 import com.rfchina.biztools.functional.MaxIdIterator;
 import com.rfchina.mch.sdk.model.ChargingConfig;
+import com.rfchina.platform.biztool.excel.ExcelBean;
+import com.rfchina.platform.biztool.excel.ExcelFactory;
 import com.rfchina.platform.biztools.CacheHashMap;
 import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.platform.common.utils.BeanUtil;
@@ -29,14 +31,18 @@ import com.rfchina.wallet.server.model.ext.SumOfFeeVo;
 import com.rfchina.wallet.server.msic.EnumWallet.FeeConfigKey;
 import com.rfchina.wallet.server.msic.EnumYunst.YunstMethodName;
 import com.rfchina.wallet.server.msic.EnumYunst.YunstServiceName;
+import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import org.apache.ibatis.session.RowBounds;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -297,6 +303,7 @@ public class SeniorChargingService {
 
 	public Pagination<StatChargingDetailVo> queryChargingDetail(Date startTime, Date endTime,
 		Integer limit, Integer offset, Boolean stat, Boolean asc) {
+
 		StatChargingDetailCriteria example = new StatChargingDetailCriteria();
 		example.setOrderByClause(asc ? "id asc" : "id desc");
 		example.createCriteria()
@@ -319,6 +326,7 @@ public class SeniorChargingService {
 			.build();
 	}
 
+
 	public void chargingRedo(Date startTime, Date endTime) {
 		DateIterator dateIterator = new DateIterator(startTime, endTime);
 		dateIterator.apply((theDay) -> {
@@ -329,4 +337,36 @@ public class SeniorChargingService {
 	}
 
 
+	public byte[] exportChargingDetail(String fileName, Date startTime, Date endTime) {
+
+		ExcelBean excelBean = ExcelFactory.build2007();
+		Sheet sheet = excelBean.creatSheet(fileName);
+		excelBean.addTitle(sheet, 0, StatChargingDetailVo.class);
+		AtomicInteger cursor = new AtomicInteger(1);
+		new MaxIdIterator<StatChargingDetailVo>().apply((maxId) -> {
+			StatChargingDetailCriteria example = new StatChargingDetailCriteria();
+			example.setOrderByClause("id asc");
+			example.createCriteria()
+				.andBizTimeBetween(startTime, endTime)
+				.andDeletedEqualTo((byte) 0)
+				.andIdGreaterThan(maxId);
+			List<StatChargingDetail> data = statChargingDetailDao.selectByExample(example);
+			return data.stream()
+				.map(item -> BeanUtil.newInstance(item, StatChargingDetailVo.class))
+				.collect(Collectors.toList());
+		}, (row) -> {
+			excelBean.addData(sheet, cursor.getAndIncrement(), Arrays.asList(row));
+			return row.getId();
+		});
+
+		try {
+			ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+			excelBean.getWorkbook().write(byteOut);
+
+			return byteOut.toByteArray();
+		}catch (Exception e){
+			return new byte[0];
+		}
+
+	}
 }

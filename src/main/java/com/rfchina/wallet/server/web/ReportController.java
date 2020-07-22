@@ -54,14 +54,30 @@ public class ReportController {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, page);
 	}
 
+	@ApiOperation("生成手续费报表")
+	@PostMapping(UrlConstant.REPORT_CHARGING_DETAIL_EXPORT)
+	public ResponseValue<Pagination<StatChargingDetailVo>> exportChargingDetail(
+		@ApiParam(name = "access_token", value = "访问令牌", required = true) @RequestParam("access_token") String accessToken,
+		@ApiParam(name = "file_name", value = "文件名称", required = true) @RequestParam("file_name") String fileName,
+		@ApiParam(name = "start_time", value = "开始时间", required = true) @RequestParam("start_time") @DateTimeFormat(pattern = DateUtil.STANDARD_DTAETIME_PATTERN) String startTime,
+		@ApiParam(name = "end_time", value = "结束时间", required = true) @RequestParam("end_time") @DateTimeFormat(pattern = DateUtil.STANDARD_DTAETIME_PATTERN) String endTime
+	) {
+
+		seniorChargingApi
+			.exportChargingDetail(accessToken, fileName, startTime, endTime);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
+	}
+
 	@ApiOperation("手续费重做")
 	@PostMapping(UrlConstant.REPORT_CHARGING_REDO)
 	public ResponseValue chargingRedo(
-		@ApiParam(name = "access_token", value = "访问令牌", required = true) @RequestParam(value = "access_token",required = false) String accessToken,
+		@ApiParam(name = "access_token", value = "访问令牌", required = true) @RequestParam(value = "access_token", required = false) String accessToken,
 		@ApiParam(name = "start_time", value = "开始时间", required = true) @RequestParam("start_time") String startTime,
 		@ApiParam(name = "end_time", value = "结束时间", required = true) @RequestParam("end_time") String endTime) {
 
-		seniorChargingApi.chargingRedo(accessToken, DateUtil.parse(startTime,DateUtil.STANDARD_DTAE_PATTERN), DateUtil.parse(endTime,DateUtil.STANDARD_DTAE_PATTERN));
+		seniorChargingApi
+			.chargingRedo(accessToken, DateUtil.parse(startTime, DateUtil.STANDARD_DTAE_PATTERN),
+				DateUtil.parse(endTime, DateUtil.STANDARD_DTAE_PATTERN));
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
 

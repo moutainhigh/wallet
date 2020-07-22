@@ -15,12 +15,12 @@ public class YunstUserHandlerTest extends SpringBaseTest {
 	@Test
 	public void vspTermid() {
 
-		String bizUserId = "PRODUCTWC1027649";
-		String vspMerchantid = "56058104816W6FX";
-		String vspCusid = "561581048164X2A";
-		String appId = "00189916";
-		String vspTermid = "12243778";
-		String oper = "set";
+		String bizUserId = "TESTWC444";
+		String vspMerchantid = "56058104816VDT7";
+		String vspCusid = "56058104816U8U6";
+		String appId = "00183310";
+		String vspTermid = null;
+		String oper = "query";
 
 		VspTermidResp resp = yunstUserHandler
 			.vspTermid(bizUserId, vspMerchantid, vspCusid, appId, vspTermid, oper);

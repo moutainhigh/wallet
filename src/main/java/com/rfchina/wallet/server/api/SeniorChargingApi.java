@@ -16,4 +16,6 @@ public interface SeniorChargingApi {
 	void chargingRedo(String accessToken, Date startTime, Date endTime);
 
 	StatCharging queryChargingByCurrentMonth(String accessToken);
+
+	void exportChargingDetail(String accessToken, String fileName, String startTime, String endTime);
 }

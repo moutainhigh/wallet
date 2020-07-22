@@ -78,7 +78,7 @@ dependencies {
     // 本地依赖
     compile('com.rfchina:rfchina-commons-utils:2.3.13')
     compile 'com.rfchina:rfchina-platform-passport-common:1.2.1'
-    compile('com.rfchina:rfwallet-domain:1.1.11')
+    compile('com.rfchina:rfwallet-domain:1.1.13-SNAPSHOT')
     compile('com.rfchina.biztool:IdGenarator:1.0.3')
     compile('com.rfchina.biztool:spring-mq:1.0.1')
     compile 'org.tas:post-core:1.0.0'
@@ -90,6 +90,7 @@ dependencies {
     compile 'com.rfchina.biztool:functional:1.0.2'
     compile 'com.rfchina.biztool:verify-factory:1.0.1'
     compile 'com.rfchina.biztool:cache:1.0.1'
+    compile 'com.rfchina.biztool:excel:1.0.2'
     compile 'com.rfchina:rfchina-platform-scheduler-spring:1.2.0'
     compile('com.rfchina:rfchina-platform-spring-intergration:2.0.10') {
         exclude group: 'org.springframework.amqp'

@@ -4,6 +4,8 @@ import com.rfchina.biztools.functionnal.LockDone;
 import com.rfchina.biztools.lock.SimpleExclusiveLock;
 import com.rfchina.passport.token.EnumTokenType;
 import com.rfchina.passport.token.TokenVerify;
+import com.rfchina.platform.biztools.fileserver.EnumFileAcl;
+import com.rfchina.platform.biztools.fileserver.FileServer;
 import com.rfchina.platform.common.annotation.Log;
 import com.rfchina.platform.common.annotation.SignVerify;
 import com.rfchina.platform.common.page.Pagination;
@@ -14,6 +16,7 @@ import com.rfchina.wallet.server.model.ext.StatChargingDetailVo;
 import com.rfchina.wallet.server.service.SeniorChargingService;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -24,6 +27,9 @@ public class SeniorChargingApiImpl implements SeniorChargingApi {
 
 	@Autowired
 	private SimpleExclusiveLock lock;
+
+	@Autowired
+	FileServer fileServer;
 
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
@@ -65,5 +71,20 @@ public class SeniorChargingApiImpl implements SeniorChargingApi {
 	@SignVerify
 	public StatCharging queryChargingByCurrentMonth(String accessToken) {
 		return seniorChargingService.queryChargingByCurrentMonth();
+	}
+
+
+	@Async
+	@Override
+	public void exportChargingDetail(String accessToken, String fileName, String startTime,
+		String endTime) {
+
+		Date start = DateUtil.parse(startTime, DateUtil.STANDARD_DTAE_PATTERN);
+		Date end = DateUtil.parse(endTime, DateUtil.STANDARD_DTAE_PATTERN);
+		byte[] bytes = seniorChargingService.exportChargingDetail(fileName, start, end);
+		String fileKey = "report/" + fileName;
+		fileServer
+			.upload(fileKey, bytes, "application/octet-stream", EnumFileAcl.PUBLIC_READ, null);
+
 	}
 }
