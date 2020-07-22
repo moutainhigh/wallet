@@ -40,7 +40,6 @@ import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletRecharge;
 import com.rfchina.wallet.domain.model.WalletRefund;
 import com.rfchina.wallet.domain.model.WalletRefundDetail;
-import com.rfchina.wallet.domain.model.WalletTerminal;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.domain.model.WalletWithdraw;
 import com.rfchina.wallet.server.bank.yunst.response.SmsPayResp;
@@ -79,10 +78,8 @@ import com.rfchina.wallet.server.msic.EnumWallet.CardPro;
 import com.rfchina.wallet.server.msic.EnumWallet.ChannelType;
 import com.rfchina.wallet.server.msic.EnumWallet.ChargingType;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
-import com.rfchina.wallet.server.msic.EnumWallet.CollectRoleType;
 import com.rfchina.wallet.server.msic.EnumWallet.FeeConfigKey;
 import com.rfchina.wallet.server.msic.EnumWallet.GwProgress;
-import com.rfchina.wallet.server.msic.EnumYunst.EnumTerminalStatus;
 import com.rfchina.wallet.server.msic.LockConstant;
 import com.rfchina.wallet.server.service.handler.common.EBankHandler;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
@@ -915,7 +912,7 @@ public class SeniorPayService {
 				.sellerId(agentPosVo.getVspCusid())
 				.amount(pos.getAmount());
 		}
-		WalletCollectMethod method = builder.build();
+		WalletCollectMethod method = builder.createTime(new Date()).build();
 		walletCollectMethodDao.insertSelective(method);
 		return method;
 	}
@@ -966,6 +963,13 @@ public class SeniorPayService {
 				.cardType(collectMethod.getCardType())
 				.build();
 			builder.bankCard(bankCard);
+		} else if (ChannelType.POS.getValue().equals(collectMethod.getChannelType())) {
+			Pos pos = Pos.builder()
+				.payType(collectMethod.getPayType())
+				.amount(collectMethod.getAmount())
+				.vspCusid(collectMethod.getSellerId())
+				.build();
+			builder.pos(pos);
 		}
 
 		return builder.build();
