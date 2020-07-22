@@ -10,6 +10,7 @@ import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.RefundReq.RefundInfo;
 import com.rfchina.wallet.server.model.ext.SettleResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
+import com.rfchina.wallet.server.model.ext.WalletOrderEx;
 import com.rfchina.wallet.server.model.ext.WithdrawResp;
 import java.util.Date;
 import java.util.List;
@@ -32,7 +33,7 @@ public interface SeniorPayApi {
 
 	WalletCollectResp deduction(String accessToken, DeductionReq req, RateSetting rateSetting);
 
-	WalletOrder orderQuery(String accessToken, String orderNo);
+	WalletOrderEx orderQuery(String accessToken, String orderNo);
 
 	void smsConfirm(String accessToken, String preBindTicket,
 		String verifyCode, String ip);

@@ -37,6 +37,9 @@ public class BankCode  {
     @ApiModelProperty("所属地区")
     private String provinceName ;
 
+    @ApiModelProperty("通联对应银行名称")
+    private String tlBankName ;
+
     @ApiModelProperty("")
     private Integer weight ;
 

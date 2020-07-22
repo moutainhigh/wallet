@@ -2,10 +2,12 @@ package com.rfchina.wallet.server.service.handler.yunst;
 
 import com.allinpay.yunst.sdk.util.RSAUtil;
 import com.rfchina.biztools.functionnal.LockDone;
+import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.biztools.lock.SimpleExclusiveLock;
 import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.platform.common.misc.Try;
 import com.rfchina.platform.common.utils.DateUtil;
+import com.rfchina.wallet.domain.mapper.ext.WalletCollectMethodDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumDefBankCard;
@@ -24,18 +26,23 @@ import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.model.ChannelNotify;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletCard;
+import com.rfchina.wallet.domain.model.WalletCollectMethod;
 import com.rfchina.wallet.domain.model.WalletCompany;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.domain.model.WalletVerifyHis;
 import com.rfchina.wallet.server.bank.yunst.response.YunstNotify;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.CompanyInfoResult;
 import com.rfchina.wallet.server.mapper.ext.WalletCardExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletCollectMethodExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCompanyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletVerifyHisExtDao;
 import com.rfchina.wallet.server.model.ext.SLWalletMqMessage;
+import com.rfchina.wallet.server.msic.EnumWallet;
+import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
 import com.rfchina.wallet.server.msic.EnumWallet.YunstCompanyInfoAuditStatus;
 import com.rfchina.wallet.server.msic.LockConstant;
+import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.SeniorWalletService;
 import com.rfchina.wallet.server.service.WalletEventService;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBaseHandler.YunstMemberType;
@@ -63,9 +70,13 @@ public class YunstNotifyHandler {
 	private YunstBizHandler yunstBizHandler;
 	@Autowired
 	private SeniorWalletService seniorWalletService;
+	@Autowired
+	private ConfigService configService;
 
 	@Autowired
 	private WalletDao walletDao;
+	@Autowired
+	private WalletCollectMethodExtDao walletCollectMethodDao;
 
 	@Autowired
 	private WalletCompanyExtDao walletCompanyDao;
@@ -327,6 +338,43 @@ public class YunstNotifyHandler {
 		int effectRows = walletTunnelExtDao.updateByPrimaryKeySelective(walletChannel);
 		if (effectRows != 1) {
 			log.error("处理个人设置支付密码失败:bizUserId:{}", bizUserId);
+		}
+	}
+
+	public void handleOrderResult(YunstNotify.OrderResult rtnVal) {
+		// 筛选代付订单
+		String collectOrderPrefix =
+			configService.getOrderNoPrefix() + IdGenerator.PREFIX_WALLE_COLLECT;
+		if (rtnVal.getBizOrderNo().startsWith(collectOrderPrefix)) {
+			Byte payType;
+			String payInterFacetrxcode = Optional.ofNullable(rtnVal.getPayInterfacetrxcode())
+				.orElse(
+					""); // 通道交易类型：VSP501 微信支付;VSP505 手机QQ 支付;VSP511 支付宝支付;VSP551 银联扫码支付;VSP521 收银宝-通联钱包
+			switch (payInterFacetrxcode) {
+				case "VSP501":
+					payType = CollectPayType.POS_WECHAT.getValue();
+					break;
+				case "VSP505":
+					payType = CollectPayType.POS_QQ.getValue();
+					break;
+				case "VSP511":
+					payType = CollectPayType.POS_ALIPAY.getValue();
+					break;
+				case "VSP551":
+				case "VSP001":
+					payType = CollectPayType.POS_UNION.getValue();
+					break;
+				default:
+					return;
+			}
+			// 根据订单号获取payType
+			WalletCollectMethod method = walletCollectMethodDao
+				.getByOrderNo(rtnVal.getBizOrderNo());
+			// 如果pay_type是61则为pos机支付，更新pay_type到rf_wallet_collect_method
+			if (method.getPayType().equals(CollectPayType.POS.getValue())) {
+				method.setPayType(payType);
+				walletCollectMethodDao.updateByPrimaryKey(method);
+			}
 		}
 	}
 

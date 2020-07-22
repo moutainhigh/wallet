@@ -40,6 +40,8 @@ public class UrlConstant {
 	 * 高级钱包-订单结果查询
 	 */
 	public static final String SENIOR_WALLET_ORDER_QUERY = VERSION + "/m/senior/pay/order_query";
+	public static final String U_SENIOR_WALLET_ORDER_QUERY = VERSION + "/u/senior/pay/order_query";
+
 
 	/**
 	 * 高级钱包-充值

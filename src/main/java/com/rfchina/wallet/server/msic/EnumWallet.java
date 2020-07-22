@@ -507,7 +507,11 @@ public class EnumWallet {
 		ALIPAY_AppOpen((byte) 33, "支付宝原生"),
 		CODEPAY((byte) 41, "扫码支付"),
 		BANKCARD((byte) 51, "银行卡快捷支付"),
-		POS((byte) 61, "POS机当面付"),
+		POS((byte) 61, "POS机建单"),
+		POS_WECHAT((byte) 62, "POS机（微信支付）"),
+		POS_QQ((byte) 63, "POS机（手机QQ支付）"),
+		POS_ALIPAY((byte) 64, "POS机（支付宝）"),
+		POS_UNION((byte) 65, "POS机（银联）"),
 		;
 
 		private Byte value;

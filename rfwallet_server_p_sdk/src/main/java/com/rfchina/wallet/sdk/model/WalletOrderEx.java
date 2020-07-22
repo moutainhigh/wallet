@@ -10,10 +10,10 @@ import java.util.ArrayList;
 
     
 /**
-* WalletCollectResp
+* WalletOrderEx
 */
 @Data
-public class WalletCollectResp  {
+public class WalletOrderEx  {
     @ApiModelProperty("金额")
     private Long amount ;
 
@@ -71,20 +71,17 @@ public class WalletCollectResp  {
     @ApiModelProperty("订单号")
     private String orderNo ;
 
-    @ApiModelProperty("扫码支付信息/ JS 支付串信息/微信原生 H5 支付串信息")
-    private String payInfo ;
-
     @ApiModelProperty("支付方式 1：余额 2：微信 4：支付宝 8:刷卡支付 16：银行卡")
     private Integer payMethod ;
+
+    @ApiModelProperty("pos机实际支付类型：61-建单; 62-微信支付; 63-手机QQ支付; 64-支付宝; 65-银联")
+    private Integer payType ;
 
     @ApiModelProperty("进度。1：待发送 2：已发送 3：已接收结果")
     private Integer progress ;
 
     @ApiModelProperty("备注")
     private String remark ;
-
-    @ApiModelProperty("密码确认时输入参数")
-    private String signedParams ;
 
     @ApiModelProperty("来源APPID")
     private Long sourceAppId ;
@@ -97,12 +94,6 @@ public class WalletCollectResp  {
 
     @ApiModelProperty("0：默认 1:待人工处理 2:等待重新发起")
     private Integer subStatus ;
-
-    @ApiModelProperty("业务票据")
-    private String ticket ;
-
-    @ApiModelProperty("交易编号")
-    private String tradeNo ;
 
     @ApiModelProperty("通道错误码")
     private String tunnelErrCode ;
@@ -133,9 +124,6 @@ public class WalletCollectResp  {
 
     @ApiModelProperty("钱包id")
     private Long walletId ;
-
-    @ApiModelProperty("微信 APP 支付信息")
-    private String weChatAPPInfo ;
 
 
 }
