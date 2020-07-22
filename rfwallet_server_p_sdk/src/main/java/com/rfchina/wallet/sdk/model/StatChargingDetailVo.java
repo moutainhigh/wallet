@@ -38,7 +38,7 @@ public class StatChargingDetailVo  {
     @ApiModelProperty("id")
     private Long id ;
 
-    @ApiModelProperty("本地的通道手续费")
+    @ApiModelProperty("")
     private Long localTunnelFee ;
 
     @ApiModelProperty("方法名")
@@ -50,7 +50,7 @@ public class StatChargingDetailVo  {
     @ApiModelProperty("服务名")
     private String serviceName ;
 
-    @ApiModelProperty("第三方的通道手续费")
+    @ApiModelProperty("")
     private Long thirdTunnelFee ;
 
     @ApiModelProperty("通道次数")

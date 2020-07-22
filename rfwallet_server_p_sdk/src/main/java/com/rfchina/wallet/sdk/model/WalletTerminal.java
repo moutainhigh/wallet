@@ -20,7 +20,7 @@ public class WalletTerminal  {
     private String bindTime ;
 
     @ApiModelProperty("会员ID")
-    private Long bizUserId ;
+    private String bizUserId ;
 
     @ApiModelProperty("创建时间")
     private String createTime ;

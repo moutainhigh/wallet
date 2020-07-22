@@ -342,6 +342,7 @@ public class SeniorChargingService {
 		ExcelBean excelBean = ExcelFactory.build2007();
 		Sheet sheet = excelBean.creatSheet(fileName);
 		excelBean.addTitle(sheet, 0, StatChargingDetailVo.class);
+
 		AtomicInteger cursor = new AtomicInteger(1);
 		new MaxIdIterator<StatChargingDetailVo>().apply((maxId) -> {
 			StatChargingDetailCriteria example = new StatChargingDetailCriteria();
