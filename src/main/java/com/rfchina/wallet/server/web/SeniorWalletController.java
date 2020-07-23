@@ -289,35 +289,4 @@ public class SeniorWalletController {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result);
 	}
 
-	@ApiOperation("高级钱包-商家绑定终端")
-	@PostMapping(UrlConstant.WALLET_BIND_TERMINAL)
-	public ResponseValue bindTerminal(
-		@RequestParam("access_token") String accessToken,
-		@ApiParam(value = "终端号", required = true) @RequestParam("vsp_termid") String vspTermid
-	) {
-
-		seniorWalletApi.bindTerminal(accessToken, vspTermid);
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
-	}
-
-
-	@ApiOperation("高级钱包-终端列表")
-	@PostMapping(UrlConstant.WALLET_QUERY_TERMINAL)
-	public ResponseValue<Pagination<WalletTerminal>> queryTerminal(
-		@RequestParam("access_token") String accessToken,
-		@ApiParam(value = "钱包id", required = false) @RequestParam(value = "wallet_id", required = false) Long walletId,
-		@ApiParam(value = "子商户号", required = false) @RequestParam(value = "vsp_cusid", required = false) String vspCusid,
-		@ApiParam(value = "终端号", required = false) @RequestParam(value = "vsp_termid", required = false) String vspTermid,
-		@ApiParam(value = "省份", required = false) @RequestParam(value = "province", required = false) String province,
-		@ApiParam(value = "商家id", required = false) @RequestParam(value = "mch_id", required = false) String mchId,
-		@ApiParam(value = "状态： 0：未绑定，1：已绑定，2：已解绑", required = false) @RequestParam(value = "status", required = false) Byte status,
-		@ApiParam(value = "limit", required = true) @RequestParam("limit") Integer limit,
-		@ApiParam(value = "offset", required = true) @RequestParam("offset") Integer offset
-	) {
-
-		Pagination<WalletTerminal> page = seniorWalletApi
-			.queryTerminal(walletId, vspCusid, vspTermid, province, mchId, status, limit, offset);
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, page);
-	}
-
 }

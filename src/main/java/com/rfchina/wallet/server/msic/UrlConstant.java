@@ -340,15 +340,18 @@ public class UrlConstant {
 
 
 	/**
-	 * 会员绑定终端
+	 * 地区绑定终端
 	 */
 	public static final String WALLET_BIND_TERMINAL = VERSION + "/m/senior/wallet/bind_terminal";
+
+	/** 地区绑定子商户 */
+	public static final String WALLET_BIND_VSP_CUSID = VERSION + "/m/senior/wallet/bind_vsp_cusid";
 
 	/** 查询终端列表 */
 	public static final String WALLET_QUERY_TERMINAL = VERSION + "/m/senior/wallet/query_terminal";
 
-	/** 新增终端 */
-	public static final String WALLET_CREATE_TERMINAL = VERSION + "/m/senior/wallet/create_terminal";
+	/** 查询地区商户号列表 */
+	public static final String WALLET_QUERY_AREA = VERSION + "/m/senior/wallet/query_area";
 
 	/** 修改钱包 */
 	public static final String WALLET_MODIFY = VERSION + "/m/wallet/modify_wallet";

@@ -161,13 +161,5 @@ public interface SeniorWalletApi {
 	void unBindPhone(String accessToken, Byte channelType, Long walletId, String mobile,
 		String verifyCode);
 
-	/**
-	 * 查询终端
-	 */
-	Pagination<WalletTerminal> queryTerminal(Long walletId, String vspCusid,
-		String vspTermid, String province, String mchId, Byte status, int limit,
-		int offset);
-
-	void bindTerminal(String accessToken, String terminalId);
 
 }

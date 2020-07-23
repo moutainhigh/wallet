@@ -1,6 +1,5 @@
 package com.rfchina.wallet.server.service;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.biztools.lock.SimpleExclusiveLock;
 import com.rfchina.biztools.mq.PostMq;
@@ -10,8 +9,8 @@ import com.rfchina.platform.biztools.CacheHashMap;
 import com.rfchina.platform.common.misc.Triple;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.BeanUtil;
-import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
+import com.rfchina.wallet.domain.mapper.ext.WalletAreaDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletBalanceDetailDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletCardDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletConsumeDao;
@@ -27,6 +26,7 @@ import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.GatewayTrans;
 import com.rfchina.wallet.domain.model.Wallet;
+import com.rfchina.wallet.domain.model.WalletArea;
 import com.rfchina.wallet.domain.model.WalletBalanceDetail;
 import com.rfchina.wallet.domain.model.WalletCard;
 import com.rfchina.wallet.domain.model.WalletClearing;
@@ -55,7 +55,6 @@ import com.rfchina.wallet.server.mapper.ext.WalletRefundExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletWithdrawExtDao;
 import com.rfchina.wallet.server.model.ext.AgentPayReq.Reciever;
-import com.rfchina.wallet.server.model.ext.AgentPosVo;
 import com.rfchina.wallet.server.model.ext.CollectReq;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod;
 import com.rfchina.wallet.server.model.ext.CollectReq.WalletPayMethod.Alipay;
@@ -95,6 +94,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.jetty.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -188,6 +188,9 @@ public class SeniorPayService {
 
 	@Autowired
 	private WalletTerminalDao walletTerminalDao;
+
+	@Autowired
+	private WalletAreaDao walletAreaDao;
 
 	/**
 	 * 充值
@@ -901,15 +904,13 @@ public class SeniorPayService {
 				.openId(bankCard.getBankCardNo())
 				.cardType(bankCard.getCardType());
 		} else if (payMethod.getPos() != null) {
-			AgentPosVo agentPosVo = JsonUtil
-				.toObject(configService.getAgentPosBindInfo(), AgentPosVo.class,
-					objectMapper -> objectMapper
-						.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false));
 			Pos pos = payMethod.getPos();
+			if (StringUtil.isNotBlank(pos.getAreaCode())) {
+				builder.sellerId(getSellerId(pos.getAreaCode()));
+			}
 			// 珏衡需求： sellerId本地表查询
 			builder.channelType(ChannelType.POS.getValue())
 				.payType(CollectPayType.POS.getValue())
-				.sellerId(agentPosVo.getVspCusid())
 				.amount(pos.getAmount());
 		}
 		WalletCollectMethod method = builder.createTime(new Date()).build();
@@ -1103,5 +1104,11 @@ public class SeniorPayService {
 				calendar.add(Calendar.MINUTE, 60);
 				return calendar.getTime();
 			});
+	}
+
+	/** 获取子商户 */
+	private String getSellerId(String areaCode) {
+		WalletArea walletArea = walletAreaDao.selectOneByAreaCode(areaCode);
+		return walletArea != null ? walletArea.getVspCusid() : null;
 	}
 }

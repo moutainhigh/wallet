@@ -23,4 +23,7 @@ public class Pos {
 	@ApiModelProperty(required = true, value = "支付金额")
 	private Long amount;
 
+	@ApiModelProperty(required = true, value = "地区码")
+	private String areaCode;
+
 }
