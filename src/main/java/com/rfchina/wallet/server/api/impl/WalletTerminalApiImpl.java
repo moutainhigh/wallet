@@ -12,6 +12,7 @@ import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletAreaDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletTerminalDao;
+import com.rfchina.wallet.domain.misc.WalletResponseCode;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.WalletArea;
 import com.rfchina.wallet.domain.model.WalletAreaCriteria;
@@ -23,6 +24,7 @@ import com.rfchina.wallet.server.msic.EnumYunst.EnumTerminalStatus;
 import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.session.RowBounds;
@@ -59,6 +61,13 @@ public class WalletTerminalApiImpl implements WalletTerminalApi {
 			.orElseThrow(
 				() -> new WalletResponseException(EnumWalletResponseCode.AREACODE_NOT_EXIST));
 
+		if(Objects.isNull(walletArea.getProxyBizUserId())
+			|| Objects.isNull(walletArea.getVspMerchantid())
+			|| Objects.isNull(walletArea.getVspCusid())
+			|| Objects.isNull(walletArea.getAppId())
+		){
+			throw new WalletResponseException(EnumWalletResponseCode.TERMINAL_VSPINFO_EMPTY);
+		}
 		VspTermidResp resp = yunstUserHandler.vspTermid(walletArea.getProxyBizUserId()
 			, walletArea.getVspMerchantid(), walletArea.getVspCusid(), walletArea.getAppId(),
 			vspTermid, "set");
