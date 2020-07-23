@@ -12,7 +12,6 @@ import com.rfchina.wallet.domain.model.WalletTerminal;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.api.SeniorWalletApi;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq.CompanyBasicInfo;
-import com.rfchina.wallet.server.bank.yunst.response.VspTermidResp;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.CompanyInfoResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.PersonInfoResult;
@@ -290,68 +289,4 @@ public class SeniorWalletController {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, result);
 	}
 
-	@ApiOperation("高级钱包-商家绑定终端")
-	@PostMapping(UrlConstant.WALLET_BIND_TERMINAL2)
-	public ResponseValue<VspTermidResp> bindTerminal2(
-		@RequestParam("access_token") String accessToken,
-		@ApiParam(value = "渠道用户ID", required = true) @RequestParam("biz_user_id") String bizUserId,
-		@ApiParam(value = "集团号", required = true) @RequestParam("vsp_merchantid") String vspMerchantid,
-		@ApiParam(value = "子商户号", required = true) @RequestParam("vsp_cusid") String vspCusid,
-		@ApiParam(value = "APPID", required = true) @RequestParam("app_id") String appId,
-		@ApiParam(value = "终端号", required = true) @RequestParam("vsp_termid") String vspTermid
-	) {
-
-		VspTermidResp resp = seniorWalletApi
-			.bindTerminal(bizUserId, vspMerchantid, vspCusid, appId, vspTermid);
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, resp);
-	}
-
-	@ApiOperation("高级钱包-商家绑定终端")
-	@PostMapping(UrlConstant.WALLET_BIND_TERMINAL)
-	public ResponseValue bindTerminal(
-		@RequestParam("access_token") String accessToken,
-		@ApiParam(value = "钱包id", required = true) @RequestParam("wallet_id") Long walletId,
-		@ApiParam(value = "终端id", required = true) @RequestParam("terminal_id") Long terminalId
-	) {
-
-		seniorWalletApi.bindTerminal(walletId, terminalId);
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
-	}
-
-	@ApiOperation("高级钱包-终端列表")
-	@PostMapping(UrlConstant.WALLET_QUERY_TERMINAL)
-	public ResponseValue<Pagination<WalletTerminal>> queryTerminal(
-		@RequestParam("access_token") String accessToken,
-		@ApiParam(value = "钱包id", required = false) @RequestParam(value = "wallet_id", required = false) Long walletId,
-		@ApiParam(value = "子商户号", required = false) @RequestParam(value = "vsp_cusid", required = false) String vspCusid,
-		@ApiParam(value = "终端号", required = false) @RequestParam(value = "vsp_termid", required = false) String vspTermid,
-		@ApiParam(value = "省份", required = false) @RequestParam(value = "province", required = false) String province,
-		@ApiParam(value = "商家id", required = false) @RequestParam(value = "mch_id", required = false) String mchId,
-		@ApiParam(value = "limit", required = true) @RequestParam("limit") Integer limit,
-		@ApiParam(value = "offset", required = true) @RequestParam("offset") Integer offset
-	) {
-
-		Pagination<WalletTerminal> page = seniorWalletApi
-			.queryTerminal(walletId, vspCusid, vspTermid, province, mchId, limit, offset);
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, page);
-	}
-
-	@ApiOperation("高级钱包-新增终端")
-	@PostMapping(UrlConstant.WALLET_CREATE_TERMINAL)
-	public ResponseValue createTerminal(
-		@RequestParam("access_token") String accessToken,
-		@ApiParam(value = "通联appId", required = true) @RequestParam("app_id") String appId,
-		@ApiParam(value = "集团商户号", required = true) @RequestParam("vsp_merchantid") String vspMerchantid,
-		@ApiParam(value = "子商户号", required = true) @RequestParam("vsp_cusid") String vspCusid,
-		@ApiParam(value = "终端号", required = true) @RequestParam("vsp_termid") String vspTermid,
-		@ApiParam(value = "省份", required = true) @RequestParam("province") String province,
-		@ApiParam(value = "商家id", required = true) @RequestParam("mch_id") String mchId,
-		@ApiParam(value = "商家名称", required = true) @RequestParam("mch_name") String mchName,
-		@ApiParam(value = "门店地址", required = true) @RequestParam("shop_address") String shopAddress
-	) {
-
-		seniorWalletApi.createTerminal(appId, vspMerchantid, vspCusid, vspTermid, province,
-			mchId, mchName, shopAddress);
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
-	}
 }
