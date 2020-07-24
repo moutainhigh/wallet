@@ -113,6 +113,7 @@ public class SeniorPayService {
 
 	public static final String INDUSTRY_CODE = "1910";
 	public static final String INDUSTRY_NAME = "其他";
+	public static final String AREA_SUFFIX = "0000";
 
 	@Autowired
 	private HandlerHelper handlerHelper;
@@ -1113,7 +1114,16 @@ public class SeniorPayService {
 	}
 
 	/** 获取子商户 */
-	private String getSellerId(String areaCode) {
+	public String getSellerId(String areaCode) {
+
+		if(StringUtil.isBlank(areaCode) || areaCode.length() < 6){
+			return "";
+		}
+
+		if(!areaCode.substring(2, 6).equalsIgnoreCase(AREA_SUFFIX)){
+			areaCode = areaCode.substring(0,2) + "0000";
+		}
+
 		WalletArea walletArea = walletAreaDao.selectOneByAreaCode(areaCode);
 		return walletArea != null ? walletArea.getVspCusid() : null;
 	}

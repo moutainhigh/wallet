@@ -26,6 +26,7 @@ import com.rfchina.wallet.server.msic.EnumWallet.CollectRoleType;
 import java.util.Arrays;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -237,4 +238,9 @@ public class SeniorPayServiceTest extends SpringBaseTest {
 	}
 
 
+	@Test
+	public void getSellerId() {
+		String sellerId = seniorPayService.getSellerId("440106");
+		Assert.assertNotNull(sellerId);
+	}
 }
