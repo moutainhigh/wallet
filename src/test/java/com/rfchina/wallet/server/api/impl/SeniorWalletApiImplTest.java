@@ -27,9 +27,4 @@ public class SeniorWalletApiImplTest extends SpringApiTest {
 		log.info("updatePayPwd url = {}", url);
 	}
 
-	@Test(expected = Exception.class)
-	public void bindTerminal() {
-		String terminalId = "111";
-		seniorWalletApi.bindTerminal(super.accessToken, terminalId);
-	}
 }

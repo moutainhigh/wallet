@@ -12,14 +12,16 @@ import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletAreaDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletTerminalDao;
-import com.rfchina.wallet.domain.misc.WalletResponseCode;
+import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.WalletArea;
 import com.rfchina.wallet.domain.model.WalletAreaCriteria;
 import com.rfchina.wallet.domain.model.WalletTerminal;
+import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.domain.model.ext.WalletTerminalExt;
 import com.rfchina.wallet.server.api.WalletTerminalApi;
 import com.rfchina.wallet.server.bank.yunst.response.VspTermidResp;
+import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.msic.EnumYunst.EnumTerminalStatus;
 import com.rfchina.wallet.server.service.handler.yunst.YunstUserHandler;
 import java.util.Date;
@@ -44,6 +46,9 @@ public class WalletTerminalApiImpl implements WalletTerminalApi {
 	@Autowired
 	private YunstUserHandler yunstUserHandler;
 
+	@Autowired
+	private WalletTunnelExtDao walletTunnelDao;
+
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
@@ -61,11 +66,11 @@ public class WalletTerminalApiImpl implements WalletTerminalApi {
 			.orElseThrow(
 				() -> new WalletResponseException(EnumWalletResponseCode.AREACODE_NOT_EXIST));
 
-		if(Objects.isNull(walletArea.getProxyBizUserId())
+		if (Objects.isNull(walletArea.getProxyBizUserId())
 			|| Objects.isNull(walletArea.getVspMerchantid())
 			|| Objects.isNull(walletArea.getVspCusid())
 			|| Objects.isNull(walletArea.getAppId())
-		){
+		) {
 			throw new WalletResponseException(EnumWalletResponseCode.TERMINAL_VSPINFO_EMPTY);
 		}
 		VspTermidResp resp = yunstUserHandler.vspTermid(walletArea.getProxyBizUserId()
@@ -90,6 +95,10 @@ public class WalletTerminalApiImpl implements WalletTerminalApi {
 		}
 	}
 
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
+	@ParamVerify
 	@Override
 	public void bindVspId(
 		@ParamValid(nullable = false) String accessToken,
@@ -105,9 +114,16 @@ public class WalletTerminalApiImpl implements WalletTerminalApi {
 			.orElseThrow(
 				() -> new WalletResponseException(EnumWalletResponseCode.AREACODE_NOT_EXIST));
 
+		WalletTunnel tunnel = walletTunnelDao
+			.selectByWalletId(proxyWalletId, TunnelType.YUNST.getValue());
+		Optional.ofNullable(tunnel)
+			.orElseThrow(
+				() -> new WalletResponseException(EnumWalletResponseCode.TUNNEL_INFO_NOT_EXISTS));
+
 		walletArea.setVspMerchantid(vspMerchantid);
 		walletArea.setVspCusid(vspCusid);
 		walletArea.setProxyWalletId(proxyWalletId);
+		walletArea.setProxyBizUserId(tunnel.getBizUserId());
 		walletArea.setCreatorId(creatorId);
 		walletArea.setCreatorName(creatorName);
 		walletArea.setUpdateTime(new Date());
@@ -115,6 +131,10 @@ public class WalletTerminalApiImpl implements WalletTerminalApi {
 		walletAreaDao.updateByPrimaryKeySelective(walletArea);
 	}
 
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
+	@ParamVerify
 	@Override
 	public Pagination<WalletArea> queryArea(
 		@ParamValid(nullable = false) String accessToken,
@@ -135,9 +155,14 @@ public class WalletTerminalApiImpl implements WalletTerminalApi {
 			.build();
 	}
 
+	@Log
+	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
+	@SignVerify
+	@ParamVerify
 	@Override
-	public Pagination<WalletTerminalExt> queryTerminalExt(String areaCode, Long proxyWalletId,
-		String vspCusid, String vspTermid, Byte status, Integer limit, Integer offset) {
+	public Pagination<WalletTerminalExt> queryTerminalExt(String accessToken, String areaCode,
+		Long proxyWalletId, String vspCusid, String vspTermid, Byte status, Integer limit,
+		Integer offset) {
 
 		List<WalletTerminalExt> data = walletTerminalDao.selectTerminalExt(areaCode, proxyWalletId,
 			vspCusid, vspTermid, status, limit, offset);

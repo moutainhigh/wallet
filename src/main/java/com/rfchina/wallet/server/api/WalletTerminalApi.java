@@ -26,6 +26,6 @@ public interface WalletTerminalApi {
 	/**
 	 * 查询终端列表
 	 */
-	Pagination<WalletTerminalExt> queryTerminalExt(String areaCode, Long proxyWalletId,
+	Pagination<WalletTerminalExt> queryTerminalExt(String accessToken, String areaCode, Long proxyWalletId,
 		String vspCusid, String vspTermid, Byte status, Integer limit, Integer offset);
 }

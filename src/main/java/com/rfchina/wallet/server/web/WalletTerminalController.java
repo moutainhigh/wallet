@@ -80,7 +80,8 @@ public class WalletTerminalController {
 	) {
 
 		Pagination<WalletTerminalExt> page = walletTerminalApi
-			.queryTerminalExt(areaCode, proxyWalletId, vspCusid, vspTermid, status, limit, offset);
+			.queryTerminalExt(accessToken, areaCode, proxyWalletId, vspCusid, vspTermid, status,
+				limit, offset);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, page);
 	}
 }
