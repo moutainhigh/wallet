@@ -1,12 +1,12 @@
 package com.rfchina.wallet.server.service;
 
+import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EmailUtil;
-import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.model.WalletOrder;
-import com.rfchina.wallet.domain.model.WalletOrderCriteria;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
@@ -38,29 +38,27 @@ public class WalletOrderService {
 	 * @param orderEndDate   订单结束时间
 	 */
 	public void failedSettleOrderSendMail(Date orderStartDate, Date orderEndDate) {
-		log.info("[发送结算失败订单邮件通知] 订单时间[{}###{}] 开始", orderStartDate.toLocaleString(), orderEndDate.toLocaleString());
-		//获取orderDate当天和之前结算不成功的订单
-		WalletOrderCriteria walletOrderCriteria = new WalletOrderCriteria();
-		walletOrderCriteria.createCriteria()
-				.andCreateTimeBetween(orderStartDate, orderEndDate)
-				.andTypeEqualTo(EnumDef.OrderType.FINANCE.getValue())
-				.andStatusEqualTo(EnumDef.OrderStatus.WAITTING.getValue());
+		String startDateStr = DateUtil.formatDate(
+				orderStartDate == null ? DateUtils.addDays(new Date(), -7) : orderStartDate,
+				DateUtil.STANDARD_DTAETIME_PATTERN);
 
-		List<WalletOrder> walletOrderList = walletOrderExtDao.selectByExample(walletOrderCriteria);
+		String endDateStr = DateUtil.formatDate(orderEndDate == null ? DateUtils.addDays(new Date(), -2) :
+						orderEndDate,
+				DateUtil.STANDARD_DTAETIME_PATTERN);
+
+		log.info("[发送结算失败订单邮件通知] 订单时间[{}###{}] 开始", startDateStr, endDateStr);
+		//获取orderDate当天和之前结算不成功的订单
+		List<WalletOrder> walletOrderList = walletOrderExtDao.selectSattleFailedOrder(startDateStr, endDateStr);
 		if (CollectionUtils.isEmpty(walletOrderList)) {
-			log.info("[发送结算失败订单邮件通知] 订单时间[{}###{}]: 订单列表为空", orderStartDate, orderEndDate);
+			log.info("[发送结算失败订单邮件通知] 订单时间[{}###{}]: 订单列表为空", startDateStr, endDateStr);
 			return;
 		}
-		//过滤已通知的订单
-		List<WalletOrder> walletOrders = walletOrderList.stream()
-				.filter(walletOrder -> (walletOrder.getNotified() & 4) == 0)
-				.collect(Collectors.toList());
 
 		//拼接邮件内容
 		StringBuilder sb = new StringBuilder(128);
 
 		sb.append("<div><span style=\"font-size:13.3333px;line-height:20px;\">申请单号   单据状态</span></div>");
-		walletOrders.forEach(walletOrder -> sb.append("<div><span style=\"font-size:13.3333px;line-height:20px;\">")
+		walletOrderList.forEach(walletOrder -> sb.append("<div><span style=\"font-size:13.3333px;line-height:20px;\">")
 				.append(walletOrder.getOrderNo())
 				.append(" ")
 				.append(walletOrder.getStatus())
@@ -74,15 +72,16 @@ public class WalletOrderService {
 			return;
 		}
 		//添加已通知业务状态
-		walletOrders.forEach(walletOrder -> {
+		walletOrderList.forEach(walletOrder -> {
 			byte existsStatus =
 					walletOrder.getNotified() == null ? Byte.valueOf("0") : walletOrder.getNotified().byteValue();
 			walletOrder.setNotified(Integer.valueOf(existsStatus | 4).byteValue());
-			//更新数据库
-			walletOrderExtDao.updateByPrimaryKey(walletOrder);
 		});
+		//更新数据库
+		walletOrderExtDao.batchUpdateNotifiedByIds(
+				walletOrderList.stream().map(WalletOrder::getId).collect(Collectors.toList()));
 
-		log.info("[发送结算失败订单邮件通知] 订单时间[{}###{}] 成功", orderStartDate, orderEndDate);
+		log.info("[发送结算失败订单邮件通知] 订单时间[{}###{}] 成功", startDateStr, endDateStr);
 	}
 
 	/**
