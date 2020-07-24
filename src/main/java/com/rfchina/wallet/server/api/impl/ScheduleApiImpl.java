@@ -26,6 +26,7 @@ import com.rfchina.wallet.server.msic.LockConstant;
 import com.rfchina.wallet.server.service.*;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBaseHandler.YunstMemberType;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -275,16 +276,19 @@ public class ScheduleApiImpl implements ScheduleApi {
 
 	@Override
 	public void quartzOrderSettleFailed() {
-		Date orderDate = DateUtil.getDate(DateUtil.addDate2(new Date(), -2));
-		log.info("结算通知订单日期:{}", DateUtil.formatDate(orderDate, DateUtil.STANDARD_DTAETIME_PATTERN));
+		Date orderStartDate = DateUtils.addDays(new Date(), -7);
+		Date orderEndDate = DateUtils.addDays(new Date(), -2);
+		log.info("结算通知订单日期:{}###{}", DateUtil.formatDate(orderStartDate, DateUtil.STANDARD_DTAETIME_PATTERN),
+				DateUtil.formatDate(orderEndDate, DateUtil.STANDARD_DTAETIME_PATTERN));
 		new LockDone(lock).apply(LockConstant.LOCK_QUARTZ_ORDER_SETTLE_FAILED, 900, () -> {
 			try {
 				log.info("[定时通知结算不成功订单] 开始");
-				walletOrderService.failedSettleOrderSendMail(orderDate);
+				walletOrderService.failedSettleOrderSendMail(orderStartDate, orderEndDate);
 				log.info("[定时通知结算不成功订单] 结束");
 			} catch (Exception e) {
 				log.error("定时通知结算不成功订单异常", e);
 			}
 		});
 	}
+
 }
