@@ -163,7 +163,10 @@ public class ScheduleController {
 
 	@PostMapping(value = UrlConstant.QUARTZ_SYNC_ORDER_SETTLE_FAILED)
 	@FuScheduleTaskReporter
-	public String quartzOrderSettleFailed() {
+	public String quartzOrderSettleFailed(
+			@RequestParam("schedule_id") String scheduleId,
+			@RequestParam("timestamp") String timestamp,
+			@RequestParam("sign") String sign) {
 		log.info("scheduler: 开始执行任务[{}]", "quartzOrderSettleFailed");
 		scheduleApi.quartzOrderSettleFailed();
 		log.info("scheduler: 完成任务[{}]", "quartzOrderSettleFailed");
