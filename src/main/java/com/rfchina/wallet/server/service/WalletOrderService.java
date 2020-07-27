@@ -58,13 +58,18 @@ public class WalletOrderService {
 		//拼接邮件内容
 		StringBuilder sb = new StringBuilder(128);
 
-		sb.append("<div><span style=\"font-size:13.3333px;line-height:20px;\">申请单号&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
-				+ "&nbsp;&nbsp;单据状态</span></div>");
-		walletOrderList.forEach(walletOrder -> sb.append("<div><span style=\"font-size:13.3333px;line-height:20px;\">")
+		sb.append("<table align=\"left\"><tr><th style=\"padding: 0 40px\" align=\"left\">申请单号</th>")
+				.append("<th style=\"padding: 0 40px\" align=\"left\">单据状态</th></tr>");
+
+		walletOrderList.forEach(walletOrder -> sb.append("<tr><td style=\"padding: 0 40px\">")
 				.append(walletOrder.getOrderNo())
-				.append("&nbsp;&nbsp;")
+				.append("</td>")
+				.append("<td style=\"padding: 0 40px\">")
 				.append(transOrderStatusName(walletOrder.getStatus()))
-				.append("\n </span></div>"));
+				.append("</td>")
+				.append("</tr>"));
+		sb.append("</table>");
+
 		//发送通知邮件
 		try {
 			sendNotifyMail(sb.toString());
