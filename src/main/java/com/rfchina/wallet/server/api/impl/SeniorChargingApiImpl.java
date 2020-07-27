@@ -15,11 +15,13 @@ import com.rfchina.wallet.server.api.SeniorChargingApi;
 import com.rfchina.wallet.server.model.ext.StatChargingDetailVo;
 import com.rfchina.wallet.server.service.SeniorChargingService;
 import java.util.Date;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class SeniorChargingApiImpl implements SeniorChargingApi {
 
 	@Autowired
@@ -79,12 +81,15 @@ public class SeniorChargingApiImpl implements SeniorChargingApi {
 	public void exportChargingDetail(String accessToken, String fileName, String startTime,
 		String endTime) {
 
+		String threadName = Thread.currentThread().getName();
+		log.info("线程[{}]正在导出报表[{}]", threadName, fileName);
 		Date start = DateUtil.parse(startTime, DateUtil.STANDARD_DTAE_PATTERN);
 		Date end = DateUtil.parse(endTime, DateUtil.STANDARD_DTAE_PATTERN);
 		byte[] bytes = seniorChargingService.exportChargingDetail(fileName, start, end);
 		String fileKey = "report/" + fileName;
 		fileServer
 			.upload(fileKey, bytes, "application/octet-stream", EnumFileAcl.PUBLIC_READ, null);
+		log.info("线程[{}]完成导出报表[{}]", threadName, fileName);
 
 	}
 }

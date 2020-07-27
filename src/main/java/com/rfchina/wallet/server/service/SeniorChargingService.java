@@ -40,14 +40,15 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class SeniorChargingService {
 
 	@Autowired
@@ -345,13 +346,19 @@ public class SeniorChargingService {
 
 		AtomicInteger cursor = new AtomicInteger(1);
 		new MaxIdIterator<StatChargingDetailVo>().apply((maxId) -> {
+			try {
+				Thread.sleep(20L);
+			} catch (Exception e) {
+				log.error("", e);
+			}
 			StatChargingDetailCriteria example = new StatChargingDetailCriteria();
 			example.setOrderByClause("id asc");
 			example.createCriteria()
 				.andBizTimeBetween(startTime, endTime)
 				.andDeletedEqualTo((byte) 0)
 				.andIdGreaterThan(maxId);
-			List<StatChargingDetail> data = statChargingDetailDao.selectByExample(example);
+			List<StatChargingDetail> data = statChargingDetailDao
+				.selectByExampleWithRowbounds(example, new RowBounds(0, 1000));
 			return data.stream()
 				.map(item -> BeanUtil.newInstance(item, StatChargingDetailVo.class))
 				.collect(Collectors.toList());
@@ -365,7 +372,7 @@ public class SeniorChargingService {
 			excelBean.getWorkbook().write(byteOut);
 
 			return byteOut.toByteArray();
-		}catch (Exception e){
+		} catch (Exception e) {
 			return new byte[0];
 		}
 
