@@ -2,12 +2,13 @@ package com.rfchina.wallet.server.mapper.ext;
 
 import com.rfchina.wallet.domain.mapper.WalletOrderMapper;
 import com.rfchina.wallet.domain.model.WalletOrder;
-import java.util.Date;
-import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
+
+import java.util.Date;
+import java.util.List;
 
 public interface WalletOrderExtDao extends WalletOrderMapper {
 
@@ -167,5 +168,30 @@ public interface WalletOrderExtDao extends WalletOrderMapper {
 	WalletOrder selectByBatchNoAndBizNo(@Param("batchNo") String batchNo,
 		@Param("bizNo") String bizNo);
 
+	/**
+	 * 查询指定时间范围内结算不成功订单
+	 */
+	@Select({ "select * from rf_wallet_order", "where create_time between #{orderStartDate} and #{orderEndDate}",
+			"and type = 1 and status = 2 and !(notified & 4) " })
+	@ResultMap("com.rfchina.wallet.domain.mapper.WalletOrderMapper.BaseResultMap")
+	List<WalletOrder> selectSattleFailedOrder(@Param("orderStartDate") String orderStartDate,
+			@Param("orderEndDate") String orderEndDate);
 
+	/**
+	 * 批量更新通知状态
+	 *
+	 * @param walletOrderIds 订单id列表
+	 * @return
+	 */
+	@Update({
+			"<script>",
+			"update rf_wallet_order set notified = (notified | 4)",
+			"where id in",
+			"<foreach collection=\"walletOrderIds\" index=\"index\" item=\"item\"",
+			" separator=\",\" open=\"(\" close=\")\">",
+			"#{item.id}",
+			"</foreach>",
+			"</script>"
+	})
+	int batchUpdateNotifiedByIds(@Param("walletOrderIds") List<Long> walletOrderIds);
 }

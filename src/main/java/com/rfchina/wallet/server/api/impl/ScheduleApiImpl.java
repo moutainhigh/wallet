@@ -12,8 +12,13 @@ import com.rfchina.wallet.domain.misc.EnumDef.DirtyType;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderType;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelAuditStatus;
-import com.rfchina.wallet.domain.model.*;
+import com.rfchina.wallet.domain.model.Wallet;
+import com.rfchina.wallet.domain.model.WalletConfig;
+import com.rfchina.wallet.domain.model.WalletConfigCriteria;
 import com.rfchina.wallet.domain.model.WalletConfigCriteria.Criteria;
+import com.rfchina.wallet.domain.model.WalletOrder;
+import com.rfchina.wallet.domain.model.WalletTunnel;
+import com.rfchina.wallet.domain.model.WalletTunnelCriteria;
 import com.rfchina.wallet.server.api.ScheduleApi;
 import com.rfchina.wallet.server.mapper.ext.WalletConfigExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
@@ -23,17 +28,23 @@ import com.rfchina.wallet.server.msic.EnumWallet.LockStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletConfigStatus;
 import com.rfchina.wallet.server.msic.RedisConstant;
-import com.rfchina.wallet.server.service.*;
+import com.rfchina.wallet.server.service.ConfigService;
+import com.rfchina.wallet.server.service.ScheduleService;
+import com.rfchina.wallet.server.service.SeniorBalanceService;
+import com.rfchina.wallet.server.service.SeniorChargingService;
+import com.rfchina.wallet.server.service.SeniorPayService;
+import com.rfchina.wallet.server.service.WalletOrderService;
+import com.rfchina.wallet.server.service.WalletService;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBaseHandler.YunstMemberType;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.session.RowBounds;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.time.DateUtils;
+import org.apache.ibatis.session.RowBounds;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
@@ -275,16 +286,20 @@ public class ScheduleApiImpl implements ScheduleApi {
 
 	@Override
 	public void quartzOrderSettleFailed() {
-		Date orderDate = DateUtil.getDate(DateUtil.addDate2(new Date(), -2));
-		log.info("结算通知订单日期:{}", DateUtil.formatDate(orderDate, DateUtil.STANDARD_DTAETIME_PATTERN));
+		Date orderStartDate = DateUtils.addDays(new Date(), -7);
+		Date orderEndDate = DateUtils.addDays(new Date(), -2);
+		log.info("结算通知订单日期:{}###{}",
+			DateUtil.formatDate(orderStartDate, DateUtil.STANDARD_DTAETIME_PATTERN),
+			DateUtil.formatDate(orderEndDate, DateUtil.STANDARD_DTAETIME_PATTERN));
 		new LockDone(lock).apply(RedisConstant.LOCK_QUARTZ_ORDER_SETTLE_FAILED, 900, () -> {
 			try {
 				log.info("[定时通知结算不成功订单] 开始");
-				walletOrderService.failedSettleOrderSendMail(orderDate);
+				walletOrderService.failedSettleOrderSendMail(orderStartDate, orderEndDate);
 				log.info("[定时通知结算不成功订单] 结束");
 			} catch (Exception e) {
 				log.error("定时通知结算不成功订单异常", e);
 			}
 		});
 	}
+
 }
