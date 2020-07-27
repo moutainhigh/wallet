@@ -17,5 +17,5 @@ public interface SeniorChargingApi {
 
 	StatCharging queryChargingByCurrentMonth(String accessToken);
 
-	void exportChargingDetail(String accessToken, String fileName, String startTime, String endTime);
+	void exportChargingDetail(String accessToken, String fileName, String uniqueCode, String startTime, String endTime);
 }

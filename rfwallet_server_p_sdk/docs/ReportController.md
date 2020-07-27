@@ -172,6 +172,7 @@
 |end_time|是|结束时间|
 |file_name|是|文件名称|
 |start_time|是|开始时间|
+|unique_code|是|唯一码|
 
 返回数据
 ```

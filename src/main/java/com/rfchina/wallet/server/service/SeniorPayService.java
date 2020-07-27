@@ -80,7 +80,7 @@ import com.rfchina.wallet.server.msic.EnumWallet.ChargingType;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
 import com.rfchina.wallet.server.msic.EnumWallet.FeeConfigKey;
 import com.rfchina.wallet.server.msic.EnumWallet.GwProgress;
-import com.rfchina.wallet.server.msic.LockConstant;
+import com.rfchina.wallet.server.msic.RedisConstant;
 import com.rfchina.wallet.server.service.handler.common.EBankHandler;
 import com.rfchina.wallet.server.service.handler.common.HandlerHelper;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBizHandler;
@@ -223,7 +223,7 @@ public class SeniorPayService {
 		payMethod.setBankCard(bankCard);
 
 		try {
-			lock.acquireLock(LockConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);
+			lock.acquireLock(RedisConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);
 
 			BigDecimal rate = payMethod.getRate(configService);
 			BigDecimal tunnelFee = new BigDecimal(amount)
@@ -287,7 +287,7 @@ public class SeniorPayService {
 			EBankHandler handler = handlerHelper.selectByTunnelType(rechargeOrder.getTunnelType());
 			return handler.recharge(rechargeOrder, recharge, payer);
 		} finally {
-			lock.unLock(LockConstant.LOCK_PAY_ORDER + orderNo);
+			lock.unLock(RedisConstant.LOCK_PAY_ORDER + orderNo);
 		}
 	}
 
@@ -344,7 +344,7 @@ public class SeniorPayService {
 			});
 
 		try {
-			lock.acquireLock(LockConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);
+			lock.acquireLock(RedisConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);
 
 			ChargingConfig config = feeMap.get(FeeConfigKey.YUNST_WITHDRAW.getValue());
 			WalletOrder withdrawOrder = WalletOrder.builder()
@@ -405,7 +405,7 @@ public class SeniorPayService {
 			result.setWithdrawId(withdraw.getId());
 			return result;
 		} finally {
-			lock.unLock(LockConstant.LOCK_PAY_ORDER + orderNo);
+			lock.unLock(RedisConstant.LOCK_PAY_ORDER + orderNo);
 		}
 	}
 
@@ -437,7 +437,7 @@ public class SeniorPayService {
 			});
 
 		try {
-			lock.acquireLock(LockConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);
+			lock.acquireLock(RedisConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);
 			BigDecimal rate = req.getWalletPayMethod().getRate(configService);
 			BigDecimal tunnelFee = new BigDecimal(req.getAmount())
 				.multiply(rate)
@@ -521,7 +521,7 @@ public class SeniorPayService {
 
 			return result;
 		} finally {
-			lock.unLock(LockConstant.LOCK_PAY_ORDER + orderNo);
+			lock.unLock(RedisConstant.LOCK_PAY_ORDER + orderNo);
 		}
 	}
 
@@ -561,7 +561,7 @@ public class SeniorPayService {
 			});
 
 		try {
-			lock.acquireLock(LockConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);
+			lock.acquireLock(RedisConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);
 
 			WalletOrder clearOrder = WalletOrder.builder()
 				.orderNo(orderNo)
@@ -614,7 +614,7 @@ public class SeniorPayService {
 				.clearing(clearing)
 				.build();
 		} finally {
-			lock.unLock(LockConstant.LOCK_PAY_ORDER + orderNo);
+			lock.unLock(RedisConstant.LOCK_PAY_ORDER + orderNo);
 		}
 
 	}
@@ -684,7 +684,7 @@ public class SeniorPayService {
 			});
 
 		try {
-			lock.acquireLock(LockConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);
+			lock.acquireLock(RedisConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);
 
 			WalletOrder refundOrder = WalletOrder.builder()
 				.orderNo(orderNo)
@@ -741,7 +741,7 @@ public class SeniorPayService {
 			handler.refund(refundOrder, refund, details, collectInfos);
 			return refundOrder;
 		} finally {
-			lock.unLock(LockConstant.LOCK_PAY_ORDER + orderNo);
+			lock.unLock(RedisConstant.LOCK_PAY_ORDER + orderNo);
 		}
 	}
 
@@ -766,7 +766,7 @@ public class SeniorPayService {
 			});
 
 		try {
-			lock.acquireLock(LockConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);
+			lock.acquireLock(RedisConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);
 
 			WalletOrder consumeOrder = WalletOrder.builder()
 				.orderNo(orderNo)
@@ -827,7 +827,7 @@ public class SeniorPayService {
 
 			return result;
 		} finally {
-			lock.unLock(LockConstant.LOCK_PAY_ORDER + orderNo);
+			lock.unLock(RedisConstant.LOCK_PAY_ORDER + orderNo);
 		}
 	}
 
@@ -1038,7 +1038,7 @@ public class SeniorPayService {
 
 		log.info("[订单更新] 更新订单[{}]", orderNo);
 		return new LockDone(lock)
-			.applyAndReturnThrowable(LockConstant.LOCK_PAY_ORDER + order.getOrderNo(), 5, () -> {
+			.applyAndReturnThrowable(RedisConstant.LOCK_PAY_ORDER + order.getOrderNo(), 5, () -> {
 
 				if (incQuery) {
 					order.setCurrTryTimes(order.getCurrTryTimes() + 1);

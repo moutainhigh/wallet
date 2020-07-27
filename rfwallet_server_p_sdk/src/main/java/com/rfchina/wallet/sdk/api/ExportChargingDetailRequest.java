@@ -25,6 +25,9 @@ public class ExportChargingDetailRequest extends  AbstractApiRequest {
   @ApiModelProperty("开始时间")
   private String startTime ;
 
+  @ApiModelProperty("唯一码")
+  private String uniqueCode ;
+
 
   @Override
   public String getApiUrl() {
@@ -50,6 +53,9 @@ public class ExportChargingDetailRequest extends  AbstractApiRequest {
       }
       if(startTime != null){
         parameters.put("start_time", startTime.toString());
+      }
+      if(uniqueCode != null){
+        parameters.put("unique_code", uniqueCode.toString());
       }
     return parameters;
   }

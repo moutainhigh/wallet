@@ -1,6 +1,8 @@
 package com.rfchina.wallet.server.msic;
 
-public class LockConstant {
+public class RedisConstant {
+
+	/* 锁 */
 
 	/**
 	 * 定时更新支付状态
@@ -49,4 +51,10 @@ public class LockConstant {
 	 * 定时通知结算不成功订单
 	 */
 	public static String LOCK_QUARTZ_ORDER_SETTLE_FAILED = "quartzOrderSettleFailed";
+
+
+
+
+	/* 缓存 */
+	public final static String DOWNLOAD_OBJECT_KEY = "platform:report:download";
 }
