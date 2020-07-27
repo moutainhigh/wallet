@@ -1,5 +1,7 @@
 package com.rfchina.wallet.server.api.impl;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rfchina.biztools.functionnal.LockDone;
 import com.rfchina.biztools.lock.SimpleExclusiveLock;
 import com.rfchina.passport.token.EnumTokenType;
@@ -8,8 +10,10 @@ import com.rfchina.platform.biztools.fileserver.EnumFileAcl;
 import com.rfchina.platform.biztools.fileserver.FileServer;
 import com.rfchina.platform.common.annotation.Log;
 import com.rfchina.platform.common.annotation.SignVerify;
+import com.rfchina.platform.common.json.ObjectSetter;
 import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.platform.common.utils.DateUtil;
+import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.misc.EnumDef.DownloadStatus;
 import com.rfchina.wallet.domain.model.StatCharging;
 import com.rfchina.wallet.server.api.SeniorChargingApi;
@@ -18,6 +22,7 @@ import com.rfchina.wallet.server.model.ext.StatChargingDetailVo;
 import com.rfchina.wallet.server.msic.RedisConstant;
 import com.rfchina.wallet.server.service.SeniorChargingService;
 import java.util.Date;
+import java.util.TimeZone;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundHashOperations;
@@ -99,11 +104,20 @@ public class SeniorChargingApiImpl implements SeniorChargingApi {
 			.upload(fileKey, bytes, "application/octet-stream", EnumFileAcl.PUBLIC_READ, null);
 		BoundHashOperations hashOps = redisTemplate.boundHashOps(RedisConstant.DOWNLOAD_OBJECT_KEY);
 		if (hashOps.hasKey(uniqueCode)) {
-			ReportDownloadVo downloadVo = (ReportDownloadVo) hashOps.get(uniqueCode);
+			String val = (String) hashOps.get(uniqueCode);
+			ReportDownloadVo downloadVo = JsonUtil
+				.toObject(val, ReportDownloadVo.class, getObjectMapper());
 			downloadVo.setStatus(DownloadStatus.BUILDED.getValue());
-			hashOps.put(uniqueCode, downloadVo);
+			hashOps.put(uniqueCode, JsonUtil.toJSON(downloadVo, getObjectMapper()));
 		}
 		log.info("线程[{}]完成导出报表[{}]", threadName, fileName);
 
+	}
+
+	private ObjectSetter<ObjectMapper> getObjectMapper() {
+		return objectMapper -> {
+			objectMapper.setTimeZone(TimeZone.getDefault());
+			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+		};
 	}
 }
