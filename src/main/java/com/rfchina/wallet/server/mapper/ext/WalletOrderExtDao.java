@@ -189,7 +189,7 @@ public interface WalletOrderExtDao extends WalletOrderMapper {
 			"where id in",
 			"<foreach collection=\"walletOrderIds\" index=\"index\" item=\"item\"",
 			" separator=\",\" open=\"(\" close=\")\">",
-			"#{item.id}",
+			"#{item}",
 			"</foreach>",
 			"</script>"
 	})

@@ -58,10 +58,11 @@ public class WalletOrderService {
 		//拼接邮件内容
 		StringBuilder sb = new StringBuilder(128);
 
-		sb.append("<div><span style=\"font-size:13.3333px;line-height:20px;\">申请单号   单据状态</span></div>");
+		sb.append("<div><span style=\"font-size:13.3333px;line-height:20px;\">申请单号&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"
+				+ "&nbsp;&nbsp;单据状态</span></div>");
 		walletOrderList.forEach(walletOrder -> sb.append("<div><span style=\"font-size:13.3333px;line-height:20px;\">")
 				.append(walletOrder.getOrderNo())
-				.append(" ")
+				.append("&nbsp;&nbsp;")
 				.append(transOrderStatusName(walletOrder.getStatus()))
 				.append("\n </span></div>"));
 		//发送通知邮件
