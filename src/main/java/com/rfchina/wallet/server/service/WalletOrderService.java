@@ -2,6 +2,7 @@ package com.rfchina.wallet.server.service;
 
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EmailUtil;
+import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import lombok.extern.slf4j.Slf4j;
@@ -61,7 +62,7 @@ public class WalletOrderService {
 		walletOrderList.forEach(walletOrder -> sb.append("<div><span style=\"font-size:13.3333px;line-height:20px;\">")
 				.append(walletOrder.getOrderNo())
 				.append(" ")
-				.append(walletOrder.getStatus())
+				.append(transOrderStatusName(walletOrder.getStatus()))
 				.append("\n </span></div>"));
 		//发送通知邮件
 		try {
@@ -71,12 +72,6 @@ public class WalletOrderService {
 			log.error("[结算失败订单]通知邮件发送失败, " + sb.toString(), e);
 			return;
 		}
-		//添加已通知业务状态
-		walletOrderList.forEach(walletOrder -> {
-			byte existsStatus =
-					walletOrder.getNotified() == null ? Byte.valueOf("0") : walletOrder.getNotified().byteValue();
-			walletOrder.setNotified(Integer.valueOf(existsStatus | 4).byteValue());
-		});
 		//更新数据库
 		walletOrderExtDao.batchUpdateNotifiedByIds(
 				walletOrderList.stream().map(WalletOrder::getId).collect(Collectors.toList()));
@@ -103,4 +98,22 @@ public class WalletOrderService {
 		EmailUtil.send(emailBody, () -> javaMailSender.createMimeMessage(), (m) -> javaMailSender.send(m));
 
 	}
+
+	/**
+	 * 转换状态值
+	 *
+	 * @param value
+	 * @return
+	 */
+	private String transOrderStatusName(Byte value) {
+		String name = StringUtils.EMPTY;
+		for (EnumDef.OrderStatus orderStatus : EnumDef.OrderStatus.values()) {
+			if (orderStatus.getValue().equals(value)) {
+				return orderStatus.getValueName();
+			}
+		}
+		log.error("枚举找不到状态:{}", value);
+		return name;
+	}
+
 }
