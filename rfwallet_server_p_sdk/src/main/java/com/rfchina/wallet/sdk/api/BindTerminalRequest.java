@@ -9,18 +9,24 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 
 
-/** 高级钱包-商家绑定终端 */
+/** 终端管理-地区绑定终端 */
 @Builder
 public class BindTerminalRequest extends  AbstractApiRequest {
 
   @ApiModelProperty("access_token")
   private String accessToken ;
 
-  @ApiModelProperty("终端id")
-  private Long terminalId ;
+  @ApiModelProperty("地区码")
+  private String areaCode ;
 
-  @ApiModelProperty("钱包id")
-  private Long walletId ;
+  @ApiModelProperty("创建人id")
+  private String creatorId ;
+
+  @ApiModelProperty("创建人名称")
+  private String creatorName ;
+
+  @ApiModelProperty("终端号")
+  private String vspTermid ;
 
 
   @Override
@@ -39,11 +45,17 @@ public class BindTerminalRequest extends  AbstractApiRequest {
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
       }
-      if(terminalId != null){
-        parameters.put("terminal_id", terminalId.toString());
+      if(areaCode != null){
+        parameters.put("area_code", areaCode.toString());
       }
-      if(walletId != null){
-        parameters.put("wallet_id", walletId.toString());
+      if(creatorId != null){
+        parameters.put("creator_id", creatorId.toString());
+      }
+      if(creatorName != null){
+        parameters.put("creator_name", creatorName.toString());
+      }
+      if(vspTermid != null){
+        parameters.put("vsp_termid", vspTermid.toString());
       }
     return parameters;
   }

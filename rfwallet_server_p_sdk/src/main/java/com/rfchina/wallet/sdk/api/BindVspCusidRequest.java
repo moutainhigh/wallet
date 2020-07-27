@@ -9,43 +9,40 @@ import io.swagger.annotations.ApiModelProperty;
 import java.util.List;
 
 
-/** 终端管理-终端列表 */
+/** 终端管理-地区绑定子商户 */
 @Builder
-public class QueryTerminalRequest extends  AbstractApiRequest {
+public class BindVspCusidRequest extends  AbstractApiRequest {
 
   @ApiModelProperty("access_token")
   private String accessToken ;
 
-  @ApiModelProperty("limit")
-  private Integer limit ;
-
-  @ApiModelProperty("offset")
-  private Integer offset ;
-
   @ApiModelProperty("地区码")
   private String areaCode ;
 
-  @ApiModelProperty("主收款钱包id")
-  private Long proxyWalletId ;
+  @ApiModelProperty("创建人id")
+  private String creatorId ;
 
-  @ApiModelProperty("状态： 0：未绑定，1：已绑定，2：已解绑")
-  private Integer status ;
+  @ApiModelProperty("创建人名称")
+  private String creatorName ;
+
+  @ApiModelProperty("主收款人钱包id")
+  private Long proxyWalletId ;
 
   @ApiModelProperty("子商户号")
   private String vspCusid ;
 
-  @ApiModelProperty("终端号")
-  private String vspTermid ;
+  @ApiModelProperty("集团商户号")
+  private String vspMerchantid ;
 
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/senior/wallet/query_terminal";
+    return "/wallet_server/v1/m/senior/wallet/bind_vsp_cusid";
   }
 
   @Override
   public Class<?> getResponseModelClass() {
-    return PaginationWalletTerminalExt.class;
+    return Map.class;
   }
 
   @Override
@@ -54,26 +51,23 @@ public class QueryTerminalRequest extends  AbstractApiRequest {
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
       }
-      if(limit != null){
-        parameters.put("limit", limit.toString());
-      }
-      if(offset != null){
-        parameters.put("offset", offset.toString());
-      }
       if(areaCode != null){
         parameters.put("area_code", areaCode.toString());
+      }
+      if(creatorId != null){
+        parameters.put("creator_id", creatorId.toString());
+      }
+      if(creatorName != null){
+        parameters.put("creator_name", creatorName.toString());
       }
       if(proxyWalletId != null){
         parameters.put("proxy_wallet_id", proxyWalletId.toString());
       }
-      if(status != null){
-        parameters.put("status", status.toString());
-      }
       if(vspCusid != null){
         parameters.put("vsp_cusid", vspCusid.toString());
       }
-      if(vspTermid != null){
-        parameters.put("vsp_termid", vspTermid.toString());
+      if(vspMerchantid != null){
+        parameters.put("vsp_merchantid", vspMerchantid.toString());
       }
     return parameters;
   }
