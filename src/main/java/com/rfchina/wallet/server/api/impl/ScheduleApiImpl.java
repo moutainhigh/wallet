@@ -22,7 +22,7 @@ import com.rfchina.wallet.server.msic.EnumWallet.AutoWithdrawStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.LockStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletApplyStatus;
 import com.rfchina.wallet.server.msic.EnumWallet.WalletConfigStatus;
-import com.rfchina.wallet.server.msic.LockConstant;
+import com.rfchina.wallet.server.msic.RedisConstant;
 import com.rfchina.wallet.server.service.*;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBaseHandler.YunstMemberType;
 import lombok.extern.slf4j.Slf4j;
@@ -82,7 +82,7 @@ public class ScheduleApiImpl implements ScheduleApi {
 	@Override
 	public void quartzUpdateJunior() {
 
-		new LockDone(lock).apply(LockConstant.LOCK_QUARTZ_UPDATE_JUNIOR, 900, () -> {
+		new LockDone(lock).apply(RedisConstant.LOCK_QUARTZ_UPDATE_JUNIOR, 900, () -> {
 			try {
 				scheduleService.quartzUpdateJunior(configService.getBatchUpdateSize());
 			} catch (Exception e) {
@@ -95,7 +95,7 @@ public class ScheduleApiImpl implements ScheduleApi {
 	@Override
 	public void quartzUpdateSenior() {
 
-		new LockDone(lock).apply(LockConstant.LOCK_QUARTZ_UPDATE_SENIOR, 900, () -> {
+		new LockDone(lock).apply(RedisConstant.LOCK_QUARTZ_UPDATE_SENIOR, 900, () -> {
 			try {
 				scheduleService
 					.quartzUpdateSenior(configService.getBatchUpdateSize());
@@ -109,7 +109,7 @@ public class ScheduleApiImpl implements ScheduleApi {
 	@Override
 	public void quartzPay() {
 
-		new LockDone(lock).apply(LockConstant.LOCK_QUARTZ_PAY, 1800, () -> {
+		new LockDone(lock).apply(RedisConstant.LOCK_QUARTZ_PAY, 1800, () -> {
 			// 待处理订单
 			List<String> batchNos = walletOrderExtDao
 				.selectUnSendBatchNo(OrderType.FINANCE.getValue(), configService.getBatchPaySize());
@@ -139,7 +139,7 @@ public class ScheduleApiImpl implements ScheduleApi {
 	@Override
 	public void quartzNotify() {
 
-		new LockDone(lock).apply(LockConstant.LOCK_QUARTZ_Notify, 600, () -> {
+		new LockDone(lock).apply(RedisConstant.LOCK_QUARTZ_Notify, 600, () -> {
 			List<WalletOrder> walletOrders = walletOrderExtDao
 				.selectByStatusNotNotified(WalletApplyStatus.WAIT_DEAL.getValue(), 200);
 			scheduleService.notifyDeveloper(walletOrders);
@@ -152,7 +152,7 @@ public class ScheduleApiImpl implements ScheduleApi {
 		Date theDay = (balanceDate == null) ?
 			DateUtil.getDate2(DateUtil.addDate2(new Date(), -1))
 			: DateUtil.parse(balanceDate, DateUtil.STANDARD_DTAE_PATTERN);
-		new LockDone(lock).apply(LockConstant.LOCK_QUARTZ_BALANCE, 60, () -> {
+		new LockDone(lock).apply(RedisConstant.LOCK_QUARTZ_BALANCE, 60, () -> {
 			try {
 				log.info("[定时对账] 开始日期 {}", theDay);
 				seniorBalanceService.doBalance(theDay);
@@ -168,7 +168,7 @@ public class ScheduleApiImpl implements ScheduleApi {
 
 		Date theDay = (balanceDate == null) ?
 			new Date() : DateUtil.parse(balanceDate, DateUtil.STANDARD_DTAE_PATTERN);
-		new LockDone(lock).apply(LockConstant.LOCK_QUARTZ_BALANCE, 60, () -> {
+		new LockDone(lock).apply(RedisConstant.LOCK_QUARTZ_BALANCE, 60, () -> {
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(theDay);
 			calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -191,7 +191,7 @@ public class ScheduleApiImpl implements ScheduleApi {
 		App app = new App();
 		app.setId(configService.getAppId());
 		sessionThreadLocal.addApp(app);
-		new LockDone(lock).apply(LockConstant.LOCK_QUARTZ_WITHDRAW, 1800, () -> {
+		new LockDone(lock).apply(RedisConstant.LOCK_QUARTZ_WITHDRAW, 1800, () -> {
 			new MaxIdIterator<WalletConfig>().apply((maxId) -> {
 
 				WalletConfigCriteria example = new WalletConfigCriteria();
@@ -217,7 +217,7 @@ public class ScheduleApiImpl implements ScheduleApi {
 	@Override
 	public void quartzSyncTunnel() {
 
-		new LockDone(lock).apply(LockConstant.LOCK_QUARTZ_SYNC_TUNNEL, 1800, () -> {
+		new LockDone(lock).apply(RedisConstant.LOCK_QUARTZ_SYNC_TUNNEL, 1800, () -> {
 			new MaxIdIterator<WalletTunnel>().apply((maxId) -> {
 
 				WalletTunnelCriteria example = new WalletTunnelCriteria();
@@ -240,7 +240,7 @@ public class ScheduleApiImpl implements ScheduleApi {
 	@Override
 	public void quartzSyncBalance() {
 
-		new LockDone(lock).apply(LockConstant.LOCK_QUARTZ_SYNC_BALANCE, 1800, () -> {
+		new LockDone(lock).apply(RedisConstant.LOCK_QUARTZ_SYNC_BALANCE, 1800, () -> {
 
 			new MaxIdIterator<WalletTunnel>().apply((maxId) -> {
 
@@ -277,7 +277,7 @@ public class ScheduleApiImpl implements ScheduleApi {
 	public void quartzOrderSettleFailed() {
 		Date orderDate = DateUtil.getDate(DateUtil.addDate2(new Date(), -2));
 		log.info("结算通知订单日期:{}", DateUtil.formatDate(orderDate, DateUtil.STANDARD_DTAETIME_PATTERN));
-		new LockDone(lock).apply(LockConstant.LOCK_QUARTZ_ORDER_SETTLE_FAILED, 900, () -> {
+		new LockDone(lock).apply(RedisConstant.LOCK_QUARTZ_ORDER_SETTLE_FAILED, 900, () -> {
 			try {
 				log.info("[定时通知结算不成功订单] 开始");
 				walletOrderService.failedSettleOrderSendMail(orderDate);

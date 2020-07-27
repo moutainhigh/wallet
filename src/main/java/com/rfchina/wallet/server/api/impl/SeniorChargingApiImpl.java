@@ -10,13 +10,18 @@ import com.rfchina.platform.common.annotation.Log;
 import com.rfchina.platform.common.annotation.SignVerify;
 import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.platform.common.utils.DateUtil;
+import com.rfchina.wallet.domain.misc.EnumDef.DownloadStatus;
 import com.rfchina.wallet.domain.model.StatCharging;
 import com.rfchina.wallet.server.api.SeniorChargingApi;
+import com.rfchina.wallet.server.model.ext.ReportDownloadVo;
 import com.rfchina.wallet.server.model.ext.StatChargingDetailVo;
+import com.rfchina.wallet.server.msic.RedisConstant;
 import com.rfchina.wallet.server.service.SeniorChargingService;
 import java.util.Date;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.BoundHashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +36,10 @@ public class SeniorChargingApiImpl implements SeniorChargingApi {
 	private SimpleExclusiveLock lock;
 
 	@Autowired
-	FileServer fileServer;
+	private FileServer fileServer;
+
+	@Autowired
+	private RedisTemplate redisTemplate;
 
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
@@ -78,8 +86,8 @@ public class SeniorChargingApiImpl implements SeniorChargingApi {
 
 	@Async
 	@Override
-	public void exportChargingDetail(String accessToken, String fileName, String startTime,
-		String endTime) {
+	public void exportChargingDetail(String accessToken, String fileName, String uniqueCode,
+		String startTime, String endTime) {
 
 		String threadName = Thread.currentThread().getName();
 		log.info("线程[{}]正在导出报表[{}]", threadName, fileName);
@@ -89,6 +97,12 @@ public class SeniorChargingApiImpl implements SeniorChargingApi {
 		String fileKey = "report/" + fileName;
 		fileServer
 			.upload(fileKey, bytes, "application/octet-stream", EnumFileAcl.PUBLIC_READ, null);
+		BoundHashOperations hashOps = redisTemplate.boundHashOps(RedisConstant.DOWNLOAD_OBJECT_KEY);
+		if (hashOps.hasKey(uniqueCode)) {
+			ReportDownloadVo downloadVo = (ReportDownloadVo) hashOps.get(uniqueCode);
+			downloadVo.setStatus(DownloadStatus.BUILDED.getValue());
+			hashOps.put(uniqueCode, downloadVo);
+		}
 		log.info("线程[{}]完成导出报表[{}]", threadName, fileName);
 
 	}

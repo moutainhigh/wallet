@@ -2,12 +2,10 @@ package com.rfchina.wallet.server.service.handler.yunst;
 
 import com.allinpay.yunst.sdk.util.RSAUtil;
 import com.rfchina.biztools.functionnal.LockDone;
-import com.rfchina.biztools.generate.IdGenerator;
 import com.rfchina.biztools.lock.SimpleExclusiveLock;
 import com.rfchina.biztools.mq.PostMq;
 import com.rfchina.platform.common.misc.Try;
 import com.rfchina.platform.common.utils.DateUtil;
-import com.rfchina.wallet.domain.mapper.ext.WalletCollectMethodDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.misc.EnumDef.EnumDefBankCard;
@@ -26,7 +24,6 @@ import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.model.ChannelNotify;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletCard;
-import com.rfchina.wallet.domain.model.WalletCollectMethod;
 import com.rfchina.wallet.domain.model.WalletCompany;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.domain.model.WalletVerifyHis;
@@ -38,10 +35,8 @@ import com.rfchina.wallet.server.mapper.ext.WalletCompanyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletVerifyHisExtDao;
 import com.rfchina.wallet.server.model.ext.SLWalletMqMessage;
-import com.rfchina.wallet.server.msic.EnumWallet;
-import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
 import com.rfchina.wallet.server.msic.EnumWallet.YunstCompanyInfoAuditStatus;
-import com.rfchina.wallet.server.msic.LockConstant;
+import com.rfchina.wallet.server.msic.RedisConstant;
 import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.SeniorWalletService;
 import com.rfchina.wallet.server.service.WalletEventService;
@@ -225,7 +220,7 @@ public class YunstNotifyHandler {
 	public void updateCompanyCard(Long walletId, CompanyInfoResult companyInfo) {
 
 		new LockDone(lock)
-			.apply(LockConstant.LOCK_CARD_UPDATE, 30, () -> {
+			.apply(RedisConstant.LOCK_CARD_UPDATE, 30, () -> {
 				List<WalletCard> walletCards = walletCardDao.selectPubAccountByWalletId(walletId);
 				// 解绑旧卡
 				if (walletCards != null && !walletCards.isEmpty()) {
