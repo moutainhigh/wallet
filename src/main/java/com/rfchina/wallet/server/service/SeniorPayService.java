@@ -483,7 +483,8 @@ public class SeniorPayService {
 				.createTime(new Date())
 				.build();
 			walletCollectDao.insertSelective(collect);
-			savePayMethod(collect.getOrderId(), collect.getId(), OrderType.COLLECT.getValue(),
+			WalletCollectMethod walletCollectMethod = savePayMethod(collect.getOrderId(),
+				collect.getId(), OrderType.COLLECT.getValue(),
 				req.getWalletPayMethod());
 
 			// 生成清分记录
@@ -505,7 +506,8 @@ public class SeniorPayService {
 				.selectByWalletId(collectOrder.getWalletId(), collectOrder.getTunnelType());
 
 			EBankHandler handler = handlerHelper.selectByTunnelType(collectOrder.getTunnelType());
-			WalletCollectResp result = handler.collect(collectOrder, collect, collectInfos, payer);
+			WalletCollectResp result = handler
+				.collect(collectOrder, collect, collectInfos, payer, walletCollectMethod);
 			// 签名密码验证参数
 			if (collect.getValidateType().byteValue() == BizValidateType.PASSWORD.getValue()) {
 				String signedParams = ((YunstBizHandler) handler)
@@ -605,9 +607,11 @@ public class SeniorPayService {
 				.build();
 			walletBalanceDetailDao.insertSelective(withdrawDetail);
 
+			WalletCollectMethod collectMethod = walletCollectMethodDao
+				.getByOrderNo(collectOrder.getOrderNo());
 			// 代付给每个收款人
 			EBankHandler handler = handlerHelper.selectByTunnelType(clearOrder.getTunnelType());
-			handler.agentPay(clearOrder, clearing, walletCollect, collectInfos);
+			handler.agentPay(clearOrder, clearing, walletCollect, collectInfos, collectMethod);
 
 			return SettleResp.builder()
 				.order(clearOrder)
@@ -1113,15 +1117,17 @@ public class SeniorPayService {
 			});
 	}
 
-	/** 获取子商户 */
+	/**
+	 * 获取子商户
+	 */
 	public String getSellerId(String areaCode) {
 
-		if(StringUtil.isBlank(areaCode) || areaCode.length() < 6){
+		if (StringUtil.isBlank(areaCode) || areaCode.length() < 6) {
 			return "";
 		}
 
-		if(!areaCode.substring(2, 6).equalsIgnoreCase(AREA_SUFFIX)){
-			areaCode = areaCode.substring(0,2) + "0000";
+		if (!areaCode.substring(2, 6).equalsIgnoreCase(AREA_SUFFIX)) {
+			areaCode = areaCode.substring(0, 2) + "0000";
 		}
 
 		WalletArea walletArea = walletAreaDao.selectOneByAreaCode(areaCode);

@@ -64,7 +64,8 @@ public abstract class EBankHandler {
 	 * 代收
 	 */
 	public WalletCollectResp collect(WalletOrder order, WalletCollect collect,
-		List<WalletCollectInfo> clearInfos, WalletTunnel payer) {
+		List<WalletCollectInfo> clearInfos, WalletTunnel payer,
+		WalletCollectMethod walletCollectMethod) {
 		throw new RuntimeException();
 	}
 
@@ -73,7 +74,8 @@ public abstract class EBankHandler {
 	 */
 	public void agentPay(WalletOrder order, WalletClearing clearings,
 		WalletCollect walletCollect,
-		List<WalletCollectInfo> collectInfos) {
+		List<WalletCollectInfo> collectInfos,
+		WalletCollectMethod collectMethod) {
 		throw new RuntimeException();
 	}
 

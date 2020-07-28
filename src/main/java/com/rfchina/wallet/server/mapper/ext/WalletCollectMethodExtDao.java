@@ -22,7 +22,8 @@ public interface WalletCollectMethodExtDao extends WalletCollectMethodMapper {
 	@Select({
 		"select * from rf_wallet_collect_method",
 		"where order_id in ",
-		"(select id from rf_wallet_order where order_no = #{orderNo})"
+		"(select id from rf_wallet_order where order_no = #{orderNo})",
+		"order by id asc limit 1"
 	})
 	@ResultMap("com.rfchina.wallet.domain.mapper.WalletCollectMethodMapper.BaseResultMap")
 	WalletCollectMethod getByOrderNo(@Param("orderNo") String orderNo);

@@ -3,7 +3,6 @@ package com.rfchina.wallet.server.service.handler.yunst;
 import com.allinpay.yunst.sdk.util.RSAUtil;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-import com.rfchina.mch.sdk.model.ChargingConfig;
 import com.rfchina.platform.biztools.fileserver.HttpFile;
 import com.rfchina.platform.common.misc.Triple;
 import com.rfchina.platform.common.misc.Tuple;
@@ -12,6 +11,7 @@ import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EnumUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.MoneyLogMapper;
+import com.rfchina.wallet.domain.mapper.ext.WalletAreaDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletBalanceDetailDao;
 import com.rfchina.wallet.domain.misc.EnumDef.BalanceDetailStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderStatus;
@@ -22,6 +22,7 @@ import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.GatewayTrans;
 import com.rfchina.wallet.domain.model.MoneyLog;
 import com.rfchina.wallet.domain.model.MoneyLog.MoneyLogBuilder;
+import com.rfchina.wallet.domain.model.WalletArea;
 import com.rfchina.wallet.domain.model.WalletBalanceDetail;
 import com.rfchina.wallet.domain.model.WalletClearing;
 import com.rfchina.wallet.domain.model.WalletCollect;
@@ -100,12 +101,10 @@ import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectRoleType;
 import com.rfchina.wallet.server.msic.EnumWallet.DebitType;
 import com.rfchina.wallet.server.msic.EnumWallet.EnumBizTag;
-import com.rfchina.wallet.server.msic.EnumWallet.FeeConfigKey;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.GwProgress;
 import com.rfchina.wallet.server.msic.EnumWallet.RefundType;
 import com.rfchina.wallet.server.msic.EnumWallet.UniProgress;
-import com.rfchina.wallet.server.msic.EnumYunst.EnumAcctType;
 import com.rfchina.wallet.server.msic.EnumYunst.EnumTrxCode;
 import com.rfchina.wallet.server.msic.EnumYunst.EnumYunstDeviceType;
 import com.rfchina.wallet.server.msic.EnumYunst.EnumYunstWithdrawType;
@@ -129,6 +128,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jetty.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -200,6 +200,9 @@ public class YunstBizHandler extends EBankHandler {
 
 	@Autowired
 	private ParcelProducer parcelProducer;
+
+	@Autowired
+	private WalletAreaDao walletAreaDao;
 
 
 	public boolean isSupportTunnelType(Byte tunnelType) {
@@ -347,8 +350,9 @@ public class YunstBizHandler extends EBankHandler {
 	}
 
 
-	private List<RecieveInfo> getRecievers(Byte budgetMode, Long amount, Byte tunnelType,
-		List<WalletCollectInfo> clearInfos) {
+	private List<RecieveInfo> getRecievers(Byte budgetMode, Long amount,
+		Byte tunnelType, List<WalletCollectInfo> clearInfos, String sellerId) {
+
 		if (budgetMode == null || budgetMode.byteValue() == BudgetMode.ON_COLLECT.getValue()) {
 
 			log.info("代收分佣 {}", clearInfos);
@@ -377,9 +381,11 @@ public class YunstBizHandler extends EBankHandler {
 				.build());
 		} else if (budgetMode.byteValue() == BudgetMode.SILI_PROXY.getValue()) {
 
-			log.info("思力代分 主收款人[{}]", configService.getAgentPosWalletId());
+			WalletArea walletArea = walletAreaDao.selectOneByVspCusid(sellerId);
+
+			log.info("思力代分 主收款人[{}]", walletArea.getProxyWalletId());
 			WalletTunnel receiver = walletChannelDao
-				.selectByWalletId(configService.getAgentPosWalletId(), tunnelType);
+				.selectByWalletId(walletArea.getProxyWalletId(), tunnelType);
 			return Arrays.asList(RecieveInfo.builder()
 				.bizUserId(receiver.getBizUserId())
 				.amount(amount)
@@ -391,14 +397,29 @@ public class YunstBizHandler extends EBankHandler {
 	}
 
 	/**
+	 * 获取子商户
+	 */
+	public String getSellerId(String areaCode) {
+
+		if (StringUtil.isBlank(areaCode) || areaCode.length() < 6) {
+			return "";
+		}
+
+		WalletArea walletArea = walletAreaDao.selectOneByAreaCode(areaCode);
+		return walletArea != null ? walletArea.getVspCusid() : null;
+	}
+
+	/**
 	 * 代收
 	 */
 	public WalletCollectResp collect(WalletOrder order, WalletCollect collect,
-		List<WalletCollectInfo> clearInfos, WalletTunnel payer) {
+		List<WalletCollectInfo> clearInfos, WalletTunnel payer,
+		WalletCollectMethod walletCollectMethod) {
 
 		// 收款人
-		List<RecieveInfo> recievers = getRecievers(collect.getBudgetMode(), order.getAmount(),
-			order.getTunnelType(), clearInfos);
+		List<RecieveInfo> recievers = getRecievers(collect.getBudgetMode(),
+			order.getAmount(), order.getTunnelType(), clearInfos,
+			walletCollectMethod.getSellerId());
 
 		// 收款方式
 		List<WalletCollectMethod> methods = walletCollectMethodDao
@@ -457,7 +478,8 @@ public class YunstBizHandler extends EBankHandler {
 	}
 
 	private Tuple<WalletTunnel, List<SplitRule>> getSplitRule(Byte budgetMode,
-		WalletOrder clearOrder, WalletClearing clearing, List<WalletCollectInfo> collectInfos) {
+		WalletOrder clearOrder, WalletClearing clearing, List<WalletCollectInfo> collectInfos,
+		String sellerId) {
 
 		if (budgetMode == null || budgetMode.byteValue() == BudgetMode.ON_COLLECT.getValue()) {
 
@@ -492,8 +514,10 @@ public class YunstBizHandler extends EBankHandler {
 
 		} else if (budgetMode.byteValue() == BudgetMode.SILI_PROXY.getValue()) {
 
+			WalletArea walletArea = walletAreaDao.selectOneByVspCusid(sellerId);
+			log.info("思力代分 主收款人[{}]", walletArea.getProxyWalletId());
 			WalletTunnel projectTunnel = walletTunnelExtDao
-				.selectByWalletId(configService.getAgentPosWalletId(), clearOrder.getTunnelType());
+				.selectByWalletId(walletArea.getProxyWalletId(), clearOrder.getTunnelType());
 			WalletTunnel clearTunnel = walletTunnelExtDao
 				.selectByWalletId(clearOrder.getWalletId(), clearOrder.getTunnelType());
 			List<SplitRule> splitRules = Arrays.asList(SplitRule.builder()
@@ -511,11 +535,12 @@ public class YunstBizHandler extends EBankHandler {
 	 * 代付
 	 */
 	public void agentPay(WalletOrder clearOrder, WalletClearing clearing,
-		WalletCollect walletCollect, List<WalletCollectInfo> collectInfos) {
+		WalletCollect walletCollect, List<WalletCollectInfo> collectInfos,
+		WalletCollectMethod collectMethod) {
 
 		// 读取分帐规则
 		Tuple<WalletTunnel, List<SplitRule>> splitRule = getSplitRule(walletCollect.getBudgetMode(),
-			clearOrder, clearing, collectInfos);
+			clearOrder, clearing, collectInfos, collectMethod.getSellerId());
 
 		// 登记代付数额
 		CollectPay collectPay = CollectPay.builder()
@@ -570,17 +595,6 @@ public class YunstBizHandler extends EBankHandler {
 		} else if (budgetMode.byteValue() == BudgetMode.ON_AGENTPAY.getValue()) {
 
 			Long projector = findProjector(collectInfos);
-			Optional<Long> total = details.stream()
-				.map(WalletRefundDetail::getAmount)
-				.reduce((x, y) -> x + y);
-			return Arrays.asList(RefundInfo.builder()
-				.accountSetNo(null)   //不送：默认从平台中间账户集退款
-				.bizUserId(String.valueOf(projector))
-				.amount(total.orElse(0L))
-				.build());
-		} else if (budgetMode.byteValue() == BudgetMode.SILI_PROXY.getValue()) {
-
-			Long projector = configService.getAgentPosWalletId();
 			Optional<Long> total = details.stream()
 				.map(WalletRefundDetail::getAmount)
 				.reduce((x, y) -> x + y);
