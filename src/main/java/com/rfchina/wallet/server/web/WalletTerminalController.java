@@ -44,13 +44,14 @@ public class WalletTerminalController {
 		@ApiParam(value = "集团商户号", required = true) @RequestParam("vsp_merchantid") String vspMerchantid,
 		@ApiParam(value = "子商户号", required = true) @RequestParam("vsp_cusid") String vspCusid,
 		@ApiParam(value = "主收款人钱包id", required = true) @RequestParam("proxy_wallet_id") Long proxyWalletId,
+		@ApiParam(value = "通联AppId", required = true) @RequestParam("app_id") String appId,
 		@ApiParam(value = "创建人id", required = true) @RequestParam("creator_id") String creatorId,
 		@ApiParam(value = "创建人名称", required = true) @RequestParam("creator_name") String creatorName
 	) {
 
 		walletTerminalApi
-			.bindVspId(accessToken, areaCode, vspMerchantid, vspCusid, proxyWalletId, creatorId,
-				creatorName);
+			.bindVspId(accessToken, appId, areaCode, vspMerchantid, vspCusid, proxyWalletId,
+				creatorId, creatorName);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
 

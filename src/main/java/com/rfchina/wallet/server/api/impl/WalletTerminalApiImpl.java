@@ -102,6 +102,7 @@ public class WalletTerminalApiImpl implements WalletTerminalApi {
 	@Override
 	public void bindVspId(
 		@ParamValid(nullable = false) String accessToken,
+		@ParamValid(nullable = false) String appId,
 		@ParamValid(nullable = false) String areaCode,
 		@ParamValid(nullable = false) String vspMerchantid,
 		@ParamValid(nullable = false) String vspCusid,
@@ -120,6 +121,7 @@ public class WalletTerminalApiImpl implements WalletTerminalApi {
 			.orElseThrow(
 				() -> new WalletResponseException(EnumWalletResponseCode.TUNNEL_INFO_NOT_EXISTS));
 
+		walletArea.setAppId(appId);
 		walletArea.setVspMerchantid(vspMerchantid);
 		walletArea.setVspCusid(vspCusid);
 		walletArea.setProxyWalletId(proxyWalletId);

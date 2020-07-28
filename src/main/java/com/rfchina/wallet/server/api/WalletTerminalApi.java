@@ -15,8 +15,8 @@ public interface WalletTerminalApi {
 	/**
 	 * 地区绑定子商户号
 	 */
-	void bindVspId(String accessToken, String areaCode, String vspMerchantid, String vspCusid,
-		Long proxyWalletId, String creatorId, String creatorName);
+	void bindVspId(String accessToken, String appId, String areaCode, String vspMerchantid,
+		String vspCusid, Long proxyWalletId, String creatorId, String creatorName);
 
 	/**
 	 * 查询地区商户号列表
@@ -26,6 +26,7 @@ public interface WalletTerminalApi {
 	/**
 	 * 查询终端列表
 	 */
-	Pagination<WalletTerminalExt> queryTerminalExt(String accessToken, String areaCode, Long proxyWalletId,
+	Pagination<WalletTerminalExt> queryTerminalExt(String accessToken, String areaCode,
+		Long proxyWalletId,
 		String vspCusid, String vspTermid, Byte status, Integer limit, Integer offset);
 }
