@@ -329,4 +329,27 @@ public class EnumYunst {
 			return null;
 		}
 	}
+
+	public enum EnumAcctType implements Valuable<String> {
+		DEBIT("00", "借记卡"),
+		PASSBOOK("01", "存折"),
+		CREDIT("02", "信用卡"),
+		SEMI_CREDIT("03", "准贷记卡"),
+		PREPAID("04", "预付费卡"),
+		OVERSEA("05", "境外卡"),
+		ETC("99", "其他");
+
+		private String value;
+		private String valueName;
+
+		EnumAcctType(String value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public String getValue() {
+			return value;
+		}
+	}
 }

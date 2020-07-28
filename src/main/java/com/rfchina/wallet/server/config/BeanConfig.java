@@ -1,17 +1,24 @@
 package com.rfchina.wallet.server.config;
 
 import com.rfchina.biztools.lock.SimpleExclusiveLock;
+import com.rfchina.mch.sdk.api.ChargingCalculateRequest;
 import com.rfchina.mch.sdk.api.ChargingGetConfigRequest;
+import com.rfchina.mch.sdk.model.ChargeCalculateVo;
 import com.rfchina.mch.sdk.model.ChargingConfig;
 import com.rfchina.mch.sdk.model.ListChargingConfig;
 import com.rfchina.passport.misc.SessionThreadLocal;
 import com.rfchina.platform.biztools.CacheHashMap;
 import com.rfchina.platform.biztools.fileserver.FileServerAutoConfig;
+import com.rfchina.platform.common.misc.ResponseCode.EnumResponseCode;
 import com.rfchina.platform.sdk2.ApiClient;
 import com.rfchina.platform.sdk2.response.ResponseData;
 import com.rfchina.platform.spring.SpringContext;
 import com.rfchina.wallet.server.bank.pudong.domain.predicate.ExactErrPredicate;
+import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
+import com.rfchina.wallet.server.model.ext.ChargingUpdateVo;
 import com.rfchina.wallet.server.msic.EnumWallet.FeeConfigKey;
+import com.rfchina.wallet.server.msic.EnumYunst.EnumAcctType;
+import com.rfchina.wallet.server.msic.StringConstant;
 import com.rfchina.wallet.server.service.AppService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -25,6 +32,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.tas.post.ParcelFactory;
+import org.tas.post.worker.ParcelConsumer;
+import org.tas.post.worker.ParcelProducer;
 
 
 /**
@@ -44,6 +54,9 @@ public class BeanConfig {
 
 	@Autowired
 	private AppService appService;
+
+	@Autowired
+	private WalletOrderExtDao walletOrderDao;
 
 	@Bean
 	public SpringContext springContext() {
@@ -95,6 +108,11 @@ public class BeanConfig {
 			updateFeeConfig(obj, FeeConfigKey.YUNST_WITHDRAW.getValue());
 			updateFeeConfig(obj, FeeConfigKey.YUNST_COMPANY_AUDIT.getValue());
 			updateFeeConfig(obj, FeeConfigKey.YUNST_PERSON_AUDIT.getValue());
+			updateFeeConfig(obj, FeeConfigKey.YUNST_POS_DEBIT_CARD.getValue());
+			updateFeeConfig(obj, FeeConfigKey.YUNST_POS_CREDIT_CARD.getValue());
+			updateFeeConfig(obj, FeeConfigKey.YUNST_POS_UNION_RCODE.getValue());
+			updateFeeConfig(obj, FeeConfigKey.YUNST_POS_WECHAT.getValue());
+			updateFeeConfig(obj, FeeConfigKey.YUNST_POS_ALIPAY.getValue());
 		});
 	}
 
@@ -116,5 +134,53 @@ public class BeanConfig {
 			.build();
 		ResponseData<ListChargingConfig> resp = apiTemplate.execute(req);
 		return (!resp.getData().isEmpty()) ? resp.getData().get(0) : null;
+	}
+
+
+	@Bean
+	public ParcelProducer parcelProducer() {
+
+		ParcelConsumer parcelConsumer = new ParcelConsumer();
+		parcelConsumer.regist(StringConstant.PARCEL_CHARGNIG_UPDATE, (parcelList) -> {
+			if (parcelList == null) {
+				return;
+			}
+			parcelList.forEach(parcel -> {
+				ChargingUpdateVo charging = (ChargingUpdateVo) parcel.getPayLoad();
+
+				try {
+					// 更新手续费用
+					String prefix = charging.getCollectPayType().toChargingPrefix();
+					if (EnumAcctType.DEBIT.getValue().equals(charging.getAcctType())) {
+						prefix += "_DEBIT";
+					} else if (EnumAcctType.CREDIT.getValue().equals(charging.getAcctType())
+						|| EnumAcctType.SEMI_CREDIT.getValue().equals(charging.getAcctType())) {
+						prefix += "_CREDIT";
+					}
+					log.info("[手续费]准备更新订单[{}]手续费", charging.getOrderNo());
+					ChargingCalculateRequest req = ChargingCalculateRequest.builder()
+						.accessToken(appService.getAccessToken())
+						.amount(charging.getAmount())
+						.chargingKey(prefix)
+						.build();
+					ResponseData<ChargeCalculateVo> resp = apiTemplate.execute(req);
+					if (EnumResponseCode.COMMON_SUCCESS.getValue() == resp.getCode()) {
+						Long fee = resp.getData().getFee();
+						ChargingConfig config = resp.getData().getChargingConfig();
+						log.info("[手续费]订单[{}]金额[{}]手续费[{}]", charging.getOrderNo(),
+							charging.getAmount(), fee);
+						walletOrderDao.updateFee(charging.getOrderNo(), config.getType(),
+							config.getChargingValue(), fee);
+					}
+
+					log.info("[手续费]完成更新订单[{}]手续费", charging.getOrderNo());
+				} catch (Exception e) {
+					log.error("[手续费]更新失败", e);
+				}
+			});
+
+		});
+
+		return ParcelFactory.buildProducer(parcelConsumer, 1024);
 	}
 }

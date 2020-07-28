@@ -2,13 +2,13 @@ package com.rfchina.wallet.server.mapper.ext;
 
 import com.rfchina.wallet.domain.mapper.WalletOrderMapper;
 import com.rfchina.wallet.domain.model.WalletOrder;
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
-
-import java.util.Date;
-import java.util.List;
 
 public interface WalletOrderExtDao extends WalletOrderMapper {
 
@@ -194,4 +194,13 @@ public interface WalletOrderExtDao extends WalletOrderMapper {
 			"</script>"
 	})
 	int batchUpdateNotifiedByIds(@Param("walletOrderIds") List<Long> walletOrderIds);
+
+	@Update({
+		"update rf_wallet_order ",
+		"set charging_type = #{chargingType} , charging_value = #{chargingValue}, tunnel_fee = #{fee}",
+		"where order_no = #{orderNo}"
+	})
+	int updateFee(@Param("orderNo") String orderNo, @Param("chargingType") Integer chargingType,
+		@Param("chargingValue") BigDecimal chargingValue, @Param("fee") Long fee);
+
 }

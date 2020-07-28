@@ -527,6 +527,21 @@ public class EnumWallet {
 		public Byte getValue() {
 			return value;
 		}
+
+		public String toChargingPrefix() {
+			switch (this.value.byteValue()) {
+				case 62:
+					return "YUNST_POS_WEIXIN";
+				case 64:
+					return "YUNST_POS_ALIPAY";
+				case 65:
+					return "YUNST_POS";
+				case 66:
+					return "YUNST_POS_UNION_RCODE";
+				default:
+					return null;
+			}
+		}
 	}
 
 
@@ -853,7 +868,12 @@ public class EnumWallet {
 	public enum FeeConfigKey implements Valuable<String> {
 		YUNST_WITHDRAW("YUNST_WITHDRAW", "提现手续费配置"),
 		YUNST_PERSON_AUDIT("YUNST_PERSON_AUDIT", "个人认证收费"),
-		YUNST_COMPANY_AUDIT("YUNST_COMPANY_AUDIT", "商户认证收费");
+		YUNST_COMPANY_AUDIT("YUNST_COMPANY_AUDIT", "商户认证收费"),
+		YUNST_POS_DEBIT_CARD("YUNST_POS_DEBIT_CARD", "通联POS借记卡"),
+		YUNST_POS_CREDIT_CARD("YUNST_POS_CREDIT_CARD", "通联POS贷记卡"),
+		YUNST_POS_UNION_RCODE("YUNST_POS_UNION_RCODE", "通联POS-银联二维码"),
+		YUNST_POS_WECHAT("YUNST_POS_WECHAT", "通联POS-微信钱包"),
+		YUNST_POS_ALIPAY("YUNST_POS_ALIPAY", "通联POS-支付宝钱包");
 
 		private String value;
 		private String valueName;

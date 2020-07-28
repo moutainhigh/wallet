@@ -3,6 +3,7 @@ package com.rfchina.wallet.server.service.handler.yunst;
 import com.allinpay.yunst.sdk.util.RSAUtil;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+import com.rfchina.mch.sdk.model.ChargingConfig;
 import com.rfchina.platform.biztools.fileserver.HttpFile;
 import com.rfchina.platform.common.misc.Triple;
 import com.rfchina.platform.common.misc.Tuple;
@@ -89,6 +90,7 @@ import com.rfchina.wallet.server.mapper.ext.WalletRefundDetailExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletRefundExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletWithdrawExtDao;
+import com.rfchina.wallet.server.model.ext.ChargingUpdateVo;
 import com.rfchina.wallet.server.model.ext.RechargeResp;
 import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.model.ext.WithdrawResp;
@@ -98,15 +100,18 @@ import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
 import com.rfchina.wallet.server.msic.EnumWallet.CollectRoleType;
 import com.rfchina.wallet.server.msic.EnumWallet.DebitType;
 import com.rfchina.wallet.server.msic.EnumWallet.EnumBizTag;
+import com.rfchina.wallet.server.msic.EnumWallet.FeeConfigKey;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayMethod;
 import com.rfchina.wallet.server.msic.EnumWallet.GwProgress;
 import com.rfchina.wallet.server.msic.EnumWallet.RefundType;
 import com.rfchina.wallet.server.msic.EnumWallet.UniProgress;
+import com.rfchina.wallet.server.msic.EnumYunst.EnumAcctType;
 import com.rfchina.wallet.server.msic.EnumYunst.EnumTrxCode;
 import com.rfchina.wallet.server.msic.EnumYunst.EnumYunstDeviceType;
 import com.rfchina.wallet.server.msic.EnumYunst.EnumYunstWithdrawType;
 import com.rfchina.wallet.server.msic.EnumYunst.YunstFileType;
 import com.rfchina.wallet.server.msic.EnumYunst.YunstOrderStatus;
+import com.rfchina.wallet.server.msic.StringConstant;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.GatewayTransService;
@@ -128,6 +133,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.tas.post.model.Parcel;
+import org.tas.post.worker.ParcelProducer;
 
 @Component
 @Slf4j
@@ -191,6 +198,9 @@ public class YunstBizHandler extends EBankHandler {
 	@Autowired
 	private WalletBalanceDetailService walletBalanceDetailService;
 
+	@Autowired
+	private ParcelProducer parcelProducer;
+
 
 	public boolean isSupportTunnelType(Byte tunnelType) {
 		return TunnelType.YUNST.getValue().byteValue() == tunnelType.byteValue();
@@ -242,7 +252,7 @@ public class YunstBizHandler extends EBankHandler {
 			.frontUrl(null)
 			.backUrl(configService.getYunstRecallPrefix() + UrlConstant.YUNST_ORDER_RECALL)
 			.orderExpireDatetime(expireTime)
-			.payMethod(getMethodMap(methods, true))
+			.payMethod(getYunstMethodMap(methods, true))
 			.industryCode(order.getIndustryCode())
 			.industryName(order.getIndustryName())
 			.goodsName(order.getGoodName())
@@ -406,7 +416,7 @@ public class YunstBizHandler extends EBankHandler {
 			.frontUrl(null)
 			.backUrl(configService.getYunstRecallPrefix() + UrlConstant.YUNST_ORDER_RECALL)
 			.orderExpireDatetime(expireTime)
-			.payMethod(getMethodMap(methods, false))
+			.payMethod(getYunstMethodMap(methods, false))
 			.tradeCode(TRADE_CODESTRING_COLLECT)
 			.industryCode(order.getIndustryCode())
 			.industryName(order.getIndustryName())
@@ -655,7 +665,7 @@ public class YunstBizHandler extends EBankHandler {
 			.protocolNo(payer.getBalanceProtocolNo())
 			.receiverId(payee.getBizUserId())
 			.bizOrderNo(order.getOrderNo())
-			.payMethod(getMethodMap(methods, false))
+			.payMethod(getYunstMethodMap(methods, false))
 			.amount(order.getAmount())
 			.fee(0L)
 			.backUrl(configService.getYunstRecallPrefix() + UrlConstant.YUNST_ORDER_RECALL)
@@ -748,12 +758,16 @@ public class YunstBizHandler extends EBankHandler {
 			if (walletOrderStatus.isEndStatus()) {
 				order.setEndTime(new Date());
 			}
+			try {
+				dealPosOrder(order, tunnelOrder);
+			} catch (Exception e) {
+				log.error("检测POS订单失败", e);
+			}
 			// 更新订单状态
 			walletOrderDao.updateByPrimaryKeySelective(order);
 			log.error("[订单更新] 订单[{}]：通道状态[{}][{}] 通道时间[{}]", order.getOrderNo(),
 				tunnelOrder.getOrderStatus(), tunnelOrder.getErrorMessage(),
 				tunnelOrder.getPayDatetime());
-			dealPosOrder(tunnelOrder);
 
 			// 更新余额明细
 			if (walletOrderStatus.isEndStatus()
@@ -922,11 +936,15 @@ public class YunstBizHandler extends EBankHandler {
 		}
 	}
 
+	private void updateOrderFee(WalletOrder order, GetOrderDetailResp tunnelOrder) {
+
+	}
+
 
 	/**
 	 * 支付方式
 	 */
-	private Map<String, Object> getMethodMap(List<WalletCollectMethod> methods,
+	private Map<String, Object> getYunstMethodMap(List<WalletCollectMethod> methods,
 		boolean isRecharge) {
 		Map<String, Object> payMethod = new HashMap<>();
 		methods.forEach(m -> {
@@ -1198,7 +1216,7 @@ public class YunstBizHandler extends EBankHandler {
 	}
 
 
-	private void dealPosOrder(GetOrderDetailResp rtnVal) {
+	private void dealPosOrder(WalletOrder order, GetOrderDetailResp rtnVal) {
 		// 筛选代付订单
 		String collectOrderPrefix =
 			configService.getOrderNoPrefix() + SeniorPayService.PREFIX_COLLECT;
@@ -1209,21 +1227,37 @@ public class YunstBizHandler extends EBankHandler {
 					log.info("[订单更新] 开始更新订单[{}]渠道交易方式", rtnVal.getBizOrderNo());
 					EnumTrxCode trxCode = EnumUtil
 						.parse(EnumTrxCode.class, trxcode);
+					CollectPayType collectPayType = trxCode.toCollectPayType();
 					if (trxCode == null) {
 						log.error("[更新订单] 通道交易类型[{}]无枚举值", trxcode);
-					} else if (trxCode.toCollectPayType() != null) {
-						// 根据订单号获取payType
-						WalletCollectMethod method = walletCollectMethodDao
-							.getByOrderNo(rtnVal.getBizOrderNo());
-						// 如果pay_type是61则为pos机支付，更新pay_type到rf_wallet_collect_method
-						if (method != null && method.getPayType()
-							.equals(CollectPayType.POS.getValue())) {
-
-							method.setPayType(trxCode.toCollectPayType().getValue());
-							walletCollectMethodDao.updateByPrimaryKey(method);
-						}
 					} else {
-						log.error("[更新订单] 本地无法匹配通道交易类型[{}]", trxcode);
+						if (collectPayType != null) {
+							// 根据订单号获取payType
+							WalletCollectMethod method = walletCollectMethodDao
+								.getByOrderNo(rtnVal.getBizOrderNo());
+							// 如果pay_type是61则为pos机支付，更新pay_type到rf_wallet_collect_method
+							if (method != null && method.getPayType()
+								.equals(CollectPayType.POS.getValue())) {
+								// 更新payType
+								method.setPayType(collectPayType.getValue());
+								walletCollectMethodDao.updateByPrimaryKey(method);
+
+								log.info("[手续费] 通知异步更新订单[{}]手续费", rtnVal.getBizOrderNo());
+								parcelProducer.deliver(Parcel.builder()
+									.sendTo(StringConstant.PARCEL_CHARGNIG_UPDATE)
+									.payLoad(ChargingUpdateVo.builder()
+										.orderNo(order.getOrderNo())
+										.amount(order.getAmount())
+										.collectPayType(collectPayType)
+										.acctType(rtnVal.getAccttype())
+										.createTime(new Date())
+										.build())
+									.createTime(System.currentTimeMillis())
+									.build());
+							}
+						} else {
+							log.error("[更新订单] 本地无法匹配通道交易类型[{}]", trxcode);
+						}
 					}
 				});
 		}
