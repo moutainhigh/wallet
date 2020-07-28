@@ -109,7 +109,7 @@ public class SeniorChargingApiImpl implements SeniorChargingApi {
 			ReportDownloadVo downloadVo = JsonUtil
 				.toObject(val, ReportDownloadVo.class, getObjectMapper());
 			downloadVo.setStatus(DownloadStatus.BUILDED.getValue());
-			downloadVo.setLocation(getFileSrvPrefix() + downloadVo.getFileName());
+			downloadVo.setLocation(getFileSrvPrefix() + fileKey);
 			hashOps.put(uniqueCode, JsonUtil.toJSON(downloadVo, getObjectMapper()));
 		}
 		log.info("线程[{}]完成导出报表[{}]", threadName, fileName);
