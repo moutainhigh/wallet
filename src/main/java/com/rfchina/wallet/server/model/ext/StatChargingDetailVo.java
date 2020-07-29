@@ -7,8 +7,10 @@ import com.rfchina.wallet.server.msic.EnumYunst;
 import io.swagger.annotations.ApiModelProperty;
 import java.math.BigDecimal;
 import java.util.Optional;
+import lombok.Data;
 
-public class StatChargingDetailVo extends StatChargingDetail {
+@Data
+public class StatChargingDetailVo  {
 
 	@PoiColumn(idx = 0, title = "业务时间")
 	@ApiModelProperty("业务时间")
@@ -22,9 +24,17 @@ public class StatChargingDetailVo extends StatChargingDetail {
 	@ApiModelProperty("钱包订单号")
 	private String orderNo;
 
+	@ApiModelProperty(name="id", value = "id")
+	private Long id;
+
+	@ApiModelProperty(name="third_tunnel_fee", value = "第三方的通道手续费")
+	private Long thirdTunnelFee;
+
+	@ApiModelProperty(name="local_tunnel_fee", value = "本地的通道手续费")
 	private Long localTunnelFee;
 
-	private Long thirdTunnelFee;
+	@ApiModelProperty(name="method_name", value = "方法名")
+	private String methodName;
 
 	@PoiColumn(idx = 4, title = "本地手续费（元）")
 	@ApiModelProperty("本地的通道手续费")
@@ -49,7 +59,7 @@ public class StatChargingDetailVo extends StatChargingDetail {
 	@ApiModelProperty(name="event", value = "事件")
 	public String getEvent() {
 		EnumYunst.YunstMethodName name = EnumUtil
-			.parse(EnumYunst.YunstMethodName.class, super.getMethodName());
+			.parse(EnumYunst.YunstMethodName.class, getMethodName());
 		return name != null ? name.getValueName().replace("代收","支付")
 				.replace("代付","收入"): null;
 	}
