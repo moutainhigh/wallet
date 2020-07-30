@@ -507,7 +507,7 @@ public class SeniorPayService {
 
 			EBankHandler handler = handlerHelper.selectByTunnelType(collectOrder.getTunnelType());
 			WalletCollectResp result = handler
-				.collect(collectOrder, collect, collectInfos, payer, walletCollectMethod);
+				.collect(collectOrder, collect, collectInfos, payer, walletCollectMethod, jumpUrl);
 			// 签名密码验证参数
 			if (collect.getValidateType().byteValue() == BizValidateType.PASSWORD.getValue()) {
 				String signedParams = ((YunstBizHandler) handler)

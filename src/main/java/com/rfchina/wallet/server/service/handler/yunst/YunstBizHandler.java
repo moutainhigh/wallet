@@ -414,7 +414,7 @@ public class YunstBizHandler extends EBankHandler {
 	 */
 	public WalletCollectResp collect(WalletOrder order, WalletCollect collect,
 		List<WalletCollectInfo> clearInfos, WalletTunnel payer,
-		WalletCollectMethod walletCollectMethod) {
+		WalletCollectMethod walletCollectMethod, String jumpUrl) {
 
 		// 收款人
 		List<RecieveInfo> recievers = getRecievers(collect.getBudgetMode(),
@@ -434,7 +434,7 @@ public class YunstBizHandler extends EBankHandler {
 			.amount(order.getAmount())
 			.fee(0L)
 			.validateType(collect.getValidateType().longValue())
-			.frontUrl(null)
+			.frontUrl(jumpUrl)
 			.backUrl(configService.getYunstRecallPrefix() + UrlConstant.YUNST_ORDER_RECALL)
 			.orderExpireDatetime(expireTime)
 			.payMethod(getYunstMethodMap(methods, false))
