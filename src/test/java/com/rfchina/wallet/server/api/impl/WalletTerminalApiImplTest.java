@@ -14,15 +14,15 @@ public class WalletTerminalApiImplTest extends SpringApiTest {
 	@Autowired
 	private WalletTerminalApi walletTerminalApi;
 
-	@Test
-	public void bindTerminal() {
-		walletTerminalApi.bindTerminal(super.accessToken, "440000", "", "", "");
-	}
-
-	@Test
-	public void bindVspId() {
-		walletTerminalApi.bindVspId(super.accessToken, "440000", "", "", 0L, "", "");
-	}
+//	@Test
+//	public void bindTerminal() {
+//		walletTerminalApi.bindTerminal(super.accessToken, "440000", "", "", "");
+//	}
+//
+//	@Test
+//	public void bindVspId() {
+//		walletTerminalApi.bindVspId(super.accessToken, "440000", "", "", 0L, "", "");
+//	}
 
 	@Test
 	public void queryArea() {
