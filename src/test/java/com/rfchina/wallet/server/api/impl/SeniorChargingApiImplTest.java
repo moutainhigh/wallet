@@ -10,14 +10,14 @@ public class SeniorChargingApiImplTest extends SpringApiTest {
 	@Autowired
 	private SeniorChargingApi seniorChargingApi;
 
-	@Test
-	public void exportChargingDetail() {
-		seniorChargingApi
-			.exportChargingDetail(super.accessToken, "test.xlsx", "2020-01-01", "2020-09-01");
-		try {
-			Thread.sleep(60 * 1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
+//	@Test
+//	public void exportChargingDetail() {
+//		seniorChargingApi
+//			.exportChargingDetail(super.accessToken, "test.xlsx", "2020-01-01", "2020-09-01");
+//		try {
+//			Thread.sleep(60 * 1000);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
+//	}
 }

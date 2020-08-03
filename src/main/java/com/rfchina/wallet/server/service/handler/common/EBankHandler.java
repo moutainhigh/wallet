@@ -65,7 +65,7 @@ public abstract class EBankHandler {
 	 */
 	public WalletCollectResp collect(WalletOrder order, WalletCollect collect,
 		List<WalletCollectInfo> clearInfos, WalletTunnel payer,
-		WalletCollectMethod walletCollectMethod) {
+		WalletCollectMethod walletCollectMethod, String jumpUrl) {
 		throw new RuntimeException();
 	}
 
