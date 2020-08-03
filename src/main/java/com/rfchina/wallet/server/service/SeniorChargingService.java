@@ -17,20 +17,29 @@ import com.rfchina.wallet.domain.model.GatewayLogCriteria;
 import com.rfchina.wallet.domain.model.StatCharging;
 import com.rfchina.wallet.domain.model.StatChargingCriteria;
 import com.rfchina.wallet.domain.model.StatChargingDetail;
+import com.rfchina.wallet.domain.model.StatChargingDetail.StatChargingDetailBuilder;
 import com.rfchina.wallet.domain.model.StatChargingDetailCriteria;
+import com.rfchina.wallet.domain.model.StatChargingDetailCriteria.Criteria;
+import com.rfchina.wallet.domain.model.WalletCompany;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletOrderCriteria;
+import com.rfchina.wallet.domain.model.WalletPerson;
+import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.mapper.ext.BalanceTunnelDetailExtDao;
 import com.rfchina.wallet.server.mapper.ext.GatewayLogExtDao;
 import com.rfchina.wallet.server.mapper.ext.StatChargingDetailExtDao;
 import com.rfchina.wallet.server.mapper.ext.StatChargingExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletCompanyExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
+import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.model.ext.ChargingVo;
 import com.rfchina.wallet.server.model.ext.StatChargingDetailVo;
 import com.rfchina.wallet.server.model.ext.SumOfFeeVo;
 import com.rfchina.wallet.server.msic.EnumWallet.FeeConfigKey;
 import com.rfchina.wallet.server.msic.EnumYunst.YunstMethodName;
 import com.rfchina.wallet.server.msic.EnumYunst.YunstServiceName;
+import com.rfchina.wallet.server.service.handler.yunst.YunstBaseHandler.YunstMemberType;
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -68,6 +77,15 @@ public class SeniorChargingService {
 
 	@Autowired
 	private CacheService cacheService;
+
+	@Autowired
+	private WalletTunnelExtDao walletTunnelDao;
+
+	@Autowired
+	private WalletPersonExtDao walletPersonDao;
+
+	@Autowired
+	private WalletCompanyExtDao walletCompanyDao;
 
 	@Autowired
 	@Qualifier(value = "feeMap")
@@ -152,11 +170,24 @@ public class SeniorChargingService {
 			}, (gatewayLog) -> {
 
 				String key = "";
+				String name = null;
+
+				WalletTunnel tunnel = walletTunnelDao.selectByTunnelTypeAndBizUserId(
+					gatewayLog.getTunnelType().intValue(), gatewayLog.getBizUserId());
+				Long walletId = tunnel.getWalletId();
+				String bizUserId = tunnel.getBizUserId();
 				if (YunstMethodName.PERSON_VERIFY.getValue().equals(gatewayLog.getMethodName())) {
 					key = FeeConfigKey.YUNST_PERSON_AUDIT.getValue();
+					WalletPerson walletPerson = walletPersonDao
+						.selectByWalletId(tunnel.getWalletId());
+					name = walletPerson.getName();
+
 				} else if (YunstMethodName.COMPANY_VERIFY.getValue()
 					.equals(gatewayLog.getMethodName())) {
 					key = FeeConfigKey.YUNST_COMPANY_AUDIT.getValue();
+					WalletCompany walletCompany = walletCompanyDao
+						.selectByWalletId(tunnel.getWalletId());
+					name = walletCompany.getCompanyName();
 				}
 				ChargingConfig config = feeMap.get(key);
 				// 个人认证按调成功次数收费,企业认证按系统自动审核次数收费
@@ -174,6 +205,9 @@ public class SeniorChargingService {
 						.chargingType(config != null ? config.getType().byteValue() : null)
 						.chargingValue(config != null ? config.getChargingValue() : BigDecimal.ZERO)
 						.bizTime(gatewayLog.getInvokeTime())
+						.name(name)
+						.walletId(walletId)
+						.bizUserId(bizUserId)
 						.build();
 					statChargingDetailDao.insertSelective(detail);
 				}
@@ -198,8 +232,11 @@ public class SeniorChargingService {
 				return walletOrders;
 			}, (walletOrder) -> {
 
+				WalletTunnel tunnel = walletTunnelDao
+					.selectByWalletId(walletOrder.getWalletId(), walletOrder.getTunnelType());
 				ChargingVo chargingVo = BeanUtil.newInstance(walletOrder, ChargingVo.class);
-				StatChargingDetail detail = StatChargingDetail.builder()
+				StatChargingDetailBuilder builder = StatChargingDetail.builder();
+				builder
 					.tunnelType(tunnelType.getValue())
 					.serviceName(YunstServiceName.ORDER_SERVICE.getValue())
 					.methodName(chargingVo.getMethodName())
@@ -210,8 +247,22 @@ public class SeniorChargingService {
 					.chargingValue(chargingVo.getChargingValue())
 					.tunnelCount(chargingVo.getTunnelCount())
 					.bizTime(chargingVo.getTunnelSuccTime())
+					.walletId(tunnel.getWalletId())
+					.bizUserId(tunnel.getBizUserId())
 					.build();
-				statChargingDetailDao.insertSelective(detail);
+
+				if (YunstMemberType.COMPANY.getValue().longValue() == tunnel.getMemberType()) {
+					WalletCompany walletCompany = walletCompanyDao
+						.selectByWalletId(tunnel.getWalletId());
+					builder.name(walletCompany.getCompanyName());
+				} else if (YunstMemberType.PERSON.getValue().longValue() == tunnel
+					.getMemberType()) {
+					WalletPerson walletPerson = walletPersonDao
+						.selectByWalletId(tunnel.getWalletId());
+					builder.name(walletPerson.getName());
+				}
+
+				statChargingDetailDao.insertSelective(builder.build());
 				return walletOrder.getId();
 			});
 
@@ -338,7 +389,7 @@ public class SeniorChargingService {
 	}
 
 
-	public byte[] exportChargingDetail(String fileName, Date startTime, Date endTime) {
+	public byte[] exportChargingDetail(String fileName, Date startTime, Date endTime,List<String> methods) {
 
 		ExcelBean excelBean = ExcelFactory.build2007();
 		Sheet sheet = excelBean.creatSheet(fileName);
@@ -353,7 +404,11 @@ public class SeniorChargingService {
 			}
 			StatChargingDetailCriteria example = new StatChargingDetailCriteria();
 			example.setOrderByClause("id asc");
-			example.createCriteria()
+			Criteria criteria = example.createCriteria();
+			if(methods!= null && !methods.isEmpty()){
+				criteria.andMethodNameIn(methods);
+			}
+			criteria
 				.andBizTimeBetween(startTime, endTime)
 				.andDeletedEqualTo((byte) 0)
 				.andIdGreaterThan(maxId);
@@ -377,4 +432,6 @@ public class SeniorChargingService {
 		}
 
 	}
+
+
 }

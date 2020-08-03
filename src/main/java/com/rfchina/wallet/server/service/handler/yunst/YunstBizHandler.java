@@ -779,7 +779,7 @@ public class YunstBizHandler extends EBankHandler {
 			}
 			// 更新订单状态
 			walletOrderDao.updateByPrimaryKeySelective(order);
-			log.error("[订单更新] 订单[{}]：通道状态[{}][{}] 通道时间[{}]", order.getOrderNo(),
+			log.info("[订单更新] 订单[{}]：通道状态[{}][{}] 通道时间[{}]", order.getOrderNo(),
 				tunnelOrder.getOrderStatus(), tunnelOrder.getErrorMessage(),
 				tunnelOrder.getPayDatetime());
 

@@ -35,6 +35,7 @@ import com.rfchina.wallet.server.model.ext.WalletCollectResp;
 import com.rfchina.wallet.server.model.ext.WalletOrderEx;
 import com.rfchina.wallet.server.model.ext.WithdrawResp;
 import com.rfchina.wallet.server.msic.EnumWallet.BalanceFreezeMode;
+import com.rfchina.wallet.server.msic.RedisConstant;
 import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.SeniorBalanceService;
 import com.rfchina.wallet.server.service.SeniorPayService;
