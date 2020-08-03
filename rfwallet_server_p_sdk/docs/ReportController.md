@@ -26,6 +26,7 @@
     list: [ {
     biz_no:""  , //业务凭证号
     biz_time:""  , //业务时间
+    biz_user_id:""  , //业务用户标识
     charging_type:""  , //计费方式，1按次收费，2按比率收费
     charging_value:""  , //计费单价，计费比例或金额
     create_time:""  , //创建日期
@@ -34,11 +35,14 @@
     id:""  , //id
     local_tunnel_fee:""  , //
     method_name:""  , //方法名
+    name:""  , //用户名
     order_no:""  , //钱包订单号
     service_name:""  , //服务名
     third_tunnel_fee:""  , //
     tunnel_count:""  , //通道次数
-    tunnel_type:""   //渠道类型。1: 浦发银企直连，2：通联云商通
+    tunnel_order_no:""  , //渠道订单号
+    tunnel_type:""  , //渠道类型。1: 浦发银企直连，2：通联云商通
+    wallet_id:""   //钱包id
 }  ]  , 
     page_limit:""  , //
     page_num:""  , //
@@ -179,29 +183,36 @@
 {
   "code": 1001,//状态码
   "msg": ""//消息
-   , "data":  {
-    list: [ {
-    biz_no:""  , //业务凭证号
-    biz_time:""  , //业务时间
-    charging_type:""  , //计费方式，1按次收费，2按比率收费
-    charging_value:""  , //计费单价，计费比例或金额
-    create_time:""  , //创建日期
-    deleted:""  , //是否删除 0：正常 1：已删除
-    event:""  , //事件
-    id:""  , //id
-    local_tunnel_fee:""  , //
-    method_name:""  , //方法名
-    order_no:""  , //钱包订单号
-    service_name:""  , //服务名
-    third_tunnel_fee:""  , //
-    tunnel_count:""  , //通道次数
-    tunnel_type:""   //渠道类型。1: 浦发银企直连，2：通联云商通
-}  ]  , 
-    page_limit:""  , //
-    page_num:""  , //
-    total:""  , //
-    total_page:""   //
-}  
+  
+}
+```
+
+###  高级钱包-导出余额明细
+
+请求地址: /wallet_server/v1/m/senior/wallet/export_order_detail
+
+请求类型: POST
+
+请求参数:
+
+
+| 参数名 | 是否必须 | 描述 |
+|:-- |:-- |:--   |
+|access_token|是|access_token|
+|begin_time|是|交易时间开始|
+|end_time|是|交易时间结束|
+|file_name|是|文件名称|
+|unique_code|是|唯一码|
+|wallet_id|是|钱包id|
+|status|否|状态|
+|trade_type|否|交易类型|
+
+返回数据
+```
+{
+  "code": 1001,//状态码
+  "msg": ""//消息
+  
 }
 ```
 

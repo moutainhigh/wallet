@@ -297,6 +297,7 @@ public class UrlConstant {
 	 * 高级钱包余额明细
 	 */
 	public static final String WALLET_SENIOR_ORDER_DETAIL= VERSION + "/m/senior/wallet/order_detail";
+	public static final String WALLET_EXPORT_ORDER_DETAIL= VERSION + "/m/senior/wallet/export_order_detail";
 	/**
 	 * 钱包配置-获取全局配置
 	 */

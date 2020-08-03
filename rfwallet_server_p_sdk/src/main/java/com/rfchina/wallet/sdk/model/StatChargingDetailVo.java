@@ -20,6 +20,9 @@ public class StatChargingDetailVo  {
     @ApiModelProperty("业务时间")
     private String bizTime ;
 
+    @ApiModelProperty("业务用户标识")
+    private String bizUserId ;
+
     @ApiModelProperty("计费方式，1按次收费，2按比率收费")
     private Integer chargingType ;
 
@@ -44,6 +47,9 @@ public class StatChargingDetailVo  {
     @ApiModelProperty("方法名")
     private String methodName ;
 
+    @ApiModelProperty("用户名")
+    private String name ;
+
     @ApiModelProperty("钱包订单号")
     private String orderNo ;
 
@@ -56,8 +62,14 @@ public class StatChargingDetailVo  {
     @ApiModelProperty("通道次数")
     private Long tunnelCount ;
 
+    @ApiModelProperty("渠道订单号")
+    private String tunnelOrderNo ;
+
     @ApiModelProperty("渠道类型。1: 浦发银企直连，2：通联云商通")
     private Integer tunnelType ;
+
+    @ApiModelProperty("钱包id")
+    private Long walletId ;
 
 
 }

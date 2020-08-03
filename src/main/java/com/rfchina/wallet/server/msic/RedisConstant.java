@@ -56,5 +56,8 @@ public class RedisConstant {
 
 
 	/* 缓存 */
-	public final static String DOWNLOAD_OBJECT_KEY = "platform:report:download";
+	public final static String PREX_MANAGER_DOWNLOAD_KEY = "platform:report:download";
+
+
+	public final static String PREX_WALLET_REPORT_DOWNLOAD = "platform:wallet:report:download";
 }

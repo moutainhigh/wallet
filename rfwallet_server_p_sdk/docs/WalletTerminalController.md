@@ -36,6 +36,7 @@
 | 参数名 | 是否必须 | 描述 |
 |:-- |:-- |:--   |
 |access_token|是|access_token|
+|app_id|是|通联AppId|
 |area_code|是|地区码|
 |creator_id|是|创建人id|
 |creator_name|是|创建人名称|

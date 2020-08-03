@@ -1,21 +1,30 @@
 package com.rfchina.wallet.server.service;
 
+import com.rfchina.biztools.functional.MaxIdIterator;
+import com.rfchina.platform.biztool.excel.ExcelBean;
+import com.rfchina.platform.biztool.excel.ExcelFactory;
+import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EmailUtil;
 import com.rfchina.wallet.domain.misc.EnumDef;
 import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
+import com.rfchina.wallet.server.model.ext.StatChargingDetailVo;
+import com.rfchina.wallet.server.model.ext.WalletOrderExcelVo;
+import java.io.ByteArrayOutputStream;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author liujiecong
@@ -25,6 +34,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class WalletOrderService {
+
 	@Autowired
 	private WalletOrderExtDao walletOrderExtDao;
 	@Autowired
@@ -32,24 +42,27 @@ public class WalletOrderService {
 	@Autowired
 	private JavaMailSender javaMailSender;
 
+
 	/**
 	 * 结算不成功的订单发送邮件通知
 	 *
 	 * @param orderStartDate 订单开始时间
-	 * @param orderEndDate   订单结束时间
+	 * @param orderEndDate 订单结束时间
 	 */
 	public void failedSettleOrderSendMail(Date orderStartDate, Date orderEndDate) {
 		String startDateStr = DateUtil.formatDate(
-				orderStartDate == null ? DateUtils.addDays(new Date(), -7) : orderStartDate,
-				DateUtil.STANDARD_DTAETIME_PATTERN);
+			orderStartDate == null ? DateUtils.addDays(new Date(), -7) : orderStartDate,
+			DateUtil.STANDARD_DTAETIME_PATTERN);
 
-		String endDateStr = DateUtil.formatDate(orderEndDate == null ? DateUtils.addDays(new Date(), -2) :
-						orderEndDate,
+		String endDateStr = DateUtil
+			.formatDate(orderEndDate == null ? DateUtils.addDays(new Date(), -2) :
+					orderEndDate,
 				DateUtil.STANDARD_DTAETIME_PATTERN);
 
 		log.info("[发送结算失败订单邮件通知] 订单时间[{}###{}] 开始", startDateStr, endDateStr);
 		//获取orderDate当天和之前结算不成功的订单
-		List<WalletOrder> walletOrderList = walletOrderExtDao.selectSattleFailedOrder(startDateStr, endDateStr);
+		List<WalletOrder> walletOrderList = walletOrderExtDao
+			.selectSattleFailedOrder(startDateStr, endDateStr);
 		if (CollectionUtils.isEmpty(walletOrderList)) {
 			log.info("[发送结算失败订单邮件通知] 订单时间[{}###{}]: 订单列表为空", startDateStr, endDateStr);
 			return;
@@ -58,16 +71,17 @@ public class WalletOrderService {
 		//拼接邮件内容
 		StringBuilder sb = new StringBuilder(128);
 
-		sb.append("<table align=\"left\"><tr><th style=\"padding: 0 40px\" align=\"left\">申请单号</th>")
-				.append("<th style=\"padding: 0 40px\" align=\"left\">单据状态</th></tr>");
+		sb.append(
+			"<table align=\"left\"><tr><th style=\"padding: 0 40px\" align=\"left\">申请单号</th>")
+			.append("<th style=\"padding: 0 40px\" align=\"left\">单据状态</th></tr>");
 
 		walletOrderList.forEach(walletOrder -> sb.append("<tr><td style=\"padding: 0 40px\">")
-				.append(walletOrder.getOrderNo())
-				.append("</td>")
-				.append("<td style=\"padding: 0 40px\">")
-				.append(transOrderStatusName(walletOrder.getStatus()))
-				.append("</td>")
-				.append("</tr>"));
+			.append(walletOrder.getOrderNo())
+			.append("</td>")
+			.append("<td style=\"padding: 0 40px\">")
+			.append(transOrderStatusName(walletOrder.getStatus()))
+			.append("</td>")
+			.append("</tr>"));
 		sb.append("</table>");
 
 		//发送通知邮件
@@ -80,7 +94,7 @@ public class WalletOrderService {
 		}
 		//更新数据库
 		walletOrderExtDao.batchUpdateNotifiedByIds(
-				walletOrderList.stream().map(WalletOrder::getId).collect(Collectors.toList()));
+			walletOrderList.stream().map(WalletOrder::getId).collect(Collectors.toList()));
 
 		log.info("[发送结算失败订单邮件通知] 订单时间[{}###{}] 成功", startDateStr, endDateStr);
 	}
@@ -93,7 +107,7 @@ public class WalletOrderService {
 	private void sendNotifyMail(String content) throws Exception {
 		// 发送通知邮件
 		EmailUtil.EmailBody emailBody = new EmailUtil.EmailBody("【请关注】存在转账单据状态不是结算成功", content,
-				configService.getEmailSender(), configService.getEmailSender());
+			configService.getEmailSender(), configService.getEmailSender());
 		String notifyContract = configService.getNotifyContract();
 		if (StringUtils.isBlank(notifyContract)) {
 			return;
@@ -101,15 +115,13 @@ public class WalletOrderService {
 		for (String email : notifyContract.split(",")) {
 			emailBody.addReceiver(email, email);
 		}
-		EmailUtil.send(emailBody, () -> javaMailSender.createMimeMessage(), (m) -> javaMailSender.send(m));
+		EmailUtil.send(emailBody, () -> javaMailSender.createMimeMessage(),
+			(m) -> javaMailSender.send(m));
 
 	}
 
 	/**
 	 * 转换状态值
-	 *
-	 * @param value
-	 * @return
 	 */
 	private String transOrderStatusName(Byte value) {
 		String name = StringUtils.EMPTY;
@@ -122,4 +134,38 @@ public class WalletOrderService {
 		return name;
 	}
 
+	public byte[] exportOrderDetail(String fileName, Long walletId, Byte tradeType, Byte status,
+		Date beginTime, Date endTime) {
+
+		ExcelBean excelBean = ExcelFactory.build2007();
+		Sheet sheet = excelBean.creatSheet(fileName);
+		excelBean.addTitle(sheet, 0, StatChargingDetailVo.class);
+
+		AtomicInteger cursor = new AtomicInteger(1);
+		new MaxIdIterator<WalletOrderExcelVo>().apply((maxId) -> {
+
+			List<WalletOrder> data = walletOrderExtDao.selectByMaxId(maxId, walletId,
+				Arrays.asList(tradeType), Arrays.asList(status), beginTime, endTime);
+
+			return data.stream()
+				.map(item -> {
+					WalletOrderExcelVo vo = BeanUtil.newInstance(item, WalletOrderExcelVo.class);
+					vo.setOwnerId(walletId);
+					return vo;
+				}).collect(Collectors.toList());
+		}, (row) -> {
+			excelBean.addData(sheet, cursor.getAndIncrement(), Arrays.asList(row));
+			return row.getId();
+		});
+
+		try {
+			ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+			excelBean.getWorkbook().write(byteOut);
+
+			return byteOut.toByteArray();
+		} catch (Exception e) {
+			return new byte[0];
+		}
+
+	}
 }

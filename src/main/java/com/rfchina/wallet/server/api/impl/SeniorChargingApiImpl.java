@@ -103,7 +103,7 @@ public class SeniorChargingApiImpl implements SeniorChargingApi {
 		String fileKey = "report/" + fileName;
 		fileServer
 			.upload(fileKey, bytes, "application/octet-stream", EnumFileAcl.PUBLIC_READ, null);
-		BoundHashOperations hashOps = redisTemplate.boundHashOps(RedisConstant.DOWNLOAD_OBJECT_KEY);
+		BoundHashOperations hashOps = redisTemplate.boundHashOps(RedisConstant.PREX_MANAGER_DOWNLOAD_KEY);
 		if (hashOps.hasKey(uniqueCode)) {
 			String val = (String) hashOps.get(uniqueCode);
 			ReportDownloadVo downloadVo = JsonUtil

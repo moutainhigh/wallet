@@ -8,7 +8,6 @@ import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletOrder;
-import com.rfchina.wallet.domain.model.WalletTerminal;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.api.SeniorWalletApi;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq.CompanyBasicInfo;
@@ -251,30 +250,9 @@ public class SeniorWalletController {
 	}
 
 
-	@ApiOperation("高级钱包-余额明细")
-	@PostMapping(UrlConstant.WALLET_SENIOR_ORDER_DETAIL)
-	public ResponseValue<Pagination<WalletOrder>> seniorOrderDetail(
-		@RequestParam("access_token") String accessToken,
-		@ApiParam(value = "钱包id", required = false) @RequestParam(value = "wallet_id", required = false) Long walletId,
-		@ApiParam(value = "交易时间开始", required = false) @RequestParam(value = "from_time", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd")
-			Date fromTime,
-		@ApiParam(value = "交易时间结束", required = false) @RequestParam(value = "to_time", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd")
-			Date toTime,
-		@ApiParam(value = "交易类型", required = false) @RequestParam(value = "trade_type", required = false) Byte tradeType,
-		@ApiParam(value = "状态", required = false) @RequestParam(value = "status", required = false) Byte status,
-		@ApiParam(value = "每页限制", required = false) @RequestParam(value = "limit") int limit,
-		@ApiParam(value = "起始页偏移量", required = false) @RequestParam(value = "offset") int offset,
-		@ApiParam(value = "是否统计", required = false) @RequestParam(value = "stat", required = false) Boolean stat) {
-		if (Objects.nonNull(fromTime)) {
-			toTime = Objects.isNull(toTime) ? new Date()
-				: fromTime.compareTo(toTime) == 0 ? DateUtil
-					.addSecs(DateUtil.addDate2(toTime, 1), -1) : toTime;
-		}
-		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS,
-			seniorWalletApi
-				.queryWalletOrderDetail(accessToken, walletId, fromTime, toTime, tradeType, status,
-					limit, offset, stat));
-	}
+
+
+
 
 
 	@ApiOperation("高级钱包-线下确认更新企业信息")
