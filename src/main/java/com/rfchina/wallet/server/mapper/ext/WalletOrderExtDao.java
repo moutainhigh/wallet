@@ -220,7 +220,7 @@ public interface WalletOrderExtDao extends WalletOrderDao {
 		"and a.create_time <![CDATA[>=]]> #{fromTime}",
 		"</if>",
 		"<if test='toTime != null'>",
-		"and a.create_time <![CDATA[<=]]> #{toTime}",
+		"and a.create_time <![CDATA[<]]> #{toTime}",
 		"</if>",
 		"</where>",
 		"order by a.create_time desc,a.id desc limit 1000 offset 0 ",
