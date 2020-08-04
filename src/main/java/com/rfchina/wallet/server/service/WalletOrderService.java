@@ -169,7 +169,7 @@ public class WalletOrderService {
 
 		ExcelBean excelBean = ExcelFactory.build2007();
 		Sheet sheet = excelBean.creatSheet(fileName);
-		excelBean.addTitle(sheet, 0, StatChargingDetailVo.class);
+		excelBean.addTitle(sheet, 0, WalletOrderExcelVo.class);
 
 		AtomicInteger cursor = new AtomicInteger(1);
 		new MaxIdIterator<WalletOrderExcelVo>().apply((maxId) -> {
