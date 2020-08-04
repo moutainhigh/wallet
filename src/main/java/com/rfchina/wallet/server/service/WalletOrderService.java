@@ -189,7 +189,7 @@ public class WalletOrderService {
 			ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
 			excelBean.getWorkbook().write(byteOut);
 
-			String fileKey = String.format("report/temp/%s/%s/", walletId, fileName);
+			String fileKey = String.format("report/temp/%s/%s", walletId, fileName);
 			fileServer
 				.upload(fileKey, byteOut.toByteArray(), "application/octet-stream",
 					EnumFileAcl.PUBLIC_READ, null);
