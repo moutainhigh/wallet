@@ -1,16 +1,15 @@
 package com.rfchina.wallet.server.model.ext;
 
 import com.rfchina.platform.biztool.excel.PoiColumn;
+import com.rfchina.wallet.domain.misc.EnumDef.OrderType;
 import io.swagger.annotations.ApiModelProperty;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Date;
 import lombok.Data;
 
 @Data
 public class WalletOrderExcelVo {
-
-	@ApiModelProperty(name="id", value = "id")
-	private Long id;
 
 	@PoiColumn(idx = 0, title = "时间")
 	@ApiModelProperty(name = "start_time", value = "开始时间")
@@ -20,16 +19,7 @@ public class WalletOrderExcelVo {
 	@ApiModelProperty(name = "tunnel_order_no", value = "渠道订单号")
 	private String tunnelOrderNo;
 
-	@ApiModelProperty(name = "type", value = "类型，1：财务结算，2：充值，3：提现，4：代收，5：代付，6：退款，7：消费, 8：代扣,")
-	private Byte type;
-
-	@ApiModelProperty("钱包id")
-	private Long walletId;
-
-	@ApiModelProperty("ownerId")
-	private Long ownerId;
-
-	@PoiColumn(idx =2, title = "类型")
+	@PoiColumn(idx = 2, title = "类型")
 	private String getOrderType() {
 		switch (type) {
 			case 1:
@@ -56,10 +46,6 @@ public class WalletOrderExcelVo {
 		}
 	}
 
-	@ApiModelProperty(name = "status", value = "交易状态。 2：进行中，3：交易成功，4：交易失败，5：交易关闭（超时或其他）")
-	private Byte status;
-
-
 	@PoiColumn(idx = 3, title = "状态")
 	private String getOrderStatus() {
 		switch (status) {
@@ -76,23 +62,43 @@ public class WalletOrderExcelVo {
 		}
 	}
 
-	@ApiModelProperty(name = "amount", value = "金额")
-	private Long amount;
-
 	@PoiColumn(idx = 4, title = "金额")
 	private String getOrderAmount() {
 		String prefix;
-		if (type.equals(3) || type.equals(4) || type.equals(7) || (type.equals(8)
-			&& walletId.longValue() == ownerId)) {
+		if (type.byteValue() == OrderType.WITHDRAWAL.getValue().byteValue()
+			|| type.byteValue() == OrderType.COLLECT.getValue().byteValue()
+			|| type.byteValue() == OrderType.CONSUME.getValue().byteValue()
+			|| (type.byteValue() == OrderType.DEDUCTION.getValue().byteValue()
+			&& walletId.longValue() == ownerId.longValue())) {
 			prefix = "-";
 		} else {
 			prefix = "+";
 		}
-		return prefix + new BigDecimal(amount).divide(new BigDecimal(100));
+		BigDecimal orderAmount = BigDecimal.valueOf(amount)
+			.divide(BigDecimal.valueOf(100))
+			.setScale(2, RoundingMode.DOWN);
+		return prefix + orderAmount.toString();
 	}
-
 
 	@PoiColumn(idx = 5, title = "说明")
 	@ApiModelProperty(name = "note", value = "附言,长度由通道确定")
 	private String note;
+
+	@ApiModelProperty(name = "id", value = "id")
+	private Long id;
+
+	@ApiModelProperty(name = "type", value = "类型，1：财务结算，2：充值，3：提现，4：代收，5：代付，6：退款，7：消费, 8：代扣,")
+	private Byte type;
+
+	@ApiModelProperty("钱包id")
+	private Long walletId;
+
+	@ApiModelProperty("ownerId")
+	private Long ownerId;
+
+	@ApiModelProperty(name = "status", value = "交易状态。 2：进行中，3：交易成功，4：交易失败，5：交易关闭（超时或其他）")
+	private Byte status;
+
+	@ApiModelProperty(name = "amount", value = "金额")
+	private Long amount;
 }
