@@ -1,7 +1,6 @@
 package com.rfchina.wallet.sdk.model;
 
 import io.swagger.annotations.ApiModelProperty;
-import java.math.BigDecimal;
 import lombok.Data;
 import java.util.List;
 import java.util.Map;
@@ -20,56 +19,23 @@ public class StatChargingDetailVo  {
     @ApiModelProperty("业务时间")
     private String bizTime ;
 
-    @ApiModelProperty("业务用户标识")
-    private String bizUserId ;
-
-    @ApiModelProperty("计费方式，1按次收费，2按比率收费")
-    private Integer chargingType ;
-
-    @ApiModelProperty("计费单价，计费比例或金额")
-    private BigDecimal chargingValue ;
-
-    @ApiModelProperty("创建日期")
-    private String createTime ;
-
-    @ApiModelProperty("是否删除 0：正常 1：已删除")
-    private Integer deleted ;
-
     @ApiModelProperty("事件")
     private String event ;
 
     @ApiModelProperty("id")
     private Long id ;
 
-    @ApiModelProperty("")
+    @ApiModelProperty("本地的通道手续费")
     private Long localTunnelFee ;
 
     @ApiModelProperty("方法名")
     private String methodName ;
 
-    @ApiModelProperty("用户名")
-    private String name ;
-
     @ApiModelProperty("钱包订单号")
     private String orderNo ;
 
-    @ApiModelProperty("服务名")
-    private String serviceName ;
-
-    @ApiModelProperty("")
+    @ApiModelProperty("第三方的通道手续费")
     private Long thirdTunnelFee ;
-
-    @ApiModelProperty("通道次数")
-    private Long tunnelCount ;
-
-    @ApiModelProperty("渠道订单号")
-    private String tunnelOrderNo ;
-
-    @ApiModelProperty("渠道类型。1: 浦发银企直连，2：通联云商通")
-    private Integer tunnelType ;
-
-    @ApiModelProperty("钱包id")
-    private Long walletId ;
 
 
 }

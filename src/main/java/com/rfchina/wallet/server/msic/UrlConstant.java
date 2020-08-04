@@ -351,9 +351,9 @@ public class UrlConstant {
 	public static final String REPORT_EXPORT_ORDER_DETAIL= VERSION + "/m/report/export_order_detail";
 
 	/**
-	 * 导出通联对账文件
+	 * 导出通道明细文件
 	 */
-	public static final String REPORT_TUNNEL_BALANCE_EXPORT = VERSION + "/m/report/export_tunnel_balance";
+	public static final String REPORT_TUNNEL_DETAIL_EXPORT = VERSION + "/m/report/export_tunnel_detail";
 
 	/**
 	 * 地区绑定终端

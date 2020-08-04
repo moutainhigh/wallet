@@ -1,5 +1,6 @@
 package com.rfchina.wallet.server.service.report;
 
+import com.rfchina.wallet.server.model.ext.StatChargingDetailVo;
 import com.rfchina.wallet.server.model.ext.VerifyDetailExcelVo;
 import com.rfchina.wallet.server.model.ext.WithdrawDetailExcelVo;
 import com.rfchina.wallet.server.msic.EnumWallet.ExportType;
@@ -41,6 +42,21 @@ public class ReportFactory {
 						YunstMethodName.COMPANY_VERIFY.getValue(),
 						YunstMethodName.PERSON_VERIFY.getValue()
 					);
+				}
+
+				public String getFilePrefix() {
+					return "report/manager/";
+				}
+			};
+		} else if (ExportType.CHARGING.getValue().byteValue() == exportType.byteValue()) {
+			return new ReportBean() {
+
+				public Class getReportClass() {
+					return StatChargingDetailVo.class;
+				}
+
+				public List<String> getMethodArrays() {
+					return Arrays.asList();
 				}
 
 				public String getFilePrefix() {

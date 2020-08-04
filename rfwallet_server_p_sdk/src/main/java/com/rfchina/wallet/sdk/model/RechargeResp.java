@@ -30,7 +30,7 @@ public class RechargeResp  {
     private Integer chargingType ;
 
     @ApiModelProperty("计费单价，计费比例或金额")
-    private BigDecimal chargingValue ;
+    protected BigDecimal chargingValue ;
 
     @ApiModelProperty("创建日期")
     private String createTime ;

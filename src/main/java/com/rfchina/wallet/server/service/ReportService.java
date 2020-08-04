@@ -15,6 +15,7 @@ import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.misc.EnumDef.DownloadStatus;
 import com.rfchina.wallet.domain.model.StatChargingDetail;
 import com.rfchina.wallet.domain.model.StatChargingDetailCriteria;
+import com.rfchina.wallet.domain.model.StatChargingDetailCriteria.Criteria;
 import com.rfchina.wallet.server.mapper.ext.StatChargingDetailExtDao;
 import com.rfchina.wallet.server.model.ext.ReportDownloadVo;
 import com.rfchina.wallet.server.msic.RedisConstant;
@@ -48,7 +49,7 @@ public class ReportService {
 	private RedisTemplate redisTemplate;
 
 	@Async
-	public void exportTunnelBalance(String fileName, Byte exportType, String uniqueCode,
+	public void exportTunnelDetail(String fileName, Byte exportType, String uniqueCode,
 		String startTime, String endTime) {
 
 		Date startTime2 = DateUtil.parse(startTime, DateUtil.STANDARD_DTAE_PATTERN);
@@ -68,11 +69,13 @@ public class ReportService {
 
 			StatChargingDetailCriteria example = new StatChargingDetailCriteria();
 			example.setOrderByClause("id asc");
-			example.createCriteria()
+			Criteria criteria = example.createCriteria()
 				.andBizTimeBetween(startTime2, endTime2)
 				.andDeletedEqualTo((byte) 0)
-				.andIdGreaterThan(maxId)
-				.andMethodNameIn(reportBean.getMethodArrays());
+				.andIdGreaterThan(maxId);
+			if (!reportBean.getMethodArrays().isEmpty()) {
+				criteria.andMethodNameIn(reportBean.getMethodArrays());
+			}
 			return statChargingDetailDao
 				.selectByExampleWithRowbounds(example, new RowBounds(0, 5000));
 		}, (row) -> {
@@ -90,7 +93,7 @@ public class ReportService {
 			fileServer.upload(fileKey, byteOut.toByteArray(),
 				"application/octet-stream", EnumFileAcl.PUBLIC_READ, null);
 			BoundHashOperations hashOps = redisTemplate
-				.boundHashOps(RedisConstant.DOWNLOAD_OBJECT_KEY);
+				.boundHashOps(RedisConstant.PREX_MANAGER_DOWNLOAD_KEY);
 			if (hashOps.hasKey(uniqueCode)) {
 				String val = (String) hashOps.get(uniqueCode);
 				ReportDownloadVo downloadVo = JsonUtil

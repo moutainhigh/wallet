@@ -19,7 +19,7 @@ public class ReportApiImpl implements ReportApi {
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
-	public void exportTunnelBalance(
+	public void exportTunnelDetail(
 		@ParamValid(nullable = false) String accessToken,
 		@ParamValid(nullable = false) String fileName,
 		@ParamValid(nullable = false) Byte exportType,
@@ -29,7 +29,7 @@ public class ReportApiImpl implements ReportApi {
 	) {
 
 		reportService
-			.exportTunnelBalance(fileName, exportType, uniqueCode,startTime, endTime);
+			.exportTunnelDetail(fileName, exportType, uniqueCode,startTime, endTime);
 	}
 
 
