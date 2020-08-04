@@ -6,9 +6,12 @@ import com.rfchina.mch.sdk.model.ChargingConfig;
 import com.rfchina.platform.biztool.excel.ExcelBean;
 import com.rfchina.platform.biztool.excel.ExcelFactory;
 import com.rfchina.platform.biztools.CacheHashMap;
+import com.rfchina.platform.biztools.fileserver.EnumFileAcl;
 import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.platform.common.utils.BeanUtil;
 import com.rfchina.platform.common.utils.DateUtil;
+import com.rfchina.platform.common.utils.JsonUtil;
+import com.rfchina.wallet.domain.misc.EnumDef.DownloadStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderType;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
@@ -34,11 +37,13 @@ import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
 import com.rfchina.wallet.server.model.ext.ChargingVo;
+import com.rfchina.wallet.server.model.ext.ReportDownloadVo;
 import com.rfchina.wallet.server.model.ext.StatChargingDetailVo;
 import com.rfchina.wallet.server.model.ext.SumOfFeeVo;
 import com.rfchina.wallet.server.msic.EnumWallet.FeeConfigKey;
 import com.rfchina.wallet.server.msic.EnumYunst.YunstMethodName;
 import com.rfchina.wallet.server.msic.EnumYunst.YunstServiceName;
+import com.rfchina.wallet.server.msic.RedisConstant;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBaseHandler.YunstMemberType;
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
@@ -54,6 +59,7 @@ import org.apache.ibatis.session.RowBounds;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -389,7 +395,7 @@ public class SeniorChargingService {
 	}
 
 
-	public byte[] exportChargingDetail(String fileName, Date startTime, Date endTime,List<String> methods) {
+	public byte[] exportChargingDetail(String fileName, Date startTime, Date endTime) {
 
 		ExcelBean excelBean = ExcelFactory.build2007();
 		Sheet sheet = excelBean.creatSheet(fileName);
@@ -405,9 +411,6 @@ public class SeniorChargingService {
 			StatChargingDetailCriteria example = new StatChargingDetailCriteria();
 			example.setOrderByClause("id asc");
 			Criteria criteria = example.createCriteria();
-			if(methods!= null && !methods.isEmpty()){
-				criteria.andMethodNameIn(methods);
-			}
 			criteria
 				.andBizTimeBetween(startTime, endTime)
 				.andDeletedEqualTo((byte) 0)
@@ -432,6 +435,5 @@ public class SeniorChargingService {
 		}
 
 	}
-
 
 }

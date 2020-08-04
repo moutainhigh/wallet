@@ -955,4 +955,24 @@ public class EnumWallet {
 			return value;
 		}
 	}
+
+	public enum ExportType implements Valuable<Byte> {
+		VERIFY((byte) 1, "实名"),
+		ORDER((byte) 2, "订单"),
+		ALL((byte) 3, "所有"),
+		;
+
+		private Byte value;
+		private String valueName;
+
+		ExportType(Byte value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Byte getValue() {
+			return value;
+		}
+	}
 }

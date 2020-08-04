@@ -337,9 +337,9 @@ public class UrlConstant {
 	public static final String REPORT_CHARGING_DETAIL_EXPORT = VERSION + "/m/report/export_charging_detail";
 
 	/**
-	 * 通联对账-认证对账
+	 * 导出通联对账文件
 	 */
-	public static final String REPORT_VERIFY_EXPORT = VERSION + "/m/report/export_verify";
+	public static final String REPORT_VERIFY_EXPORT = VERSION + "/m/report/export_";
 
 	/**
 	 * 手续费重做

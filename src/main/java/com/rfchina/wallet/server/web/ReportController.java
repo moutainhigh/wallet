@@ -6,6 +6,7 @@ import com.rfchina.platform.common.misc.ResponseValue;
 import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.domain.model.StatCharging;
+import com.rfchina.wallet.server.api.ReportApi;
 import com.rfchina.wallet.server.api.SeniorChargingApi;
 import com.rfchina.wallet.server.model.ext.StatChargingDetailVo;
 import com.rfchina.wallet.server.msic.UrlConstant;
@@ -24,6 +25,9 @@ public class ReportController {
 
 	@Autowired
 	private SeniorChargingApi seniorChargingApi;
+
+	@Autowired
+	private ReportApi reportApi;
 
 	@ApiOperation("手续费报表")
 	@PostMapping(UrlConstant.REPORT_CHARGING_QUERY)
@@ -93,7 +97,7 @@ public class ReportController {
 
 
 
-	@ApiOperation("通联对账-导出认证对账")
+	@ApiOperation("通联对账-导出通联对账文件")
 	@PostMapping(UrlConstant.REPORT_VERIFY_EXPORT)
 	public ResponseValue exportVerify(
 		@ApiParam(name = "access_token", value = "访问令牌", required = true) @RequestParam("access_token") String accessToken,
@@ -103,7 +107,7 @@ public class ReportController {
 		@ApiParam(name = "end_time", value = "结束时间", required = true) @RequestParam("end_time") @DateTimeFormat(pattern = DateUtil.STANDARD_DTAETIME_PATTERN) String endTime
 	){
 
-		seniorChargingApi
+		reportApi
 			.exportVerifyDetail(accessToken, fileName, uniqueCode, startTime, endTime);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
