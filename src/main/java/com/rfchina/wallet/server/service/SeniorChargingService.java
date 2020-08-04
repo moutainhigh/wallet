@@ -416,11 +416,7 @@ public class SeniorChargingService {
 
 		AtomicInteger cursor = new AtomicInteger(1);
 		new MaxIdIterator<StatChargingDetailVo>().apply((maxId) -> {
-			try {
-				Thread.sleep(20L);
-			} catch (Exception e) {
-				log.error("", e);
-			}
+
 			StatChargingDetailCriteria example = new StatChargingDetailCriteria();
 			example.setOrderByClause("id asc");
 			Criteria criteria = example.createCriteria();

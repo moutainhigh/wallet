@@ -8,6 +8,7 @@ import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.domain.model.StatCharging;
 import com.rfchina.wallet.server.api.ReportApi;
 import com.rfchina.wallet.server.api.SeniorChargingApi;
+import com.rfchina.wallet.server.api.SeniorOrderApi;
 import com.rfchina.wallet.server.model.ext.StatChargingDetailVo;
 import com.rfchina.wallet.server.msic.UrlConstant;
 import io.swagger.annotations.Api;
@@ -28,6 +29,9 @@ public class ReportController {
 
 	@Autowired
 	private ReportApi reportApi;
+
+	@Autowired
+	private SeniorOrderApi seniorOrderApi;
 
 	@ApiOperation("手续费报表")
 	@PostMapping(UrlConstant.REPORT_CHARGING_QUERY)
@@ -60,7 +64,7 @@ public class ReportController {
 
 	@ApiOperation("生成手续费报表")
 	@PostMapping(UrlConstant.REPORT_CHARGING_DETAIL_EXPORT)
-	public ResponseValue<Pagination<StatChargingDetailVo>> exportChargingDetail(
+	public ResponseValue exportChargingDetail(
 		@ApiParam(name = "access_token", value = "访问令牌", required = true) @RequestParam("access_token") String accessToken,
 		@ApiParam(name = "file_name", value = "文件名称", required = true) @RequestParam("file_name") String fileName,
 		@ApiParam(name = "unique_code", value = "唯一码", required = true) @RequestParam("unique_code") String uniqueCode,
@@ -95,6 +99,23 @@ public class ReportController {
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, statCharging);
 	}
 
+	@ApiOperation("高级钱包-导出余额明细")
+	@PostMapping(UrlConstant.REPORT_EXPORT_ORDER_DETAIL)
+	public ResponseValue exportOrderDetail(
+		@RequestParam("access_token") String accessToken,
+		@ApiParam(value = "钱包id", required = true) @RequestParam(value = "wallet_id", required = true) Long walletId,
+		@ApiParam(value = "交易时间开始", required = true) @RequestParam(value = "begin_time", required = true) String beginTime,
+		@ApiParam(value = "交易时间结束", required = true) @RequestParam(value = "end_time", required = true) String endTime,
+		@ApiParam(value = "交易类型", required = false) @RequestParam(value = "trade_type", required = false) Byte tradeType,
+		@ApiParam(value = "状态", required = false) @RequestParam(value = "status", required = false) Byte status,
+		@ApiParam(value = "文件名称", required = true) @RequestParam("file_name") String fileName,
+		@ApiParam(value = "唯一码", required = true) @RequestParam("unique_code") String uniqueCode
+	) {
+
+		seniorOrderApi.exportOrderDetail(accessToken, walletId, beginTime, endTime,
+			tradeType, status, fileName, uniqueCode);
+		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
+	}
 
 	@ApiOperation("通联对账-导出通道对账文件")
 	@PostMapping(UrlConstant.REPORT_TUNNEL_BALANCE_EXPORT)

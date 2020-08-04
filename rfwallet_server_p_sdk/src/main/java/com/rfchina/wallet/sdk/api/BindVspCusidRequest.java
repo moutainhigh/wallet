@@ -16,6 +16,9 @@ public class BindVspCusidRequest extends  AbstractApiRequest {
   @ApiModelProperty("access_token")
   private String accessToken ;
 
+  @ApiModelProperty("通联AppId")
+  private String appId ;
+
   @ApiModelProperty("地区码")
   private String areaCode ;
 
@@ -50,6 +53,9 @@ public class BindVspCusidRequest extends  AbstractApiRequest {
     Map<String, String> parameters = new HashMap<>(2);
       if(accessToken != null){
         parameters.put("access_token", accessToken.toString());
+      }
+      if(appId != null){
+        parameters.put("app_id", appId.toString());
       }
       if(areaCode != null){
         parameters.put("area_code", areaCode.toString());

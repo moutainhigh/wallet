@@ -297,6 +297,7 @@ public class UrlConstant {
 	 * 高级钱包余额明细
 	 */
 	public static final String WALLET_SENIOR_ORDER_DETAIL= VERSION + "/m/senior/wallet/order_detail";
+
 	/**
 	 * 钱包配置-获取全局配置
 	 */
@@ -346,11 +347,13 @@ public class UrlConstant {
 	 */
 	public static final String REPORT_CUR_CHARGING_QUERY = VERSION + "/m/report/cur_charging_query";
 
+	/** 高级钱包-导出余额明细 */
+	public static final String REPORT_EXPORT_ORDER_DETAIL= VERSION + "/m/report/export_order_detail";
+
 	/**
 	 * 导出通联对账文件
 	 */
 	public static final String REPORT_TUNNEL_BALANCE_EXPORT = VERSION + "/m/report/export_tunnel_balance";
-
 
 	/**
 	 * 地区绑定终端

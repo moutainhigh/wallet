@@ -441,29 +441,6 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 	}
 
 
-	@Log
-	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
-	@SignVerify
-	@Override
-	public Pagination<WalletOrder> queryWalletOrderDetail(String accessToken, Long walletId,
-		Date fromTime, Date endTime, Byte tradeType, Byte status, int limit, int offset,
-		Boolean stat) {
 
-		List<Byte> types = tradeType != null ? Arrays.asList(tradeType) : null;
-		List<Byte> statusList = status != null ? Arrays.asList(status) : null;
-		List<WalletOrder> walletOrderList = walletOrderDao
-			.selectByWalletIdStatus(walletId, types, statusList, fromTime, endTime,
-				offset, limit);
-		long total = 0;
-		if (Objects.nonNull(stat) && stat) {
-			total = walletOrderDao
-				.countByWalletIdStatus(walletId, types, statusList, fromTime, endTime);
-		}
-		return new Pagination.PaginationBuilder<WalletOrder>().data(walletOrderList)
-			.total(total)
-			.offset(offset)
-			.pageLimit(limit)
-			.build();
-	}
 
 }
