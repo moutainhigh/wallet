@@ -1,6 +1,7 @@
 package com.rfchina.wallet.server.service.report;
 
 import com.rfchina.wallet.server.model.ext.VerifyDetailExcelVo;
+import com.rfchina.wallet.server.model.ext.WithdrawDetailExcelVo;
 import com.rfchina.wallet.server.msic.EnumWallet.ExportType;
 import com.rfchina.wallet.server.msic.EnumYunst.YunstMethodName;
 import java.util.Arrays;
@@ -8,9 +9,9 @@ import java.util.List;
 
 public class ReportFactory {
 
-	public static ReportBean createInstance(ExportType exportType) {
+	public static ReportBean createInstance(Byte exportType) {
 
-		if (ExportType.VERIFY.getValue().byteValue() == exportType.getValue()) {
+		if (ExportType.VERIFY.getValue().byteValue() == exportType.byteValue()) {
 			return new ReportBean() {
 
 				public Class getReportClass() {
@@ -28,11 +29,11 @@ public class ReportFactory {
 					return "report/manager/";
 				}
 			};
-		} else if (ExportType.ORDER.getValue().byteValue() == exportType.getValue()) {
+		} else if (ExportType.WITHDRAW.getValue().byteValue() == exportType.byteValue()) {
 			return new ReportBean() {
 
 				public Class getReportClass() {
-					return VerifyDetailExcelVo.class;
+					return WithdrawDetailExcelVo.class;
 				}
 
 				public List<String> getMethodArrays() {

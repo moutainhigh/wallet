@@ -101,14 +101,14 @@ public class ReportController {
 	public ResponseValue exportTunnelBalance(
 		@ApiParam(name = "access_token", value = "访问令牌", required = true) @RequestParam("access_token") String accessToken,
 		@ApiParam(name = "file_name", value = "文件名称", required = true) @RequestParam("file_name") String fileName,
-		@ApiParam(name = "type", value = "导出类型。 1:实名； 2：提现支付单 ；", required = true) @RequestParam("type") String type,
+		@ApiParam(name = "export_type", value = "导出类型。 1:实名； 2：提现支付单 ；", required = true) @RequestParam("export_type") Byte exportType,
 		@ApiParam(name = "unique_code", value = "唯一码", required = true) @RequestParam("unique_code") String uniqueCode,
 		@ApiParam(name = "start_time", value = "开始时间", required = true) @RequestParam("start_time") @DateTimeFormat(pattern = DateUtil.STANDARD_DTAE_PATTERN) String startTime,
 		@ApiParam(name = "end_time", value = "结束时间", required = true) @RequestParam("end_time") @DateTimeFormat(pattern = DateUtil.STANDARD_DTAE_PATTERN) String endTime
 	) {
 
 		reportApi
-			.exportTunnelBalance(accessToken, fileName, type, uniqueCode, startTime, endTime);
+			.exportTunnelBalance(accessToken, fileName, exportType, uniqueCode, startTime, endTime);
 		return new ResponseValue<>(EnumResponseCode.COMMON_SUCCESS, null);
 	}
 

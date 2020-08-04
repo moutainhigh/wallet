@@ -15,10 +15,8 @@ import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.misc.EnumDef.DownloadStatus;
 import com.rfchina.wallet.domain.model.StatChargingDetail;
 import com.rfchina.wallet.domain.model.StatChargingDetailCriteria;
-import com.rfchina.wallet.domain.model.StatChargingDetailCriteria.Criteria;
 import com.rfchina.wallet.server.mapper.ext.StatChargingDetailExtDao;
 import com.rfchina.wallet.server.model.ext.ReportDownloadVo;
-import com.rfchina.wallet.server.msic.EnumWallet.ExportType;
 import com.rfchina.wallet.server.msic.RedisConstant;
 import com.rfchina.wallet.server.service.report.ReportBean;
 import com.rfchina.wallet.server.service.report.ReportFactory;
@@ -50,8 +48,8 @@ public class ReportService {
 	private RedisTemplate redisTemplate;
 
 	@Async
-	public void exportChargingDetail(String uniqueCode, String fileName, String startTime,
-		String endTime, ExportType exportType) {
+	public void exportTunnelBalance(String fileName, Byte exportType, String uniqueCode,
+		String startTime, String endTime) {
 
 		Date startTime2 = DateUtil.parse(startTime, DateUtil.STANDARD_DTAE_PATTERN);
 		Date endTime2 = DateUtil
@@ -70,23 +68,17 @@ public class ReportService {
 
 			StatChargingDetailCriteria example = new StatChargingDetailCriteria();
 			example.setOrderByClause("id asc");
-			Criteria criteria = example.createCriteria();
-			criteria
+			example.createCriteria()
 				.andBizTimeBetween(startTime2, endTime2)
 				.andDeletedEqualTo((byte) 0)
-				.andIdGreaterThan(maxId);
-			if (ExportType.VERIFY.getValue().byteValue() == exportType.getValue()) {
-				criteria.andMethodNameIn(reportBean.getMethodArrays());
-			}
+				.andIdGreaterThan(maxId)
+				.andMethodNameIn(reportBean.getMethodArrays());
 			return statChargingDetailDao
 				.selectByExampleWithRowbounds(example, new RowBounds(0, 5000));
 		}, (row) -> {
 
-			if (ExportType.VERIFY.getValue().byteValue() == exportType.getValue()) {
-				Object vo = BeanUtil.newInstance(row, reportBean.getReportClass());
-				excelBean.addData(sheet, cursor.getAndIncrement(), Arrays.asList(vo));
-			}
-
+			Object vo = BeanUtil.newInstance(row, reportBean.getReportClass());
+			excelBean.addData(sheet, cursor.getAndIncrement(), Arrays.asList(vo));
 			return row.getId();
 		});
 
