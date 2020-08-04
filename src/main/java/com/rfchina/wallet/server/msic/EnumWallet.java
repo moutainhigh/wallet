@@ -956,10 +956,10 @@ public class EnumWallet {
 		}
 	}
 
+	/** 导出类型。 1:实名； 2：提现支付单 ； */
 	public enum ExportType implements Valuable<Byte> {
 		VERIFY((byte) 1, "实名"),
-		ORDER((byte) 2, "订单"),
-		ALL((byte) 3, "所有"),
+		ORDER((byte) 2, "提现支付单"),
 		;
 
 		private Byte value;

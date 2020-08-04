@@ -10,6 +10,7 @@ import com.rfchina.platform.biztools.fileserver.FileServer;
 import com.rfchina.platform.common.json.ObjectSetter;
 import com.rfchina.platform.common.misc.SymbolConstant;
 import com.rfchina.platform.common.utils.BeanUtil;
+import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.misc.EnumDef.DownloadStatus;
 import com.rfchina.wallet.domain.model.StatChargingDetail;
@@ -17,11 +18,10 @@ import com.rfchina.wallet.domain.model.StatChargingDetailCriteria;
 import com.rfchina.wallet.domain.model.StatChargingDetailCriteria.Criteria;
 import com.rfchina.wallet.server.mapper.ext.StatChargingDetailExtDao;
 import com.rfchina.wallet.server.model.ext.ReportDownloadVo;
-import com.rfchina.wallet.server.model.ext.StatChargingDetailVo;
-import com.rfchina.wallet.server.model.ext.VerifyDetailExcelVo;
 import com.rfchina.wallet.server.msic.EnumWallet.ExportType;
-import com.rfchina.wallet.server.msic.EnumYunst.YunstMethodName;
 import com.rfchina.wallet.server.msic.RedisConstant;
+import com.rfchina.wallet.server.service.report.ReportBean;
+import com.rfchina.wallet.server.service.report.ReportFactory;
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.Date;
@@ -50,15 +50,20 @@ public class ReportService {
 	private RedisTemplate redisTemplate;
 
 	@Async
-	public void exportChargingDetail(String uniqueCode, String fileName, Date startTime,
-		Date endTime, ExportType exportType) {
+	public void exportChargingDetail(String uniqueCode, String fileName, String startTime,
+		String endTime, ExportType exportType) {
+
+		Date startTime2 = DateUtil.parse(startTime, DateUtil.STANDARD_DTAE_PATTERN);
+		Date endTime2 = DateUtil
+			.addDate2(DateUtil.parse(endTime, DateUtil.STANDARD_DTAE_PATTERN), 1);
 
 		String threadName = Thread.currentThread().getName();
 		log.info("线程[{}]正在导出报表[{}]", threadName, fileName);
 
+		ReportBean reportBean = ReportFactory.createInstance(exportType);
 		ExcelBean excelBean = ExcelFactory.build2007();
 		Sheet sheet = excelBean.creatSheet(fileName);
-		excelBean.addTitle(sheet, 0, StatChargingDetailVo.class);
+		excelBean.addTitle(sheet, 0, reportBean.getReportClass());
 
 		AtomicInteger cursor = new AtomicInteger(1);
 		new MaxIdIterator<StatChargingDetail>().apply((maxId) -> {
@@ -66,20 +71,19 @@ public class ReportService {
 			StatChargingDetailCriteria example = new StatChargingDetailCriteria();
 			example.setOrderByClause("id asc");
 			Criteria criteria = example.createCriteria();
-			if (ExportType.VERIFY.getValue().byteValue() == exportType.getValue()) {
-				criteria.andMethodNameIn(Arrays.asList(YunstMethodName.COMPANY_VERIFY.getValue(),
-					YunstMethodName.PERSON_VERIFY.getValue()));
-			}
 			criteria
-				.andBizTimeBetween(startTime, endTime)
+				.andBizTimeBetween(startTime2, endTime2)
 				.andDeletedEqualTo((byte) 0)
 				.andIdGreaterThan(maxId);
+			if (ExportType.VERIFY.getValue().byteValue() == exportType.getValue()) {
+				criteria.andMethodNameIn(reportBean.getMethodArrays());
+			}
 			return statChargingDetailDao
-				.selectByExampleWithRowbounds(example, new RowBounds(0, 1000));
+				.selectByExampleWithRowbounds(example, new RowBounds(0, 5000));
 		}, (row) -> {
 
 			if (ExportType.VERIFY.getValue().byteValue() == exportType.getValue()) {
-				VerifyDetailExcelVo vo = BeanUtil.newInstance(row, VerifyDetailExcelVo.class);
+				Object vo = BeanUtil.newInstance(row, reportBean.getReportClass());
 				excelBean.addData(sheet, cursor.getAndIncrement(), Arrays.asList(vo));
 			}
 
@@ -90,10 +94,7 @@ public class ReportService {
 			ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
 			excelBean.getWorkbook().write(byteOut);
 
-			String fileKey = "report/manager/" + fileName;
-			if (ExportType.VERIFY.getValue().byteValue() == exportType.getValue()) {
-				fileKey = "report/manager/" + fileName;
-			}
+			String fileKey = reportBean.getFilePrefix() + fileName;
 			fileServer.upload(fileKey, byteOut.toByteArray(),
 				"application/octet-stream", EnumFileAcl.PUBLIC_READ, null);
 			BoundHashOperations hashOps = redisTemplate

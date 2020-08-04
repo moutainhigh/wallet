@@ -337,11 +337,6 @@ public class UrlConstant {
 	public static final String REPORT_CHARGING_DETAIL_EXPORT = VERSION + "/m/report/export_charging_detail";
 
 	/**
-	 * 导出通联对账文件
-	 */
-	public static final String REPORT_VERIFY_EXPORT = VERSION + "/m/report/export_";
-
-	/**
 	 * 手续费重做
 	 */
 	public static final String REPORT_CHARGING_REDO = VERSION + "/m/report/charging_redo";
@@ -350,6 +345,11 @@ public class UrlConstant {
 	 * 当月手续费报表
 	 */
 	public static final String REPORT_CUR_CHARGING_QUERY = VERSION + "/m/report/cur_charging_query";
+
+	/**
+	 * 导出通联对账文件
+	 */
+	public static final String REPORT_TUNNEL_BALANCE_EXPORT = VERSION + "/m/report/export_tunnel_balance";
 
 
 	/**
