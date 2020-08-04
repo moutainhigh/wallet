@@ -189,7 +189,7 @@
 
 ###  高级钱包-导出余额明细
 
-请求地址: /wallet_server/v1/m/senior/wallet/export_order_detail
+请求地址: /wallet_server/v1/m/report/export_order_detail
 
 请求类型: POST
 

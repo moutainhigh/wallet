@@ -6,7 +6,7 @@ import java.util.Date;
 
 public interface SeniorOrderApi {
 
-	void exportOrderDetail(String accessToken, Long walletId, Date beginTime, Date endTime,
+	void exportOrderDetail(String accessToken, Long walletId, String beginTime, String endTime,
 		Byte tradeType, Byte status, String fileName, String uniqueCode);
 
 	/**

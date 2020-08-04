@@ -40,7 +40,7 @@ public class ExportOrderDetailRequest extends  AbstractApiRequest {
 
   @Override
   public String getApiUrl() {
-    return "/wallet_server/v1/m/senior/wallet/export_order_detail";
+    return "/wallet_server/v1/m/report/export_order_detail";
   }
 
   @Override

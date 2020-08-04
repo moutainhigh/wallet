@@ -44,7 +44,7 @@ public class SeniorOrderApiImpl implements SeniorOrderApi {
 	@Log
 	@TokenVerify(verifyAppToken = true, accept = {EnumTokenType.APP_MANAGER})
 	@SignVerify
-	public void exportOrderDetail(String accessToken, Long walletId, Date beginTime, Date endTime,
+	public void exportOrderDetail(String accessToken, Long walletId, String beginTime, String endTime,
 		Byte tradeType, Byte status, String fileName, String uniqueCode) {
 
 		walletOrderService

@@ -156,9 +156,11 @@ public class WalletOrderService {
 
 	@Async
 	public void exportOrderDetail(String uniqueCode, String fileName, Long walletId,
-		Byte tradeType, Byte status, Date beginTime, Date endTime) {
+		Byte tradeType, Byte status, String beginTime, String endTime) {
 
-		final Date endTime2 = DateUtil.addDate2(endTime,1);
+		final Date beginTime2 = DateUtil.parse(beginTime, DateUtil.STANDARD_DTAE_PATTERN);
+		final Date endTime2 = DateUtil
+			.addDate2(DateUtil.parse(endTime, DateUtil.STANDARD_DTAE_PATTERN), 1);
 		String threadName = Thread.currentThread().getName();
 		log.info("线程[{}]正在导出钱包[{}]订单明细报表[{}]", threadName, walletId, fileName);
 
@@ -170,7 +172,7 @@ public class WalletOrderService {
 		new MaxIdIterator<WalletOrderExcelVo>().apply((maxId) -> {
 
 			List<WalletOrder> data = walletOrderExtDao.selectByMaxId(maxId, walletId,
-				Arrays.asList(tradeType), Arrays.asList(status), beginTime, endTime2);
+				Arrays.asList(tradeType), Arrays.asList(status), beginTime2, endTime2);
 
 			return data.stream()
 				.map(item -> {

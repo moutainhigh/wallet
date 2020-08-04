@@ -97,12 +97,12 @@ public class ReportController {
 	}
 
 	@ApiOperation("高级钱包-导出余额明细")
-	@PostMapping(UrlConstant.WALLET_EXPORT_ORDER_DETAIL)
+	@PostMapping(UrlConstant.REPORT_EXPORT_ORDER_DETAIL)
 	public ResponseValue exportOrderDetail(
 		@RequestParam("access_token") String accessToken,
 		@ApiParam(value = "钱包id", required = true) @RequestParam(value = "wallet_id", required = true) Long walletId,
-		@ApiParam(value = "交易时间开始", required = true) @RequestParam(value = "begin_time", required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date beginTime,
-		@ApiParam(value = "交易时间结束", required = true) @RequestParam(value = "end_time", required = true) @DateTimeFormat(pattern = "yyyy-MM-dd") Date endTime,
+		@ApiParam(value = "交易时间开始", required = true) @RequestParam(value = "begin_time", required = true) String beginTime,
+		@ApiParam(value = "交易时间结束", required = true) @RequestParam(value = "end_time", required = true) String endTime,
 		@ApiParam(value = "交易类型", required = false) @RequestParam(value = "trade_type", required = false) Byte tradeType,
 		@ApiParam(value = "状态", required = false) @RequestParam(value = "status", required = false) Byte status,
 		@ApiParam(value = "文件名称", required = true) @RequestParam("file_name") String fileName,
