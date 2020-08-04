@@ -7,6 +7,9 @@ import lombok.Data;
 @Data
 public class ReportDownloadVo {
 
+	@ApiModelProperty(value = "商家锁id")
+	private String mchId;
+
 	@ApiModelProperty(value = "用户id")
 	private Long userId;
 
