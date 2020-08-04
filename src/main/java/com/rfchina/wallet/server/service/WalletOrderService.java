@@ -174,6 +174,7 @@ public class WalletOrderService {
 			List<WalletOrder> data = walletOrderExtDao.selectByMaxId(maxId, walletId,
 				Arrays.asList(tradeType), Arrays.asList(status), beginTime2, endTime2);
 
+			log.info("读取{}maxId{}", data.size(), maxId);
 			return data.stream()
 				.map(item -> {
 					WalletOrderExcelVo vo = BeanUtil.newInstance(item, WalletOrderExcelVo.class);
