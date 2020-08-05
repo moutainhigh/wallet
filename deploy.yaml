@@ -71,9 +71,6 @@ spec:
           configMap:
             name: yunst-cert
         - name: %{service_name}-ceph
-          flexVolume:
-            driver: ceph.rook.io/rook
-            fsType: ceph
-            options:
-              fsName: myfs
-              clusterNamespace: rook-ceph
+          hostPath:
+            path: /data/static_files/p/%{service_name}
+            type: DirectoryOrCreate

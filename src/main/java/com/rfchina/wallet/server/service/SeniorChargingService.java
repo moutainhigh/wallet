@@ -3,8 +3,6 @@ package com.rfchina.wallet.server.service;
 import com.rfchina.biztools.functional.DateIterator;
 import com.rfchina.biztools.functional.MaxIdIterator;
 import com.rfchina.mch.sdk.model.ChargingConfig;
-import com.rfchina.platform.biztool.excel.ExcelBean;
-import com.rfchina.platform.biztool.excel.ExcelFactory;
 import com.rfchina.platform.biztools.CacheHashMap;
 import com.rfchina.platform.common.page.Pagination;
 import com.rfchina.platform.common.utils.BeanUtil;
@@ -20,7 +18,6 @@ import com.rfchina.wallet.domain.model.StatChargingCriteria;
 import com.rfchina.wallet.domain.model.StatChargingDetail;
 import com.rfchina.wallet.domain.model.StatChargingDetail.StatChargingDetailBuilder;
 import com.rfchina.wallet.domain.model.StatChargingDetailCriteria;
-import com.rfchina.wallet.domain.model.StatChargingDetailCriteria.Criteria;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletCompany;
 import com.rfchina.wallet.domain.model.WalletOrder;
@@ -43,18 +40,15 @@ import com.rfchina.wallet.server.msic.EnumWallet.FeeConfigKey;
 import com.rfchina.wallet.server.msic.EnumYunst.YunstMethodName;
 import com.rfchina.wallet.server.msic.EnumYunst.YunstServiceName;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBaseHandler.YunstMemberType;
-import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.session.RowBounds;
-import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -180,17 +174,18 @@ public class SeniorChargingService {
 
 				WalletTunnel tunnel = walletTunnelDao.selectByTunnelTypeAndBizUserId(
 					gatewayLog.getTunnelType().intValue(), gatewayLog.getBizUserId());
-				Long walletId = tunnel.getWalletId();
-				String bizUserId = tunnel.getBizUserId();
-				if (YunstMethodName.COMPANY_VERIFY.getValue().equals(gatewayLog.getMethodName())) {
+				if (tunnel != null && YunstMethodName.COMPANY_VERIFY.getValue()
+					.equals(gatewayLog.getMethodName())) {
+
 					key = FeeConfigKey.YUNST_COMPANY_AUDIT.getValue();
 					WalletCompany walletCompany = walletCompanyDao
 						.selectByWalletId(tunnel.getWalletId());
 					if (walletCompany != null) {
 						name = walletCompany.getCompanyName();
 					}
-				} else if (YunstMethodName.PERSON_VERIFY.getValue()
+				} else if (tunnel != null && YunstMethodName.PERSON_VERIFY.getValue()
 					.equals(gatewayLog.getMethodName())) {
+
 					key = FeeConfigKey.YUNST_PERSON_AUDIT.getValue();
 					WalletPerson walletPerson = walletPersonDao
 						.selectByWalletId(tunnel.getWalletId());
@@ -216,8 +211,8 @@ public class SeniorChargingService {
 						.chargingValue(config != null ? config.getChargingValue() : BigDecimal.ZERO)
 						.bizTime(gatewayLog.getInvokeTime())
 						.name(name)
-						.walletId(walletId)
-						.bizUserId(bizUserId)
+						.walletId(tunnel != null ? tunnel.getWalletId() : null)
+						.bizUserId(tunnel != null ? tunnel.getBizUserId() : null)
 						.build();
 					statChargingDetailDao.insertSelective(detail);
 				}
@@ -242,15 +237,17 @@ public class SeniorChargingService {
 				return walletOrders;
 			}, (walletOrder) -> {
 
-				String name = "";
+				String name = null;
 				Wallet wallet = walletDao.selectByPrimaryKey(walletOrder.getWalletId());
 				if (WalletType.COMPANY.getValue().byteValue() == wallet.getType().byteValue()) {
+
 					WalletCompany walletCompany = walletCompanyDao.selectByWalletId(wallet.getId());
 					if (walletCompany != null) {
 						name = walletCompany.getCompanyName();
 					}
 				} else if (WalletType.PERSON.getValue().byteValue() == wallet.getType()
 					.byteValue()) {
+
 					WalletPerson walletPerson = walletPersonDao.selectByWalletId(wallet.getId());
 					if (walletPerson != null) {
 						name = walletPerson.getName();
@@ -273,8 +270,8 @@ public class SeniorChargingService {
 					.tunnelCount(chargingVo.getTunnelCount())
 					.bizTime(chargingVo.getTunnelSuccTime())
 					.name(name)
-					.walletId(tunnel.getWalletId())
-					.bizUserId(tunnel.getBizUserId())
+					.walletId(tunnel != null ? tunnel.getWalletId() : null)
+					.bizUserId(tunnel != null ? tunnel.getBizUserId() : null)
 					.amount(walletOrder.getAmount())
 					.build();
 
@@ -414,43 +411,4 @@ public class SeniorChargingService {
 			doCharging(TunnelType.YUNST, theDay);
 		});
 	}
-
-
-	public byte[] exportChargingDetail(String fileName, Date startTime, Date endTime) {
-
-		ExcelBean excelBean = ExcelFactory.build2007();
-		Sheet sheet = excelBean.creatSheet(fileName);
-		excelBean.addTitle(sheet, 0, StatChargingDetailVo.class);
-
-		AtomicInteger cursor = new AtomicInteger(1);
-		new MaxIdIterator<StatChargingDetailVo>().apply((maxId) -> {
-
-			StatChargingDetailCriteria example = new StatChargingDetailCriteria();
-			example.setOrderByClause("id asc");
-			Criteria criteria = example.createCriteria();
-			criteria
-				.andBizTimeBetween(startTime, endTime)
-				.andDeletedEqualTo((byte) 0)
-				.andIdGreaterThan(maxId);
-			List<StatChargingDetail> data = statChargingDetailDao
-				.selectByExampleWithRowbounds(example, new RowBounds(0, 1000));
-			return data.stream()
-				.map(item -> BeanUtil.newInstance(item, StatChargingDetailVo.class))
-				.collect(Collectors.toList());
-		}, (row) -> {
-			excelBean.addData(sheet, cursor.getAndIncrement(), Arrays.asList(row));
-			return row.getId();
-		});
-
-		try {
-			ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-			excelBean.getWorkbook().write(byteOut);
-
-			return byteOut.toByteArray();
-		} catch (Exception e) {
-			return new byte[0];
-		}
-
-	}
-
 }

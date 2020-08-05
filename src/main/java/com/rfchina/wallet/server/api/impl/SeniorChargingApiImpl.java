@@ -90,37 +90,6 @@ public class SeniorChargingApiImpl implements SeniorChargingApi {
 	}
 
 
-	@Async
-	@Override
-	public void exportChargingDetail(String accessToken, String fileName, String uniqueCode,
-		String startTime, String endTime) {
-
-		String threadName = Thread.currentThread().getName();
-		log.info("线程[{}]正在导出报表[{}]", threadName, fileName);
-		Date start = DateUtil.parse(startTime, DateUtil.STANDARD_DTAE_PATTERN);
-		Date end = DateUtil.parse(endTime, DateUtil.STANDARD_DTAE_PATTERN);
-
-
-		byte[] bytes = seniorChargingService.exportChargingDetail(fileName, start, end);
-		String fileKey = "report/" + fileName;
-		fileServer
-			.upload(fileKey, bytes, "application/octet-stream", EnumFileAcl.PUBLIC_READ, null);
-		BoundHashOperations hashOps = redisTemplate.boundHashOps(RedisConstant.PREX_MANAGER_DOWNLOAD_KEY);
-		if (hashOps.hasKey(uniqueCode)) {
-			String val = (String) hashOps.get(uniqueCode);
-			ReportDownloadVo downloadVo = JsonUtil
-				.toObject(val, ReportDownloadVo.class, getObjectMapper());
-			downloadVo.setStatus(DownloadStatus.BUILDED.getValue());
-			downloadVo.setLocation(getFileSrvPrefix() + fileKey);
-			hashOps.put(uniqueCode, JsonUtil.toJSON(downloadVo, getObjectMapper()));
-		}
-		log.info("线程[{}]完成导出报表[{}]", threadName, fileName);
-
-	}
-
-
-
-
 	private ObjectSetter<ObjectMapper> getObjectMapper() {
 		return objectMapper -> {
 			objectMapper.setTimeZone(TimeZone.getDefault());
