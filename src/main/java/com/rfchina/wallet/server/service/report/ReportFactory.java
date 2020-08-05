@@ -39,8 +39,7 @@ public class ReportFactory {
 
 				public List<String> getMethodArrays() {
 					return Arrays.asList(
-						YunstMethodName.COMPANY_VERIFY.getValue(),
-						YunstMethodName.PERSON_VERIFY.getValue()
+						YunstMethodName.WITHDRAW.getValue()
 					);
 				}
 
