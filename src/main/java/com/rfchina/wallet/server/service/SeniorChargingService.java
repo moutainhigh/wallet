@@ -186,13 +186,17 @@ public class SeniorChargingService {
 					key = FeeConfigKey.YUNST_COMPANY_AUDIT.getValue();
 					WalletCompany walletCompany = walletCompanyDao
 						.selectByWalletId(tunnel.getWalletId());
-					name = walletCompany.getCompanyName();
+					if (walletCompany != null) {
+						name = walletCompany.getCompanyName();
+					}
 				} else if (YunstMethodName.PERSON_VERIFY.getValue()
 					.equals(gatewayLog.getMethodName())) {
 					key = FeeConfigKey.YUNST_PERSON_AUDIT.getValue();
 					WalletPerson walletPerson = walletPersonDao
 						.selectByWalletId(tunnel.getWalletId());
-					name = walletPerson.getName();
+					if (walletPerson != null) {
+						name = walletPerson.getName();
+					}
 
 				}
 				ChargingConfig config = feeMap.get(key);
@@ -242,11 +246,15 @@ public class SeniorChargingService {
 				Wallet wallet = walletDao.selectByPrimaryKey(walletOrder.getWalletId());
 				if (WalletType.COMPANY.getValue().byteValue() == wallet.getType().byteValue()) {
 					WalletCompany walletCompany = walletCompanyDao.selectByWalletId(wallet.getId());
-					name = walletCompany.getCompanyName();
+					if (walletCompany != null) {
+						name = walletCompany.getCompanyName();
+					}
 				} else if (WalletType.PERSON.getValue().byteValue() == wallet.getType()
 					.byteValue()) {
 					WalletPerson walletPerson = walletPersonDao.selectByWalletId(wallet.getId());
-					name = walletPerson.getName();
+					if (walletPerson != null) {
+						name = walletPerson.getName();
+					}
 				}
 
 				WalletTunnel tunnel = walletTunnelDao

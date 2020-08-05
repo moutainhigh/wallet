@@ -182,6 +182,7 @@ public class ScheduleApiImpl implements ScheduleApi {
 		new LockDone(lock).apply(RedisConstant.LOCK_QUARTZ_BALANCE, 60, () -> {
 			Calendar calendar = Calendar.getInstance();
 			calendar.setTime(theDay);
+			calendar.set(Calendar.DAY_OF_MONTH, 1);
 			calendar.set(Calendar.HOUR_OF_DAY, 0);
 			calendar.set(Calendar.MINUTE, 0);
 			calendar.set(Calendar.SECOND, 0);
