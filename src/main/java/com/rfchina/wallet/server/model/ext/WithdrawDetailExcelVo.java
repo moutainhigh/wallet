@@ -1,11 +1,14 @@
 package com.rfchina.wallet.server.model.ext;
 
+import com.rfchina.biztools.functional.Optionals;
 import com.rfchina.platform.biztool.excel.PoiColumn;
+import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EnumUtil;
 import com.rfchina.wallet.server.msic.EnumYunst;
 import io.swagger.annotations.ApiModelProperty;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Date;
 import lombok.Data;
 
 @Data
@@ -34,7 +37,10 @@ public class WithdrawDetailExcelVo {
 
 	@PoiColumn(idx = 4, title = "交易日期")
 	@ApiModelProperty("业务时间")
-	private String bizTime;
+	private String getBizTimeStr() {
+		return Optionals.select(bizTime != null,
+			() -> DateUtil.formatDate(bizTime, DateUtil.STANDARD_DTAETIME_PATTERN), null);
+	}
 
 	@PoiColumn(idx = 5, title = "交易金额")
 	private String getAmountStr() {
@@ -70,6 +76,9 @@ public class WithdrawDetailExcelVo {
 
 	@ApiModelProperty(name = "local_tunnel_fee", value = "本地的通道手续费")
 	private Long localTunnelFee;
+
+	@ApiModelProperty(name = "biz_time", value = "业务时间")
+	private Date bizTime;
 
 
 }

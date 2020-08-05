@@ -87,7 +87,7 @@ dependencies {
     compile 'com.rfchina.biztool:mapper:1.0.0-SNAPSHOT'
     compile 'com.rfchina.biztool:fileserver:1.0.3'
     compile 'com.rfchina.biztool:limiter:1.0.3'
-    compile 'com.rfchina.biztool:functional:1.0.2'
+    compile 'com.rfchina.biztool:functional:1.0.4'
     compile 'com.rfchina.biztool:verify-factory:1.0.1'
     compile 'com.rfchina.biztool:cache:1.0.1'
     compile 'com.rfchina.biztool:excel:1.0.2'

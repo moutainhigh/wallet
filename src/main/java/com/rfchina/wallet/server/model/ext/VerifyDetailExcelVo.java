@@ -1,9 +1,12 @@
 package com.rfchina.wallet.server.model.ext;
 
+import com.rfchina.biztools.functional.Optionals;
 import com.rfchina.platform.biztool.excel.PoiColumn;
+import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EnumUtil;
 import com.rfchina.wallet.server.msic.EnumYunst;
 import io.swagger.annotations.ApiModelProperty;
+import java.util.Date;
 import lombok.Data;
 
 @Data
@@ -30,8 +33,12 @@ public class VerifyDetailExcelVo {
 	}
 
 	@PoiColumn(idx = 3, title = "认证时间")
-	@ApiModelProperty("业务时间")
-	private String bizTime;
+	private String getBizTimeStr() {
+		return Optionals.select(bizTime != null,
+			() -> DateUtil.formatDate(bizTime, DateUtil.STANDARD_DTAETIME_PATTERN), null);
+	}
 
+	@ApiModelProperty(name = "biz_time", value = "业务时间")
+	private Date bizTime;
 }
 
