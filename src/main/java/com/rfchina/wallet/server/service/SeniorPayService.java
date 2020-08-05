@@ -23,6 +23,7 @@ import com.rfchina.wallet.domain.misc.EnumDef.DirtyType;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderStatus;
 import com.rfchina.wallet.domain.misc.EnumDef.OrderType;
 import com.rfchina.wallet.domain.misc.EnumDef.TunnelType;
+import com.rfchina.wallet.domain.misc.EnumDef.WalletCardType;
 import com.rfchina.wallet.domain.misc.MqConstant;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.GatewayTrans;
@@ -225,7 +226,7 @@ public class SeniorPayService {
 		try {
 			lock.acquireLock(RedisConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);
 
-			BigDecimal rate = payMethod.getRate(configService);
+			BigDecimal rate = getRate(payMethod);
 			BigDecimal tunnelFee = new BigDecimal(amount)
 				.multiply(rate)
 				.setScale(0, EBankHandler.getRoundingMode());
@@ -409,6 +410,40 @@ public class SeniorPayService {
 		}
 	}
 
+
+	public BigDecimal getRate(WalletPayMethod method) {
+
+		BigDecimal bigDecimal = new BigDecimal("0");
+		if (method.getBalance() != null) {
+		} else if (method.getWechat() != null) {
+			ChargingConfig config = feeMap.get(FeeConfigKey.YUNST_WECHAT.getValue());
+			if (config != null) {
+				return config.getChargingValue();
+			}
+		} else if (method.getAlipay() != null) {
+			ChargingConfig config = feeMap.get(FeeConfigKey.YUNST_ALIPAY.getValue());
+			if (config != null) {
+				return config.getChargingValue();
+			}
+		} else if (method.getCodePay() != null) {
+		} else if (method.getBankCard() != null) {
+			FeeConfigKey key = null;
+			if(WalletCardType.CREDIT.getValue().byteValue() == method.getBankCard().getCardType()
+					.byteValue() ){
+				key =FeeConfigKey.YUNST_CREDIT_CARD;
+			} else if(WalletCardType.DEPOSIT.getValue().byteValue() == method.getBankCard().getCardType()
+				.byteValue() ){
+				key =FeeConfigKey.YUNST_DEBIT_CARD;
+			}
+			ChargingConfig config = feeMap.get(key.getValue());
+			if (config != null) {
+				return config.getChargingValue();
+			}
+		} else if (method.getPos() != null) {
+		}
+		return bigDecimal;
+	}
+
 	/**
 	 * 预代收
 	 */
@@ -438,7 +473,7 @@ public class SeniorPayService {
 
 		try {
 			lock.acquireLock(RedisConstant.LOCK_PAY_ORDER + orderNo, 5, 0, 1000);
-			BigDecimal rate = req.getWalletPayMethod().getRate(configService);
+			BigDecimal rate = getRate(req.getWalletPayMethod());
 			BigDecimal tunnelFee = new BigDecimal(req.getAmount())
 				.multiply(rate)
 				.setScale(0, EBankHandler.getRoundingMode());
@@ -668,7 +703,7 @@ public class SeniorPayService {
 			List<WalletCollectMethod> methods = walletCollectMethodDao
 				.selectByCollectId(walletCollect.getId(), OrderType.COLLECT.getValue());
 			WalletPayMethod payMethod = getPayMethod(methods.get(0));
-			rate = payMethod.getRate(configService);
+			rate = getRate(payMethod);
 			tunnelFee = new BigDecimal(walletCollect.getRefundLimit() - refundAmount)
 				.multiply(rate)
 				.setScale(0, EBankHandler.getRoundingMode());

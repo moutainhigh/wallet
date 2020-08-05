@@ -119,25 +119,6 @@ public class CollectReq {
 			return false;
 		}
 
-		@ApiModelProperty(hidden = true)
-		public BigDecimal getRate(ConfigService configService) {
-			BigDecimal bigDecimal = new BigDecimal("0");
-			if (balance != null) {
-			} else if (wechat != null) {
-				bigDecimal = bigDecimal.add(new BigDecimal(configService.getWechatRate()));
-			} else if (alipay != null) {
-				bigDecimal = bigDecimal.add(new BigDecimal(configService.getAlipayRate()));
-			} else if (codePay != null) {
-			} else if (bankCard != null) {
-				bigDecimal = bigDecimal.add(new BigDecimal(
-					(WalletCardType.CREDIT.getValue().equals(bankCard.cardType)) ?
-						configService.getCreditCardRate() : configService.getDebitCardRate()));
-			} else if (pos != null) {
-				bigDecimal = bigDecimal.add(new BigDecimal("0"));
-			}
-			return bigDecimal;
-		}
-
 		@ApiModel
 		@Data
 		@Builder

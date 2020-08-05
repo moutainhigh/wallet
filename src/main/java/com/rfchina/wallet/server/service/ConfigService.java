@@ -182,18 +182,6 @@ public class ConfigService {
 	@Value("${yunst.jumpUrl.prefix}")
 	private String yunstJumpUrlPrefix;
 
-	@Value("${yunst.feerate.wechat}")
-	private String wechatRate;
-
-	@Value("${yunst.feerate.alipay}")
-	private String alipayRate;
-
-	@Value("${yunst.feerate.debitcard}")
-	private String debitCardRate;
-
-	@Value("${yunst.feerate.creditcard}")
-	private String creditCardRate;
-
 
 // yunst end
 

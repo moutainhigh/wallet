@@ -873,7 +873,12 @@ public class EnumWallet {
 		YUNST_POS_CREDIT_CARD("YUNST_POS_CREDIT_CARD", "通联POS贷记卡"),
 		YUNST_POS_UNION_RCODE("YUNST_POS_UNION_RCODE", "通联POS-银联二维码"),
 		YUNST_POS_WECHAT("YUNST_POS_WECHAT", "通联POS-微信钱包"),
-		YUNST_POS_ALIPAY("YUNST_POS_ALIPAY", "通联POS-支付宝钱包");
+		YUNST_POS_ALIPAY("YUNST_POS_ALIPAY", "通联POS-支付宝钱包"),
+		YUNST_ALIPAY("YUNST_ALIPAY", "通联-支付宝支付"),
+		YUNST_WECHAT("YUNST_WECHAT", "通联-微信支付"),
+		YUNST_DEBIT_CARD("YUNST_DEBIT_CARD", "通联-储蓄卡支付"),
+		YUNST_CREDIT_CARD("YUNST_CREDIT_CARD", "通联-信用卡支付"),
+		;
 
 		private String value;
 		private String valueName;
