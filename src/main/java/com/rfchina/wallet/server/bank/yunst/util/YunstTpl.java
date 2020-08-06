@@ -16,7 +16,9 @@ import com.rfchina.wallet.domain.model.GatewayLog;
 import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
 import com.rfchina.wallet.server.bank.yunst.request.YunstBaseReq;
 import com.rfchina.wallet.server.bank.yunst.response.YunstBaseResp;
+import com.rfchina.wallet.server.bank.yunst.response.result.YunstSetCompanyInfoResult;
 import com.rfchina.wallet.server.msic.EnumWallet.GatewayInvokeStatus;
+import com.rfchina.wallet.server.msic.EnumYunst.CompanyVerifyResult;
 import com.rfchina.wallet.server.msic.EnumYunst.YunstMethodName;
 import com.rfchina.wallet.server.service.CacheService;
 import com.rfchina.wallet.server.service.ConfigService;
@@ -134,10 +136,38 @@ public class YunstTpl {
 		};
 	}
 
+	private Byte isSucc(YunRequest reqPkg, YunstBaseResp resp) {
+		try {
+			if (YunstMethodName.COMPANY_VERIFY.getValue().equals(reqPkg.getMethod())) {
+				YunstSetCompanyInfoResult result = JsonUtil
+					.toObject(resp.getSignedValue(), YunstSetCompanyInfoResult.class,
+						getObjectMapper());
+				return
+					(CompanyVerifyResult.SUCC.getValue().longValue() == result.getResult()
+						.longValue())
+						? GatewayInvokeStatus.SUCC.getValue() : GatewayInvokeStatus.FAIL.getValue();
+			}
+		} catch (Exception e) {
+			log.error("", e);
+		}
+
+		return null;
+	}
+
 	private void log2db(YunRequest reqPkg, String respBody, YunstBaseResp resp,
 		GatewayInvokeStatus status) {
+
+		// 订单信息、余额查询数据量大，暂时不做存储
+		if (YunstMethodName.ORDER_DETAIL.getValue().equals(reqPkg.getMethod())
+			|| YunstMethodName.QUERY_BALANCE.getValue().equals(reqPkg.getMethod())) {
+			return;
+		}
 		try {
 			Boolean isAuth = reqPkg.get("isAuth") != null ? (Boolean) reqPkg.get("isAuth") : null;
+			Byte isSucc = isSucc(reqPkg, resp);
+			isSucc = Optional.ofNullable(isSucc)
+				.orElse(GatewayInvokeStatus.SUCC.getValue());
+
 			GatewayLog gatewayLog = GatewayLog.builder()
 				.tunnelType(TunnelType.YUNST.getValue())
 				.bizUserId((String) Optional.ofNullable(reqPkg.get("bizUserId")).orElse(null))
@@ -148,6 +178,7 @@ public class YunstTpl {
 				.invokeStatus(status.getValue())
 				.invokeTime(new Date())
 				.isAuth(isAuth != null ? Integer.valueOf(isAuth ? 1 : 0).byteValue() : null)
+				.isSucc(isSucc)
 				.req(JsonUtil.toJSON(reqPkg))
 				.resp(respBody)
 				.build();

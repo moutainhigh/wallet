@@ -4,6 +4,7 @@ import com.rfchina.biztools.functional.Optionals;
 import com.rfchina.platform.biztool.excel.PoiColumn;
 import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.platform.common.utils.EnumUtil;
+import com.rfchina.wallet.server.msic.EnumWallet.GatewayInvokeStatus;
 import com.rfchina.wallet.server.msic.EnumYunst;
 import io.swagger.annotations.ApiModelProperty;
 import java.math.BigDecimal;
@@ -22,11 +23,15 @@ public class WithdrawDetailExcelVo {
 	@ApiModelProperty(name = "wallet_id", value = "钱包id")
 	private Long walletId;
 
-	@PoiColumn(idx = 2, title = "用户姓名")
+	@PoiColumn(idx = 2, title = "会员编号")
+	@ApiModelProperty(name="biz_user_id", value = "业务用户标识")
+	private String bizUserId;
+
+	@PoiColumn(idx = 3, title = "用户姓名")
 	@ApiModelProperty(name = "name", value = "用户名")
 	private String name;
 
-	@PoiColumn(idx = 3, title = "交易类型")
+	@PoiColumn(idx = 4, title = "交易类型")
 	@ApiModelProperty(name = "event", value = "事件")
 	public String getEvent() {
 		EnumYunst.YunstMethodName name = EnumUtil
@@ -35,14 +40,14 @@ public class WithdrawDetailExcelVo {
 			.replace("代付", "收入") : null;
 	}
 
-	@PoiColumn(idx = 4, title = "交易日期")
+	@PoiColumn(idx = 5, title = "交易日期")
 	@ApiModelProperty("业务时间")
 	private String getBizTimeStr() {
 		return Optionals.select(bizTime != null,
 			() -> DateUtil.formatDate(bizTime, DateUtil.STANDARD_DTAETIME_PATTERN), null);
 	}
 
-	@PoiColumn(idx = 5, title = "交易金额")
+	@PoiColumn(idx = 6, title = "交易金额")
 	private String getAmountStr() {
 		if (amount != null) {
 			BigDecimal total = BigDecimal.valueOf(amount);
@@ -53,7 +58,16 @@ public class WithdrawDetailExcelVo {
 		return null;
 	}
 
-	@PoiColumn(idx = 6, title = "费用金额")
+	@PoiColumn(idx = 7, title = "交易状态")
+	private String getSuccStr() {
+		if (isSucc != null) {
+			return Optionals.select(GatewayInvokeStatus.SUCC.getValue().byteValue() == isSucc,
+				() -> "交易成功", () -> "交易失败");
+		}
+		return null;
+	}
+
+	@PoiColumn(idx = 8, title = "费用金额")
 	private String getFeeStr() {
 		if (localTunnelFee != null) {
 			BigDecimal fee = BigDecimal.valueOf(localTunnelFee);
@@ -64,7 +78,7 @@ public class WithdrawDetailExcelVo {
 		return null;
 	}
 
-	@PoiColumn(idx = 7, title = "关联交易号")
+	@PoiColumn(idx = 9, title = "关联交易号")
 	@ApiModelProperty(name = "order_no", value = "钱包订单号")
 	private String orderNo;
 
@@ -79,6 +93,9 @@ public class WithdrawDetailExcelVo {
 
 	@ApiModelProperty(name = "biz_time", value = "业务时间")
 	private Date bizTime;
+
+	@ApiModelProperty(name = "is_succ", value = "是否业务成功")
+	private Byte isSucc;
 
 
 }

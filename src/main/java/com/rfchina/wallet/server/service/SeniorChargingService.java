@@ -37,6 +37,7 @@ import com.rfchina.wallet.server.model.ext.ChargingVo;
 import com.rfchina.wallet.server.model.ext.StatChargingDetailVo;
 import com.rfchina.wallet.server.model.ext.SumOfFeeVo;
 import com.rfchina.wallet.server.msic.EnumWallet.FeeConfigKey;
+import com.rfchina.wallet.server.msic.EnumWallet.GatewayInvokeStatus;
 import com.rfchina.wallet.server.msic.EnumYunst.YunstMethodName;
 import com.rfchina.wallet.server.msic.EnumYunst.YunstServiceName;
 import com.rfchina.wallet.server.service.handler.yunst.YunstBaseHandler.YunstMemberType;
@@ -214,6 +215,9 @@ public class SeniorChargingService {
 						.name(name)
 						.walletId(tunnel != null ? tunnel.getWalletId() : null)
 						.bizUserId(tunnel != null ? tunnel.getBizUserId() : null)
+						.isSucc(gatewayLog.getIsSucc())
+						.refId(gatewayLog.getId())
+						.refType(GatewayLog.class.getSimpleName())
 						.build();
 					statChargingDetailDao.insertSelective(detail);
 				}
@@ -275,6 +279,9 @@ public class SeniorChargingService {
 					.walletId(tunnel != null ? tunnel.getWalletId() : null)
 					.bizUserId(tunnel != null ? tunnel.getBizUserId() : null)
 					.amount(walletOrder.getAmount())
+					.isSucc(GatewayInvokeStatus.SUCC.getValue())
+					.refId(walletOrder.getId())
+					.refType(WalletOrder.class.getSimpleName())
 					.build();
 
 				if (YunstMemberType.COMPANY.getValue().longValue() == tunnel.getMemberType()) {

@@ -203,6 +203,8 @@ public class EnumYunst {
 		AGENT_PAY("signalAgentPay", "代付"),
 		REFUND("refund", "退款"),
 		DEDUCTION("consumeProtocolApply", "协议消费"),
+		ORDER_DETAIL("getOrderDetail", "订单详情"),
+		QUERY_BALANCE("queryBalance", "账户余额"),
 		;
 
 		private String value;
@@ -349,6 +351,26 @@ public class EnumYunst {
 
 		@Override
 		public String getValue() {
+			return value;
+		}
+	}
+
+
+	public enum CompanyVerifyResult implements Valuable<Long> {
+		SUCC(2L, "审核成功"),
+		FAILE(3L, "审核失败"),
+		;
+
+		private Long value;
+		private String valueName;
+
+		CompanyVerifyResult(Long value, String valueName) {
+			this.value = value;
+			this.valueName = valueName;
+		}
+
+		@Override
+		public Long getValue() {
 			return value;
 		}
 	}
