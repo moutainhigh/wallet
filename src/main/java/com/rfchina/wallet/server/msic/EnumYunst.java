@@ -205,6 +205,7 @@ public class EnumYunst {
 		DEDUCTION("consumeProtocolApply", "协议消费"),
 		ORDER_DETAIL("getOrderDetail", "订单详情"),
 		QUERY_BALANCE("queryBalance", "账户余额"),
+		QUERY_MEMBER("getMemberInfo", "会员查询"),
 		;
 
 		private String value;

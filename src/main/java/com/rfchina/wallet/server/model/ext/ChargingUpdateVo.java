@@ -18,5 +18,5 @@ public class ChargingUpdateVo {
 	private String acctType;
 	private Long amount;
 	private Date createTime;
-
+	private String traceId;
 }

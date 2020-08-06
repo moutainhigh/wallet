@@ -244,14 +244,15 @@ public class SeniorChargingService {
 
 				String name = null;
 				Wallet wallet = walletDao.selectByPrimaryKey(walletOrder.getWalletId());
-				if (WalletType.COMPANY.getValue().byteValue() == wallet.getType().byteValue()) {
+				if (wallet != null && WalletType.COMPANY.getValue().byteValue() == wallet.getType()
+					.byteValue()) {
 
 					WalletCompany walletCompany = walletCompanyDao.selectByWalletId(wallet.getId());
 					if (walletCompany != null) {
 						name = walletCompany.getCompanyName();
 					}
-				} else if (WalletType.PERSON.getValue().byteValue() == wallet.getType()
-					.byteValue()) {
+				} else if (wallet != null && WalletType.PERSON.getValue().byteValue() == wallet
+					.getType().byteValue()) {
 
 					WalletPerson walletPerson = walletPersonDao.selectByWalletId(wallet.getId());
 					if (walletPerson != null) {
@@ -284,11 +285,12 @@ public class SeniorChargingService {
 					.refType(WalletOrder.class.getSimpleName())
 					.build();
 
-				if (YunstMemberType.COMPANY.getValue().longValue() == tunnel.getMemberType()) {
+				if (tunnel != null && YunstMemberType.COMPANY.getValue().longValue() == tunnel
+					.getMemberType()) {
 					WalletCompany walletCompany = walletCompanyDao
 						.selectByWalletId(tunnel.getWalletId());
 					builder.name(walletCompany.getCompanyName());
-				} else if (YunstMemberType.PERSON.getValue().longValue() == tunnel
+				} else if (tunnel != null && YunstMemberType.PERSON.getValue().longValue() == tunnel
 					.getMemberType()) {
 					WalletPerson walletPerson = walletPersonDao
 						.selectByWalletId(tunnel.getWalletId());

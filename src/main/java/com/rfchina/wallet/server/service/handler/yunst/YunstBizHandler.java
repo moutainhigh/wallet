@@ -129,6 +129,7 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.util.StringUtil;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -1264,6 +1265,7 @@ public class YunstBizHandler extends EBankHandler {
 										.amount(order.getAmount())
 										.collectPayType(collectPayType)
 										.acctType(rtnVal.getAccttype())
+										.traceId(MDC.get("traceId"))
 										.createTime(new Date())
 										.build())
 									.createTime(System.currentTimeMillis())

@@ -16,6 +16,7 @@ import com.rfchina.platform.spring.SpringContext;
 import com.rfchina.wallet.server.bank.pudong.domain.predicate.ExactErrPredicate;
 import com.rfchina.wallet.server.mapper.ext.WalletOrderExtDao;
 import com.rfchina.wallet.server.model.ext.ChargingUpdateVo;
+import com.rfchina.wallet.server.msic.EnumWallet.CollectPayType;
 import com.rfchina.wallet.server.msic.EnumWallet.FeeConfigKey;
 import com.rfchina.wallet.server.msic.EnumYunst.EnumAcctType;
 import com.rfchina.wallet.server.msic.StringConstant;
@@ -26,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import org.apache.commons.lang3.concurrent.BasicThreadFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -113,6 +115,10 @@ public class BeanConfig {
 			updateFeeConfig(obj, FeeConfigKey.YUNST_POS_UNION_RCODE.getValue());
 			updateFeeConfig(obj, FeeConfigKey.YUNST_POS_WECHAT.getValue());
 			updateFeeConfig(obj, FeeConfigKey.YUNST_POS_ALIPAY.getValue());
+			updateFeeConfig(obj, FeeConfigKey.YUNST_ALIPAY.getValue());
+			updateFeeConfig(obj, FeeConfigKey.YUNST_WECHAT.getValue());
+			updateFeeConfig(obj, FeeConfigKey.YUNST_DEBIT_CARD.getValue());
+			updateFeeConfig(obj, FeeConfigKey.YUNST_CREDIT_CARD.getValue());
 		});
 	}
 
@@ -149,13 +155,19 @@ public class BeanConfig {
 				ChargingUpdateVo charging = (ChargingUpdateVo) parcel.getPayLoad();
 
 				try {
+					if(MDC.get("traceId")==null){
+						MDC.put("traceId", charging.getTraceId());
+					}
 					// 更新手续费用
 					String prefix = charging.getCollectPayType().toChargingPrefix();
-					if (EnumAcctType.DEBIT.getValue().equals(charging.getAcctType())) {
-						prefix += "_DEBIT";
-					} else if (EnumAcctType.CREDIT.getValue().equals(charging.getAcctType())
-						|| EnumAcctType.SEMI_CREDIT.getValue().equals(charging.getAcctType())) {
-						prefix += "_CREDIT";
+					if (CollectPayType.POS_UNION.getValue().byteValue() ==
+						charging.getCollectPayType().getValue().byteValue()) {
+						if (EnumAcctType.DEBIT.getValue().equals(charging.getAcctType())) {
+							prefix += "_DEBIT";
+						} else if (EnumAcctType.CREDIT.getValue().equals(charging.getAcctType())
+							|| EnumAcctType.SEMI_CREDIT.getValue().equals(charging.getAcctType())) {
+							prefix += "_CREDIT";
+						}
 					}
 					log.info("[手续费]准备更新订单[{}]手续费", charging.getOrderNo());
 					ChargingCalculateRequest req = ChargingCalculateRequest.builder()

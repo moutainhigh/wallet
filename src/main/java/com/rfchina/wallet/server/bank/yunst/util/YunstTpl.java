@@ -159,7 +159,8 @@ public class YunstTpl {
 
 		// 订单信息、余额查询数据量大，暂时不做存储
 		if (YunstMethodName.ORDER_DETAIL.getValue().equals(reqPkg.getMethod())
-			|| YunstMethodName.QUERY_BALANCE.getValue().equals(reqPkg.getMethod())) {
+			|| YunstMethodName.QUERY_BALANCE.getValue().equals(reqPkg.getMethod())
+			|| YunstMethodName.QUERY_MEMBER.getValue().equals(reqPkg.getMethod())) {
 			return;
 		}
 		try {
