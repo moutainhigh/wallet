@@ -308,7 +308,7 @@ public class SeniorChargingService {
 
 	public Pagination<StatCharging> queryCharging(Integer limit, Integer offset, Boolean stat) {
 		StatChargingCriteria example = new StatChargingCriteria();
-		example.setOrderByClause("create_time desc,id desc");
+		example.setOrderByClause("charging_date desc,id desc");
 		example.createCriteria()
 			.andDeletedEqualTo((byte) 0)
 			.andChargingDateLessThan(DateUtil.getDate2(DateUtil.getFirstDayOfMonth(new Date())));
