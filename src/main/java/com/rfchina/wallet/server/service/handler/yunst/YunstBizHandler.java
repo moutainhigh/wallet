@@ -398,19 +398,6 @@ public class YunstBizHandler extends EBankHandler {
 	}
 
 	/**
-	 * 获取子商户
-	 */
-	public String getSellerId(String areaCode) {
-
-		if (StringUtil.isBlank(areaCode) || areaCode.length() < 6) {
-			return "";
-		}
-
-		WalletArea walletArea = walletAreaDao.selectOneByAreaCode(areaCode);
-		return walletArea != null ? walletArea.getVspCusid() : null;
-	}
-
-	/**
 	 * 代收
 	 */
 	public WalletCollectResp collect(WalletOrder order, WalletCollect collect,

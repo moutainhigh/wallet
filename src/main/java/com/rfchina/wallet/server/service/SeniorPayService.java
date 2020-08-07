@@ -220,6 +220,7 @@ public class SeniorPayService {
 		bankCard.setBankCardNo(walletCard.getBankAccount());
 		bankCard.setAmount(amount);
 		bankCard.setPayType(CollectPayType.BANKCARD.getValue());
+		bankCard.setCardType(walletCard.getCardType());
 		WalletPayMethod payMethod = new WalletPayMethod();
 		payMethod.setBankCard(bankCard);
 
@@ -414,32 +415,38 @@ public class SeniorPayService {
 	public BigDecimal getRate(WalletPayMethod method) {
 
 		BigDecimal bigDecimal = new BigDecimal("0");
-		if (method.getBalance() != null) {
-		} else if (method.getWechat() != null) {
-			ChargingConfig config = feeMap.get(FeeConfigKey.YUNST_WECHAT.getValue());
-			if (config != null) {
-				return config.getChargingValue();
+		try {
+			if (method.getBalance() != null) {
+			} else if (method.getWechat() != null) {
+				ChargingConfig config = feeMap.get(FeeConfigKey.YUNST_WECHAT.getValue());
+				if (config != null) {
+					return config.getChargingValue();
+				}
+			} else if (method.getAlipay() != null) {
+				ChargingConfig config = feeMap.get(FeeConfigKey.YUNST_ALIPAY.getValue());
+				if (config != null) {
+					return config.getChargingValue();
+				}
+			} else if (method.getCodePay() != null) {
+			} else if (method.getBankCard() != null) {
+				FeeConfigKey key = null;
+				if (WalletCardType.CREDIT.getValue().byteValue() == method.getBankCard()
+					.getCardType()
+					.byteValue()) {
+					key = FeeConfigKey.YUNST_CREDIT_CARD;
+				} else if (WalletCardType.DEPOSIT.getValue().byteValue() == method.getBankCard()
+					.getCardType()
+					.byteValue()) {
+					key = FeeConfigKey.YUNST_DEBIT_CARD;
+				}
+				ChargingConfig config = feeMap.get(key.getValue());
+				if (config != null) {
+					return config.getChargingValue();
+				}
+			} else if (method.getPos() != null) {
 			}
-		} else if (method.getAlipay() != null) {
-			ChargingConfig config = feeMap.get(FeeConfigKey.YUNST_ALIPAY.getValue());
-			if (config != null) {
-				return config.getChargingValue();
-			}
-		} else if (method.getCodePay() != null) {
-		} else if (method.getBankCard() != null) {
-			FeeConfigKey key = null;
-			if(WalletCardType.CREDIT.getValue().byteValue() == method.getBankCard().getCardType()
-					.byteValue() ){
-				key =FeeConfigKey.YUNST_CREDIT_CARD;
-			} else if(WalletCardType.DEPOSIT.getValue().byteValue() == method.getBankCard().getCardType()
-				.byteValue() ){
-				key =FeeConfigKey.YUNST_DEBIT_CARD;
-			}
-			ChargingConfig config = feeMap.get(key.getValue());
-			if (config != null) {
-				return config.getChargingValue();
-			}
-		} else if (method.getPos() != null) {
+		} catch (Exception e) {
+			log.error("设置手续非率错误", e);
 		}
 		return bigDecimal;
 	}
