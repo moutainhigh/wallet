@@ -35,3 +35,5 @@ build
 Dockerfile.o
 /gradle
 /gradlew*
+
+/script
