@@ -233,7 +233,7 @@ public class SeniorChargingService {
 					.andIdGreaterThan(maxId)
 					.andTunnelTypeEqualTo(tunnelType.getValue())
 					.andStatusEqualTo(OrderStatus.SUCC.getValue())
-					.andTunnelSuccTimeBetween(firstDay, lastDay)
+					.andCreateTimeBetween(firstDay, lastDay)
 					.andTypeIn(Arrays.asList(OrderType.RECHARGE.getValue(),
 						OrderType.WITHDRAWAL.getValue(), OrderType.COLLECT.getValue(),
 						OrderType.REFUND.getValue(), OrderType.CONSUME.getValue()));
