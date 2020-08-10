@@ -223,7 +223,7 @@ public interface WalletOrderExtDao extends WalletOrderDao {
 		"and a.create_time <![CDATA[<]]> #{toTime}",
 		"</if>",
 		"</where>",
-		"order by a.create_time desc,a.id desc limit 1000 offset 0 ",
+		"order by a.create_time desc,a.id asc limit 1000 offset 0 ",
 		"</script>"
 	})
 	@ResultMap("com.rfchina.wallet.domain.mapper.WalletOrderMapper.BaseResultMap")
