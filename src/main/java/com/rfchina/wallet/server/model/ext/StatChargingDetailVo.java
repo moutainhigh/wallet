@@ -37,15 +37,19 @@ public class StatChargingDetailVo {
 	@ApiModelProperty("钱包订单号")
 	private String orderNo;
 
+	@PoiColumn(idx = 4, title = "通道订单号")
+	@ApiModelProperty(name="tunnel_order_no", value = "渠道订单号")
+	private String tunnelOrderNo;
 
-	@PoiColumn(idx = 4, title = "本地手续费（元）")
+
+	@PoiColumn(idx = 5, title = "本地手续费（元）")
 	@ApiModelProperty("本地的通道手续费")
 	public String localTunnelFeeString() {
 		Long val = Optional.ofNullable(localTunnelFee).orElse(0L);
 		return fenToYuan(val);
 	}
 
-	@PoiColumn(idx = 5, title = "通联手续费（元）")
+	@PoiColumn(idx = 6, title = "通联手续费（元）")
 	@ApiModelProperty("第三方的通道手续费")
 	public String thirdTunnelFeeString() {
 		Long val = Optional.ofNullable(thirdTunnelFee).orElse(0L);
