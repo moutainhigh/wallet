@@ -172,9 +172,9 @@ public class PuDongExampleTest {
 		send_query_str =
 			"<?xml version='1.0' encoding='GBK'?><packet><head><transCode>4402</transCode><signFlag>1</signFlag><packetID>"
 				+ packet_id
-				+ "</packetID><masterID>2000040752</masterID><timeStamp>2010-10-26 15:37:27</timeStamp></head><body><signature>"
-				+ sign_obj_str + "</signature></body></packet>";
-		//send_query_str="<?xml version='1.0' encoding='Gb2312'?><packet><head><transCode>4402</transCode><signFlag>1</signFlag><packetID>"+packet_id+"</packetID><masterID>2003809821</masterID><timeStamp>2009-11-27 15:37:27</timeStamp></head><body><signature>"+sign_obj_str+"</signature></body></packet>";
+				+ "</packetID><masterID>2000040752</masterID><timeStamp>2010-10-26 15:37:27</timeStamp></head><body><ca>"
+				+ sign_obj_str + "</ca></body></packet>";
+		//send_query_str="<?xml version='1.0' encoding='Gb2312'?><packet><head><transCode>4402</transCode><signFlag>1</signFlag><packetID>"+packet_id+"</packetID><masterID>2003809821</masterID><timeStamp>2009-11-27 15:37:27</timeStamp></head><body><ca>"+sign_obj_str+"</ca></body></packet>";
 
 		System.out.println("上送数据=[" + send_query_str + "]");
 		query_result_str = query.do_query_for_http(url_str, send_query_str);
@@ -185,8 +185,8 @@ public class PuDongExampleTest {
 
 		/*解签*/
 		url_str = "http://" + host_ip_str + ":5666";
-		toSign = "<signature>";
-		fromSign = "</signature>";
+		toSign = "<ca>";
+		fromSign = "</ca>";
 		begin_ind = query_result_str.indexOf(toSign) + 11;
 		end_ind = query_result_str.indexOf(fromSign);
 		sign_obj_str = query_result_str.substring(begin_ind, end_ind);
