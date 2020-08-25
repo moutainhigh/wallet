@@ -23,6 +23,7 @@ import com.rfchina.wallet.domain.misc.EnumDef.WalletTunnelSignContract;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyRefType;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletVerifyType;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
+import com.rfchina.wallet.domain.model.BankCode;
 import com.rfchina.wallet.domain.model.Wallet;
 import com.rfchina.wallet.domain.model.WalletPerson;
 import com.rfchina.wallet.domain.model.WalletTunnel;
@@ -37,6 +38,7 @@ import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResul
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstPersonSetRealNameResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstQueryBalanceResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstSetCompanyInfoResult;
+import com.rfchina.wallet.server.mapper.ext.BankCodeExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletCardExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
@@ -53,6 +55,7 @@ import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -97,6 +100,14 @@ public class SeniorWalletService {
 
 	@Autowired
 	private YunstNotifyHandler yunstNotifyHandler;
+
+	@Autowired
+	private BankCodeExtDao bankCodeExtDao;
+
+	@Autowired
+	private RedisTemplate redisTemplate;
+
+	public static final String BANKNAME_TL_MAPPING = "wallet:bankname_tl_mapping:";
 
 
 	/**
@@ -339,10 +350,18 @@ public class SeniorWalletService {
 		WalletTunnel walletTunnel = walletTunnelDao
 			.selectByTunnelTypeAndWalletId(channelType.byteValue(), walletId);
 		if (channelType == TunnelType.YUNST.getValue().intValue()) {
+			String oldBankName = companyBasicInfo.getParentBankName();
+			BankCode bankCode = bankCodeExtDao.selectByClassName(oldBankName);
+			if (Objects.nonNull(bankCode)) {
+				companyBasicInfo.setParentBankName(bankCode.getTlBankName());
+				redisTemplate.opsForValue().set(BANKNAME_TL_MAPPING + bankCode.getTlBankName(), oldBankName);
+			}
+
 			try {
 				// 发送到通联审核
 				boolean isAuth =
 					auditType == EnumDef.WalletTunnelAuditType.AUTO.getValue().intValue();
+
 				YunstSetCompanyInfoResult setCompanyResp = yunstUserHandler.setCompanyInfo(
 					walletTunnel.getBizUserId(), isAuth, companyBasicInfo);
 				Objects.requireNonNull(setCompanyResp);
@@ -480,6 +499,17 @@ public class SeniorWalletService {
 
 		companyInfo.setAccountNo(RSAUtil.decrypt(companyInfo.getAccountNo()));
 		companyInfo.setLegalIds(RSAUtil.decrypt(companyInfo.getLegalIds()));
+
+		String tlBankName = companyInfo.getParentBankName();
+		if (redisTemplate.hasKey(BANKNAME_TL_MAPPING + tlBankName)){
+			companyInfo.setParentBankName((String)redisTemplate.opsForValue().get(BANKNAME_TL_MAPPING + tlBankName));
+		}else{
+			BankCode bankCode = bankCodeExtDao.selectByTlBankName(tlBankName);
+			if (Objects.nonNull(bankCode)){
+				companyInfo.setParentBankName(bankCode.getClassName());
+				redisTemplate.opsForValue().set(BANKNAME_TL_MAPPING + tlBankName, bankCode.getClassName());
+			}
+		}
 		return companyInfo;
 	}
 

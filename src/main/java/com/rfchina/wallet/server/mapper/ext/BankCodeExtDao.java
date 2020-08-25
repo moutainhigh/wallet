@@ -21,4 +21,12 @@ public interface BankCodeExtDao extends BankCodeMapper {
 	})
 	@ResultMap("com.rfchina.wallet.domain.mapper.BankCodeMapper.BaseResultMap")
 	BankCode selectByClassName(@Param("className") String className);
+
+
+	@Select({
+		"select * from rf_bank_code"
+		, "where tl_bank_name = #{tlBankName} limit 1"
+	})
+	@ResultMap("com.rfchina.wallet.domain.mapper.BankCodeMapper.BaseResultMap")
+	BankCode selectByTlBankName(@Param("tlBankName") String tlBankName);
 }

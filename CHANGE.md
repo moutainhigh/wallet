@@ -4,6 +4,9 @@
 
 service: rfwallet-server
 ```
+## 1.8.6_2020082517_Beta 1.8.6_2020082517_Release
+- 修复通联审批后对公账号银行名匹对新旧银行一不一致问题
+
 ## 1.8.5_2020081013_Beta 1.8.5_2020081013_Release
 - 修复一个TunnelErrMsg存入TunnelErrCode的问题
 
