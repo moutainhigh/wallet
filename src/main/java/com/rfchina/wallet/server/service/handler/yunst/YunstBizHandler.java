@@ -642,7 +642,7 @@ public class YunstBizHandler extends EBankHandler {
 			if (StringUtils.isNotBlank(resp.getPayStatus())
 				&& "fail".equals(resp.getPayStatus())) {
 				refundOrder.setStatus(OrderStatus.FAIL.getValue());
-				refundOrder.setTunnelErrCode(resp.getPayFailMessage());
+				refundOrder.setTunnelErrMsg(resp.getPayFailMessage());
 			}
 			walletOrderDao.updateByPrimaryKeySelective(refundOrder);
 		} catch (CommonGatewayException e) {

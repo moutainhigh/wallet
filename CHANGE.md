@@ -4,6 +4,9 @@
 
 service: rfwallet-server
 ```
+## 1.8.5_2020081013_Beta 1.8.5_2020081013_Release
+- 修复一个TunnelErrMsg存入TunnelErrCode的问题
+
 ## 1.8.4_2020081011_Release
 - 增加手续费报表字段
 
