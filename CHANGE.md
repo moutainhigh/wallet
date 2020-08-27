@@ -4,6 +4,9 @@
 
 service: rfwallet-server
 ```
+## 1.8.5_2020082712_Release
+- 优化通联查单超时
+
 ## 1.8.5_2020081013_Beta 1.8.5_2020081013_Release
 - 修复一个TunnelErrMsg存入TunnelErrCode的问题
 
