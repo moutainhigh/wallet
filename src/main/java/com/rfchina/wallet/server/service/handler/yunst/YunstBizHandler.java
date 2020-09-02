@@ -226,7 +226,8 @@ public class YunstBizHandler extends EBankHandler {
 					return new Triple<WalletOrder, WalletFinance, GatewayTrans>(walletOrder, null,
 						null);
 				} catch (Exception e) {
-					dealUndefinedError(order, e);
+					//			通联查单经常超时，注释掉
+//					dealUndefinedError(order, e);
 					throw e;
 				}
 			})
