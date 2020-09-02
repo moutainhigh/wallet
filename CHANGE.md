@@ -4,6 +4,9 @@
 
 service: rfwallet-server
 ```
+## 1.8.7_2020090212_Release
+- 优化通联查单超时
+
 ## 1.8.7_2020082712_Release
 - 优化通联查单超时
 
