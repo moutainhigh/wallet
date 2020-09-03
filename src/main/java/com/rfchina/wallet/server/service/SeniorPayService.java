@@ -10,6 +10,7 @@ import com.rfchina.platform.biztools.CacheHashMap;
 import com.rfchina.platform.common.misc.Triple;
 import com.rfchina.platform.common.misc.Tuple;
 import com.rfchina.platform.common.utils.BeanUtil;
+import com.rfchina.platform.common.utils.DateUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletAreaDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletBalanceDetailDao;
@@ -94,11 +95,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -115,6 +119,8 @@ public class SeniorPayService {
 	public static final String INDUSTRY_CODE = "1910";
 	public static final String INDUSTRY_NAME = "其他";
 	public static final String AREA_SUFFIX = "0000";
+
+	public static final String COLLECT_COUNT = "wallet:collect_count:%s:%s";
 
 	@Autowired
 	private HandlerHelper handlerHelper;
@@ -194,6 +200,9 @@ public class SeniorPayService {
 
 	@Autowired
 	private WalletAreaDao walletAreaDao;
+
+	@Autowired
+	private RedisTemplate redisTemplate;
 
 	/**
 	 * 充值
@@ -459,7 +468,7 @@ public class SeniorPayService {
 		// 定义付款人
 		Balance balancePay = req.getWalletPayMethod().getBalance();
 		Long payerWalletId = (balancePay != null) ? balancePay.getPayerWalletId()
-			: configService.getAnonyPayerWalletId();
+			: getAnonyPayerWallet();
 		Wallet payerWallet = verifyService.checkSeniorWallet(payerWalletId);
 		// 检查钱包余额
 		if (balancePay != null) {
@@ -1175,4 +1184,33 @@ public class SeniorPayService {
 		WalletArea walletArea = walletAreaDao.selectOneByAreaCode(areaCode);
 		return walletArea != null ? walletArea.getVspCusid() : null;
 	}
+
+
+	private Long getAnonyPayerWallet(){
+		String anonyPayerWalletIds = configService.getAnonyPayerWalletIdList();
+		if (StringUtils.isBlank(anonyPayerWalletIds)){
+			throw new WalletResponseException(EnumWalletResponseCode.WALLET_NOT_EXISTS);
+		}
+		String[] arr = anonyPayerWalletIds.split(",");
+		String curDate = DateUtil.formatDate(new Date(), DateUtil.SHORT_DTAE_PATTERN);
+		for (String selected:arr){
+			selected = selected.trim();
+			String key = String.format(COLLECT_COUNT,curDate,selected);
+			if (!redisTemplate.hasKey(key)){
+				redisTemplate.boundValueOps(key).set(1L,1, TimeUnit.DAYS);
+				return Long.parseLong(selected);
+			}
+			long count = (long)redisTemplate.opsForValue().get(key);
+			long limit = configService.getCollectLimit();
+			log.info("交易限制额度",limit);
+			if (count < limit){
+				redisTemplate.boundValueOps(key).increment();
+				return Long.parseLong(selected);
+			}
+			log.info("{} 触发日 {} 交易限制",selected, curDate);
+		}
+		log.error("{}所有匿名账号代收已达交易限制", curDate);
+		throw new WalletResponseException(EnumWalletResponseCode.WALLET_PAY_OVER_LIMIT);
+	}
+
 }

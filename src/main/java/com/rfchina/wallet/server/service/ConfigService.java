@@ -167,6 +167,12 @@ public class ConfigService {
 	@Value("${yunst.agentEnt.walletId}")
 	private Long agentEntWalletId;
 
+	@Value("${yunst.anony.walletIdList}")
+	private String anonyPayerWalletIdList;
+
+	@Value("${yunst.collect.limit}")
+	private Long collectLimit;
+
 	/**
 	 * 异常邮件通知
 	 */
