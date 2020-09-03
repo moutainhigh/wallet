@@ -171,7 +171,7 @@ public class ConfigService {
 	private String anonyPayerWalletIdList;
 
 	@Value("${yunst.collect.limit}")
-	private Long collectLimit;
+	private Integer collectLimit;
 
 	/**
 	 * 异常邮件通知

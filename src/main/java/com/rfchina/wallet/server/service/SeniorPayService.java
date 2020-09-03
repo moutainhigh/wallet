@@ -1200,8 +1200,8 @@ public class SeniorPayService {
 				redisTemplate.boundValueOps(key).set(1L,1, TimeUnit.DAYS);
 				return Long.parseLong(selected);
 			}
-			long count = (long)redisTemplate.opsForValue().get(key);
-			long limit = configService.getCollectLimit();
+			int count = (int)redisTemplate.opsForValue().get(key);
+			int limit = configService.getCollectLimit();
 			log.info("交易限制额度:{}",limit);
 			if (count < limit){
 				redisTemplate.boundValueOps(key).increment();
