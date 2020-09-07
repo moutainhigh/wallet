@@ -1,6 +1,5 @@
 package com.rfchina.wallet.server.api.impl;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.rfchina.passport.token.EnumTokenType;
 import com.rfchina.passport.token.TokenVerify;
 import com.rfchina.platform.common.annotation.Log;
@@ -9,8 +8,6 @@ import com.rfchina.platform.common.annotation.ParamVerify;
 import com.rfchina.platform.common.annotation.SignVerify;
 import com.rfchina.platform.common.exception.RfchinaResponseException;
 import com.rfchina.platform.common.misc.ResponseCode;
-import com.rfchina.platform.common.page.Pagination;
-import com.rfchina.platform.common.utils.JsonUtil;
 import com.rfchina.wallet.domain.exception.WalletResponseException;
 import com.rfchina.wallet.domain.mapper.ext.WalletConsumeDao;
 import com.rfchina.wallet.domain.mapper.ext.WalletDao;
@@ -22,35 +19,23 @@ import com.rfchina.wallet.domain.misc.EnumDef.WalletProgress;
 import com.rfchina.wallet.domain.misc.EnumDef.WalletSource;
 import com.rfchina.wallet.domain.misc.WalletResponseCode.EnumWalletResponseCode;
 import com.rfchina.wallet.domain.model.Wallet;
-import com.rfchina.wallet.domain.model.WalletOrder;
 import com.rfchina.wallet.domain.model.WalletPerson;
-import com.rfchina.wallet.domain.model.WalletTerminal;
-import com.rfchina.wallet.domain.model.WalletTerminalCriteria;
-import com.rfchina.wallet.domain.model.WalletTerminalCriteria.Criteria;
 import com.rfchina.wallet.domain.model.WalletTunnel;
 import com.rfchina.wallet.server.api.SeniorWalletApi;
 import com.rfchina.wallet.server.bank.yunst.exception.CommonGatewayException;
 import com.rfchina.wallet.server.bank.yunst.request.YunstSetCompanyInfoReq;
-import com.rfchina.wallet.server.bank.yunst.response.VspTermidResp;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.CompanyInfoResult;
 import com.rfchina.wallet.server.bank.yunst.response.result.YunstMemberInfoResult.PersonInfoResult;
 import com.rfchina.wallet.server.mapper.ext.WalletPersonExtDao;
 import com.rfchina.wallet.server.mapper.ext.WalletTunnelExtDao;
-import com.rfchina.wallet.server.model.ext.AgentPosVo;
 import com.rfchina.wallet.server.msic.EnumYunst;
-import com.rfchina.wallet.server.msic.EnumYunst.EnumTerminalStatus;
 import com.rfchina.wallet.server.service.ConfigService;
 import com.rfchina.wallet.server.service.SeniorWalletService;
 import com.rfchina.wallet.server.service.VerifyService;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.session.RowBounds;
-import org.eclipse.jetty.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -195,11 +180,12 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 		Objects.requireNonNull(walletTunnel);
 		try {
 			seniorWalletService.seniorWalletBindPhone(walletTunnel, mobile, verifyCode);
-		} catch (CommonGatewayException e) {
+		}  catch (Exception e) {
 			log.error("高级钱包绑定手机失败", e);
-			throw e;
-		} catch (Exception e) {
-			log.error("高级钱包绑定手机失败", e);
+			if (e instanceof  CommonGatewayException){
+				throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+					((CommonGatewayException) e).getBankErrMsg());
+			}
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
 				"高级钱包绑定手机失败");
 		}
@@ -263,6 +249,10 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 			return seniorWalletService.signMemberProtocol(walletId, jumpUrl);
 		} catch (Exception e) {
 			log.error("高级钱包个人认证失败", e);
+			if (e instanceof  CommonGatewayException){
+				throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
+					((CommonGatewayException) e).getBankErrMsg());
+			}
 			throw new RfchinaResponseException(ResponseCode.EnumResponseCode.COMMON_FAILURE,
 				"高级钱包个人认证失败");
 		}
@@ -439,8 +429,5 @@ public class SeniorWalletApiImpl implements SeniorWalletApi {
 		}
 
 	}
-
-
-
 
 }
